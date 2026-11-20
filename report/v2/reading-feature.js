@@ -23,14 +23,14 @@ var SPEC={
  timeline_self_33:{title:'50대 이후 대운 · 말년의 흐름',parts:[{custom:'late'}]},
  // ───── 재물운·커리어운·인연운 심화: 그 장의 질문에 해당하는 조각만. 같은 조각은 한 장에만 둔다.
  timeline_wealth_01:{title:'그릇의 힘과 사양표',parts:[{sec:'deep_wealth',match:/① 그릇의 힘|그릇 사양/}]},
- timeline_wealth_02:{title:'이렇게 벌면 편해요',parts:[{sec:'deep_wealth',match:/이렇게 벌면 편합니다/}]},
+ timeline_wealth_02:{title:'이렇게 벌면 편해요',parts:[{sec:'deep_wealth',match:/이렇게 벌면 편합니다/},{custom:'es',lens:'wealth'}]},
  timeline_wealth_03:{title:'돈이 새는 자리 점검',parts:[{sec:'deep_wealth',match:/③ 보관과 누수/}]},
  timeline_wealth_05:{title:'돈을 다루는 나의 성향',parts:[{sec:'deep_wealth',match:/돈을 다루는 나의 성향/}]},
  timeline_wealth_06:{title:'큰돈 기회가 몰리는 해 TOP 3',parts:[{custom:'timing',kind:'wealth',scope:'year'}]},
  timeline_wealth_07:{title:'이 그릇의 장점과 조심할 점',parts:[{sec:'deep_wealth',match:/이 그릇의 장점과 조심할 점/}]},
  timeline_wealth_10:{title:'재물이 유리한 달 TOP 3',parts:[{custom:'timing',kind:'wealth',scope:'month'}]},
  timeline_wealth_14:{title:'앞으로 10년 재물 흐름 그래프',parts:[{custom:'timing',kind:'wealth',scope:'chart'}]},
- timeline_career_01:{title:'일하는 방식 성향',parts:[{sec:'deep_jobs',match:/일하는 방식의 성향/}]},
+ timeline_career_01:{title:'일하는 방식 성향',parts:[{sec:'deep_jobs',match:/일하는 방식의 성향/},{custom:'es',lens:'career'}]},
  timeline_career_06:{title:'부담이 큰 일과 환경',parts:[{sec:'deep_jobs',match:/솔직하게, 힘들 수 있는 일/}]},
  timeline_career_08:{title:'일의 흐름이 좋은 해 TOP 3',parts:[{custom:'timing',kind:'career',scope:'year'}]},
  timeline_career_14:{title:'앞으로 10년 일의 흐름 그래프',parts:[{custom:'timing',kind:'career',scope:'chart'}]},
@@ -107,6 +107,22 @@ var TALENT={
 };
 var TG_KEYS=['비견','겁재','식신','상관','편재','정재','편관','정관','편인','정인'];
 function ig(w){var c=String(w).charCodeAt(String(w).length-1)-0xAC00;return w+(c>=0&&c%28?'이':'가');}
+// 오행별 실전 전략 블록(2026-11-20): 엔진 통합 용신 역할을 수익·일 전략으로 옮긴 것(element-strategy.js). 순위·점수와 무관한 해석.
+// 재물 장 = 핵심 방향의 수익화 예·확장·주의, 커리어 장 = 강점을 쓰는 방식·확장·지금 대운의 일 전략. 서사 문단(plainNote)과 같은 문장을 쓰지 않는다.
+function esBlock(H,lens){var ES=root.MantraElementStrategy;if(!ES||!H||!H.M||!H.ch)return null;var n;try{n=ES.natal(H.M,H.ch);}catch(e){return null;}if(!n||!n.core)return null;
+ var nm=R.Deep&&R.Deep.who?R.Deep.who(H):'내',c=n.core,x=n.expand[0],chips=function(a){return '<div class="dp-tags">'+a.map(function(t){return '<span class="dp-chip">'+esc(t)+'</span>';}).join('')+'</div>';};
+ var out='<section class="dp-embed dp dp-es"><div class="cap">'+esc(lens==='career'?'일에서 힘이 실리는 방식 · 오행별 실전 전략':'돈 버는 방향 · 오행별 실전 전략')+'</div>';
+ if(lens==='career'){
+  out+='<p class="lead">'+esc(c.combo)+'</p>';
+  if(x)out+='<div class="dp-talent"><h4>'+esc('확장 · '+x.elName+' '+x.type)+'</h4><p>'+esc(ES.ELS[x.el].jobUse+'으로 넓혀 가면, 핵심 강점이 닿는 일이 많아져요.')+'</p></div>';
+  try{var du=H.M.daeunAt(H.ch,Date.now()),lk=du&&ES.luck(H.M,H.ch,du,'daeun','career');if(lk&&lk.actions[0])out+='<p class="dp-pl">＋ '+esc('지금 대운('+H.M.gzNameK(du)+')에서는: '+lk.actions[0])+'</p>';}catch(e){}
+  var cz=n.caution[1]||null;if(cz)out+='<p class="dp-mi">'+esc('조심할 일하는 방식('+cz.elName+'): '+cz.text)+'</p>';
+ }else{
+  out+='<p class="lead">'+esc(nm+'에게 힘이 되는 기운은 '+c.elName+', '+c.type+'이에요. 이 방향으로 수익을 만드는 예를 고르면 이래요.')+'</p>'+chips(c.modes);
+  if(x)out+='<div class="dp-talent"><h4>'+esc('확장 · '+x.elName+' '+x.type)+'</h4><p>'+esc(x.text)+'</p>'+chips(x.modes)+'</div>';
+  var cw=n.caution[0];if(cw)out+='<p class="dp-mi">'+esc('조심할 돈 버는 방식('+cw.elName+'): '+cw.text)+'</p>';
+ }
+ return out+'<p class="dp-mi">'+esc('오행의 상징을 현대 경제활동에 옮긴 참고 전략이에요. 특정 직업을 정해 주는 기준은 아니에요.')+'</p></section>';}
 function talentBlock(H){var sd=H&&H.sd,tg=sd&&sd.tenGods;if(!tg)return null;
  var rows=TG_KEYS.map(function(k,i){return {k:k,i:i,v:+tg[k]||0};}).filter(function(r){return r.v>0;}).sort(function(a,b){return b.v-a.v||a.i-b.i;});if(!rows.length)return null;
  var top=rows.slice(0,2),mon=sd.pillars&&sd.pillars.month&&sd.pillars.month.branchTG,band=sd.strength&&sd.strength.band,nm=R.Deep&&R.Deep.who?R.Deep.who(H):'내';
@@ -188,6 +204,7 @@ function build(c){var f=c&&c.readingFeature,id=c&&(c.editorialContractId||c.id),
   if(part.custom==='rank'){var rk=rankBlock(id,f);if(rk)scenes.push(rk);return;}
   if(part.custom==='healthmap'){var hm=healthMap(f);if(hm)scenes.push(hm);return;}
   if(part.custom==='talent'){var tb=talentBlock(f);if(tb)scenes.push(tb);return;}
+  if(part.custom==='es'){var eb=esBlock(f,part.lens);if(eb)scenes.push(eb);return;}   // 오행별 실전 전략(2026-11-20, element-strategy.js — 만세력 '돈 버는 방식'과 같은 계산)
   if(part.custom==='late'){var lt=lateLuck(f);if(lt)scenes.push(lt);return;}
   if(part.custom==='timing'){var t=timingRank(f,part.kind,part.scope);if(t)scenes.push(t);return;}
   if(part.custom&&R.FateBlocks&&R.FateBlocks.has(part.custom)){var fb=R.FateBlocks.render(part,f,id);if(fb)scenes.push(fb);return;}   // fate-blocks.js(구성 다양화)

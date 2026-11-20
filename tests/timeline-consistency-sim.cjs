@@ -8,7 +8,7 @@ const fs = require('fs'), path = require('path'), vm = require('vm'), assert = r
 const root = path.join(__dirname, '..'), N = +process.argv[2] || 200;
 const LN = ['report/v2/life-narrative-data.js', 'report/v2/life-narrative-data-self.js', 'report/v2/life-narrative-data-self2.js', 'report/v2/life-narrative-data-wealth.js', 'report/v2/life-narrative-data-wealth2.js', 'report/v2/life-narrative-data-love.js', 'report/v2/life-narrative-data-love2.js', 'report/v2/life-narrative-data-career.js', 'report/v2/life-narrative-data-career2.js', 'report/v2/life-narrative-data-self3.js', 'report/v2/life-narrative-data-wealth3.js', 'report/v2/life-narrative-data-extra.js', 'report/v2/life-narrative.js'];
 const mk = files => { const c = { console }; c.window = c; vm.createContext(c); files.forEach(f => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), c, { filename: f })); return c; };
-const W = mk(['engine.js', 'amhap.js', 'luck-interpret.js', 'luck-overlay.js', 'report/v2/saju-data.js', ...LN]);   // 타임라인(상세풀이 화면) 구성
+const W = mk(['engine.js', 'amhap.js', 'element-strategy.js', 'luck-interpret.js', 'luck-overlay.js', 'report/v2/saju-data.js', ...LN]);   // 타임라인(상세풀이 화면) 구성
 const P = mk(['engine.js', 'report/v2/saju-data.js', ...LN]);                                                        // 암합 모듈 없이
 const M = W.Manse, A = W.MantraAmhap, L = W.MantraLifeNarrative, L0 = P.MantraLifeNarrative, SD = W.ReportV2.SajuData;
 W.MANTRA_FLAGS = { lifeNarrative: true }; P.MANTRA_FLAGS = { lifeNarrative: true };
@@ -47,7 +47,7 @@ for (let i = 0; i < N; i++) {
   L.periods(M, b, NOW).forEach(pd => { const x = b.daeun.list.find(d => M.gzName(d) === pd.gz || M.gzNameK(d) === pd.gz); if (!x) return; const g = M.groupPull(dEl, x); let top = 0; g.forEach((v, k) => { if (v > g[top]) top = k; }); assert.equal(pd.group, top, '서사 대운 주 십성 = 엔진 groupPull'); });
   n++;
   // B) 암합 예외
-  const ids = Object.keys(L.CHAPTERS), said = new Set(), b0 = P.Manse.compute(tInp);   // 리포트 하나 = 차트 하나(장 사이 중복 방지 상태 공유)
+  const ids = Object.keys(L.CHAPTERS), said = new Set(), esSaid = {}, b0 = P.Manse.compute(tInp);   // 리포트 하나 = 차트 하나(장 사이 중복 방지 상태 공유)
   for (const id of ids) {
     const with_ = L.compose(M, b, NOW, id), without = L0.compose(P.Manse, b0, NOW, id);
     assert.equal(!!with_, !!without, '장 구성 그대로 ' + id);
@@ -60,11 +60,15 @@ for (let i = 0; i < N; i++) {
     const rw = with_.rows.map(x => x.text), r0 = without.rows.map(x => x.text);
     assert.equal(rw.length, r0.length, '문단 수 그대로');
     rw.forEach((t, k) => { if (t === r0[k]) return; if (process.env.DBG && !t.startsWith(r0[k] + '\n\n')) { console.log('ID', id, k, '\nWITH:', t.slice(0, 700), '\nWITHOUT:', r0[k].slice(0, 700)); process.exit(0); } assert.ok(t.startsWith(r0[k] + '\n\n'), '기존 문단 뒤에만 덧붙임'); const add = t.slice(r0[k].length + 2);
-      assert.ok(/숨은 합\(암합\)/.test(add) && !add.includes('\n\n'), '덧붙인 것은 암합 한 문장'); assert.ok(!JARGON.test(add) && !BAN.test(add), '용어·단정 표현: ' + add);
-      assert.ok(!said.has(add), '같은 암합 문장 리포트 안 반복'); said.add(add);
-      const lens = L.CHAPTERS[id]; notes[lens]++;
-      assert.ok(['life', 'wealth', 'career', 'love'].includes(lens), '관련 렌즈에만');
-      if (lens === 'life') assert.ok(!/대운|올해/.test(add), '종합은 원국 암합만'); else assert.ok(/지금 대운에 들어온 글자|올해 들어온 글자/.test(add), '재물·커리어·인연은 지금 대운·올해 세운만'); });
+      const lens = L.CHAPTERS[id];
+      // 덧붙는 문단(2026-11-20): ① 오행 전략(재물·커리어, 렌즈별 한 번) ② 암합(관련 렌즈, 지금 대운·올해 세운, 종합은 원국)
+      add.split('\n\n').forEach(pg => {
+        assert.ok(!JARGON.test(pg) && !BAN.test(pg), '용어·단정 표현: ' + pg); assert.ok(!said.has(pg), '같은 문장 리포트 안 반복'); said.add(pg);
+        if (/기운을 살리는|기운을 살려/.test(pg)) { assert.ok(lens === 'wealth' || lens === 'career', '오행 전략은 재물·커리어에만'); assert.ok(!esSaid[lens], '렌즈별 한 번'); esSaid[lens] = 1; notes.es = (notes.es || 0) + 1; return; }
+        assert.ok(/숨은 합\(암합\)/.test(pg), '덧붙인 것은 전략 또는 암합 한 문장: ' + pg); notes[lens]++;
+        assert.ok(['life', 'wealth', 'career', 'love'].includes(lens), '관련 렌즈에만');
+        if (lens === 'life') assert.ok(!/대운|올해/.test(pg), '종합은 원국 암합만'); else assert.ok(/지금 대운에 들어온 글자|올해 들어온 글자/.test(pg), '재물·커리어·인연은 지금 대운·올해 세운만');
+      }); });
   }
   // B-2) 암합은 점수·희기·오행 세력을 바꾸지 않음(분석 전후 엔진 결과 같음)
   const before = core(b); for (const l of ['life', 'wealth', 'career', 'love', 'health']) A.timelineNote(M, b, { lens: l, now: NOW, said: new Set() }); assert.equal(core(b), before, '암합 분석 뒤 엔진 결과 그대로');
@@ -78,4 +82,4 @@ for (let i = 0; i < 300; i++) { const c = M.compute({ year: 1950 + (i * 7) % 55,
     assert.equal(A.timelineNote(M, c, { lens: l, now: NOW, said: sd2 }), null, '같은 암합 두 번 말하지 않음'); } }
 
 console.log(`timeline-consistency-sim PASS · 사주 ${n}명 · 만세력/타임라인 입력·원국·운·SajuData·용희기구신 일치 · groupPull 단일화`);
-console.log(`  암합 예외: 본문 그대로인 장 ${unchanged} · 암합 한 문장 덧붙은 장 ${appended} (종합 ${notes.life}·재물 ${notes.wealth}·커리어 ${notes.career}·인연 ${notes.love}) · 건강·사고 0 · 월운·일진 0 · 점수 불변`);
+console.log(`  암합 예외: 본문 그대로인 장 ${unchanged} · 암합 한 문장 덧붙은 장 ${appended} (종합 ${notes.life}·재물 ${notes.wealth}·커리어 ${notes.career}·인연 ${notes.love}) · 오행 전략 문단 ${notes.es || 0} · 건강·사고 0 · 월운·일진 0 · 점수 불변`);

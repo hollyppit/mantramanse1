@@ -70,7 +70,14 @@
     var n = function (k) { return tg[k] || 0; };
     var B0 = n('비견') + n('겁재'), leak = Math.max(4, Math.min(100, B0 * 1.4 + n('겁재') * 1.2)), roles = sd.usefulElements && sd.usefulElements.roles;
     return { leak: leak, C: n('정재') + n('편재'), B: B0, O: n('식신') + n('상관'), K: n('편관') + n('정관'), I: n('편인') + n('정인'), pj: n('정재'), pp: n('편재'), gj: n('겁재'), bg: n('비견'), sin: n('식신'), sang: n('상관'), jg: n('정관'), pg: n('편관'),
-      band: sd.strength && sd.strength.band, el: el, role: (roles && el && roles[el]) || '', rooted: br.some(function (b) { return BR_EL[b] === el; }), vault: vs, open: open, clashN: (sd.clashes || []).length, earth: (sd.fiveElements || {}).토 || 0 };
+      band: sd.strength && sd.strength.band, el: el, role: (roles && el && roles[el]) || '', rooted: rootedIn(sd, el, br), vault: vs, open: open, clashN: (sd.clashes || []).length, earth: (sd.fiveElements || {}).토 || 0 };
+  }
+  // 재성의 뿌리(통근): 엔진 지장간(sd.pillars[k].hidden — 일반 지장간 기준) 안에 재성 오행이 있는지. 옛 데이터(hidden 없음)면 지지 본기로 대신 본다(2026-11-20)
+  var STEM_EL = { 갑: '목', 을: '목', 병: '화', 정: '화', 무: '토', 기: '토', 경: '금', 신: '금', 임: '수', 계: '수' };
+  function rootedIn(sd, el, br) {
+    if (!el) return false; var any = false, has = false;
+    ['year', 'month', 'day', 'hour'].forEach(function (k) { var p = sd.pillars && sd.pillars[k]; if (!p || !p.hidden) return; any = true; p.hidden.forEach(function (h) { if (STEM_EL[h.stem] === el) has = true; }); });
+    return any ? has : br.some(function (b) { return BR_EL[b] === el; });
   }
   // ① 그릇의 힘 정하기: 재성이 많음(재왕) → 신약이면 재다신약, 아니면 신강재왕 / 재성이 적음(재약) → 신강재약 · 신약재약 / 그 밖은 균형
   function powerOf(p) {

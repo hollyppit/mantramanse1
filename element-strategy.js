@@ -50,7 +50,8 @@
   var GROUP_SKILL = ['내 힘과 동료와의 협력', '만들고 표현하는 재능', '돈과 현실을 다루는 감각', '조직과 책임을 맡는 힘', '배움과 지식을 쌓는 힘'];
   var mod5 = function (x) { return ((x % 5) + 5) % 5; };
   var elN = function (e) { return EL_K[e] + '(' + EL_H[e] + ')'; };
-  var jong = function (w) { var c = String(w).replace(/[)\s]+$/, '').slice(-1).charCodeAt(0); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0; };
+  // 받침: 끝의 한자 괄호(예: 목(木))는 떼고 앞 한글로 본다. 그 밖의 괄호(예: 화(편재))는 괄호 안 마지막 글자로 본다
+  var jong = function (w) { var s = String(w).replace(/\s+$/, ''); if (/\([一-鿿]+\)$/.test(s)) s = s.replace(/\([一-鿿]+\)$/, ''); var c = s.replace(/\)+$/, '').slice(-1).charCodeAt(0); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0; };
   var J = function (w, a, b) { return w + (jong(w) ? a : b); };
 
   function rolesOf(ch) { var r = (ch.unified && ch.unified.roles) || {}, o = {}; [0, 1, 2, 3, 4].forEach(function (e) { o[e] = r[e] || ''; }); return o; }
@@ -135,7 +136,17 @@
     return { version: VERSION, key: key, kind: kind, inflow: inflow, actions: actions.filter(Boolean), cautions: cautions, basis: basis, longTerm: longTerm };
   }
 
-  var api = { version: VERSION, ELS: ELS, EL_K: EL_K, LUCK_KEYS: LUCK_KEYS, natal: natal, job: job, luck: luck };
+  // 상세풀이(서사) 본문용 쉬운 문장: 전문 용어(용신·희신·기신·오행·십성 등) 없이, 재물·커리어 렌즈에서만 한 문장
+  function plainNote(M, ch, lens) {
+    if (lens !== 'wealth' && lens !== 'career') return null;
+    var n = natal(M, ch); if (!n || !n.core) return null;
+    var e = n.core.el, nm = EL_K[e] + '(' + EL_H[e] + ')', hx = n.expand[0], cz = n.caution[0];
+    var t = lens === 'wealth'
+      ? '길게 보면 이 사주에서 돈이 붙기 쉬운 방향은 ' + nm + ' 기운을 살리는 ' + ELS[e].name + '이에요. ' + ELS[e].core + (hx ? ' 여기에 ' + EL_K[hx.el] + '(' + EL_H[hx.el] + ') 기운 쪽 방식(' + ELS[hx.el].modes.slice(0, 2).join('·') + ')을 곁들이면 폭이 넓어져요.' : '')
+      : '일의 긴 흐름으로 보면 ' + nm + ' 기운을 살려 ' + ELS[e].jobUse + '이 이 사주와 잘 맞아요.';   // 주의 문장은 상세풀이 블록(reading-feature esBlock)이 맡는다 — 장 사이 같은 문장 반복 방지
+    return { key: lens + '|' + e, text: t };
+  }
+  var api = { version: VERSION, ELS: ELS, EL_K: EL_K, LUCK_KEYS: LUCK_KEYS, natal: natal, job: job, luck: luck, plainNote: plainNote };
   G.MantraElementStrategy = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -365,3 +365,6 @@ body #wstrip button{max-width:none;text-overflow:clip}
 @media(max-width:480px){.og-grid{gap:6px}.og-col{padding:10px 3px}.og-tg{font-size:11px}}
 
 /* 2026-11-09 대운 그래프 아래 이름: '乙未 대운'을 크게, 나이는 구간으로 작게 */
+
+/* 계절·월령 한 줄(2026-11-20): 오행 그래프 아래 — 글자 수와 실제 힘의 차이 */
+.reading-chart-note{margin:8px 0 0;font-size:.82em;line-height:1.55;opacity:.78}

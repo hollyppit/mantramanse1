@@ -64,20 +64,21 @@
     var tensions = {}; Object.keys(T).forEach(function (k) { var hit = T[k](P); if (hit) tensions[k] = hit; });
     var yongG = u.yong != null ? GN[mod5(u.yong - dEl)] : null;
     return {
-      v: PROFILE_V, G: G, help: ch.strength.help, dayEl: dEl, dom: GN[dom], min: GN[min],
+      v: PROFILE_V, G: G, help: ch.strength.help, zone: ch.strength.zone, dayEl: dEl, dom: GN[dom], min: GN[min],
       yong: u.yong, yongG: yongG, yongPct: u.yong != null ? (ch.weights.pct[u.yong] || 0) : null, mode: u.mode || '',
       djg: GN[mod5(M.stemEl(M.mainHidden(ch.pillars.day.b)) - dEl)],
       tensions: tensions, young: P.has('age:young'), senior: P.has('age:senior')
     };
   }
-  var strWord = function (h) { return h < 42 ? '힘이 여린 편' : h > 58 ? '힘이 센 편' : '어느 한쪽으로 크게 기울지 않은 편'; };
+  var STR_W = { 극약: -1, 태약: -1, 신약: -1, 중화: 0, 신강: 1, 태강: 1, 극왕: 1 };   // 2026-11-20: 엔진 강약 구간(STRENGTH_ZONES)을 그대로 — 경곗값을 따로 두지 않음
+  var strWord = function (h, zone) { var w = zone in STR_W ? STR_W[zone] : (h < 42 ? -1 : h > 58 ? 1 : 0); return w < 0 ? '힘이 여린 편' : w > 0 ? '힘이 센 편' : '어느 한쪽으로 크게 기울지 않은 편'; };
   var gName = function (D, g) { return D.G[g] + '(' + D.GT[g] + ')'; };
 
   // ── ① 내면의 구조: 장마다 읽는 값이 다르다 ──
   var INNER = {
     timeline_self_03: function (pf, D) {
       var G = pf.G, i = GN.indexOf(pf.dom), j = GN.indexOf(pf.min);
-      return '이 기질 풀이는 세 가지 값에서 나왔어요. 태어난 날의 기운은 ' + EL_PLAIN[pf.dayEl] + '의 성질이고, 나를 돕는 힘은 ' + pc(pf.help) + '로 ' + strWord(pf.help) + '이에요. 다섯 가지 기운 묶음 가운데 가장 큰 것은 ' + gName(D, pf.dom) + ' ' + pc(G[i]) + ', 가장 작은 것은 ' + gName(D, pf.min) + ' ' + pc(G[j]) + '예요. 가장 큰 묶음은 당신이 자꾸 꺼내 쓰는 힘이고, 가장 작은 묶음은 남에게 빌리거나 연습으로 채워야 하는 힘이라고 보면 쉬워요.';
+      return '이 기질 풀이는 세 가지 값에서 나왔어요. 태어난 날의 기운은 ' + EL_PLAIN[pf.dayEl] + '의 성질이고, 나를 돕는 힘은 ' + pc(pf.help) + '로 ' + strWord(pf.help, pf.zone) + '이에요. 다섯 가지 기운 묶음 가운데 가장 큰 것은 ' + gName(D, pf.dom) + ' ' + pc(G[i]) + ', 가장 작은 것은 ' + gName(D, pf.min) + ' ' + pc(G[j]) + '예요. 가장 큰 묶음은 당신이 자꾸 꺼내 쓰는 힘이고, 가장 작은 묶음은 남에게 빌리거나 연습으로 채워야 하는 힘이라고 보면 쉬워요.';
     },
     timeline_wealth_03: function (pf, D) {
       var G = pf.G, bi = G[0], sik = G[1], jae = G[2];
@@ -118,7 +119,7 @@
       np: function (g) { return D.G[g] + '(' + D.GT[g] + ' ' + pc(pf.G[i(g)]) + ')'; },   // '나와 같은 편 기운(비겁 34%)' — 뒤 조사는 '기운' 받침 기준(은·이·과·을)
       domNP: D.G[pf.dom] + '(' + D.GT[pf.dom] + ' ' + pc(pf.G[i(pf.dom)]) + ')', minNP: D.G[pf.min] + '(' + D.GT[pf.min] + ' ' + pc(pf.G[i(pf.min)]) + ')',
       tg: function (n) { return tg[n] || 0; }, tgp: function (n) { return pc(tg[n] || 0); },
-      help: pf.help, helpP: pc(pf.help), str: strWord(pf.help), weak: pf.help < 42, strong: pf.help > 58,
+      help: pf.help, helpP: pc(pf.help), str: strWord(pf.help, pf.zone), weak: pf.help < 42, strong: pf.help > 58,
       dom: pf.dom, min: pf.min, domName: gName(D, pf.dom), minName: gName(D, pf.min), domP: pc(pf.G[i(pf.dom)]), minP: pc(pf.G[i(pf.min)]),
       yong: pf.yongG, yongEl: pf.yong != null ? EL_PLAIN[pf.yong] : '', yongP: pc(pf.yongPct), yongName: pf.yongG ? gName(D, pf.yongG) : '',
       dayEl: EL_PLAIN[pf.dayEl], dj: pf.djg, djName: gName(D, pf.djg), has: function (t) { return c.P.has(t); }, t: pf.tensions

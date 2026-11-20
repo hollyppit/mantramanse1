@@ -47,8 +47,10 @@
     var tags = {}, add = function (t, why) { if (!tags[t]) tags[t] = why; };
     var st = ch.strength, help = st.help, G = ch.weights.groups, tg = ch.weights.tgPct || {}, dEl = M.stemEl(ch.pillars.day.s);
     var pc = function (v) { return Math.round(v) + '%'; };
-    add(help < 42 ? 'str:weak' : help > 58 ? 'str:strong' : 'str:mid', '나를 돕는 힘 ' + pc(help) + '(' + st.zone + ')');
-    if (help < 30) add('str:veryweak', '나를 돕는 힘 ' + pc(help)); if (help >= 70) add('str:verystrong', '나를 돕는 힘 ' + pc(help));
+    // 2026-11-20: 엔진 강약 구간(st.zone)을 그대로 쓴다 — 경곗값을 따로 두면 엔진 구간이 바뀔 때 어긋난다
+    var ZW = { 극약: 'weak', 태약: 'weak', 신약: 'weak', 중화: 'mid', 신강: 'strong', 태강: 'strong', 극왕: 'strong' }, zw = ZW[st.zone] || (help < 42 ? 'weak' : help > 58 ? 'strong' : 'mid');
+    add('str:' + zw, '나를 돕는 힘 ' + pc(help) + '(' + st.zone + ')');
+    if (st.zone === '극약' || st.zone === '태약') add('str:veryweak', '나를 돕는 힘 ' + pc(help)); if (st.zone === '태강' || st.zone === '극왕') add('str:verystrong', '나를 돕는 힘 ' + pc(help));
     var rs = 0; try { rs = M.analyzeNatalRoot(ch).natalRootScore; } catch (e) { }
     if (rs === 0) add('root:none', '일간의 뿌리(통근) 없음'); else if (rs < 30) add('root:weak', '일간의 뿌리(통근) ' + rs + '점'); else if (rs >= 60) add('root:firm', '일간의 뿌리(통근) ' + rs + '점');
     var dom = 0;
@@ -281,8 +283,11 @@
   // 암합 예외 정책(2026-11-20): 장·점수는 그대로, '운 단계' 문단 끝에 관련성이 확인될 때만 한 문장(amhap.js timelineNote)
   //  종합=원국 일지·월지 암합 · 재물=재성 · 커리어=월지·관성 · 인연=일지·배우자 별, 지금 대운·올해 세운만, 리포트 안에서 같은 암합은 한 번
   function luckStage(M, ch, now, lens, st, chapterId) {
-    var base = luckStage0(M, ch, now, lens, st, chapterId), A = root.MantraAmhap;
-    if (!base || !A || !A.timelineNote) return base;
+    var base = luckStage0(M, ch, now, lens, st, chapterId), A = root.MantraAmhap, ES = root.MantraElementStrategy;
+    if (!base) return base;
+    // 오행별 실전 전략(2026-11-20): 재물·커리어 장에만, 리포트 안 렌즈별 한 번 — 만세력 '돈 버는 방식'과 같은 계산(element-strategy.js)
+    if (ES && ES.plainNote) try { st.esSaid = st.esSaid || {}; if (!st.esSaid[lens]) { var es = ES.plainNote(M, ch, lens), et = es && dedupe(st, es.text); if (et) { st.esSaid[lens] = 1; base += '\n\n' + et; } } } catch (e) { }
+    if (!A || !A.timelineNote) return base;
     try { st.amhapSaid = st.amhapSaid || new Set(); var n = A.timelineNote(M, ch, { lens: lens, now: now, said: st.amhapSaid }), t = n && dedupe(st, n.text); if (t) return base + '\n\n' + t; } catch (e) { }
     return base;
   }

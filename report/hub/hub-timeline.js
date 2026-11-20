@@ -76,10 +76,10 @@
       // 운 분석 층(2026-11-18, 만세력 운세 흐름과 같은 계산): 외부 환경·전환·상하위(luckEnv) · 오행 겹쳐 보기(luckOverlay) · 십성 작용(tenGodRoles)
       // 시대 흐름(삼원구운·원회운세·오운육기)은 2026-11-20부터 타임라인에서 빼고 만세력 운세 흐름의 시대 흐름 카드에만 둔다(개인 인생 흐름에 집중)
       var on = function (k) { return F[k] === true || f[k] === true; }, lv = { luckEnv: on('luckEnv'), luckOverlay: on('luckOverlay'), tenGodRoles: on('tenGodRoles') }, LV_V = '?v=20261118-agree';
-      var need = [].concat(lv.luckOverlay ? ['/luck-overlay.js'] : [], lv.tenGodRoles || lv.luckEnv ? ['/ten-god-roles.js'] : [], lv.luckEnv ? ['/luck-env.js'] : [], ['/luck-layers-view.js']);
+      var need = [].concat(lv.luckOverlay ? ['/luck-overlay.js'] : [], lv.tenGodRoles || lv.luckEnv ? ['/ten-god-roles.js'] : [], lv.luckEnv ? ['/luck-env.js'] : [], ['/amhap.js', '/element-strategy.js', '/luck-layers-view.js']);   // 암합·오행 전략(2026-11-20, 만세력과 같은 공용 모듈)
       var seq = function (list) { return list.reduce(function (pr, u) { return pr.then(function () { return H.load(u + LV_V).catch(function () { }); }); }, Promise.resolve()); };
       // 원국 한눈에 보기(2026-11-20, 만세력 원국 탭과 같은 natal-overview.js): 격국 판정(gyeok-structure.js)을 함께 읽는다. 스위치 없이 늘 보인다
-      var ovNeed = [].concat(root.MantraGyeokStructure ? [] : ['/gyeok-structure.js'], root.MantraNatalOverview ? [] : ['/natal-overview.js']);
+      var ovNeed = [].concat(root.MantraGyeokStructure ? [] : ['/gyeok-structure.js'], root.MantraAmhap ? [] : ['/amhap.js'], root.MantraElementStrategy ? [] : ['/element-strategy.js'], root.MantraNatalOverview ? [] : ['/natal-overview.js']);
       return Promise.all([lc && !root.MantraLuckCycle ? H.load('/luck-cycle.js?v=20261118-ls').catch(function () { }) : Promise.resolve(), root.MantraLuckView ? Promise.resolve() : seq(need), seq(ovNeed)]).then(function () { return { lc: lc && !!root.MantraLuckCycle, ef: ef, lv: root.MantraLuckView ? lv : null, ow: f.overlayWeights || null }; });
     }).catch(function () { return { lc: false, ef: false }; });
     return graphP;

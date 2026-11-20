@@ -11,6 +11,12 @@
   function head(kick, title, lead) { return '<p class="fx-kick">' + esc(kick) + '</p><h3 class="fx-title">' + esc(title) + '</h3>' + (lead ? '<p class="fx-lead">' + esc(lead) + '</p>' : ''); }
   function years(H, n) {
     var sd = H.sd, roles = (sd.usefulElements && sd.usefulElements.roles) || {}, now = sd.nowYear || new Date().getFullYear(), out = [];
+    // 2026-11-20: 엔진 세운(입춘 기준 간지·흐름 점수 — 계절 왕쇠·통근·합충·희기를 함께 본 값)을 그대로 쓴다. 옛 데이터(annualLuck 에 fit 없음)만 아래 예비 셈법
+    var AL = (sd.annualLuck || []).filter(function (a) { return typeof a.fit === 'number' && a.ganzhi; });
+    if (AL.length) return AL.slice(0, n || 10).map(function (a) {
+      var si = STEM.indexOf(a.ganzhi.charAt(0)), bi = BR.indexOf(a.ganzhi.charAt(1)), se = STEM_EL.charAt(si), be = BR_EL.charAt(bi), f = a.fit;
+      return { y: a.year, gz: a.ganzhi, se: se, be: be, fit: f, s: f >= 18 ? 2 + f / 30 : f <= -12 ? -2 + f / 30 : f / 30, sr: roles[se] || '한신', br: roles[be] || '한신' };
+    });
     for (var y = now; y < now + (n || 10); y++) {
       var si = ((y - 4) % 10 + 10) % 10, bi = ((y - 4) % 12 + 12) % 12, se = STEM_EL.charAt(si), be = BR_EL.charAt(bi);
       var s = (ROLE_V[roles[se]] || 0) * 2 + (ROLE_V[roles[be]] || 0);
@@ -18,7 +24,7 @@
     }
     return out;
   }
-  var tone = function (s) { return s >= 3 ? 'good' : s <= -2 ? 'bad' : 'mid'; };
+  var tone = function (s, x) { if (x && typeof x.fit === 'number') return x.fit >= 18 ? 'good' : x.fit <= -12 ? 'bad' : 'mid'; return s >= 3 ? 'good' : s <= -2 ? 'bad' : 'mid'; };
   var TOPIC = {
     wealth: { word: '재물', go: '수입 통로를 늘리고 큰 결정을 내리기 좋은 해', wait: '지출을 줄이고 계약·투자를 미루는 게 나은 해', before: '빚과 고정비를 정리하고 종잣돈을 따로 모아 두기', on: '미뤄 둔 투자·사업·이직 같은 큰 결정을 실행하기', after: '번 것을 묶어 두고 새는 곳을 다시 점검하기' },
     career: { word: '일', go: '이직·독립·승진 같은 움직임을 걸어 볼 해', wait: '자리를 지키며 실력과 이력을 쌓는 게 나은 해', before: '이력과 포트폴리오를 정리하고 사람을 만나 두기', on: '옮기거나 독립하는 결정을 실행하기', after: '새 자리에서 기준을 세우고 성과 하나를 만들기' },
@@ -38,9 +44,9 @@
   /* ── 움직일 해 · 기다릴 해 ── */
   FB.add('fx:years', function (H, part) {
     var t = topicFor(H, part.topic), ys = years(H, 10), go = ys.filter(function (x) { return x.s >= 2; }).sort(function (a, b) { return b.s - a.s || a.y - b.y; }).slice(0, 3), wait = ys.filter(function (x) { return x.s <= -2; }).sort(function (a, b) { return a.s - b.s || a.y - b.y; }).slice(0, 3);
-    var chip = '<div class="fx-yr">' + ys.map(function (x) { return '<span class="is-' + tone(x.s) + '"><b>' + x.y + '</b><small>' + esc(x.gz) + '</small></span>'; }).join('') + '</div>';
+    var chip = '<div class="fx-yr">' + ys.map(function (x) { return '<span class="is-' + tone(x.s, x) + '"><b>' + x.y + '</b><small>' + esc(x.gz) + '</small></span>'; }).join('') + '</div>';
     var list = function (arr, good) { return arr.length ? arr.map(function (x) { return '<li><b>' + x.y + '년 ' + esc(x.gz) + '</b><small>' + esc('천간 ' + x.se + ' · ' + roleTxt(x.sr) + ' / 지지 ' + x.be + ' · ' + roleTxt(x.br)) + '</small></li>'; }).join('') : '<li>' + (good ? '앞으로 10년 안에 뚜렷한 순풍 해는 없어요. 해마다 조금씩 쌓는 쪽이 맞아요.' : '앞으로 10년 안에 크게 막히는 해는 없어요.') + '</li>'; };
-    return '<section class="dp-embed dp fx">' + head('命簿 · 해마다의 바람', '앞으로 10년, 움직일 해와 기다릴 해', '그해 들어오는 천간·지지 오행이 내 사주에 필요한 기운인지로 나눴어요. 밝은 칸은 순풍, 붉은 칸은 맞바람이에요.') + chip +
+    return '<section class="dp-embed dp fx">' + head('命簿 · 해마다의 바람', '앞으로 10년, 움직일 해와 기다릴 해', '그해 들어오는 기운이 내 사주에 필요한지에, 계절·뿌리·합과 충돌까지 함께 따진 만세력 흐름 점수로 나눴어요. 밝은 칸은 순풍, 붉은 칸은 맞바람이에요.') + chip +
       '<div class="fx-two"><div class="fx-side fx-best"><p class="fx-sk">動 · 움직일 해</p><p class="fx-note">' + esc(t.go) + '</p><ul class="fx-ul">' + list(go, true) + '</ul></div><div class="fx-side fx-worst"><p class="fx-sk">靜 · 기다릴 해</p><p class="fx-note">' + esc(t.wait) + '</p><ul class="fx-ul">' + list(wait, false) + '</ul></div></div></section>';
   });
 
@@ -64,7 +70,10 @@
     var sd = H.sd, dw = sd.daewoon || [], now = sd.nowYear || new Date().getFullYear(), roles = (sd.usefulElements && sd.usefulElements.roles) || {};
     var cur = sd.currentDaewoon || dw.filter(function (x) { return x.startYear <= now && now <= x.endYear; })[0], next = (cur && dw[dw.indexOf(cur) + 1]) || dw.filter(function (x) { return x.startYear > now; })[0];
     if (!cur || !next) return null;
-    var ce = STEM_EL_K[String(cur.ganzhi).charAt(0)], ne = STEM_EL_K[String(next.ganzhi).charAt(0)], cv = ROLE_V[roles[ce]] || 0, nv = ROLE_V[roles[ne]] || 0, up = nv >= cv, left = Math.max(0, next.startYear - now), c = CROSS[part.topic] || CROSS.wealth;
+    var ce = STEM_EL_K[String(cur.ganzhi).charAt(0)], ne = STEM_EL_K[String(next.ganzhi).charAt(0)], cv = ROLE_V[roles[ce]] || 0, nv = ROLE_V[roles[ne]] || 0;
+    // 2026-11-20: 엔진 대운 흐름 점수(천간·지지·계절·합충을 함께 본 값)로 오르막·내리막을 정한다. 없으면 천간 오행 역할로 대신
+    var cf = cur.assessment && typeof cur.assessment.fitScore === 'number' ? cur.assessment.fitScore : null, nf = next.assessment && typeof next.assessment.fitScore === 'number' ? next.assessment.fitScore : null;
+    var up = cf != null && nf != null ? nf >= cf : nv >= cv, left = Math.max(0, next.startYear - now), c = CROSS[part.topic] || CROSS.wealth;
     return '<section class="dp-embed dp fx">' + head('命簿 · 교운기 알림', '다음 대운이 바뀌는 때', '') +
       '<div class="fx-cross"><div><small>지금</small><b>' + esc(cur.ganzhi) + ' 대운</b><span>' + esc(cur.startYear + '~' + cur.endYear + '년 · ' + ce + '(' + EL_HJ[ce] + ') ' + roleTxt(roles[ce])) + '</span></div><i aria-hidden="true">→</i><div><small>' + esc(next.startYear + '년부터') + '</small><b>' + esc(next.ganzhi) + ' 대운</b><span>' + esc(ne + '(' + EL_HJ[ne] + ') ' + roleTxt(roles[ne])) + '</span></div><p class="fx-left"><strong>' + left + '</strong>년 남음</p></div>' +
       '<p class="fx-lead">' + esc(up ? (nv < 0 ? '맞바람이 조금 누그러지는 쪽으로 바뀌어요. 지금 버틴 만큼 다음 10년이 수월해져요.' : nv > cv ? '바람이 나아지는 쪽으로 바뀌어요. 지금은 다음 10년을 위해 준비할 때예요.' : '지금과 비슷한 바람이 이어져요. 하던 방식을 지키며 조금씩 넓히세요.') : (cv > 0 && nv >= 0 ? '순풍이 조금 약해지는 쪽으로 바뀌어요. 지금 흐름이 좋을 때 단단히 다져 두세요.' : '바람이 거세지는 쪽으로 바뀌어요. 지금 흐름이 좋을 때 단단히 다져 두세요.')) + '</p>' +

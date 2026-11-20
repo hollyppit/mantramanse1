@@ -40,6 +40,10 @@
     var order = ELK.slice().sort(function (a, b) { return sd.fiveElements[b] - sd.fiveElements[a]; });
     sd.dominantEl = order[0]; sd.weakestEl = order[4];
     sd.lackEl = sd.fiveElements[order[4]] < 8 ? order[4] : null; // 8% 미만만 "부족"으로 표기 (표현용 기준, 엔진 계산 아님)
+    // 계절·월령 세력(2026-11-20, engine season 모델): 출현량(글자·지장간 비율) · 계절 세력 · 최종 세력(= fiveElements)과 월령·왕상휴수사
+    var sea = ch.weights && ch.weights.seasonal;
+    sd.seasonal = sea ? { command: { el: ELK[sea.command.el], why: sea.command.why }, states: (function () { var o = {}; sea.states.forEach(function (s) { o[ELK[s.el]] = s.state; }); return o; })(),
+      appearance: (function () { var o = {}; ELK.forEach(function (e, i) { o[e] = round1(sea.appearance[i]); }); return o; })(), seasonalPct: (function () { var o = {}; ELK.forEach(function (e, i) { o[e] = round1(sea.seasonalPct[i]); }); return o; })() } : null;
 
     // 십성군(%) / 십성 10종(%)
     sd.groups = {}; GROUPS.forEach(function (g, i) { sd.groups[g] = round1(ch.weights.groups[i]); });
@@ -139,7 +143,7 @@
     // 앞으로 10년 세운(해마다). 읽기 화면의 타이밍 순위·그래프가 쓴다. 엔진의 세운 계산값만 옮겨 담는다.
     try {
       sd.annualLuck = M.seunRange(ch, Y, Y + 9).map(function (se, i) {
-        return { year: Y + i, ganzhi: M.gzNameK(se), stemTG: se.stemTG, branchTG: se.branchTG, relations: luckRelations(ch, se), season: seasonOf(se.ev), flow: se.ev.flow.primaryFlow, condition: se.ev.flow.condition.name, isNow: i === 0 };
+        return { year: Y + i, ganzhi: M.gzNameK(se), stemTG: se.stemTG, branchTG: se.branchTG, relations: luckRelations(ch, se), season: seasonOf(se.ev), flow: se.ev.flow.primaryFlow, condition: se.ev.flow.condition.name, fit: Math.round(se.ev.fitScore * 10) / 10, isNow: i === 0 };   // fit: 엔진 흐름 점수(2026-11-20, 해마다 운 블록이 같은 값을 쓰게)
       });
     } catch (e) { sd.annualLuck = []; un.push('annualLuck'); }
 

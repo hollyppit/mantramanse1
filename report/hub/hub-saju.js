@@ -115,7 +115,7 @@
       var f = (r && (r.data || r.d || r)) || {}, on = function (k) { return F[k] === true || f[k] === true; };
       LVF = { flags: { luckEnv: on('luckEnv'), luckOverlay: on('luckOverlay'), tenGodRoles: on('tenGodRoles') }, ow: f.overlayWeights || null };
       if (!LVF.flags.luckEnv && !LVF.flags.luckOverlay) return null;
-      var V = '?v=20261118-agree', need = [].concat(LVF.flags.luckOverlay ? ['/luck-overlay.js'] : [], ['/ten-god-roles.js'], LVF.flags.luckEnv ? ['/luck-env.js'] : [], ['/luck-layers-view.js']);
+      var V = '?v=20261118-agree', need = [].concat(LVF.flags.luckOverlay ? ['/luck-overlay.js'] : [], ['/ten-god-roles.js'], LVF.flags.luckEnv ? ['/luck-env.js'] : [], ['/amhap.js', '/element-strategy.js', '/luck-layers-view.js']);   /* 암합·오행 전략(2026-11-20, 만세력과 같은 공용 모듈) */
       return need.reduce(function (pr, u) { return pr.then(function () { if (document.querySelector('script[src^="' + u + '"]')) return; return H.load(u + V).catch(function () { }); }); }, Promise.resolve()).then(function () {
         if (root.MantraLuckView && !document.getElementById('lv-css')) { var st = document.createElement('style'); st.id = 'lv-css'; st.textContent = root.MantraLuckView.CSS; document.head.appendChild(st); }
         return root.MantraLuckView || null;
@@ -128,8 +128,9 @@
     var q = '', fig = '';
     try { q = LV.quick(root.Manse, ch, x, kind, { flags: LVF.flags, esc: esc, weights: LVF.ow || undefined, todo: todo || '' }); } catch (e) { q = ''; }
     try { fig = LV.overlayFigure(root.Manse, ch, x, kind, { flags: LVF.flags, esc: esc, weights: LVF.ow || undefined }); } catch (e) { fig = ''; }
-    if (!q && !fig) return '';
-    return '<section class="fortune-panel lv-cal"' + (id ? ' id="' + id + '"' : '') + '><p class="kick">' + (kind === 'wolun' ? 'MONTH · 월운' : 'DAY · 일진') + '</p><h2 class="lv-cal-h">' + esc(title) + '</h2>' + q + fig + '</section>';
+    var ext = ''; try { ext = LV.extras ? LV.extras(root.Manse, ch, x, kind, { esc: esc }) : ''; } catch (e) { ext = ''; }   /* 이 달·이 날의 암합·일 전략 */
+    if (!q && !fig && !ext) return '';
+    return '<section class="fortune-panel lv-cal"' + (id ? ' id="' + id + '"' : '') + '><p class="kick">' + (kind === 'wolun' ? 'MONTH · 월운' : 'DAY · 일진') + '</p><h2 class="lv-cal-h">' + esc(title) + '</h2>' + q + fig + ext + '</section>';
   }
   function calendar(ch, ctx) {
     var M = root.Manse, today = Saju.todayData(ch), y = today.y, m = today.mo, d = today.d, purpose = '', range = 30, weekday = 'all', generation = 0, searchY = y, searchM = m;

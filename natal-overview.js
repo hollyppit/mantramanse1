@@ -65,7 +65,28 @@
         '<div class="ov-chips">' + chips + '</div><p class="ov-easy">' + E(rep.easy) + (g.major.length ? ' 함께 선 구조: ' + g.major.map(function (o) { return E(o.name) + '(' + E(o.txt.short) + ')'; }).join(', ') + '.' : '') + '</p></div>';
     } else if (u && u.gyeok && u.gyeok.kind) { gName = u.gyeok.kind; bGy = '<div class="ov-b">' + head(T('격국')) + '<div class="ov-big">' + E(u.gyeok.kind) + '</div></div>'; }
     var top = [tx(d.dEl, M.STEM[day] + EL_HJ[d.dEl]) + ' 일간', E(zone) + ' ' + st.help.toFixed(0) + '%', r ? E(lvName(r)) + ' ' + r.natalRootScore + '점' : '', d.yong ? '용신 ' + EL_KO[d.yong.e] : '', d.gi ? '기신 ' + EL_KO[d.gi.e] : '', E(gName)].filter(Boolean).join('<span class="sep">·</span>');
-    return '<div class="ov"><p class="ov-top">' + top + '</p><div class="ov-grid">' + bStr + bRoot + bYong + bGy + '</div>' +
+    // 5. 계절·월령 세력(2026-11-20, engine season 모델): 월령·왕상휴수사, 출현량 → 최종 세력
+    var bSea = '', sea = ch.weights && ch.weights.seasonal;
+    if (sea) {
+      var WSC = { 왕: 'good', 상: 'good', 수: 'bad', 사: 'bad' };
+      var diffs = [0, 1, 2, 3, 4].map(function (e) { return { e: e, d: sea.finalPct[e] - sea.appearance[e] }; }).filter(function (x) { return Math.abs(x.d) >= 3; }).sort(function (a, b) { return Math.abs(b.d) - Math.abs(a.d); }).slice(0, 3);
+      bSea = '<div class="ov-b">' + head('계절·월령으로 본 세력', L('ohaeng', '오행·강약 ›')) + '<div class="ov-big">' + E(sea.command.elK) + '<small>월령 · ' + E(M.BR[ch.pillars.month.b]) + '월</small></div>' +
+        '<div class="ov-chips">' + sea.states.map(function (s) { return chip(WSC[s.state] || '', EL_HJ[s.el] + ' ' + T(s.state)); }).join('') + '</div>' +
+        '<p class="ov-easy">' + E(sea.command.why) + '. ' + (diffs.length ? '글자 수만 셀 때보다 ' + diffs.map(function (x) { return E(EL_KO[x.e]) + (x.d > 0 ? ' +' : ' ') + Math.round(x.d); }).join(' · ') + '%p로, 계절과 뿌리를 따지면 실제 세력이 달라져요.' : '글자 수로 본 분포와 계절을 따진 세력이 크게 다르지 않아요.') + '</p></div>';
+    }
+    // 6. 숨은 합(암합, amhap.js) — 있을 때만
+    var bAm = '', AM = G.MantraAmhap;
+    if (AM && AM.natal) { try { var am = AM.natal(M, ch).filter(function (x) { return x.isValid && x.type === 'branch-hidden-stem'; });
+      if (am.length) bAm = '<div class="ov-b">' + head('숨은 합 · 암합') + '<div class="ov-chips">' + am.slice(0, 3).map(function (x) { return chip('', E(x.branchA + x.branchB + ' ' + x.combination)); }).join('') + '</div><p class="ov-easy">' + E(am[0].text.general) + ' <span class="ov-mu">길흉 판정이 아닌 보조 해석이에요.</span></p></div>';
+    } catch (e) { } }
+    // 7. 돈 버는 방향(element-strategy.js) — 통합 용신 역할을 전략 문장으로
+    var bEs = '', ES = G.MantraElementStrategy;
+    if (ES && ES.natal) { try { var es = ES.natal(M, ch);
+      if (es && es.core) bEs = '<div class="ov-b">' + head('돈 버는 방향 · 오행 전략', L('ohaeng', '돈 버는 방식 ›')) + '<div class="ov-big">' + tx(es.core.el, EL_HJ[es.core.el] + ' ' + EL_KO[es.core.el]) + '<small>' + E(es.core.type) + '</small></div>' +
+        (es.expand.length ? '<div class="ov-chips">' + es.expand.map(function (x) { return chip('good', '확장 ' + EL_HJ[x.el] + ' ' + E(x.type)); }).join('') + es.caution.slice(0, 1).map(function (x) { return chip('bad', '주의 ' + EL_HJ[x.el]); }).join('') + '</div>' : '') +
+        '<p class="ov-easy">' + E(es.core.text) + '</p></div>';
+    } catch (e) { } }
+    return '<div class="ov"><p class="ov-top">' + top + '</p><div class="ov-grid">' + bStr + bRoot + bYong + bGy + bSea + bAm + bEs + '</div>' +
       '<p class="ov-note">수치와 판정은 강약·용신·격국 계산을 그대로 옮긴 요약이에요. 통근 점수는 일간 힘의 퍼센트가 아닌 앱 내부의 상대 지표예요.</p></div>';
   }
 

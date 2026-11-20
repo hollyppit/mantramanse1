@@ -206,6 +206,26 @@
   }
 
   // 겹쳐 보기 그림 한 덩어리(제목·용신 한 줄·그림) — 타임라인 시기 카드에 접지 않고 바로 보이게
+  // 만세력과 같은 공용 계산(2026-11-20): 이 시기 암합(amhap.js) · 일·돈 시기 전략(element-strategy.js) — 모듈이 없으면 빈 문자열
+  //  암합은 이 운(kind)이 원국·다른 운과 실제로 이룰 때만, 전략은 엔진 통합 용신 역할을 문장으로 옮긴 것(점수 불변)
+  function extras(M, ch, x, kind, opt) {
+    opt = opt || {}; var E = opt.esc || esc0, A = root.MantraAmhap, S = root.MantraElementStrategy, out = '';
+    if (!x || x.s == null) return '';
+    if (A && A.luck) {
+      try {
+        var recs = A.luck(M, ch, layersOf(M, ch, x, kind)).filter(function (r) { return r.isValid && r.type === 'branch-hidden-stem' && (r.source === kind || (r.source === 'luck-luck' && r.levels.indexOf(kind) >= 0)); });
+        if (recs.length) out += '<div class="lv-sec2"><p class="lv-sm"><b>숨은 합(암합)</b> <span>이 시기에만 · 보조 해석</span></p><ul class="lv-ul">' + recs.slice(0, 3).map(function (r) { return '<li><b>' + E(r.branchA + r.branchB + ' ' + r.combination) + '</b> ' + E(r.text.general) + (r.text.love ? ' ' + E(r.text.love) : '') + (r.text.career ? ' ' + E(r.text.career) : '') + '</li>'; }).join('') + '</ul></div>';
+      } catch (e) { }
+    }
+    if (S && S.luck) {
+      try {
+        var keys = kind === 'ilun' ? ['career'] : ['career', 'business'], seen = {}, acts = [], cau = [];
+        keys.forEach(function (k) { var o = S.luck(M, ch, x, kind, k); if (!o) return; o.actions.forEach(function (t) { if (!seen[t]) { seen[t] = 1; acts.push(t); } }); o.cautions.forEach(function (t) { if (!seen[t]) { seen[t] = 1; cau.push(t); } }); });
+        if (acts.length) out += '<div class="lv-sec2"><p class="lv-sm"><b>일·돈 시기 전략</b> <span>오행별 실전 전략 · 만세력과 같은 계산</span></p><ul class="lv-ul">' + acts.map(function (t) { return '<li>' + E(t) + '</li>'; }).join('') + cau.slice(0, 1).map(function (t) { return '<li class="lv-cau">' + E(t) + '</li>'; }).join('') + '</ul></div>';
+      } catch (e) { }
+    }
+    return out;
+  }
   function overlayFigure(M, ch, x, kind, opt) {
     opt = opt || {}; var E = opt.esc || esc0, OV = root.MantraLuckOverlay; if (!OV || !(opt.flags || {}).luckOverlay) return '';
     var L = layersOf(M, ch, x, kind), oc; try { oc = OV.compute(M, ch, L, { weights: opt.weights }); } catch (e) { return ''; }
@@ -216,7 +236,7 @@
   // 상세 카드 한 장 분량(타임라인 시기 카드 아래에 붙인다)
   function card(M, ch, x, kind, opt) {
     var p = parts(M, ch, x, kind, opt), lv = LEVEL_K[kind] || '';
-    var s2 = p.tr + p.tgr, s3 = p.hier + p.ol, s1 = p.env;
+    var s2 = p.tr + p.tgr + extras(M, ch, x, kind, opt), s3 = p.hier + p.ol, s1 = p.env;
     var h = (s1 ? '' : p.hid) + sec(1, '① 외부 환경의 오행 흐름', '모두에게 같은 ' + lv + (kind === 'wolun' || kind === 'ilun' ? '의 간지·계절' : '의 간지') + ' · 좋고 나쁨 판단 없음', s1 ? s1 + p.hid : '', false) +
       sec(2, '② 내 사주에 미치는 영향', '원국과 이 ' + lv + '이 만나 생기는 작용', s2, true) +
       sec(3, '③ 상위 운과 하위 운', kind === 'daeun' ? '대운이 원국 위에 쌓이는 모습' : '큰 운은 배경, 작은 운은 구체화 · 위가 아래를 정하지 않아요', s3, false) +
@@ -242,7 +262,7 @@
   }
 
   var CSS = '.lv{margin:10px 0 4px;display:grid;gap:6px}.lv-sec{border:1px solid var(--lv-line,rgba(127,127,127,.28));border-radius:12px;padding:0 12px;background:var(--lv-bg,transparent)}.lv-sec>summary{cursor:pointer;list-style:none;display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;padding:9px 0}.lv-sec>summary::-webkit-details-marker{display:none}.lv-sec>summary b{font-size:.92rem}.lv-sec>summary span{font-size:.74rem;opacity:.65}'
-    + '.lv-s1{border-style:dashed;background:rgba(127,127,127,.05)}.lv-b{padding:0 0 10px;font-size:.88rem;line-height:1.6}.lv-b p{margin:6px 0}.lv-lead{font-weight:600}.lv-sm{font-size:.8rem;opacity:.8}.lv-note{font-size:.76rem;opacity:.65}.lv-ul,.lv-ol{margin:6px 0;padding-left:18px}.lv-ul li,.lv-ol li{margin:3px 0}'
+    + '.lv-s1{border-style:dashed;background:rgba(127,127,127,.05)}.lv-b{padding:0 0 10px;font-size:.88rem;line-height:1.6}.lv-b p{margin:6px 0}.lv-lead{font-weight:600}.lv-sm{font-size:.8rem;opacity:.8}.lv-note{font-size:.76rem;opacity:.65}.lv-ul,.lv-ol{margin:6px 0;padding-left:18px}.lv-sec2{margin-top:8px;border-top:1px dashed rgba(127,127,127,.3);padding-top:6px}.lv-sec2 .lv-sm span{opacity:.7;font-weight:400}.lv-cau{opacity:.85}.lv-ul li,.lv-ol li{margin:3px 0}'
     + '.lv-chip{display:inline-block;font-style:normal;font-size:.74rem;padding:1px 8px;border-radius:999px;border:1px solid rgba(127,127,127,.35)}.lv-chip.good{color:#1f7a5c;border-color:#1f7a5c66;background:#1f7a5c14}.lv-chip.bad{color:#b23a2b;border-color:#b23a2b66;background:#b23a2b12}'
     + '.lv-tr{border-left:3px solid rgba(127,127,127,.35);padding-left:9px}.lv-tr.lv-high{border-left-color:#b23a2b}.lv-tr.lv-mid{border-left-color:#c58b2a}.lv-ol li.lv-good{border-left:3px solid #1f7a5c55;padding-left:6px;list-style:none;margin-left:-18px}.lv-ol li.lv-bad{border-left:3px solid #b23a2b55;padding-left:6px;list-style:none;margin-left:-18px}.lv-ol li.lv-mixed,.lv-ol li.lv-flat{border-left:3px solid rgba(127,127,127,.35);padding-left:6px;list-style:none;margin-left:-18px}'
     + '.lv-rows{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.lv-rows em{opacity:.5;font-style:normal}.lv-mxs{display:flex;flex-wrap:wrap;gap:5px}.lv-mx{position:relative;overflow:hidden;z-index:0;font-size:.74rem;padding:2px 8px;border-radius:999px;border:1px solid rgba(127,127,127,.3)}.lv-mx i{position:absolute;inset:0 auto 0 0;z-index:-1;opacity:.35}'
@@ -253,7 +273,7 @@
     + '.lv-fig{margin:10px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(127,127,127,.28)}.lv-fig-h{margin:0 0 4px;font-size:.9rem}.lv-fig-h span{font-size:.74rem;opacity:.7}.lv-fig-y{margin:2px 0 4px;font-size:.86rem}'
     + '.lv-nf{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 18px;align-items:start;margin:12px 0}.lv-nf-fig svg{width:100%;height:auto;max-width:400px;display:block;margin:0 auto}.lv-nf-h{font-size:1.02rem;margin:4px 0}.lv-nf-txt{font-size:.9rem;line-height:1.65}.lv-npl{paint-order:stroke;stroke:var(--lv-halo,#fff);stroke-width:5px;stroke-linejoin:round;opacity:.9}.lv-q{border-radius:14px;padding:12px 14px;margin:10px 0;border:1px solid rgba(127,127,200,.35);background:rgba(110,120,230,.07)}.lv-qk{font-size:.74rem;font-weight:700;margin:0 0 6px;letter-spacing:.04em;opacity:.85}.lv-qr{display:flex;gap:10px;margin:6px 0;line-height:1.6;font-size:.9rem}.lv-qt{flex:0 0 4.6em;font-size:.78rem;font-weight:700;opacity:.8;padding-top:2px}.lv-qr{padding-left:8px;border-left:3px solid transparent;border-radius:2px}.lv-qr.good{border-left-color:#1FA85A}.lv-qr.bad{border-left-color:#E2553F}.lv-qr.good .lv-qt,.lv-qr.good b,.lv-qr.good .lv-qm{color:#178a4a}.lv-qr.bad .lv-qt,.lv-qr.bad b,.lv-qr.bad .lv-qm{color:#c9412d}.lv-qr.good .lv-qt,.lv-qr.bad .lv-qt{opacity:1}.lv-qleg{font-weight:400;font-size:.7rem;opacity:.75;margin-left:8px;letter-spacing:0}.lv-qleg i{display:inline-block;width:8px;height:8px;border-radius:2px;margin:0 3px 0 6px}.lv-qleg i.good{background:#1FA85A}.lv-qleg i.bad{background:#E2553F}@media (max-width:720px){.lv-nf{grid-template-columns:1fr}}';
 
-  var api = { version: VERSION, layersOf: layersOf, hidden: hidden, parts: parts, card: card, era: era, olVisual: olVisual, overlayFigure: overlayFigure, natalFlowFigure: natalFlowFigure, quick: quick, CSS: CSS, LEVEL_K: LEVEL_K };
+  var api = { version: VERSION, layersOf: layersOf, hidden: hidden, parts: parts, card: card, era: era, olVisual: olVisual, overlayFigure: overlayFigure, extras: extras, natalFlowFigure: natalFlowFigure, quick: quick, CSS: CSS, LEVEL_K: LEVEL_K };
   root.MantraLuckView = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
