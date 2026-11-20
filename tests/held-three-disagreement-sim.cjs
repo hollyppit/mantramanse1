@@ -17,7 +17,7 @@ for(let i=0;i<480;i++){
  }
 }
 const causeCounts={groupOnly:0,helpOnly:0,both:0};for(const c of conflicts){const group=c.axes.includes('groupPass'),help=c.axes.includes('helpPass');causeCounts[group&&help?'both':group?'groupOnly':'helpOnly']++;}
-/* 엔진 오행 가중 모델이 이후 의도적으로 바뀌어 표본 480명의 엇갈림 수가 달라졌다(2026-11-16 재측정) */test(conflicts.length===36);test(rounding.length===0);test(JSON.stringify(causeCounts)===JSON.stringify({groupOnly:15,helpOnly:7,both:14}));
+/* 엔진 오행 가중 모델이 이후 의도적으로 바뀌어 표본 480명의 엇갈림 수가 달라졌다(2026-11-16 재측정: 36건 15/7/14). 2026-11-20 지장간 정정(子卯酉 정기 하나·午亥 여기 제외)으로 재측정 */test(conflicts.length===37);test(rounding.length===0);test(JSON.stringify(causeCounts)===JSON.stringify({groupOnly:17,helpOnly:9,both:11}));
 // Prevent both sides of floating point noise from becoming a research candidate.
 for(const [g,h]of [[30,41],[30-1e-14,41],[30+1e-14,41],[31,42-1e-14],[31,42],[31,42+1e-14]]){const input={precision:'raw-engine',ruleId:RULES.male,gender:'M',hourKnown:true,groupPct:g,helpPct:h,context:ctx,alternatives:['hidden','simple8'].map(model=>({model,groupPct:g,helpPct:h}))};test(evaluateDraft(input).reasons.includes('numeric-boundary-review'));}
 const result={date:'2026-10-17',baselineCharts:480,conflicts:conflicts.length,causeCounts,roundingCases:rounding.length,roundingApplicableCases:rounding.filter(x=>x.applicable).length,numericBoundaryCases:boundaryCases.length,numericTolerance:NUMERIC_TOLERANCE,checks,allPublicationDisabled:true,externalAIRequests:0};

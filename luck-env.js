@@ -99,7 +99,8 @@
     };
     var SK = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계'], BK = ['자', '축', '인', '묘', '진', '사', '오', '미', '신', '유', '술', '해'];
     out.stem.text = '천간 ' + josa(M.STEM[me.s] + '(' + SK[me.s] + ')', '은', '는') + ' ' + (out.stem.yang ? '양' : '음') + '의 ' + EL_K[sEl] + ' — ' + EL_Q[sEl] + ' 기운이 겉으로 드러나요.';
-    out.branch.text = '지지 ' + josa(M.BR[me.b] + '(' + BK[me.b] + ')', '은', '는') + ' ' + EL_K[bEl] + ' 바탕이고, 안에 ' + hid.map(function (h) { return h.stem + '(' + EL_S[h.el] + ') ' + h.pct + '%'; }).join(' · ') + '가 들어 있어요.';
+    out.branch.text = '지지 ' + josa(M.BR[me.b] + '(' + BK[me.b] + ')', '은', '는') + ' ' + EL_K[bEl] + ' 바탕이고, 안에 ' + (hid.length === 1 ? hid[0].stem + '(' + EL_S[hid[0].el] + ') 한 글자만 들어 있어요.'   // 子·卯·酉는 지장간이 하나(정기)뿐
+      : hid.map(function (h) { return h.stem + '(' + EL_S[h.el] + ') ' + h.pct + '%'; }).join(' · ') + '가 들어 있어요.');
     // 계절(월운은 그 달의 월지, 일진은 그날이 든 달의 월지) — 대운·세운은 계절 단위가 아니라 넣지 않는다
     var sb = level === 'wolun' ? me.b : level === 'ilun' ? opt.seasonB : null;
     if (sb != null) {

@@ -30,10 +30,10 @@
   function hidden(M, ch, b, E) {
     E = E || esc0;
     var P = ch.pillars || {}, nat = ['year', 'month', 'day', 'hour'].map(function (k) { return P[k] && P[k].s; }).filter(function (s) { return s != null; });
-    var H = M.HIDDEN[b], lab = H.length === 2 ? ['여기', '정기'] : ['여기', '중기', '정기'], same = [], hap = [];
+    var H = M.HIDDEN[b], lab = M.hiddenLabels ? M.hiddenLabels(b) : (H.length === 2 ? ['여기', '정기'] : ['여기', '중기', '정기']), same = [], hap = [];   // 子·卯·酉는 정기 하나
     var cells = H.map(function (h, k) {
       var hs = h[0]; if (nat.indexOf(hs) >= 0) same.push(M.STEM[hs]); if (nat.indexOf((hs + 5) % 10) >= 0) hap.push(M.STEM[hs] + M.STEM[(hs + 5) % 10]);
-      return '<i class="lv-el e' + stemEl(hs) + (k === H.length - 1 ? ' m' : '') + '" title="' + E(lab[k] + ' ' + h[1] + '일') + '">' + E(M.STEM[hs]) + '<small>' + lab[k] + '</small></i>';
+      return '<i class="lv-el e' + stemEl(hs) + (k === H.length - 1 ? ' m' : '') + '" title="' + E(lab[k] + ' ' + Math.round(h[1] / 30 * 100) + '%') + '">' + E(M.STEM[hs]) + '<small>' + lab[k] + '</small></i>';
     }).join('');
     var note = (same.length ? '원국 천간과 같은 글자 ' + same.join('·') : '') + (hap.length ? (same.length ? ' · ' : '') + '원국 천간과 합 ' + hap.join('·') : '');
     return '<p class="lv-hid"><b>지지 ' + E(M.BR[b]) + ' 속 지장간</b> ' + cells + (note ? '<span>' + E(note) + '</span>' : '') + '</p>';

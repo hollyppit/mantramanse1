@@ -20,11 +20,14 @@ const CASES = [
   ['화면 사주: 정기 투출(시간) 정관격 성립 — 년간-시간 壬丁합은 떨어져 있어 합거 아님', [1992, 6, 23, 1, 45], '壬申 丙午 庚午 丁丑', a => a.rep.type === 'jeong' && a.jeong.name === '정관격' && a.jeong.establish === 'firm' && !a.jeong.order.some(o => o.hapGeo) && a.engineGyeok.kind === '정관격'],
   ['정기 투출 + 통근 → 성립', [2000, 8, 13, 5, 30], '庚辰 甲申 癸卯 甲寅', a => a.jeong.name === '정인격' && a.jeong.establish === 'firm' && a.jeong.role === '정기'],
   ['투출 없음 → 월령 본기 취격, 약하게 성립', [1960, 8, 1, 8, 45], '庚子 癸未 辛酉 壬辰', a => a.jeong.method === '정기' && a.jeong.establish === 'weak' && a.jeong.name === '편인격'],
-  ['투출 격신이 붙은 천간과 합거, 다른 후보 없음 → 판정 유보', [1967, 12, 8, 18, 15, 'F'], '丁未 壬子 丙午 丁酉', a => a.jeong.method === '투출(합거)' && a.jeong.establish === 'hold' && a.rep.type === 'hold' && a.jeong.stability.status === 'hold' && a.rep.name === '판정 유보'],
-  ['합거된 글자가 있어도 다른 투출 후보로 취격', [1960, 9, 18, 13, 15], '庚子 乙酉 己酉 辛未', a => a.jeong.order.some(o => o.hapGeo) && a.jeong.method === '투출' && a.jeong.establish !== 'hold' && a.jeong.basis.some(t => /다음 후보로 넘깁니다/.test(t))],
-  ['왕지(午)에서 여기만 투출 → 복수 후보(정기 기준과 충돌)', [1996, 7, 5, 6, 45, 'F'], '丙子 甲午 癸卯 乙卯', a => a.jeong.establish === 'multi' && a.jeong.name === '정재격' && a.jeong.candidates.some(c => c.role === '정기' && c.name === '편재격')],
+  // 2026-11-20 지장간 정정(子=癸·酉=辛 단일)으로 옛 사례(丁未 壬子 丙午 丁酉: 子 속 壬 투출 합거)가 성립하지 않아 같은 규칙의 명식으로 교체
+  ['투출 격신이 붙은 천간과 합거, 다른 후보 없음 → 판정 유보', [1962, 7, 8, 1, 15, 'M'], '壬寅 丁未 丁未 庚子', a => a.jeong.method === '투출(합거)' && a.jeong.establish === 'hold' && a.rep.type === 'hold' && a.jeong.stability.status === 'hold' && a.rep.name === '판정 유보'],
+  // 옛 사례(庚子 乙酉 己酉 辛未: 酉 속 庚 투출 합거)도 같은 이유로 교체 — 未 여기 丁 합거 → 정기 己 투출로 취격
+  ['합거된 글자가 있어도 다른 투출 후보로 취격', [1962, 7, 8, 19, 15, 'M'], '壬寅 丁未 丁未 己酉', a => a.jeong.order.some(o => o.hapGeo) && a.jeong.method === '투출' && a.jeong.establish !== 'hold' && a.jeong.basis.some(t => /다음 후보로 넘깁니다/.test(t))],
+  // 2026-11-20 午 지장간에서 여기 丙을 뺀 뒤 옛 사례(丙子 甲午 癸卯 乙卯: 午 여기 丙 투출)는 성립하지 않아, 午의 중기 己만 투출한 명식으로 교체 — 왕지 정기 기준과 갈리는 규칙은 같다
+  ['왕지(午)에서 중기만 투출 → 복수 후보(정기 기준과 충돌)', [1964, 6, 15, 6, 45, 'F'], '甲辰 庚午 乙未 己卯', a => a.jeong.establish === 'multi' && a.jeong.name === '편재격' && a.jeong.candidates.some(c => c.role === '정기' && c.name === '식신격')],
   ['정기 미투출 + 중기·여기 동시 투출 → 복수 후보', [1979, 8, 12, 21, 0, 'F'], '己未 壬申 辛亥 戊戌', a => a.jeong.establish === 'multi' && a.jeong.reasons.some(r => /중기·여기가 함께/.test(r)) && a.jeong.candidates.length >= 1],
-  ['월지가 삼합 국(申子辰 수국)을 이루고 그 오행 투출 → 복수 후보(국)', [1992, 4, 23, 1, 30], '壬申 甲辰 己巳 甲子', a => a.jeong.name === '월겁격' && a.jeong.establish === 'multi' && a.jeong.candidates.some(c => c.role === '국(局)' && c.name === '정재격') && a.jeong.use === '정재'],
+  ['월지가 삼합 국(申子辰 수국)을 이루고 그 오행 투출 → 복수 후보(국)', [1992, 4, 23, 1, 30], '壬申 甲辰 己巳 甲子', a => a.jeong.name === '월겁격' && a.jeong.establish === 'multi' && a.jeong.candidates.some(c => c.role === '국(局)' && c.name === '정재격') && a.jeong.use === '정관'],   // 2026-11-20: 子 속 壬이 빠져 정재 壬의 뿌리가 申 중기뿐 → 상신이 정재→정관
   ['시간 모름 + 투출 없음 → 판정 유보', [1958, 12, 12, '', 30], '戊戌 甲子 癸亥 --', a => !a.hasHour && a.jeong.establish === 'hold' && a.rep.type === 'hold' && a.caveats.length > 0],
   ['투출 없음 + 월지 충 → 판정 유보', [1952, 9, 15, 7, 0, 'F'], '壬辰 己酉 甲子 丁卯', a => a.jeong.establish === 'hold' && a.jeong.reasons.some(r => /월지가 충/.test(r))],
   ['양인격인데 격용(재·관·식상) 천간에 없음 → 판정 유보', [1992, 4, 8, 2, 0, 'F'], '壬申 甲辰 甲寅 乙丑', a => a.jeong.name === '양인격' && a.jeong.use === null && a.jeong.establish === 'hold'],

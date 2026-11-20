@@ -25,14 +25,30 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   const gzName = p => STEM[p.s] + BR[p.b];
   const gzNameK = p => STEM_K[p.s] + BR_K[p.b];
 
-  // 지장간 [천간, 일수] — 여기·중기·정기 순
-  const HIDDEN = [
+  // ── 지장간: 세 가지를 따로 관리한다(2026-11-20) ──
+  // ① WOLRYUL  월률분야(月律分野) 일수표 [천간, 일수] — 절입 후 사령(司令) 순서를 정하는 원문 그대로. 子·卯·酉의 여기(壬·甲·庚)도 이 표에만 있다.
+  // ② JIJANGGAN 지장간 구성 — 지지 속에 실제로 들어 있는 천간(여기·중기·정기 순). 子·卯·酉는 정기 하나뿐(癸·乙·辛).
+  //    午는 己·丁, 亥는 甲·壬 — 월률분야에만 있는 여기(午 丙·亥 戊)는 빼는 자평진전 계열 기준으로 통일(2026-11-20 사용자 결정).
+  // ③ HIDDEN   지장간 비율 [천간, 30일 환산 일수] — ②의 글자에 ①의 일수를 그대로 주고, 빠진 여기의 일수는 정기에 더해 합이 늘 30(=100%)이 되게 한다(2026-11-20 사용자 결정: 중기 비율 보존). 엔진·화면이 모두 이 값을 쓴다.
+  //    예전에는 ①을 그대로 HIDDEN으로 써서 酉가 辛67%·庚33%로 나왔다(子 癸67%·壬33%, 卯 乙67%·甲33%도 같은 원인).
+  const WOLRYUL = [
     [[8, 10], [9, 20]], [[9, 9], [7, 3], [5, 18]], [[4, 7], [2, 7], [0, 16]], [[0, 10], [1, 20]],
     [[1, 9], [9, 3], [4, 18]], [[4, 7], [6, 7], [2, 16]], [[2, 10], [5, 9], [3, 11]], [[3, 9], [1, 3], [5, 18]],
     [[4, 7], [8, 7], [6, 16]], [[6, 10], [7, 20]], [[7, 9], [3, 3], [4, 18]], [[4, 7], [0, 7], [8, 16]],
   ];
+  const wolryulLabels = b => WOLRYUL[b].length === 2 ? ['여기', '정기'] : ['여기', '중기', '정기'];
+  //               子    丑         寅         卯   辰         巳         午         未         申         酉   戌         亥
+  const JIJANGGAN = [[9], [9, 7, 5], [4, 2, 0], [1], [1, 9, 4], [4, 6, 2], [5, 3], [3, 1, 5], [4, 8, 6], [7], [7, 3, 4], [0, 8]];
+  const HIDDEN = JIJANGGAN.map((stems, b) => {
+    const src = WOLRYUL[b].filter(([s]) => stems.includes(s));
+    if (src.length !== stems.length || src.some(([s], i) => s !== stems[i])) throw new Error('지장간 구성표와 월률분야 표의 순서가 다름: ' + b);
+    const tot = src.reduce((a, x) => a + x[1], 0);
+    return src.map(([s, d], i) => [s, i === src.length - 1 ? d + 30 - tot : d]);   // 빠진 여기의 일수는 정기(본기)에 더한다 — 중기 일수는 월률분야 그대로
+  });
+  // 이름표는 월률분야 표에서의 자리를 그대로 따른다(하나만 남으면 정기, 午에서 여기를 빼면 己=중기·丁=정기)
+  const HIDDEN_LABELS = JIJANGGAN.map((stems, b) => stems.map(s => wolryulLabels(b)[WOLRYUL[b].findIndex(x => x[0] === s)]));
   const mainHidden = b => HIDDEN[b][HIDDEN[b].length - 1][0];
-  const hiddenLabels = b => HIDDEN[b].length === 2 ? ['여기', '정기'] : ['여기', '중기', '정기'];
+  const hiddenLabels = b => HIDDEN_LABELS[b].slice();
 
   // ───────────── 십성 ─────────────
   const TG = ['비견', '겁재', '식신', '상관', '편재', '정재', '편관', '정관', '편인', '정인'];
@@ -564,10 +580,11 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   function saryeong(ch) {
     const jie = ch.pillars.month.jie, b = ch.pillars.month.b;
     const day = Math.max(0, Math.floor((ch.utc - jie.t) / 86400000));   // 절입일 = 0일째
-    let acc = 0, idx = HIDDEN[b].length - 1;
-    for (let i = 0; i < HIDDEN[b].length; i++) { acc += HIDDEN[b][i][1]; if (day < acc) { idx = i; break; } }
-    const s = HIDDEN[b][idx][0];
-    return { day: day + 1, stem: s, label: hiddenLabels(b)[idx], tg: tenGod(ch.pillars.day.s, s), jie: jie.name };
+    // 사령은 월률분야 일수표(WOLRYUL)로 센다 — 지장간 구성(JIJANGGAN)에 없는 子·卯·酉월 초 10일의 壬·甲·庚 사령도 원문대로 둔다
+    let acc = 0, idx = WOLRYUL[b].length - 1;
+    for (let i = 0; i < WOLRYUL[b].length; i++) { acc += WOLRYUL[b][i][1]; if (day < acc) { idx = i; break; } }
+    const s = WOLRYUL[b][idx][0];
+    return { day: day + 1, stem: s, label: wolryulLabels(b)[idx], tg: tenGod(ch.pillars.day.s, s), jie: jie.name };
   }
 
   // ───────────── 운 ─────────────
@@ -3504,7 +3521,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   const rootBand = (bands, v) => { const b = bands.find(x => v >= x[0]); return b ? b[1] : bands[bands.length - 1][1]; };
   const rootLevelLabel = score => rootBand(ROOT_CONFIG.levels, score);
   // 지장간 배열은 [여기·중기·정기] 순이다(hiddenLabels와 같은 정의). 마지막이 본기, 세 개일 때 가운데가 중기, 나머지는 여기
-  const rootDepth = (b, i) => { const n = HIDDEN[b].length; return i === n - 1 ? 'main' : (n === 3 && i === 1 ? 'middle' : 'residual'); };
+  const rootDepth = (b, i) => ({ '정기': 'main', '중기': 'middle', '여기': 'residual' })[HIDDEN_LABELS[b][i]];
   // 지장간 데이터가 본기·중기·여기 정의와 일치하는지 검증한다(배열 순서를 그냥 가정하지 않는다)
   function validateRootHiddenData() {
     const CANON = [9, 5, 0, 1, 4, 2, 3, 5, 6, 7, 4, 8], issues = [];   // 子癸 丑己 寅甲 卯乙 辰戊 巳丙 午丁 未己 申庚 酉辛 戌戊 亥壬
@@ -3716,7 +3733,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     compute, elementFlow, ELEMENT_FLOW_CFG, natalFlow, NATAL_FLOW_CFG, luckStructures, integrateYongsin, unifiedLuckFit, unifiedSupport, gyeokCore, jongCore, chainLink, UNIFIED_CFG, josa, evaluateLuckFlow, composeFlowState, flowLabel, flowSummary, flowName, migrateLegacyPhase, FLOW_CONFIG, LEVEL_WEIGHTS, ROOT_RULES, ROOT_CONFIG, ROOT_LEVEL_WEIGHTS, getRootRelation, rootRuleTable, validateRootHiddenData, analyzeNatalRoot, analyzeLuckRootSupport, evaluateCurrentRootState, rootFitEffect, rootSummary, rootLevelLabel, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, SUB_DOMAIN_KEYS, SUB_CONFIG, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, gyoungi, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
     solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, currentTerm, termsOf, surroundingJie,
     yearPillarAt, monthPillarAt, dayPillarOfJdn, jdnFromYMD, pillarsFor, relationsAmong, tenGod, unseong, sinsal12, gongmangOf,
-    STEM, STEM_K, BR, BR_K, EL, EL_K, TG, TG_GROUP, stemEl, BR_EL, HIDDEN, mainHidden, yang, gzName, gzNameK,
+    STEM, STEM_K, BR, BR_K, EL, EL_K, TG, TG_GROUP, stemEl, BR_EL, HIDDEN, JIJANGGAN, WOLRYUL, hiddenLabels, mainHidden, yang, gzName, gzNameK,
     MODELS, SCHOOLS, TIME_MODES, TERM_NAMES, POS, POS_K, MIN_Y, MAX_Y, bandOf,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

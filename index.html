@@ -6865,11 +6865,11 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // 원국 천간과 같은 글자는 점(•), 원국 천간과 합이 되는 글자는 밑줄 — 숨은 글자가 원국을 건드리는 자리를 바로 보이게 한다. 일수는 툴팁.
   function luckHidden(b) {
     const ch = S.ch, P = ch && ch.pillars || {}, nat = ['year', 'month', 'day', 'hour'].map(k => P[k] && P[k].s).filter(s => s != null);
-    const H = M.HIDDEN[b], lab = H.length === 2 ? ['여기', '정기'] : ['여기', '중기', '정기'];
+    const H = M.HIDDEN[b], lab = M.hiddenLabels(b);   // 子·卯·酉는 정기 하나 — 이름표는 엔진 것을 쓴다
     const tips = [], eqs = [], haps = [];
     const cells = H.map(([hs, d], k) => {
       const main = k === H.length - 1, eq = nat.includes(hs), hp = nat.includes((hs + 5) % 10);
-      tips.push(`${lab[k]} ${M.STEM[hs]}(${M.STEM_K[hs]}${M.EL_K[M.stemEl(hs)]}) ${d}일`);
+      tips.push(`${lab[k]} ${M.STEM[hs]}(${M.STEM_K[hs]}${M.EL_K[M.stemEl(hs)]}) ${Math.round(d / 30 * 100)}%`);
       if (eq) eqs.push(M.STEM[hs]); if (hp) haps.push(`${M.STEM[hs]}${M.STEM[(hs + 5) % 10]}`);
       return `<i class="eltxt ${ECLS[M.stemEl(hs)]}${main ? ' m' : ''}${eq ? ' eq' : ''}${hp ? ' hp' : ''}">${M.STEM[hs]}</i>`;
     });

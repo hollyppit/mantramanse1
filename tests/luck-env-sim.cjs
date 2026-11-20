@@ -24,7 +24,7 @@ assert.equal(E.pillarRel(1, 1).key, 'same'); assert.equal(E.pillarRel(1, 0).key,
 
 // 3) 사람마다
 const T = Date.UTC(2026, 10, 18, 3), kinds = ['daeun', 'seun', 'wolun', 'ilun'];
-const trLv = { daeun: {}, seun: {}, wolun: {}, ilun: {} }, hiSide = {}, hiText = new Set(), envSeun = new Set();
+const trLv = { daeun: {}, seun: {}, wolun: {}, ilun: {} }, trYear = {}, hiSide = {}, hiText = new Set(), envSeun = new Set();
 let n = 0, differ = 0, sameDir = 0;
 for (let i = 0; i < N; i++) {
   const inp = { year: 1950 + (i * 7) % 60, month: 1 + (i * 5) % 12, day: 1 + (i * 11) % 28, hour: (i * 3) % 24, minute: 0, gender: i % 2 ? 'M' : 'F' };
@@ -32,6 +32,8 @@ for (let i = 0; i < N; i++) {
   const snap = J({ d: ch.daeun.list.map(x => x.ev.fitScore), u: ch.unified && ch.unified.roles });
   const du = M.daeunAt(ch, T), se = M.seunRange(ch, 2026, 2026)[0], wl = M.wolun(ch, 2026), wo = wl.filter(m => m.startMs <= T).pop(), il = M.ilun(ch, 2026, 11).filter(d => d.date[2] === 18)[0];
   const items = { daeun: du, seun: se, wolun: wo, ilun: il };
+  // 월운 전환 분포는 그달 하나(2026-11 = 戌→亥)만 보면 특정 지지의 성격에 끌려가므로 2026년 열두 달 전환 전체로 본다(2026-11-20 亥 지장간 정정 뒤 亥월만 평소 교체 34%)
+  for (let m = 1; m < wl.length; m++) { const t = E.transition(M, ch, wl[m - 1], wl[m], 'wolun', {}); if (t) trYear[t.level] = (trYear[t.level] || 0) + 1; }
   const layersOf = k => { const out = []; if (du) out.push({ level: 'daeun', s: du.s, b: du.b }); if (k === 'daeun') return out.slice(0, 1); out.push({ level: 'seun', s: se.s, b: se.b }); if (k === 'seun') return out; out.push({ level: 'wolun', s: wo.s, b: wo.b }); if (k === 'wolun') return out; out.push({ level: 'ilun', s: il.s, b: il.b }); return out; };
   for (const k of kinds) {
     const x = items[k]; if (!x) continue;
@@ -60,7 +62,7 @@ for (let i = 0; i < N; i++) {
 assert.equal(envSeun.size, 1, '같은 해 세운의 외부 환경은 모두에게 같음');
 assert.ok(Object.keys(hiSide).length >= 4, '같은 시기라도 원국에 따라 방향이 다름 ' + J(hiSide));
 assert.ok(differ > n * 0.3 && sameDir > n * 0.3, '상위·하위 방향이 같은 경우와 다른 경우가 모두 나옴');
-for (const k of kinds) { const c = trLv[k], tot = Object.values(c).reduce((a, b) => a + b, 0) || 1; assert.ok((c.low || 0) / tot >= 0.4, k + ' 평소 교체가 너무 적음(전환기 과장) ' + J(c)); assert.ok((c.high || 0) / tot <= 0.3, k + ' 큰 전환이 너무 많음 ' + J(c)); }
+for (const k of kinds) { const c = k === 'wolun' ? trYear : trLv[k], tot = Object.values(c).reduce((a, b) => a + b, 0) || 1; assert.ok((c.low || 0) / tot >= 0.4, k + ' 평소 교체가 너무 적음(전환기 과장) ' + J(c)); assert.ok((c.high || 0) / tot <= 0.3, k + ' 큰 전환이 너무 많음 ' + J(c)); }
 
 // 4) 화면 연결
 const rd = f => fs.readFileSync(path.join(root, f), 'utf8'), html = rd('index.html');
