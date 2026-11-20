@@ -43,7 +43,13 @@ assert(r.j.song.sections.length === 7 && /^\/api\/music-video\?a=[0-9a-f]{64}$/.
 r = await call('POST', '/api/music-video', { sd, topic: 'self', lyrics: '아무 가사' }, admin); assert.equal(r.status, 200); assert.equal(eleven, 1); assert.equal(r.j.key, key);
 // 5) 다른 주제는 다른 곡
 r = await call('POST', '/api/music-video', { sd, topic: 'wealth' }, admin); assert.equal(r.status, 200); assert.equal(eleven, 2); assert.notEqual(r.j.key, key); assert.equal(r.j.song.topic, 'wealth');
-// 6) 신년운세: 괘 없으면 400, 있으면 생성
+// 5-2) 사용자 옵션: 모두 auto(또는 모르는 값)면 예전과 같은 곡(캐시), 장르·분위기·보컬을 바꾸면 다른 곡 — 보컬만 바꿔도 패널 칸(주인공 성별)은 그대로
+r = await call('POST', '/api/music-video', { sd, topic: 'self', opts: { genre: 'auto', mood: 'nope', vocal: 'X' } }, admin); assert.equal(r.j.key, key); assert.equal(eleven, 2); assert.equal(r.j.song.opt.genre, 'auto');
+r = await call('POST', '/api/music-video', { sd, topic: 'self', opts: { genre: 'trap', mood: 'chill', vocal: 'M' } }, admin); assert.equal(r.status, 200); assert.equal(eleven, 3); assert.notEqual(r.j.key, key);
+{ const st = lastBody.composition_plan.chunks[0].positive_styles; assert(st.includes('melodic trap') && st.includes('mellow late-night vibe') && st.includes('male rapper') && !st.includes('female rapper'), '옵션 스타일'); assert(lastBody.composition_plan.chunks[0].negative_styles.includes('female vocals'));
+  assert.equal(r.j.song.optKo, '멜로딕 트랩 · 감성 있게 · 남성 보컬'); assert(/-f$/.test(r.j.song.sections[0].panel), '패널 주인공은 사주 성별(여자) 그대로'); }
+eleven--;   // 아래 단계의 곡 수 셈을 그대로 두기 위해(이 단계에서 1곡 더 만듦)
+
 const birth = { year: 1990, month: 5, day: 17, hour: 9, minute: 0, gender: 'F', calendar: 'solar' };
 r = await call('POST', '/api/music-video', { topic: 'newyear' }, admin); assert.equal(r.status, 400);
 r = await call('POST', '/api/music-video', { topic: 'newyear', birth, year: 2027 }, admin); assert.equal(r.status, 409, '검수 전 괘는 노래를 만들지 않는다'); assert(/161괘/.test(r.j.detail)); assert.equal(eleven, 2);
@@ -52,7 +58,7 @@ r = await call('POST', '/api/music-video', { topic: 'newyear', birth, year: 2027
 assert.equal(L.stripAdlibs(r.j.song.sections[0].lines[3]), '“관리자가 고친 괘 제목”', '승인·수정된 문구를 쓴다'); assert(r.j.song.title.startsWith('2027 ')); assert(r.j.song.sections[0].lines[0] === L.compose(sd, 'self').sections[0].lines[0], '사주는 서버가 출생 정보로 계산(브라우저 sd 무시)');
 r = await call('POST', '/api/music-video', { topic: 'newyear', birth, year: 2027 }); assert.equal(r.status, 403, '신년운세 무료 공개·미설정이면 일반 사용자는 못 연다');
 // 7) 하루 상한(일반 사용자 기준 2곡): 관리자는 상한 무시. 오늘 수는 4
-assert.equal(kv.get('mv:count:' + new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10)), '3');
+assert.equal(kv.get('mv:count:' + new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10)), '4');
 // 8) 진행 중이면 202(같은 곡을 두 번 만들지 않는다)
 { const x = L.inputsOf(sd, 'career'), s = L.fromInputs(x); const enc = new TextEncoder(); const d = await crypto.subtle.digest('SHA-256', enc.encode(JSON.stringify({ v: s.version, m: 'music_v2_5', lyrics: s.lyrics, style: s.style, d: s.sections.map(q => q.durationMs) }))); const ck = [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, '0')).join('');
   kv.set('mv:song:' + ck, JSON.stringify({ status: 'pending', at: Date.now() })); r = await call('POST', '/api/music-video', { sd, topic: 'career' }, admin); assert.equal(r.status, 202); assert.equal(r.j.pending, true); assert.equal(eleven, 3); kv.delete('mv:song:' + ck); }

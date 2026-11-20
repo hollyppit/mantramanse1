@@ -363,6 +363,31 @@
   };
   var NEG_STYLE = ['explicit lyrics', 'screaming', 'harsh noise', 'phonk', 'trap metal', 'rage', 'slow ballad', 'sad mood', 'lo-fi', 'acoustic ballad', 'dark gloomy', 'comedic novelty song', 'dated 2000s sound', 'stiff robotic rhythm'];
   var COLOR = { 목: '초록빛', 화: '붉은빛', 토: '노란빛', 금: '하얀빛', 수: '푸른빛' };
+  /* 사용자 선택 옵션(2026-11-20): 노래를 만들기 전에 장르·분위기·보컬을 고른다. 'auto' 는 지금까지와 똑같은 곡(같은 캐시)을 만든다.
+     장르 auto = 일간 오행 추천(목 펑키·화 웨스트코스트·토 아프로스윙·금 재지·수 R&B). 옵션이 다르면 다른 곡(캐시 열쇠에 스타일이 들어간다).
+     보컬을 바꿔도 패널 주인공은 사주 성별 그대로다. */
+  var EL_GENRE = { 목: 'funk', 화: 'westcoast', 토: 'afro', 금: 'jazzy', 수: 'rnb' };
+  var GENRE = {
+    funk: { ko: '펑키 바운스', base: STYLE.목 }, westcoast: { ko: '웨스트코스트', base: STYLE.화 }, afro: { ko: '아프로스윙', base: STYLE.토 },
+    jazzy: { ko: '재지 힙합', base: STYLE.금 }, rnb: { ko: 'R&B·소울', base: STYLE.수 },
+    trap: { ko: '멜로딕 트랩', base: ['trendy modern k-hip hop', 'upbeat', 'catchy', 'melodic trap', 'pluggnb', 'dreamy bell synths', 'rolling hi-hats', 'hard-hitting 808 bass', 'polished radio-ready mix', '140 bpm'] },
+    party: { ko: '신나는 파티', base: ['trendy modern k-hip hop', 'upbeat', 'catchy', 'jersey club bounce', 'sliding 808s', 'bright plucked synths', 'chopped vocal samples', 'festival party energy', 'polished radio-ready mix', '140 bpm'] }
+  };
+  var MOOD = { auto: { ko: '기본', styles: [] }, hype: { ko: '신나게', styles: ['high energy', 'hype crowd ad-libs', 'bigger punchier drums'] }, chill: { ko: '감성 있게', styles: ['mellow late-night vibe', 'warm atmospheric pads', 'emotional melodic hook'] } };
+  var VOCAL_KO = { auto: '사주대로', F: '여성 보컬', M: '남성 보컬' };
+  var OPTIONS = {
+    genre: ['auto'].concat(Object.keys(GENRE)).map(function (k) { return { id: k, ko: k === 'auto' ? '내 사주 추천' : GENRE[k].ko }; }),
+    mood: Object.keys(MOOD).map(function (k) { return { id: k, ko: MOOD[k].ko }; }),
+    vocal: Object.keys(VOCAL_KO).map(function (k) { return { id: k, ko: VOCAL_KO[k] }; })
+  };
+  function optsOf(o) {
+    o = o && typeof o === 'object' ? o : {};
+    return { genre: GENRE[o.genre] ? o.genre : 'auto', mood: MOOD[o.mood] ? o.mood : 'auto', vocal: o.vocal === 'F' || o.vocal === 'M' ? o.vocal : 'auto' };
+  }
+  function optsKo(op, el) {
+    var g = op.genre === 'auto' ? '내 사주 추천(' + GENRE[EL_GENRE[el] || 'afro'].ko + ')' : GENRE[op.genre].ko;
+    return [g, MOOD[op.mood].ko, VOCAL_KO[op.vocal]].join(' · ');
+  }
 
   function hash(s) { var h = 5381; s = String(s); for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; return h; }
   function elOk(e) { return ELK.indexOf(e) >= 0 ? e : null; }
@@ -473,7 +498,8 @@
       { id: 'bridge', lines: br, el: x.hee },
       { id: 'outro', lines: [OUT_CLIMATE[x.climate], OUT_REL[x.rel]].concat(DAY_OUTRO[x.day] || OUT_EL[x.el]), el: x.el }
     ];
-    parts.forEach(function (p) { p.lines = p.repeatOf ? parts[2].lines.slice() : addAdlibs(p.lines, p.id, x.el, seed, x.g, x.yong); });   // 훅 반복은 첫 훅과 똑같이
+    var op = optsOf(x.opt), vg = op.vocal === 'auto' ? x.g : op.vocal;   // 보컬 성별(추임새 girl/boy 도 따라감)
+    parts.forEach(function (p) { p.lines = p.repeatOf ? parts[2].lines.slice() : addAdlibs(p.lines, p.id, x.el, seed, vg, x.yong); });   // 훅 반복은 첫 훅과 똑같이
     var sections = parts.map(function (p) {
       var base = p.repeatOf || p.id;
       return { id: p.id, name: SECTION_KO[base] + (p.repeatOf ? ' (반복)' : ''), tag: '[' + TAG[base] + ']', lines: p.lines, durationMs: DUR[p.id], panel: panelId(base, topic, x.g, x.day), panelFallback: panelId(base, 'self', x.g, x.day), el: p.el };
@@ -483,7 +509,8 @@
     return {
       version: VERSION, topic: topic, topicKo: TOPIC_KO[topic], inputs: x,
       title: (topic === 'newyear' ? x.ny.year + ' ' : '') + x.day + ' 일주, ' + (word ? word + '에 부는 ' : '') + COLOR[x.yong] + ' 바람',
-      gender: x.g, hero: heroOf(x.day, x.g), style: STYLE[x.el].concat(VOCAL[x.g] || VOCAL.M), negativeStyle: NEG_STYLE.concat(NEG_VOCAL[x.g] || NEG_VOCAL.M),
+      gender: x.g, hero: heroOf(x.day, x.g), opt: op, optKo: optsKo(op, x.el),
+      style: (op.genre === 'auto' ? STYLE[x.el] : GENRE[op.genre].base).concat(MOOD[op.mood].styles, VOCAL[vg] || VOCAL.M), negativeStyle: NEG_STYLE.concat(NEG_VOCAL[vg] || NEG_VOCAL.M),
       sections: sections, totalMs: t,
       lyrics: sections.map(function (s) { return s.tag + '\n' + s.lines.join('\n'); }).join('\n\n')
     };
@@ -606,7 +633,7 @@
     return { section: s, line: s.lines[k], lineIndex: k };
   }
 
-  R.MusicVideoLyrics = { VERSION: VERSION, BANNED: BANNED, SECTIONS: SECTIONS, SECTION_KO: SECTION_KO, ELK: ELK, ELR: ELR, DAYS: DAYS, GENDERS: GENDERS, GENDER_KO: GENDER_KO, DUR: DUR, TOPICS: TOPICS, TOPIC_KO: TOPIC_KO, TOPIC_WORLD: TOPIC_WORLD,
+  R.MusicVideoLyrics = { OPTIONS: OPTIONS, optsOf: optsOf, optsKo: optsKo, EL_GENRE: EL_GENRE, VERSION: VERSION, BANNED: BANNED, SECTIONS: SECTIONS, SECTION_KO: SECTION_KO, ELK: ELK, ELR: ELR, DAYS: DAYS, GENDERS: GENDERS, GENDER_KO: GENDER_KO, DUR: DUR, TOPICS: TOPICS, TOPIC_KO: TOPIC_KO, TOPIC_WORLD: TOPIC_WORLD,
     inputsOf: inputsOf, fromInputs: fromInputs, compose: compose, toElevenPlan: toElevenPlan, toElevenV1Plan: toElevenV1Plan, alignToTranscript: alignToTranscript, stripAdlibs: stripAdlibs, ADLIB: ADLIB, HOOK_TAG: HOOK_TAG, panelId: panelId, parsePanelId: parsePanelId, panelSlots: panelSlots, heroOf: heroOf, bannedIn: bannedIn, allFragments: allFragments, DAY_OUTRO: DAY_OUTRO, cueAt: cueAt, hash: hash };
   if (typeof module !== 'undefined' && module.exports) module.exports = R.MusicVideoLyrics;
 })(typeof window !== 'undefined' ? window : globalThis);

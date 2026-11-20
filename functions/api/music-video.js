@@ -2,7 +2,7 @@
 // 공개 스위치: /api/luck-flags 의 musicVideo(기본 꺼짐). 꺼져 있으면 관리자만 쓸 수 있다.
 // 공개 범위: 유료 주제(worlds:config access=paid) 안에서만, 그 주제를 산 회원(또는 관리자)만 노래를 만든다.
 //
-// POST /api/music-video { sd, topic } | { topic:'newyear', birth, year } — topic: self(종합풀이 w1)·love(w3)·wealth(w2)·career(w7)·newyear(토정비결 신년운세 tj<연도>)
+// POST /api/music-video { sd, topic, opts? } | { topic:'newyear', birth, year, opts? } — opts: { genre, mood, vocal }(L.OPTIONS, 모르는 값은 auto) — topic: self(종합풀이 w1)·love(w3)·wealth(w2)·career(w7)·newyear(토정비결 신년운세 tj<연도>)
 //      가사는 서버가 사주 값(+승인된 토정 현대어 풀이)으로 다시 조합한다(브라우저가 보낸 가사는 받지 않는다).
 //      일레븐랩스는 구간마다 길이(composition_plan chunks duration_ms)를 지켜 주므로 패널·자막 시점이 정확히 맞는다.
 //      → { ok, song:{title, sections, totalMs}, audio, panels } | 202 { ok:false, pending:true }(같은 곡을 만드는 중) | { ok:false, error, locked? }
@@ -42,12 +42,14 @@ const imageReady = env => !!((env.OPENAI_API_KEY || env.GEMINI_API_KEY) && env.C
 const panelLimitOf = env => { const n = parseInt(env.MV_PANEL_DAILY_LIMIT, 10); return Number.isFinite(n) && n >= 0 ? n : 120; };
 const KEY_RE = /^[0-9a-f]{64}$/, PENDING_MS = 4 * 60 * 1000;
 const modelOf = env => (env.ELEVENLABS_MUSIC_MODEL === 'music_v2' || env.ELEVENLABS_MUSIC_MODEL === 'music_v2_5') ? env.ELEVENLABS_MUSIC_MODEL : 'music_v2_5';
+const UCOUNT = (d, h) => 'mv:ucount:' + d + ':' + h.slice(0, 32);
+const perSajuOf = env => { const n = parseInt(env.MV_PER_SAJU_DAILY, 10); return Number.isFinite(n) && n >= 1 ? n : 3; };
 const limitOf = env => { const n = parseInt(env.MV_DAILY_LIMIT, 10); return Number.isFinite(n) && n >= 0 ? n : 30; };
 const today = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
 
 async function sha256(s) { const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)); return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, '0')).join(''); }
 async function flagOn(env) { try { const d = await env.GLOSSARY_KV.get('luckenv:flags', 'json'); return !!(d && d.musicVideo === true); } catch { return false; } }
-const publicSong = (s, rec) => ({ title: s.title, topic: s.topic, topicKo: s.topicKo, totalMs: s.totalMs, hero: s.hero, timing: (rec && rec.timing) || null, sync: (rec && rec.sync) || null, sections: s.sections.map(x => ({ id: x.id, name: x.name, lines: x.lines, startMs: x.startMs, durationMs: x.durationMs, panel: x.panel, panelFallback: x.panelFallback, el: x.el })) });
+const publicSong = (s, rec) => ({ title: s.title, topic: s.topic, topicKo: s.topicKo, totalMs: s.totalMs, hero: s.hero, opt: s.opt, optKo: s.optKo, timing: (rec && rec.timing) || null, sync: (rec && rec.sync) || null, sections: s.sections.map(x => ({ id: x.id, name: x.name, lines: x.lines, startMs: x.startMs, durationMs: x.durationMs, panel: x.panel, panelFallback: x.panelFallback, el: x.el })) });
 
 // 유료 주제를 산 회원인가(관리자는 통과, 관리자 '무료 사용자로 보기'는 일반 회원과 같게)
 async function gate(request, env, world, sd) {
@@ -123,6 +125,7 @@ export async function onRequestPost({ request, env }) {
 
   const sf = await songFor(request, env, b); if (sf.res) return sf.res;
   const x = sf.x, g = sf.g;
+  x.opt = L.optsOf(b && b.opts);   // 사용자가 고른 장르·분위기·보컬(모두 auto 면 예전과 같은 곡·같은 캐시)
   if (b && b.fillPanel) return fillPanel(env, request, b.fillPanel, L.fromInputs(x), g);
   if (b && b.checkVideos) return checkVideos(env, L.fromInputs(x));
   if (!env.CLIPS_R2) return json({ ok: false, error: 'R2 바인딩(CLIPS_R2)이 없습니다' }, 501);
@@ -137,8 +140,12 @@ export async function onRequestPost({ request, env }) {
 
   const day = today(), used = parseInt(await env.GLOSSARY_KV.get(COUNT(day)), 10) || 0;
   if (!g.admin && used >= limitOf(env)) return json({ ok: false, error: 'daily-limit' }, 429);
+  // 같은 사주·주제로 옵션을 바꿔 가며 새 곡을 만드는 것은 하루 MV_PER_SAJU_DAILY(기본 3)곡까지 — 한 사람이 하루 전체 상한을 다 쓰지 않게
+  const who = UCOUNT(day, await sha256(JSON.stringify(Object.assign({}, x, { opt: undefined })))), mine = parseInt(await env.GLOSSARY_KV.get(who), 10) || 0;
+  if (!g.admin && mine >= perSajuOf(env)) return json({ ok: false, error: 'per-saju-limit', limit: perSajuOf(env) }, 429);
   await env.GLOSSARY_KV.put(SONG(key), JSON.stringify({ status: 'pending', at: Date.now() }), { expirationTtl: 600 });
   await env.GLOSSARY_KV.put(COUNT(day), String(used + 1), { expirationTtl: 3 * 86400 });
+  if (!g.admin) await env.GLOSSARY_KV.put(who, String(mine + 1), { expirationTtl: 2 * 86400 });
   let bytes;
   let usedModel = modelOf(env);
   try { const out = await callEleven(env, song); bytes = out.bytes; usedModel = out.model; }

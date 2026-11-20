@@ -10,6 +10,8 @@
   var WORLD_TOPIC = { w1: 'self', w2: 'wealth', w3: 'love', w7: 'career' };
   var EL_BG = { 목: ['#17352a', '#3f7a52'], 화: ['#3a1416', '#a4462f'], 토: ['#33280f', '#9a7a3a'], 금: ['#25272c', '#8c929c'], 수: ['#0d1a2e', '#2f5d8c'] };
   function L() { return R.MusicVideoLyrics; }
+  // 이 파일이 있는 폴더(MP4 저장 모듈·mp4-muxer 를 필요할 때 같은 폴더에서 불러온다)
+  var BASE = (function () { try { var c = root.document && document.currentScript; return c && c.src ? c.src.replace(/[^/]*(\?.*)?$/, '') : '/report/v2/'; } catch (e) { return '/report/v2/'; } })();
 
   /* ── 공개 스위치 */
   function localFlag() {
@@ -80,6 +82,13 @@
     '.mv-err{position:relative;margin:auto 0;padding:0 24px;text-align:center;line-height:1.6}.mv-err button{margin-top:14px;background:#fff;color:#111;border:0;border-radius:999px;padding:10px 18px;cursor:pointer}' +
     /* 신년운세 화면처럼 무빙툰 카드 스타일(cs-card)이 없는 곳 */
     '.ny-mv .mv-card{border:1px solid rgba(128,128,128,.35);border-radius:14px;padding:14px 16px;margin:18px 0}.ny-mv .cs-ct{font-size:12px;opacity:.7;margin:0 0 4px}.ny-mv h4{margin:0 0 6px;font-size:17px}.ny-mv .cs-sum{margin:0 0 12px;font-size:14px;opacity:.85;line-height:1.6}' +
+    '.mv-pick{position:relative;margin:auto 0;padding:0 20px;max-height:calc(100% - 80px);overflow:auto}.mv-pick h5{margin:0 0 14px;font-size:20px;text-align:center}.mv-pick p.mv-pl{margin:14px 0 8px;font-size:13px;opacity:.75}' +
+    '.mv-chips{display:flex;flex-wrap:wrap;gap:8px}.mv-chips button{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:9px 14px;font:inherit;font-size:14px;cursor:pointer}' +
+    '.mv-chips button[aria-pressed="true"]{background:#fff;color:#111;border-color:#fff;font-weight:700}' +
+    '.mv-go{display:block;width:100%;margin:22px 0 8px;background:#fff;color:#111;border:0;border-radius:999px;padding:14px;font:inherit;font-size:16px;font-weight:700;cursor:pointer}.mv-note{font-size:12px;opacity:.6;text-align:center;line-height:1.6;margin:0}' +
+    '.mv-end{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:18px 18px 26px;background:linear-gradient(180deg,rgba(7,8,11,0),rgba(7,8,11,.92) 30%);display:flex;flex-direction:column;gap:10px}' +
+    '.mv-end button,.mv-end a{display:block;text-align:center;text-decoration:none;border:0;border-radius:999px;padding:13px;font:inherit;font-size:15px;font-weight:700;cursor:pointer}.mv-end .mv-b1{background:#fff;color:#111}.mv-end .mv-b2{background:rgba(255,255,255,.14);color:#fff}' +
+    '.mv-end .mv-prog{height:6px;background:rgba(255,255,255,.2);border-radius:6px;overflow:hidden}.mv-end .mv-prog span{display:block;height:100%;width:0;background:#fff;transition:width .3s}.mv-end small{opacity:.7;text-align:center;line-height:1.5}' +
     '.ny-mv .chipbtn{border:1px solid currentColor;background:transparent;color:inherit;border-radius:999px;padding:8px 16px;font:inherit;cursor:pointer}';
   function injectCss() { if (document.getElementById('mv-css')) return; var s = document.createElement('style'); s.id = 'mv-css'; s.textContent = CSS; document.head.appendChild(s); }
   function fmt(ms) { var s = Math.max(0, Math.floor(ms / 1000)); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
@@ -97,16 +106,22 @@
     if (!preview) return;
     injectCss(); close();
     var el = document.createElement('div'); el.className = 'mv-sheet'; el.id = 'mv-sheet'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', '내 사주 뮤직비디오');
-    el.innerHTML = '<div class="mv-stage"></div><div class="mv-top"><b>' + escH(preview.title) + '<small>내 사주 뮤직비디오 · ' + escH(preview.topicKo) + '</small></b><button type="button" class="mv-x" aria-label="닫기">✕</button></div>' +
-      '<div class="mv-wait"><div class="mv-spin"></div><p>내 사주로 고른 가사로 노래를 만들고 있어요.<br>처음 한 번은 1~2분쯤 걸려요. 다음부터는 바로 열려요.</p>' + (preview.lyrics ? '<div class="mv-pre">' + escH(preview.lyrics.replace(/^\[.*\]$/gm, '').replace(/\n{3,}/g, '\n\n').trim()) + '</div>' : '') + '</div>';
+    el.innerHTML = '<div class="mv-stage"></div><div class="mv-top"><b>' + escH(preview.title) + '<small>내 사주 뮤직비디오 · ' + escH(preview.topicKo) + '</small></b><button type="button" class="mv-x" aria-label="닫기">✕</button></div>';
     document.body.appendChild(el); document.documentElement.style.overflow = 'hidden';
     var stage = el.querySelector('.mv-stage'); stage.innerHTML = '<i class="on" style="background-image:' + bgFor(preview.sections[0], null).replace(/"/g, '&quot;') + '"></i>';
     el.querySelector('.mv-x').onclick = close;
     var alive = true, tries = 0; el._stop = function () { alive = false; };
     var track = o.track || function () { };
     track('mv_open', { topic: preview.topic });
-    var body = JSON.stringify(ny ? { topic: 'newyear', birth: o.birth, year: o.year } : { sd: compactSd(o.sd), topic: preview.topic });
-    (function req() {
+    // 먼저 장르·분위기·보컬을 고른다(사용자 요청 2026-11-20). 고른 값은 이 기기에 기억해 다음에 미리 골라 둔다
+    pick(el, preview, o, function (opts) {
+      track('mv_opts', { topic: preview.topic, genre: opts.genre, mood: opts.mood, vocal: opts.vocal });
+      var wait = document.createElement('div'); wait.className = 'mv-wait';
+      wait.innerHTML = '<div class="mv-spin"></div><p>내 사주로 고른 가사로 노래를 만들고 있어요.<br>처음 만드는 조합은 1~2분쯤 걸려요. 같은 조합은 다음부터 바로 열려요.</p>' + (preview.lyrics ? '<div class="mv-pre">' + escH(preview.lyrics.replace(/^\[.*\]$/gm, '').replace(/\n{3,}/g, '\n\n').trim()) + '</div>' : '');
+      el.appendChild(wait);
+      request(JSON.stringify(ny ? { topic: 'newyear', birth: o.birth, year: o.year, opts: opts } : { sd: compactSd(o.sd), topic: preview.topic, opts: opts }));
+    });
+    function request(body) { el._body = body; el._reopen = function () { open(o); }; (function req() {
       if (!alive) return;
       root.fetch('/api/music-video', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, (o.headers && o.headers()) || {}), body: body })
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._s = r.status; return d; }); })
@@ -115,11 +130,29 @@
           if (d._s === 202 && d.pending && tries++ < 30) { setTimeout(req, 8000); return; }   // 같은 곡을 다른 기기에서 만드는 중
           if (d.ok && d.audio && d.song) { play(el, d, track); if (d.fill) fillPanels(el, d, body, o.headers); else if (d.videosPending) pollVideos(el, d, body, o.headers); return; }
           if (d._s === 401 || d._s === 402) { close(); if (o.onLocked) o.onLocked(d.error === 'login' ? 'login' : 'purchase'); return; }
-          fail(el, d._s === 429 ? '오늘 만들 수 있는 노래가 모두 찼어요. 내일 다시 열어 주세요.' : d._s === 403 ? '이 주제에서는 뮤직비디오를 열 수 없어요.' : d._s === 409 ? '이 괘의 풀이를 다듬는 중이에요. 준비되면 바로 들을 수 있어요.' + (d.detail ? '\n(' + d.detail + ')' : '') : '노래를 만들지 못했어요. 잠시 뒤 다시 열어 주세요.' + (d.detail ? '\n\n[관리자에게만 보임] ' + d.detail : ''), d._s >= 500);   // detail 은 서버가 관리자 요청에만 담는다
+          fail(el, d._s === 429 && d.error === 'per-saju-limit' ? '오늘은 이 사주로 새 노래를 ' + (d.limit || 3) + '곡까지 만들 수 있어요.\n이미 만든 조합(장르·분위기·보컬)은 지금도 바로 열려요.' : d._s === 429 ? '오늘 만들 수 있는 노래가 모두 찼어요. 내일 다시 열어 주세요.' : d._s === 403 ? '이 주제에서는 뮤직비디오를 열 수 없어요.' : d._s === 409 ? '이 괘의 풀이를 다듬는 중이에요. 준비되면 바로 들을 수 있어요.' + (d.detail ? '\n(' + d.detail + ')' : '') : '노래를 만들지 못했어요. 잠시 뒤 다시 열어 주세요.' + (d.detail ? '\n\n[관리자에게만 보임] ' + d.detail : ''), d._s >= 500);   // detail 은 서버가 관리자 요청에만 담는다
           track('mv_error', { topic: preview.topic, status: d._s });
         })
         .catch(function () { if (alive) fail(el, '연결이 끊겼어요. 잠시 뒤 다시 열어 주세요.', true); });
-    })();
+    })(); }
+  }
+  /* 옵션 고르기 화면: 장르·분위기·보컬. 장르 '내 사주 추천' 은 일간 오행 장르, 보컬 '사주대로' 는 사주 성별 */
+  var OPT_KEY = 'mv:opts';
+  function pick(el, preview, o, go) {
+    var lib = L(), O = lib.OPTIONS, saved = {}; try { saved = JSON.parse(root.localStorage.getItem(OPT_KEY) || '{}') || {}; } catch (e) { saved = {}; }
+    var cur = lib.optsOf(saved), el0 = preview.inputs && preview.inputs.el, g0 = preview.gender || (o.birth && o.birth.gender);
+    var label = function (k, x) {
+      if (k === 'genre' && x.id === 'auto' && el0) return '내 사주 추천 · ' + (O.genre.filter(function (y) { return y.id === lib.EL_GENRE[el0]; })[0] || {}).ko;
+      if (k === 'vocal' && x.id === 'auto' && (g0 === 'F' || g0 === 'M')) return '사주대로 · ' + (g0 === 'F' ? '여성' : '남성');
+      return x.ko;
+    };
+    var box = document.createElement('div'); box.className = 'mv-pick';
+    var group = function (k, title) { return '<p class="mv-pl">' + title + '</p><div class="mv-chips" data-k="' + k + '">' + O[k].map(function (x) { return '<button type="button" data-v="' + x.id + '" aria-pressed="' + (cur[k] === x.id) + '">' + escH(label(k, x)) + '</button>'; }).join('') + '</div>'; };
+    box.innerHTML = '<h5>어떤 느낌으로 만들까요?</h5>' + group('genre', '장르') + group('mood', '분위기') + group('vocal', '보컬') +
+      '<button type="button" class="mv-go">이 느낌으로 뮤직비디오 만들기</button><p class="mv-note">가사는 내 사주 그대로예요. 같은 조합은 다음부터 바로 열리고,<br>새 조합은 하루에 몇 곡까지만 만들 수 있어요.</p>';
+    box.querySelectorAll('.mv-chips').forEach(function (g) { g.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; cur[g.dataset.k] = b.dataset.v; g.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); }); }); });
+    box.querySelector('.mv-go').onclick = function () { try { root.localStorage.setItem(OPT_KEY, JSON.stringify(cur)); } catch (e) { } box.remove(); go(lib.optsOf(cur)); };
+    el.appendChild(box);
   }
   function fail(el, msg, retry) {
     var w = el.querySelector('.mv-wait'); if (w) w.remove();
@@ -210,11 +243,11 @@
     }
     function setPP() { pp.textContent = audio.paused ? '▶' : '❚❚'; pp.setAttribute('aria-label', audio.paused ? '재생' : '일시정지'); }
     pp.onclick = function () { if (audio.paused) audio.play().catch(function () { }); else audio.pause(); };
-    audio.addEventListener('play', function () { setPP(); root.cancelAnimationFrame(raf); raf = root.requestAnimationFrame(tick); });
+    audio.addEventListener('play', function () { var eb = el.querySelector('.mv-end'); if (eb && !eb._file && !eb.querySelector('[data-a="cancel"]')) eb.remove(); setPP(); root.cancelAnimationFrame(raf); raf = root.requestAnimationFrame(tick); });
     audio.addEventListener('pause', function () { setPP(); tick(); stage.querySelectorAll('video[data-v]').forEach(function (v) { v.pause(); }); });
     audio.addEventListener('playing', function () { if (lastSec >= 0) showVid(lastSec); });
     audio.addEventListener('timeupdate', tick); audio.addEventListener('seeked', tick);   // 탭이 뒤로 가 rAF 가 멈춰도 자막·패널이 따라온다
-    audio.addEventListener('ended', function () { setPP(); if (!done) { done = true; track('mv_done', { topic: song.topic }); } });
+    audio.addEventListener('ended', function () { setPP(); if (!done) { done = true; track('mv_done', { topic: song.topic }); } endScreen(el, d, track, function () { audio.currentTime = 0; audio.play().catch(function () { }); }); });
     audio.addEventListener('error', function () { fail(el, '노래 파일을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.'); });
     function seek(x) { var r = bar.getBoundingClientRect(), f = Math.max(0, Math.min(1, (x - r.left) / r.width)); if (isFinite(audio.duration)) { audio.currentTime = f * audio.duration; tick(); } }
     bar.addEventListener('click', function (e) { seek(e.clientX); });
@@ -222,8 +255,57 @@
     tick(); audio.play().catch(function () { setPP(); });   // 자동 재생이 막히면 ▶ 를 누르게 둔다
     track('mv_ready', { topic: song.topic });
   }
+  /* 끝 화면(사용자 요청 2026-11-20): 끝까지 본 뒤에 SNS 업로드용 MP4(세로 9:16)를 저장할 수 있다. MP4 는 이 기기에서 만든다(music-video-export.js) */
+  function loadScript(src) { return new Promise(function (ok, no) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = function () { no(new Error('스크립트를 불러오지 못했습니다')); }; document.head.appendChild(s); }); }
+  var exportLibs = null;
+  function loadExport() {
+    if (!exportLibs) exportLibs = Promise.all([root.Mp4Muxer ? 0 : loadScript(BASE + 'vendor/mp4-muxer-5.1.5.js'), R.MusicVideoExport ? 0 : loadScript(BASE + 'music-video-export.js?v=20261120-mv')]).catch(function (e) { exportLibs = null; throw e; });
+    return exportLibs;
+  }
+  function endScreen(el, d, track, replay) {
+    if (el.querySelector('.mv-end')) return;
+    var box = document.createElement('div'); box.className = 'mv-end';
+    var base = function () {
+      box.innerHTML = '<button type="button" class="mv-b1" data-a="mp4">⬇ MP4로 저장 (세로 9:16 · SNS용)</button>' +
+        '<button type="button" class="mv-b2" data-a="again">↺ 처음부터 다시 보기</button><button type="button" class="mv-b2" data-a="opts">🎚 다른 느낌으로 다시 만들기</button>';
+    };
+    base(); el.appendChild(box);
+    var sig = null;
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-a]'); if (!b) return; var a = b.dataset.a;
+      if (a === 'again') { box.remove(); replay(); return; }
+      if (a === 'opts') { if (el._reopen) el._reopen(); return; }
+      if (a === 'cancel') { if (sig) sig.cancel = true; return; }
+      if (a === 'mp4') {
+        sig = { cancel: false };
+        box.innerHTML = '<small class="mv-st">MP4 준비 중…</small><div class="mv-prog"><span></span></div><button type="button" class="mv-b2" data-a="cancel">그만두기</button>';
+        var st = box.querySelector('.mv-st'), bar = box.querySelector('.mv-prog span');
+        track('mv_export_start', { topic: d.song.topic });
+        loadExport().then(function () {
+          if (!R.MusicVideoExport.canExport()) throw new Error('unsupported');
+          return R.MusicVideoExport.make({ song: d.song, panels: d.panels || {}, audio: d.audio, signal: sig, onProgress: function (p, msg) { bar.style.width = Math.round(p * 100) + '%'; st.textContent = msg; } });
+        }).then(function (file) {
+          track('mv_export_done', { topic: d.song.topic, mb: Math.round(file.size / 1048576) });
+          var url = URL.createObjectURL(file), canShare = false; try { canShare = !!(root.navigator.canShare && root.navigator.canShare({ files: [file] })); } catch (x) { }
+          box.innerHTML = '<a class="mv-b1" href="' + url + '" download="' + escH(file.name) + '">⬇ MP4 저장하기 (' + (file.size / 1048576).toFixed(1) + 'MB)</a>' +
+            (canShare ? '<button type="button" class="mv-b2" data-a="share">↗ 바로 공유하기</button>' : '') +
+            '<small>세로 9:16 · 1080×1920 — 인스타그램 릴스·틱톡·유튜브 쇼츠에 그대로 올릴 수 있어요.</small><button type="button" class="mv-b2" data-a="again">↺ 처음부터 다시 보기</button>';
+          box._file = file;
+        }).catch(function (err) {
+          var m = err && err.message;
+          if (m === 'cancel') { base(); return; }
+          track('mv_export_fail', { topic: d.song.topic, reason: String(m || '').slice(0, 60) });
+          box.innerHTML = '<small>' + (m === 'unsupported' ? '이 브라우저에서는 MP4를 만들 수 없어요. 크롬(PC·안드로이드) 또는 최신 사파리에서 다시 열어 주세요.' : 'MP4를 만들지 못했어요. 잠시 뒤 다시 시도해 주세요.') + '</small>';
+          var again = document.createElement('div'); again.innerHTML = '<button type="button" class="mv-b2" data-a="again">↺ 처음부터 다시 보기</button>'; box.appendChild(again.firstChild);
+        });
+        return;
+      }
+      if (a === 'share' && box._file) { root.navigator.share({ files: [box._file], title: d.song.title }).catch(function () { }); }
+    });
+  }
   function close() {
     var el = document.getElementById('mv-sheet'); if (!el) return;
+    var en = el.querySelector('.mv-end'); if (en && en.querySelector('[data-a="cancel"]')) en.querySelector('[data-a="cancel"]').click();   // 만들던 MP4 는 멈춘다
     if (el._stop) el._stop(); if (el._audio) { try { el._audio.pause(); el._audio.src = ''; } catch (e) { } }
     el.parentNode.removeChild(el); document.documentElement.style.overflow = '';
   }

@@ -167,5 +167,19 @@ if (process.argv.includes('--show')) for (const t of ['love', 'newyear']) { cons
   }
   assert(seenDays.size >= 50, '검사한 곡의 일주 종류 ' + seenDays.size);
   assert.equal(L.heroOf('경오', 'F').motifKo, '달리는 말 위에 빛나는 쇠의 결');
-  console.log('일주 ok: 60갑자 마무리 대목 120줄, 곡 ' + songs.length + '개에서 일주 ' + seenDays.size + '종 확인');
+  // 사용자 옵션: auto 는 예전 곡과 같고, 장르·분위기·보컬마다 스타일이 갈리며, 모르는 값은 auto
+{ const sd0 = ReportV2.SajuData.build(Manse.compute({ year: 1993, month: 8, day: 9, hour: 7, minute: 0, gender: 'F', calendar: 'solar', city: '서울' }), { now });
+  const x0 = L.inputsOf(sd0, 'love'), base = L.fromInputs(x0);
+  const same = L.fromInputs(Object.assign({}, x0, { opt: { genre: 'auto', mood: 'zzz', vocal: 'Q' } })); assert.equal(same.lyrics, base.lyrics); assert.deepEqual(same.style, base.style);
+  const styles = new Set();
+  for (const gn of L.OPTIONS.genre) for (const md of L.OPTIONS.mood) for (const vc of L.OPTIONS.vocal) {
+    const s2 = L.fromInputs(Object.assign({}, x0, { opt: { genre: gn.id, mood: md.id, vocal: vc.id } }));
+    styles.add(JSON.stringify(s2.style)); assert.equal(s2.sections[0].panel, base.sections[0].panel, '보컬을 바꿔도 패널 칸은 그대로');
+    const vg = vc.id === 'auto' ? 'F' : vc.id; assert(s2.style.includes(vg === 'F' ? 'female rapper' : 'male rapper') && /\d{2,3} bpm/.test(s2.style.join(' ')));
+    assert(s2.optKo && !/undefined/.test(s2.optKo)); assert.deepEqual(L.bannedIn(s2.lyrics), []);
+  }
+  assert.equal(styles.size, (L.OPTIONS.genre.length - 1) * L.OPTIONS.mood.length * (L.OPTIONS.vocal.length - 1), '장르 auto = 오행 추천 장르, 보컬 auto = 사주 성별과 같은 곡 — 나머지 조합은 모두 다름');
+  const m = L.fromInputs(Object.assign({}, x0, { opt: { vocal: 'M' } })); assert(/\(king, peace out\)$/.test(m.sections[6].lines[3]), '남성 보컬이면 추임새도 king');
+  console.log('옵션 ok: 장르 ' + L.OPTIONS.genre.length + ' × 분위기 ' + L.OPTIONS.mood.length + ' × 보컬 ' + L.OPTIONS.vocal.length + ', 서로 다른 스타일 ' + styles.size + '가지'); }
+console.log('일주 ok: 60갑자 마무리 대목 120줄, 곡 ' + songs.length + '개에서 일주 ' + seenDays.size + '종 확인');
 }
