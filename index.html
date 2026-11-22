@@ -401,6 +401,9 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 @media (max-width: 620px) { .now { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; } .now .nowc { padding: 8px 6px; border-radius: 12px; gap: 1px; } .now .nowc .gzb { font-size: 1.12rem; } .now .nowc .tgs { font-size: 0.66rem; } .now .nowc > span:last-child { font-size: 0.66rem; line-height: 1.3; } .now .nowc > span:last-child .muted { display: block; } .now .nowc > span:last-child > :not(.muted) { font-size: 0.6rem; padding: 0 4px; margin: 1px 1px 0 0; line-height: 1.5; } }
 .nowc { border: 0; box-shadow: inset 0 0 0 1px var(--line); border-radius: 16px; padding: 10px 12px; display: grid; gap: 2px; cursor: pointer; text-align: left; background: var(--surface); }
 .nowc:hover { box-shadow: inset 0 0 0 2px var(--accent); }
+.now-care { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 10px; padding: 9px 12px; border-radius: 12px; background: color-mix(in srgb, var(--sg-care) 8%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sg-care) 30%, transparent); }
+.now-care .k { font-size: 0.8rem; font-weight: 800; color: color-mix(in srgb, var(--sg-care) 75%, var(--ink)); }
+.now-care .v { display: flex; flex-wrap: wrap; gap: 5px; } .now-care .nc-chip.strong { box-shadow: 0 0 0 2px color-mix(in srgb, var(--sg-care) 45%, transparent); } .now-care .nc-n { flex-basis: 100%; font-size: 0.72rem; }
 .nowc .lbl { font-size: 0.74rem; color: var(--ink-3); font-weight: 600; }
 .nowc .gzb { font-family: var(--f-display); font-weight: 900; font-size: 1.5rem; line-height: 1.15; }
 .nowc .tgs { font-size: 0.76rem; color: var(--ink-2); }
@@ -8251,6 +8254,17 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const tail = u.mode === 'jong' ? '그래서 이 사주는 강약(억부) 기준을 쓰지 않고, 운이 따르는 세력을 유지시키는지·깨는지로 읽습니다.' : '그래서 같은 시기에도 좋은 점과 조심할 점이 함께 보일 수 있습니다. 각 시기 해석의 "기준에 따라 달라지는 점"에 어느 기준으로 본 말인지 적어 두었습니다.';
     return `<p class="small" style="margin:2px 0 8px"><b>${esc(u.headline || '')}</b><br>${esc(u.summary)}${jongMaybe ? ' 종격 가능성도 있어, 종격으로 확인되면 판단이 반대가 될 수 있습니다.' : ''} ${tail}</p>`;
   }
+  // 오늘 일진 지표별 조심 신호(2026-11-22): 그래프 지표(연애·재물·건강·사고수 + 세부 12개)마다 오늘 일진 등급이 '조심'이면 모두 띄운다.
+  //  전체 흐름 등급(좋음·무난·조심)과 상관없이 지표별로 본다. 누르면 그 지표 그래프로 바뀐다. 분포 끝(하위 10%)은 굵게.
+  function ilCareLine(il) {
+    if (!il) return '';
+    let r; try { r = domOf(il, 'ilun'); } catch (e) { return ''; }
+    const hits = [...DOM_ORDER, ...DOM_SUB].filter(k => k !== 'windfall').map(k => {   /* 횡재운이 낮은 건 '뜻밖의 수입이 적다'는 뜻이라 빼고, 손실 쪽(재물손실 위험)만 본다 */ const x = r[k]; if (!x || x.score == null) return null; const g = sigMetric(k, x.score); return g.k === 'care' ? { k, v: x.score, strong: sigStrong(x.score, k) } : null; }).filter(Boolean);
+    const loss = r.windfall && r.windfall.loss; if (loss && sigMetric('windfallLoss', loss.score).k === 'care') hits.push({ k: 'windfall', v: loss.score, strong: sigStrong(loss.score, 'windfallLoss'), name: '재물손실 위험' });
+    const nm = h => h.name || (h.k === 'accident' ? '사고수' : DOM_INFO[h.k].full);
+    const body = hits.length ? hits.map(h => `<button type="button" class="sgchip nc-chip${h.strong ? ' strong' : ''}" style="${sgVars(SIG[2])};border:0;cursor:pointer" data-act="metric:${h.k}" title="${esc(nm(h) + ' ' + h.v + ' · 이 사주의 평소 수준보다 불리한 쪽' + (h.strong ? '(가장 불리한 10%)' : ''))}">${esc(nm(h))} ${h.v}</button>`).join('') : '<span class="muted small">오늘 일진에서 조심 신호가 뜬 지표는 없습니다.</span>';
+    return `<div class="now-care"><span class="k">오늘 일진 조심 신호</span><span class="v">${body}</span>${hits.length ? '<span class="muted small nc-n">달력의 좋음·무난·조심(전체 흐름)과 따로, 지표마다 이 사주의 평소 수준보다 불리한 쪽(가장 불리한 30%)이면 띄웁니다. 사고수·재물손실 위험은 높을수록 불리합니다. 누르면 그 지표 그래프로 바뀝니다.</span>' : ''}</div>`;
+  }
   function renderLuck() {
     const ch = S.ch;
     const du = M.daeunAt(ch, NOW);
@@ -8288,7 +8302,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         ${nowCard('seun', term('세운'), se, `${curY}`)}
         ${nowCard('wolun', term('월운'), curM, curM.termName + '~')}
         ${nowCard('ilun', term('일운'), il, '오늘')}
-      </div>${nowDetail}
+      </div>${ilCareLine(il)}${nowDetail}
     </section>
     ${metricBar()}
     ${eraCardHTML(ch)}

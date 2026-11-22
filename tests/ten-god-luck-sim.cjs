@@ -47,7 +47,7 @@ const hub = code('report/hub/hub-timeline.js'), sj = code('report/hub/hub-saju.j
 assert.ok(!/it\.six|L\.NAMES|L\.MEANING|sixCopy\(it|기회 · 확장|변동 · 방어|방어 신호/.test(hub), '타임라인 6분류 표시 제거');
 assert.ok(/MantraTenGodLuck/.test(hub) && /TGM\.copy\(tg\.label, lvl\)/.test(hub), '타임라인 십신 문안');
 assert.ok(rd('report/hub/index.html').includes('/ten-god-luck.js'), '허브 스크립트');
-assert.ok(!/'기회'|'방어운'|방어 부담도|주 흐름|names\[assess|names\[state\.key/.test(sj) && /fk\(x\)/.test(sj), '허브 캘린더 십신(옛 6분류 이름표 names[key] 사용 없음)');
+assert.ok(!/'기회'|'방어운'|방어 부담도|주 흐름|names\[assess|names\[state\.key/.test(sj) && /flow-tg-'\+\(TGK\[x\.stemTG\]/.test(sj) && /mg-'\+assess\(x\)\.grade\.k/.test(sj), '허브 캘린더 십신 글자(십성 묶음 색)·칸 색은 등급(2026-11-21), 옛 6분류 이름표 names[key] 사용 없음');
 assert.ok(!/notes: note,\s*\/\//.test(rd('report/hub/free-core.js')), 'free-core 한 줄 중간 주석 없음(뒤 값이 지워짐)');
 // 오늘의 운세 문장 조각(free-core DAILY_DEFAULTS): 키가 십신 10개, 옛 6분류 키 없음
 { const fc = { console }; fc.window = fc; vm.createContext(fc); vm.runInContext(rd('report/hub/free-core.js'), fc); const D = fc.FreeCore ? fc.FreeCore.DAILY_DEFAULTS : (Object.values(fc).find(v => v && v.DAILY_DEFAULTS) || {}).DAILY_DEFAULTS;
