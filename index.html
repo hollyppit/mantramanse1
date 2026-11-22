@@ -9904,8 +9904,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <dt>건물 방위</dt><dd>${rec && rec.azimuth != null ? rec.azimuth + '° (' + esc(rec.referenceLabel) + ')' + (ms.mountain ? ' · 24산 ' + esc(ms.mountain.hanja) : '') + ' — 이 수에 해당하는지는 판정하지 않음(나경 대응표 미확정)' : '향 미입력'}</dd>
       <dt>이름·배속 출전</dt><dd>${esc(m.source)}</dd><dt>데이터 버전</dt><dd>${esc(MD.VERSION)}${p ? ' · ' + esc(p.id) : ''}</dd></dl></div>`;
   }
-  // 출처 경고(2026-11-21 문헌 검증 단계): 28수 자료는 전산 텍스트로만 확인했고 원본 판본(영인본)과는 아직 대조하지 않았다. 자세한 단계는 docs/MANSIONS_VERIFICATION_REPORT.md
-  const MS_SRC_WARN = '<p class="ms-warn small" role="note"><b>출처 안내</b> — 이 28수 자료는 고전 원문의 <b>전산 텍스트</b>(위키문헌·사고전서 전산본)를 기준으로 했으며, <b>원본 판본(영인본)과는 아직 대조하지 않았습니다.</b> 판본 검증이 끝날 때까지 참고용으로만 봐 주세요.</p>';
+  // 출처 경고(2026-11-22 갱신): 협기변방서 卷1·卷36·후한서 卷13은 사고전서 영인본 원본 면과 대조함(edition_verified). 다른 판본 교차·옥갑기 판본 확인은 미완. 자세한 단계는 docs/MANSIONS_VERIFICATION_REPORT.md
+  const MS_SRC_WARN = '<p class="ms-warn small" role="note"><b>출처 안내</b> — 이 28수 자료는 고전 원문의 <b>전산 텍스트</b>(위키문헌·사고전서 전산본)를 기준으로 했습니다. 날짜 배속·복단(伏斷)·적도 도수표는 사고전서 영인본 원본 면과 대조했지만, <b>다른 판본과의 교차 확인과 택일 길흉 노래(옥갑기)의 판본 확인은 아직 끝나지 않았습니다.</b> 검증이 끝날 때까지 참고용으로만 봐 주세요.</p>';
   function spMansionProfiles(ms) {
     const lab = s => s === 'verified' ? '<span class="sp-g">사용(전산 확인)</span>' : s === 'incomplete' ? '<span class="sp-n">값 부족</span>' : '<span class="sp-n">미확정</span>';
     return `<details class="adv"><summary>도수 프로필 ${ms.profiles.length}개 · 나경 대응 프로필 ${ms.links.profiles.length}개</summary><div class="list">${ms.profiles.map(x => `<div class="li"><span class="k">${lab(x.status)}</span><span class="v small"><b>${esc(x.title)}</b>${x.isDefault ? ' · 기본' : ''}${x.profile.coordinateSystem === 'ecliptic' ? ' · 황도(비교용)' : ''}<br><span class="muted">${esc(x.profile.edition)}</span>${x.usable ? '' : '<br><span class="muted">계산에 쓰지 않는 이유: ' + esc(x.profile.statusReason || x.errors.join(', ')) + '</span>'}${(x.profile.notes || []).map(n => '<br><span class="muted">' + esc(n) + '</span>').join('')}<br><a href="${esc(x.profile.sourceUrl)}" target="_blank" rel="noopener">원문 보기</a></span><span></span></div>`).join('')}</div>
