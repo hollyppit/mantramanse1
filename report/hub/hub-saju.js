@@ -106,6 +106,19 @@
       return { score: clamp((fit + 100) / 2), fit: fit, burden: burden, cautious: cautious, grade: grade, key: cautious ? 'defense' : f.primaryFlow };
     }
   };
+  // 일진 조심 신호(2026-11-22): 만세력 '지금의 운'과 같은 공용 계산(/luck-care.js). 선택한 날(기본 오늘) 지표마다 조심이면 무엇을 조심할지 한 줄씩. 전체 흐름 등급과 상관없이
+  var CRP = null;
+  function careReady() {
+    if (CRP) return CRP;
+    var V = '?v=20261122-care';
+    CRP = ['/luck-grade.js', '/health-body.js', '/accident-hint.js', '/luck-care.js'].reduce(function (pr, u) { return pr.then(function () { if (document.querySelector('script[src^="' + u + '"]')) return; return H.load(u + V).catch(function () { }); }); }, Promise.resolve()).then(function () { return root.MantraLuckCare || null; });
+    return CRP;
+  }
+  function careBlock(M, ch, x, label) {
+    var LC = root.MantraLuckCare; if (!LC || !x) return '';
+    var hits = []; try { hits = LC.signals(M, ch, x, { names: { love: '인연운' } }); } catch (e) { return ''; }
+    return '<div class="mc-care"><p class="mc-care-k">' + esc(label) + ' 일진 조심 신호</p>' + (hits.length ? '<ul>' + hits.map(function (h) { return '<li><b class="mc-care-c' + (h.strong ? ' strong' : '') + '">' + esc(h.name) + ' ' + h.v + '</b><span>' + esc(h.why) + '</span></li>'; }).join('') + '</ul><p class="dsub">' + esc(LC.NOTE) + '</p>' : '<p class="dsub">이 날 일진에서 조심 신호가 뜬 지표는 없습니다.</p>') + '</div>';
+  }
   // 운 분석 층(2026-11-18): 만세력 일진 달력처럼 선택한 달(월운)·날(일진)에 한눈에 보기 + 오행 겹쳐 보기 — luck-layers-view.js
   var LVP = null, LVF = null;
   function lvReady() {
@@ -175,7 +188,7 @@
       if (activeMonth) h += '<p class="mc-month-note">선택한 날의 월운: ' + esc(activeMonth.termName) + ' · ' + esc(tgn(activeMonth)) + ' · ' + esc(assess(activeMonth).grade.n) + ' · 적합도 ' + score(activeMonth) + ' · 부담도 ' + assess(activeMonth).burden + '<br>' + esc((!assess(activeMonth).cautious && root.MantraTenGodLuck && root.MantraTenGodLuck.copy(activeMonth.stemTG, 'wolun') ? root.MantraTenGodLuck.copy(activeMonth.stemTG, 'wolun').do : '') || {opportunity:'새로운 연락과 작은 시도를 시작해 보세요.',expansion:'하던 일을 넓히되 감당할 수 있는 범위를 정하세요.',harvest:'결과를 정리하고 마무리할 일을 챙겨 보세요.',accumulation:'배우고 준비하면서 다음 단계의 기반을 다져 보세요.',defense:'새로운 확장보다 일정의 여유, 지출과 약속의 재확인을 우선하세요.'}[assess(activeMonth).key]) + '</p>';
       var pm = picked ? M.wolun(ch,y-1).concat(months, M.wolun(ch,y+1)).filter(function (x) { var dt = new Date(x.startMs+9*3600e3); return dt.getUTCFullYear()+'-'+(dt.getUTCMonth()+1) === picked; })[0] : null, lm = pm || activeMonth;
       if (lm) h += lvBlock(ch, lm, 'wolun', (pm ? '' : '선택한 날의 ') + '월운 ' + M.gzName(lm) + ' · ' + lm.termName + ' 이후', '', 'mc-lv-month');
-      h += '<section class="fortune-panel"><div class="mc-nav"><button type="button" data-nav="-1" aria-label="이전 달">‹</button><h2>'+y+'년 '+m+'월 일진 캘린더</h2><button type="button" data-nav="1" aria-label="다음 달">›</button></div><div class="fc-controls"><label>보기<select id="mc-purpose"><option value="">일상 흐름</option>'+['move','wedding','contract','trip','exam'].map(function (k) { return '<option value="'+k+'"'+(purpose===k?' selected':'')+'>'+esc(M.TAEK_PURPOSE[k].label)+' 택일</option>'; }).join('')+'</select></label>';
+      h += '<section class="fortune-panel"><div class="mc-nav"><button type="button" data-nav="-1" aria-label="이전 달">‹</button><h2>'+y+'년 '+m+'월 일진 캘린더</h2><button type="button" data-nav="1" aria-label="다음 달">›</button></div>'+(function () { var dl = M.ilun(ch,y,m), sx = dl[d-1]; return careBlock(M, ch, sx, (y===today.y&&m===today.mo&&d===today.d?'오늘('+m+'/'+d+')':m+'/'+d)); })()+'<div class="fc-controls"><label>보기<select id="mc-purpose"><option value="">일상 흐름</option>'+['move','wedding','contract','trip','exam'].map(function (k) { return '<option value="'+k+'"'+(purpose===k?' selected':'')+'>'+esc(M.TAEK_PURPOSE[k].label)+' 택일</option>'; }).join('')+'</select></label>';
       if (purpose) h += '<label>검색 기간<select id="mc-range">'+[30,60,90].map(function (n) { return '<option value="'+n+'"'+(range===n?' selected':'')+'>'+n+'일</option>'; }).join('')+'</select></label><label>요일<select id="mc-weekday">'+[['all','전체'],['weekday','평일'],['weekend','주말']].map(function (x) { return '<option value="'+x[0]+'"'+(weekday===x[0]?' selected':'')+'>'+x[1]+'</option>'; }).join('')+'</select></label>';
       h += '<button type="button" id="mc-today">오늘로</button></div><div class="mc-grid" role="group" aria-label="날짜 선택">'+DOW.map(function (x) { return '<span class="mc-week">'+x+'</span>'; }).join('');
       for(var i=0;i<new Date(Date.UTC(y,m-1,1)).getUTCDay();i++) h += '<span></span>';
@@ -238,6 +251,7 @@
       };
       cal.refresh();
       lvReady().then(function (V) { if (V && H.alive(ctx)) cal.refresh(); });   // 운 분석 층 모듈이 늦게 오면 다시 그린다
+      if (!root.MantraLuckCare) careReady().then(function (LC) { if (LC && H.alive(ctx)) cal.refresh(); });   // 일진 조심 신호 모듈이 늦게 오면 다시 그린다
     });
   });
 
