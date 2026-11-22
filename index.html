@@ -403,7 +403,7 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 .nowc:hover { box-shadow: inset 0 0 0 2px var(--accent); }
 .now-care { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 10px; padding: 9px 12px; border-radius: 12px; background: color-mix(in srgb, var(--sg-care) 8%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sg-care) 30%, transparent); }
 .now-care .k { font-size: 0.8rem; font-weight: 800; color: color-mix(in srgb, var(--sg-care) 75%, var(--ink)); }
-.now-care .v { display: flex; flex-wrap: wrap; gap: 5px; } .now-care .nc-chip.strong { box-shadow: 0 0 0 2px color-mix(in srgb, var(--sg-care) 45%, transparent); } .now-care .nc-n { flex-basis: 100%; font-size: 0.72rem; }
+.now-care .k { flex-basis: 100%; } .now-care .nc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; flex-basis: 100%; } .now-care .nc-list li { display: flex; gap: 8px; align-items: baseline; font-size: 0.8rem; line-height: 1.45; } .now-care .nc-chip { flex: none; } .now-care .nc-w { color: var(--ink-2); } .now-care .nc-chip.strong { box-shadow: 0 0 0 2px color-mix(in srgb, var(--sg-care) 45%, transparent); } .now-care .nc-n { flex-basis: 100%; font-size: 0.72rem; }
 .nowc .lbl { font-size: 0.74rem; color: var(--ink-3); font-weight: 600; }
 .nowc .gzb { font-family: var(--f-display); font-weight: 900; font-size: 1.5rem; line-height: 1.15; }
 .nowc .tgs { font-size: 0.76rem; color: var(--ink-2); }
@@ -8259,11 +8259,31 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function ilCareLine(il) {
     if (!il) return '';
     let r; try { r = domOf(il, 'ilun'); } catch (e) { return ''; }
-    const hits = [...DOM_ORDER, ...DOM_SUB].filter(k => k !== 'windfall').map(k => {   /* 횡재운이 낮은 건 '뜻밖의 수입이 적다'는 뜻이라 빼고, 손실 쪽(재물손실 위험)만 본다 */ const x = r[k]; if (!x || x.score == null) return null; const g = sigMetric(k, x.score); return g.k === 'care' ? { k, v: x.score, strong: sigStrong(x.score, k) } : null; }).filter(Boolean);
-    const loss = r.windfall && r.windfall.loss; if (loss && sigMetric('windfallLoss', loss.score).k === 'care') hits.push({ k: 'windfall', v: loss.score, strong: sigStrong(loss.score, 'windfallLoss'), name: '재물손실 위험' });
+    const hits = [...DOM_ORDER, ...DOM_SUB].filter(k => k !== 'windfall').map(k => { const x = r[k]; if (!x || x.score == null) return null; const g = sigMetric(k, x.score); return g.k === 'care' ? { k, x, v: x.score, strong: sigStrong(x.score, k) } : null; }).filter(Boolean);   /* 횡재운이 낮은 건 '뜻밖의 수입이 적다'는 뜻이라 빼고, 손실 쪽(재물손실 위험)만 본다 */
+    const loss = r.windfall && r.windfall.loss; if (loss && sigMetric('windfallLoss', loss.score).k === 'care') hits.push({ k: 'windfall', x: loss, v: loss.score, strong: sigStrong(loss.score, 'windfallLoss'), name: '재물손실 위험' });
     const nm = h => h.name || (h.k === 'accident' ? '사고수' : DOM_INFO[h.k].full);
-    const body = hits.length ? hits.map(h => `<button type="button" class="sgchip nc-chip${h.strong ? ' strong' : ''}" style="${sgVars(SIG[2])};border:0;cursor:pointer" data-act="metric:${h.k}" title="${esc(nm(h) + ' ' + h.v + ' · 이 사주의 평소 수준보다 불리한 쪽' + (h.strong ? '(가장 불리한 10%)' : ''))}">${esc(nm(h))} ${h.v}</button>`).join('') : '<span class="muted small">오늘 일진에서 조심 신호가 뜬 지표는 없습니다.</span>';
-    return `<div class="now-care"><span class="k">오늘 일진 조심 신호</span><span class="v">${body}</span>${hits.length ? '<span class="muted small nc-n">달력의 좋음·무난·조심(전체 흐름)과 따로, 지표마다 이 사주의 평소 수준보다 불리한 쪽(가장 불리한 30%)이면 띄웁니다. 사고수·재물손실 위험은 높을수록 불리합니다. 누르면 그 지표 그래프로 바뀝니다.</span>' : ''}</div>`;
+    // 무엇을 조심할지: 지표가 만든 요약·근거를 짧게. 건강은 부위(health-body.js), 사고수는 장면(accident-hint.js), 재물은 손실 신호
+    const cut = t => String(t || '').replace(/\s*\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
+    // 근거 문장 쉬운 말: '합충형파해 긴장 85 — 업무 안정성 하락 요인' → '부딪히는 글자가 많아 업무 안정성 쪽이 흔들리기 쉬워요'
+    const easy = t => { t = cut(t); let m;
+      if ((m = /^합충형파해 긴장 \d+(?: 누적)? — (.+?)(?: 하락 요인| 요인)?$/.exec(t))) { const x = m[1]; return '부딪히는 글자가 많아 ' + (/안정성$/.test(x) ? x + ' 쪽이 흔들리기 쉬워요' : /쉬운$/.test(x) ? x.replace(/쉬운$/, '쉬워요') : x + ' 쪽을 조심할 때예요'); }
+      if ((m = /^변동성 \d+ — (.+)$/.exec(t))) return '변화가 큰 날이라 ' + m[1];
+      return t.replace(/ — /, ': '); };
+    // 같은 이유가 여러 지표에 반복되면 지표 고유 이유를 먼저 쓴다(긴장·변동성 일반 문장은 뒤로)
+    // 조심할 이유만 고른다: 부정 신호(충·형·긴장·하락·어긋남·마찰·경쟁·손실…)가 있는 문장 중 지표 고유 문장 → 일반 긴장·변동 문장 순. 좋은 쪽 문장(늘어남·개선·결속)은 쓰지 않는다
+    const NEG = /충|형|파|해|원진|긴장|하락|어긋|부담|마찰|말조심|구설|경쟁|분산|약해|약하|흔들|손실|지출|변동|움직|낮아|떨어/, POS = /개선|완화|결속 신호|받쳐|보완|늘어납니다(?!.*경쟁)/;
+    const pickReason = rs => { const neg = rs.filter(t => NEG.test(t) && !POS.test(t)); return neg.find(t => !/^합충형파해 긴장|^변동성 \d/.test(t)) || neg[0] || ''; };
+    const plain = t => !t || /뚜렷한 쏠림이 없는|대체로 안정적인/.test(t);
+    const why = h => {
+      const x = h.x, rs = (x.reasons || []).filter(t => !/^원국 적합도|통합 용신 기준 보완/.test(t));
+      if (h.k === 'health') { try { const hb = window.MantraHealthBody && window.MantraHealthBody.read(M, S.ch, il, 'ilun'); const it = hb && hb.items.filter(i => i.level === '주의').slice(0, 2); if (it && it.length) return '살펴볼 부위: ' + it.map(i => (i.focus && i.focus[0] ? i.focus[0].organ + '(' + i.focus[0].glyph + ')' : i.organ) + ' — ' + i.body.split(',').slice(0, 2).join(',')).join(' · '); } catch (e) { } }
+      if (h.k === 'accident') { try { const ah = window.MantraAccidentHint && window.MantraAccidentHint.read(M, S.ch, il, 'ilun', x.score); const it = ah && ah.items.slice(0, 2); if (it && it.length) return it.map(i => i.title + (i.where ? ' (' + i.where.split(',').slice(0, 2).join(',') + ')' : '')).join(' · ') + (it[0].tip ? ' — ' + it[0].tip : ''); } catch (e) { } }
+      if (h.k === 'wealth' && loss && loss.score >= LOSS_ON()) return '손실 신호: ' + loss.summary;
+      const head = plain(x.summary) ? '' : x.summary, rr = pickReason(rs);
+      return head && rr ? head + ' (' + easy(rr) + ')' : head || (rr ? easy(rr) : '');
+    };
+    const body = hits.length ? '<ul class="nc-list">' + hits.map(h => '<li><button type="button" class="sgchip nc-chip' + (h.strong ? ' strong' : '') + '" style="' + sgVars(SIG[2]) + ';border:0;cursor:pointer" data-act="metric:' + h.k + '" title="' + esc(nm(h) + ' 그래프 보기') + '">' + esc(nm(h)) + ' ' + h.v + '</button><span class="nc-w">' + esc(why(h)) + '</span></li>').join('') + '</ul>' : '<span class="muted small">오늘 일진에서 조심 신호가 뜬 지표는 없습니다.</span>';
+    return '<div class="now-care"><span class="k">오늘 일진 조심 신호</span>' + body + (hits.length ? '<span class="muted small nc-n">달력의 좋음·무난·조심(전체 흐름)과 따로, 지표마다 이 사주의 평소 수준보다 불리한 쪽(가장 불리한 30%)이면 띄웁니다. 사고수·재물손실 위험은 높을수록 불리합니다. 이름을 누르면 그 지표 그래프로 바뀝니다. 사건 예측이 아닌 참고 신호입니다.</span>' : '') + '</div>';
   }
   function renderLuck() {
     const ch = S.ch;
