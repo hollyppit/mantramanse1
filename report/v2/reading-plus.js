@@ -8,6 +8,9 @@ var SEASON_KO={opportunity:'기회기',expansion:'확장기',harvest:'수확기'
 var SEASON_MONTH={opportunity:'새 일을 시작하거나 제안하기 좋은 달이에요.',expansion:'하던 일을 넓히고 알리기 좋은 달이에요.',harvest:'결과를 정리하고 받을 것을 챙기기 좋은 달이에요.',accumulation:'배우고 준비하며 힘을 모으기 좋은 달이에요.',transition:'방향을 점검하고 정리하기 좋은 달이에요.',defense:'무리한 확장보다 지키고 쉬기 좋은 달이에요.'};
 var TG_MONTH={비견:'내 기준대로 밀고 가는 힘',겁재:'경쟁 속에서 버티는 힘',식신:'만들고 즐기는 힘',상관:'말과 표현으로 돌파하는 힘',편재:'기회를 넓게 잡는 힘',정재:'꼼꼼히 챙기고 모으는 힘',편관:'압박을 견디는 힘',정관:'규칙 안에서 인정받는 힘',편인:'혼자 깊이 생각하는 힘',정인:'배우고 준비하는 힘'};
 var DAEWOON={opportunity:'이번 10년은 새로운 시도로 판을 여는 시기로 읽어요.',expansion:'이번 10년은 해 온 일을 넓히고 키우는 시기로 읽어요.',harvest:'이번 10년은 쌓아 온 것을 거두고 정리하는 시기로 읽어요.',accumulation:'이번 10년은 배우고 다지며 힘을 모으는 시기로 읽어요.',transition:'이번 10년은 방향을 바꾸고 새 판을 준비하는 시기로 읽어요.',defense:'이번 10년은 무리보다 지키고 정비하는 시기로 읽어요.'};
+// 대운 설명은 시기표 카드와 같은 판정(공통 엔진 groupPull: 천간+지장간)을 쓴다. 천간 하나로 '배움 10년', 시기표는 '독립 10년'처럼 엇갈리던 문제(2026-11-24)
+var DW_GROUP={비겁:['내 힘을 세우는 10년','이번 10년은 내 힘으로 판을 짜고 내 몫을 세우는 시기로 읽어요.','과제는 내 힘으로 서는 기반과 내 몫의 기준을 만드는 거예요.'],식상:['꺼내 보이는 10년','이번 10년은 하고 싶은 것을 밖으로 꺼내 결과물로 만드는 시기로 읽어요.','과제는 재능과 표현을 꾸준한 결과물로 만드는 거예요.'],재성:['현실을 굴리는 10년','이번 10년은 돈과 일의 결과를 직접 굴리는 시기로 읽어요.','과제는 늘어난 일과 돈을 관리하는 틀을 만드는 거예요.'],관성:['책임을 맡는 10년','이번 10년은 자리와 책임이 정해지고 평가를 받는 시기로 읽어요.','과제는 책임을 지되 소진되지 않는 리듬을 찾는 거예요.'],인성:['배우고 다지는 10년','이번 10년은 배우고 다지며 힘을 모으는 시기로 읽어요.','과제는 배움과 자격으로 기반을 단단히 하는 거예요.']};
+function dwGroup(dw){return dw&&dw.pull&&DW_GROUP[dw.pull.group]?dw.pull.group:null;}
 var TG_TASK={비견:'과제는 내 힘으로 서는 기반을 만드는 거예요.',겁재:'과제는 경쟁 속에서 내 몫을 지키는 기준을 세우는 거예요.',식신:'과제는 재능을 꾸준한 결과물로 만드는 거예요.',상관:'과제는 표현과 개성을 일로 연결하는 거예요.',편재:'과제는 넓어진 기회를 관리하는 구조를 만드는 거예요.',정재:'과제는 안정적인 수입과 저축의 틀을 다지는 거예요.',편관:'과제는 압박을 버티되 소진되지 않는 리듬을 찾는 거예요.',정관:'과제는 책임과 평판을 쌓아 자리를 다지는 거예요.',편인:'과제는 나만의 전문 영역을 깊게 파는 거예요.',정인:'과제는 배움과 자격으로 기반을 단단히 하는 거예요.'};
 var EL_TIP={목:'배우고 키우는 활동',화:'사람과 어울리고 표현하는 활동',토:'규칙적인 생활 리듬',금:'정리와 마무리 습관',수:'생각을 정리하고 쉬는 시간'};
 var CONDITION={순풍:' 흐름이 순한 때라 미뤄 둔 일을 꺼내기 좋아요.',주의:' 다만 부담 신호가 있어서 속도를 한 단계 낮추고 확인을 한 번 더 하세요.',부담:' 다만 부담이 큰 때라 새로 벌이기보다 쉬는 시간과 여유를 먼저 확보하세요.'};
@@ -34,11 +37,12 @@ function signature(sd){
 }
 function feedback(part,label,force){if(force!==true)return '';return '<div class="part-feedback" data-part="'+esc(part)+'"><span>'+esc(label||'내 얘기 같나요?')+'</span><button type="button" data-part-feedback="agree">맞아요</button><button type="button" data-part-feedback="disagree">아니에요</button><em data-part-status></em></div>';}
 // ───────── 개인화 문단 판별(반응 버튼용): 사주 요소 문장·일간/월지/용신 문장 ─────────
-var AGAIN=/^([가-힣]+?)(?:은|는) 이 장에서도|^([가-힣]+)의 (?:결이|흔적은|영향이|결은|힘은|기운이) |^이 장에서도 ([가-힣]+)의 /;
+// 예전 문형(이 장에서도 …)과 2026-11-23 문형(chart-lines AGAIN: 앞에서 본 … / 이 주제에서도 / 이 이야기에도 / 이 주제로) 모두 알아본다
+var AGAIN=/^([가-힣]+?)(?:은|는) 이 장에서도|^([가-힣]+)의 (?:결이|흔적은|영향이|결은|힘은|기운이) (?!이 (?:주제|이야기))|^이 장에서도 ([가-힣]+)의 |^앞에서 본 ([가-힣]+?)(?:의 힘)?(?:이|가) 여기서|^([가-힣]+?)(?:의 힘)?(?:은|는) 이 주제에서도|^([가-힣]+?)(?:의 기운)?(?:이|가) 이 이야기에도|^([가-힣]+?)(?:의 힘)?(?:을|를) 이 주제로/;
 function partFor(text){
  var t=String(text||'').replace(/^[^ ]{1,41}님은 (?=사주)/,''),m;
  if((m=/^사주에 ([가-힣]+?)(?:이|가) 있어요[.]/.exec(t))||(m=/^사주 글자들 사이에 ([가-힣]+?)(?:이|가) 걸려 있어요[.]/.exec(t))||(m=/^사주에 ([가-힣]+)의 힘이 두드러져요[.]/.exec(t)))return 'el:'+m[1];
- if((m=AGAIN.exec(t)))return 'el:'+(m[1]||m[2]||m[3]);
+ if((m=AGAIN.exec(t)))return 'el:'+(m.slice(1).filter(Boolean)[0]);
  if(/^[갑을병정무기경신임계][목화토금수] 일간/.test(t))return 'dt:dm';
  if(/^[가-힣]+[(][자축인묘진사오미신유술해]월[)](?: 출생|에 태어나)/.test(t))return 'dt:mb';
  if(/^용신|^[목화토금수] 용신의 결|^균형을 잡아 주는 [목화토금수] 기운/.test(t))return 'dt:yong';
@@ -56,7 +60,7 @@ function summaryCard(sd){
  var band=sd.strength&&sd.strength.band;if(band)rows.push(['힘의 균형',band+'. '+(D.BAND[band]||'')]);
  var yong=sd.usefulElements&&sd.usefulElements.yong;if(yong&&EL_TIP[yong])rows.push(['균형을 잡아 주는 기운',yong+'(용신). '+EL_TIP[yong]+'이 생활의 중심을 잡아 줘요.']);
  var se=sd.sewoon;if(se&&se.season&&D.YEAR[se.season])rows.push([(se.year||sd.nowYear||'올해')+'년 흐름',(se.label?se.label+'. ':'')+D.YEAR[se.season]+(CONDITION[se.condition]||'')]);
- var dw=sd.currentDaewoon;if(dw&&dw.season&&DAEWOON[dw.season])rows.push(['지금 대운',(dw.ganzhi?dw.ganzhi+' 대운'+(dw.startYear?'('+dw.startYear+'~'+dw.endYear+')':'')+'. ':'')+DAEWOON[dw.season]]);
+ var dw=sd.currentDaewoon,dg=dwGroup(dw);if(dw&&(dg||dw.season&&DAEWOON[dw.season]))rows.push(['지금 대운',(dw.ganzhi?dw.ganzhi+' 대운'+(dw.startYear?'('+dw.startYear+'~'+dw.endYear+')':'')+'. ':'')+(dg?DW_GROUP[dg][1]:DAEWOON[dw.season])]);
  if(!rows.length)return '';
  var hourUnknown=sd.pillars&&!sd.pillars.hour||sd.reviewConditions&&sd.reviewConditions.hourUnknown;
  return '<div class="plus-card plus-summary"><h3>한 장 요약</h3><dl>'+rows.map(function(r){return '<dt>'+esc(r[0])+'</dt><dd>'+esc(r[1])+'</dd>';}).join('')+'</dl><p class="plus-note">'+esc(TIMING_NOTE)+(hourUnknown?' 출생 시간이 없어 시주(일의 마무리·말년·자녀와 관련된 자리)를 근거로 한 풀이는 정확도가 낮을 수 있어요.':'')+'</p></div>';
@@ -66,11 +70,12 @@ function lensCard(sd,topic){
  return '<div class="plus-card plus-lens"><h3>내 시그니처로 보는 '+esc(TOPIC_KO[topic]||'')+'</h3><p>'+esc(a)+'</p>'+(b&&b!==a?'<p>'+esc(b)+'</p>':'')+feedback('lens:'+topic)+'</div>';
 }
 function daewoonCard(sd){
- var dw=sd.currentDaewoon;if(!dw||!dw.season||!DAEWOON[dw.season])return '';
- var list=sd.daewoon||[],idx=-1;for(var i=0;i<list.length;i++)if(list[i]&&list[i].startYear===dw.startYear)idx=i;var nx=idx>=0?list[idx+1]:null;
- var lines=[DAEWOON[dw.season]];if(dw.stemTG&&TG_TASK[dw.stemTG])lines.push(TG_TASK[dw.stemTG]);
- if(nx&&nx.startYear&&nx.season&&SEASON_KO[nx.season])lines.push('다음 대운은 '+nx.startYear+'년부터 '+(nx.ganzhi?nx.ganzhi+' 대운, ':'')+SEASON_KO[nx.season]+' 흐름으로 이어져요.'+(sd.nowYear&&nx.startYear>sd.nowYear?' 앞으로 '+(nx.startYear-sd.nowYear)+'년 동안 지금의 과제를 정리해 두면 전환이 편해요.':''));
- return '<div class="plus-card plus-daewoon"><h3>이번 대운 10년의 과제</h3><p class="plus-lead">'+esc((dw.ganzhi||'')+' 대운 · '+(dw.startYear||'')+'~'+(dw.endYear||'')+' · '+(SEASON_KO[dw.season]||''))+'</p>'+lines.map(function(t){return '<p>'+esc(t)+'</p>';}).join('')+'<p class="plus-note">'+esc(TIMING_NOTE)+'</p>'+feedback('lens:daewoon')+'</div>';
+ var dw=sd.currentDaewoon,dg=dwGroup(dw);if(!dw||!dg&&(!dw.season||!DAEWOON[dw.season]))return '';
+ var list=sd.daewoon||[],idx=-1;for(var i=0;i<list.length;i++)if(list[i]&&list[i].startYear===dw.startYear)idx=i;var nx=idx>=0?list[idx+1]:null,ng=dwGroup(nx);
+ var task=dg?(dw.pull.tg&&TG_TASK[dw.pull.tg]||DW_GROUP[dg][2]):dw.stemTG&&TG_TASK[dw.stemTG];
+ var lines=[dg?DW_GROUP[dg][1]:DAEWOON[dw.season]];if(task)lines.push(task);
+ if(nx&&nx.startYear&&(ng||nx.season&&SEASON_KO[nx.season]))lines.push('다음 대운은 '+nx.startYear+'년부터 '+(nx.ganzhi?nx.ganzhi+' 대운, ':'')+(ng?(ng===dg?'같은 흐름이 한 번 더 이어지는 '+DW_GROUP[ng][0]+'이에요.':DW_GROUP[ng][0]+'으로 넘어가요.'):SEASON_KO[nx.season]+' 흐름으로 이어져요.')+(sd.nowYear&&nx.startYear>sd.nowYear?' 앞으로 '+(nx.startYear-sd.nowYear)+'년 동안 지금의 과제를 정리해 두면 전환이 편해요.':''));
+ return '<div class="plus-card plus-daewoon"><h3>이번 대운 10년의 과제</h3><p class="plus-lead">'+esc((dw.ganzhi||'')+' 대운 · '+(dw.startYear||'')+'~'+(dw.endYear||'')+' · '+(dg?DW_GROUP[dg][0]:SEASON_KO[dw.season]||''))+'</p>'+lines.map(function(t){return '<p>'+esc(t)+'</p>';}).join('')+'<p class="plus-note">'+esc(TIMING_NOTE)+'</p>'+feedback('lens:daewoon')+'</div>';
 }
 function calendarCard(sd){
  var months=(sd.monthlyLuck||[]).filter(function(m){return m&&m.month&&m.season;});if(!months.length)return '';

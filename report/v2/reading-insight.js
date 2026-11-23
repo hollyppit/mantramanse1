@@ -111,9 +111,9 @@ function facts(sd){var f={},P=sd.pillars||{};
  if(uniq[0])f.rel1=uniq[0];if(uniq[1])f.rel2=uniq[1];if(uniq[2])f.rel3=uniq[2];
  var dw=sd.currentDaewoon;
  if(dw&&TG_GROUP[dw.stemTG]&&(!sd.nowYear||(dw.startYear<=sd.nowYear&&sd.nowYear<=dw.endYear))){
-  var g=TG_GROUP[dw.stemTG];f.dwg={group:g,state:g===top?'same':g===weak?'fill':'other'};
+  var g=dw.pull&&dw.pull.group||TG_GROUP[dw.stemTG];f.dwg={group:g,state:g===top?'same':g===weak?'fill':'other'};
   var el=STEM_EL[String(dw.ganzhi||'').charAt(0)],role=el&&sd.usefulElements&&sd.usefulElements.roles&&sd.usefulElements.roles[el];if(role)f.dwy={el:el,role:role};
-  var list=sd.daewoon||[],at=-1;list.forEach(function(x,i){if(x&&x.ganzhi===dw.ganzhi&&x.startYear===dw.startYear)at=i;});var nx=at>=0?list[at+1]:null;if(nx&&TG_GROUP[nx.stemTG]&&Number.isFinite(nx.startYear))f.dwn={year:nx.startYear,group:TG_GROUP[nx.stemTG]};
+  var list=sd.daewoon||[],at=-1;list.forEach(function(x,i){if(x&&x.ganzhi===dw.ganzhi&&x.startYear===dw.startYear)at=i;});var nx=at>=0?list[at+1]:null;if(nx&&TG_GROUP[nx.stemTG]&&Number.isFinite(nx.startYear))f.dwn={year:nx.startYear,group:nx.pull&&nx.pull.group||TG_GROUP[nx.stemTG]};
   var dr=luckRel(dw.relations,P);if(dr)f.dwr=dr;}
  var nextY=(sd.annualLuck||[]).filter(function(a){return a&&sd.nowYear&&a.year===sd.nowYear+1&&TG_GROUP[a.stemTG];})[0];if(nextY)f.sen={year:nextY.year,group:TG_GROUP[nextY.stemTG]};
  var sw=sd.sewoon;

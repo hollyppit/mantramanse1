@@ -17,6 +17,10 @@
   function bandOfZone(z) { return /강|왕/.test(z || '') ? '신강' : /약/.test(z || '') ? '신약' : '중화'; }
   function round1(x) { return Math.round(x * 10) / 10; }
   // Copy the engine's existing luck/natal relations; never reconstruct them from a flow label.
+  // 대운이 끌어오는 십성 묶음(공통 엔진 groupPull: 천간 0.4 + 지장간 0.6). 시기표·과제 카드·깊이 블록·인사이트가 같은 판정을 쓰게 한다(2026-11-24).
+  //   group 가장 큰 묶음, tg 그 묶음의 대표 십성(천간·지지 십성 중 같은 묶음이 있으면 그것, 없으면 null)
+  var TG_GROUP_K = { 비견: 0, 겁재: 0, 식신: 1, 상관: 1, 편재: 2, 정재: 2, 편관: 3, 정관: 3, 편인: 4, 정인: 4 };
+  function luckPull(ch, x) { try { var M = root.Manse; if (!M || !M.groupPull) return null; var g = M.groupPull(M.stemEl(ch.pillars.day.s), x), top = 0; g.forEach(function (v, i) { if (v > g[top]) top = i; }); var tg = TG_GROUP_K[x.stemTG] === top ? x.stemTG : TG_GROUP_K[x.branchTG] === top ? x.branchTG : null; return { group: GROUPS[top], tg: tg, shares: g.map(function (v) { return Math.round(v * 100) / 100; }) }; } catch (e) { return null; } }
   function luckRelations(ch,p){try{return (root.Manse.luckRelations(ch,p).rels||[]).map(function(r){return {kind:r.kind,type:r.type,name:r.name,members:r.members.slice()};});}catch(e){return [];}}
   function luckDateKst(ms){return Number.isFinite(ms)?new Date(ms+9*3600e3).toISOString().slice(0,10):null;}
 
@@ -100,7 +104,7 @@
     sd.daewoon = ch.daeun.list.map(function (x,i) {
       var next=ch.daeun.list[i+1],endDate=next?luckDateKst(next.startMs-1):null;
       var s = seasonOf(x.ev);
-      return { ganzhi: M.gzNameK(x), startYear: x.startYear, endYear: endDate?Number(endDate.slice(0,4)):x.startYear+9,startDate:luckDateKst(x.startMs),endBefore:next?luckDateKst(next.startMs):null, startAge: x.startAge, season: s, flow: x.ev.flow.primaryFlow, condition: x.ev.flow.condition.name, stemTG: x.stemTG, branchTG: x.branchTG, relations:luckRelations(ch,x), assessment:{fitScore:x.ev.flow.condition.fitScore,flows:Object.assign({},x.ev.flow.flows),reasons:(x.ev.flow.reasons||[]).slice(),defense:!!x.ev.flow.overlays.defense.active,volatile:!!x.ev.flow.overlays.volatility.active} };
+      return { ganzhi: M.gzNameK(x), startYear: x.startYear, endYear: endDate?Number(endDate.slice(0,4)):x.startYear+9,startDate:luckDateKst(x.startMs),endBefore:next?luckDateKst(next.startMs):null, startAge: x.startAge, season: s, pull: luckPull(ch, x), flow: x.ev.flow.primaryFlow, condition: x.ev.flow.condition.name, stemTG: x.stemTG, branchTG: x.branchTG, relations:luckRelations(ch,x), assessment:{fitScore:x.ev.flow.condition.fitScore,flows:Object.assign({},x.ev.flow.flows),reasons:(x.ev.flow.reasons||[]).slice(),defense:!!x.ev.flow.overlays.defense.active,volatile:!!x.ev.flow.overlays.volatility.active} };
     });
     var Y = M.yearPillarAt(now).sajuYear;
     sd.nowYear = Y;

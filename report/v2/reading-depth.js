@@ -20,7 +20,7 @@ function pickStrongest(sd){var g=sd.groups||{},best=null;GROUPS.forEach(function
 function pickWeakest(sd){var g=sd.groups||{},best=null;GROUPS.forEach(function(k){if(Number.isFinite(g[k])&&(best===null||g[k]<g[best]))best=k;});return GROUPS.indexOf(sd.weakestGroup)>=0?sd.weakestGroup:best;}
 // 한 장에 붙일 문단: [{key,text}]. 데이터가 없는 값은 건너뛰고, 사주 값이 없으면 빈 배열.
 function paragraphs(c,sd){var id=c&&(c.editorialContractId||c.id),d=R.ReadingDepthData&&R.ReadingDepthData[id];if(!d||!sd)return [];var out=[];
- var top=pickStrongest(sd),weak=pickWeakest(sd),band=sd.strength&&sd.strength.band,yong=sd.usefulElements&&sd.usefulElements.yong,dw=sd.currentDaewoon,tg=dw&&TG_GROUP[dw.stemTG],nowY=sd.nowYear;
+ var top=pickStrongest(sd),weak=pickWeakest(sd),band=sd.strength&&sd.strength.band,yong=sd.usefulElements&&sd.usefulElements.yong,dw=sd.currentDaewoon,tg=dw&&(dw.pull&&dw.pull.group||TG_GROUP[dw.stemTG]),nowY=sd.nowYear;
  var ti=GROUPS.indexOf(top),wi=GROUPS.indexOf(weak),bi=BANDS.indexOf(band),yi=ELS.indexOf(yong),FO=R.FactOnce,first=function(k){return !FO||FO.own(sd,k,id);};
  if(ti>=0&&d.g&&d.g[ti])out.push({key:'strong',text:(first('strong:'+top)?lead(LEAD_STRONG,id,0,'{g}',top+'('+GLOSS[top]+')')+' ':'')+d.g[ti]});
  // 2026-11-23: 머리말 없이 강점 문단 바로 뒤에 오면 '대신'을 붙여 모순이 아니라 보완으로 읽히게(예: 규칙으로 모으는 힘 ↔ 대신 모으는 감각은 약해요)

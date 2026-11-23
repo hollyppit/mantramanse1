@@ -20,7 +20,7 @@ const P=globalThis.ReportV2.ReadingPlus,D=globalThis.MantraSignatureData,CL=glob
  for(const sd0 of sds){const sd={...sd0,name:'테스트'};const sig=P.signature(sd);if(sig){withSig++;assert.equal(new Set(sig.top.map(f=>f.key)).size,sig.top.length,'시그니처 중복');sig.top.forEach(f=>famCount[f.key]=(famCount[f.key]||0)+1);assert.deepEqual(P.signature(sd),sig,'결정성');}
   for(const id of ['timeline_self_01','timeline_wealth_01','timeline_career_01','timeline_love_01','timeline_health_01','timeline_remedy_01','timeline_self_20','timeline_self_21','timeline_remedy_07']){
    const h=html(id,sd);assert(!/undefined|NaN|[{][}]|null/.test(h),id+' 렌더링 값 누락: '+h.slice(0,200));assert(!FORBID.test(h),id+' 금지어');const needs=id==='timeline_self_20'?!!(sd.currentDaewoon&&sd.currentDaewoon.season):id==='timeline_self_21'?!!(sd.monthlyLuck&&sd.monthlyLuck.length):!!sig;if(needs)assert(h.length>0,id+' 카드 없음');}
-  const self01=html('timeline_self_01',sd);if(sig){assert(self01.includes('나의 시그니처')&&self01.includes('한 장 요약'));assert(self01.includes('사건이나 결과를 예측하지 않아요'));}
+  const self01=html('timeline_self_01',sd);if(sig){assert(self01.includes('나의 시그니처')&&self01.includes('한 장 요약'));assert(self01.includes('일이 꼭 그렇게 일어난다는 뜻은 아니에요'));}
   if(!sd.pillars.hour){unknownHour++;assert(self01.includes('출생 시간이 없어'),'출생 시간 미상 안내');}
   const cal=html('timeline_self_21',sd);if(sd.monthlyLuck&&sd.monthlyLuck.length)assert.equal((cal.match(/<li/g)||[]).length,Math.min(12,sd.monthlyLuck.length),'12개월');
   assert.equal(html('timeline_self_05',sd),'','보강 카드가 없는 장');assert.equal(html('timeline_creative_01',sd),'','창작 장 제외');}
