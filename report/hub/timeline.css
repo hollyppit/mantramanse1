@@ -417,3 +417,21 @@ html.theme-mist #hub #tq .tq-body > ol.tq-glance, #hub #tq .tq-body > ol.tq-glan
 }
 /* 펼쳐 보기(인생 90년 그래프) */
 #hub .tq-lifef{ margin: 14px 0 6px; }
+/* 삼재 보조 지표(2026-11-24): 좋음·무난·조심 신호색과 겹치지 않는 남보라 + 빗금. 만세력 운세 흐름 탭(--samjae)과 같은 계열 */
+#hub .tq{ --sj: #ABA8FF; --sj-solid: #5B57D9; }
+#hub .tq-sjfill{ fill: var(--sj); opacity: .10; } #hub .tq-sjline{ stroke: var(--sj); stroke-width: 1.6; opacity: .38; } #hub .tq-sjmark{ fill: var(--sj-solid); }
+#hub .tq-bar.sjy u{ background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--sj) 34%, transparent) 0 2px, transparent 2px 6px), rgba(255,255,255,.05); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sj) 55%, transparent); }
+#hub .tq-sjq{ quotes: none; display: inline-block; padding: 1px 6px; border-radius: 999px; background: var(--sj-solid); color: #fff; font-size: .62rem; font-weight: 800; line-height: 1.5; white-space: nowrap; }
+#hub .tq-sjleg{ display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; margin: 6px 0 2px; font-size: .74rem; color: var(--ink-3); }
+#hub .tq-sjleg i{ width: 14px; height: 10px; border-radius: 2px; background: repeating-linear-gradient(135deg, var(--sj-solid) 0 2px, color-mix(in srgb, var(--sj) 25%, transparent) 2px 5px); }
+#hub .tq-sjleg b{ color: var(--sj); font-weight: 800; }
+#hub .tq-sjc{ display: grid; gap: 8px; margin: 0 0 12px; padding: 12px 14px; border-radius: 14px; background: color-mix(in srgb, var(--sj) 8%, transparent); border: 1px solid color-mix(in srgb, var(--sj) 38%, transparent); color: var(--ink); }
+#hub .tq-sjc-h{ display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 0; font-size: .86rem; }
+#hub .tq-sjc-h i{ font-style: normal; padding: 1px 9px; border-radius: 999px; background: var(--sj-solid); color: #fff; font-size: .74rem; font-weight: 800; } #hub .tq-sjc-h span{ font-size: .74rem; color: var(--ink-3); }
+#hub .tq-sjsteps{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+#hub .tq-sjs{ display: grid; gap: 1px; padding: 7px 8px; border-radius: 10px; border: 1px dashed color-mix(in srgb, var(--sj) 50%, transparent); background: transparent; color: var(--ink); font: inherit; font-size: .74rem; line-height: 1.35; text-align: left; cursor: pointer; min-height: 44px; }
+#hub .tq-sjs span{ display: flex; flex-wrap: wrap; gap: 0 4px; align-items: baseline; color: var(--ink-3); } #hub .tq-sjs span b{ color: var(--ink); } #hub .tq-sjs em{ font-style: normal; color: var(--gold); font-weight: 800; white-space: nowrap; }
+#hub .tq-sjs strong{ font-size: .84rem; color: var(--sj); } #hub .tq-sjs small{ font-size: .7rem; color: var(--ink-3); }
+#hub .tq-sjs.on{ border-style: solid; border-width: 2px; background: color-mix(in srgb, var(--sj) 14%, transparent); }
+#hub .tq-sjc-t, #hub .tq-sjc-tip{ margin: 0; font-size: .84rem; line-height: 1.6; } #hub .tq-sjc-tip{ color: var(--ink-2, var(--ink)); }
+#hub .tq-sjc-more > summary{ cursor: pointer; font-size: .8rem; font-weight: 700; color: var(--sj); } #hub .tq-sjc-more p, #hub .tq-sjc-more ul{ margin: 6px 0 0; font-size: .8rem; line-height: 1.6; } #hub .tq-sjc-more ul{ padding-left: 18px; }

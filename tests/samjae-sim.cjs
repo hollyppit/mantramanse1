@@ -31,10 +31,35 @@ ok(html.includes('function samjaeLayer(') && (html.match(/samjaeLayer\(\{/g) || 
 ok(html.includes('function samjaeBox(') && html.includes('${samjaeBox('), '연도별 흐름 카드에 삼재 상자');
 ok(html.includes('sw sj-sw') && html.includes('삼재 3년</b>'), '범례에 삼재 빗금');
 ok(!/data-term="\$\{sj\.stage\}">[^`]*var\(--d-chg\)/.test(html), '삼재 배지에 변화 신호 색(--d-chg) 안 씀');
-['들삼재', '눌삼재', '날삼재'].forEach(k => ok(new RegExp(`'${k}': \\['[^']+', '[^']{30,}'\\]`).test(html), `${k} 생활 조심 문안`));
 const sjFn = html.slice(html.indexOf('function samjaeLayer('), html.indexOf('function drawLife('));
 ok(!/combined|score|luckV/.test(sjFn), '그래프 삼재 층이 점수를 읽거나 바꾸지 않음');
-ok(!/겁나|무서|큰일|재앙|화를 당|불행/.test(html.slice(html.indexOf('const SJ_STAGE'), html.indexOf('function samjaeBox('))), '겁주는 표현 없음');
+
+console.log('4. 공용 문안 samjae-copy.js (만세력·타임라인 같은 문장)');
+const SJS = fs.readFileSync(path.join(root, 'samjae-copy.js'), 'utf8'); vm.runInContext(SJS, ctx); const MS = ctx.MantraSamjae;
+ok(MS && MS.STAGES.length === 3, '공용 모듈 로드');
+['들삼재', '눌삼재', '날삼재'].forEach(k => ok(MS.STAGE[k] && MS.STAGE[k][1].length >= 30, k + ' 생활 조심 문안'));
+ok(!/겁나|무서|큰일|재앙|화를 당|불행/.test(JSON.stringify(MS.STAGE) + MS.WHAT + MS.NOTE), '겁주는 표현 없음');
+for (let br = 0; br < 12; br++) for (let Y = 1950; Y <= 2080; Y++) { const x = MS.cycle(M, br, Y), y = M.samjaeCycle(br, Y); ok(x && x.start === y.start && x.pos === y.pos && x.gap === y.gap, `공용 cycle = 엔진 samjaeCycle ${br} ${Y}`); }
+ok(html.includes('<script src="samjae-copy.js"></script>') && html.includes('const SJ_STAGE = window.MantraSamjae.STAGE'), '만세력이 공용 문안 사용');
+
+console.log('5. 운명의 타임라인(report/hub)');
+const tl = fs.readFileSync(path.join(root, 'report/hub/hub-timeline.js'), 'utf8'), css = fs.readFileSync(path.join(root, 'report/hub/timeline.css'), 'utf8');
+ok(tl.includes("H.load('/samjae-copy.js?v="), '공용 문안 불러오기(캐시 꼬리표)');
+ok(tl.includes('s += sjLife(data, L0, step, T0, H0, B0);'), '인생 전체 그래프에 삼재 띠');
+ok(tl.includes('sj: function (it) { return sjAt(it.year); }') && tl.includes("(sj ? ' sjy' : '')"), '대운 안 해별 막대에 삼재 표시');
+ok(tl.includes('sjCard(st.y, sj)') && tl.includes('function sjCard('), '앞으로 10년 아래 삼재 카드');
+ok(tl.split('sjLegend()').length - 1 >= 2, '그래프 범례 2곳');
+const sjTl = tl.slice(tl.indexOf('function sjLife('), tl.indexOf('function sjCard('));
+ok(!/q\.v\b|\.fit\b|scores/.test(sjTl), '타임라인 삼재 띠가 점수를 읽지 않음');
+ok(/--sj: #ABA8FF/.test(css) && !/--sj:[^;]*(#2DB36B|#E8622C|#B5BDCB)/i.test(css), '타임라인 삼재 색이 3색 신호와 다름');
+const HV = (fs.readFileSync(path.join(root, 'report/story/story.js'), 'utf8').match(/HV = '\?v=([^']+)'/) || [])[1], hubIdx = fs.readFileSync(path.join(root, 'report/hub/index.html'), 'utf8');
+ok(HV && hubIdx.includes('hub-timeline.js?v=' + HV) && hubIdx.includes('timeline.css?v=' + HV), '허브 캐시 꼬리표 HV 와 hub/index.html 일치');
+
+console.log('6. 카드는 삼재인 해에만 · 그래프 안 "삼재" 글씨 없음');
+ok(html.includes("const c = sjCycleOf(Y); if (!c || c.pos < 0) return '';"), '만세력 삼재 상자: 삼재 해에만');
+ok(tl.includes("if (!c || c.pos < 0) return '';"), '타임라인 삼재 카드: 삼재 해에만');
+ok(!/>삼재<\/text>/.test(html) && !/>삼재<\/text>/.test(tl), '그래프 SVG 안에 "삼재" 글씨 없음');
+ok(tl.includes("esc(sj.stage[0]) + '</q>'"), '타임라인 막대 꼬리표는 들·눌·날 한 글자');
 
 console.log(fail ? `\n✗ ${fail}/${n} 실패` : `\n✓ 삼재 검증 ${n}항목 통과`);
 process.exit(fail ? 1 : 0);

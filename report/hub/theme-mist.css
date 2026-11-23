@@ -752,3 +752,7 @@ html.theme-mist #hub .tq-hero .kick{ color: #4F5E64; }
 html.theme-mist #hub #tq .tq-bar:not(:disabled):is(:hover, :focus-visible, :active){ background: #FFFFFF !important; color: inherit !important; border-color: rgba(178,58,44,.45) !important; box-shadow: 0 10px 22px -14px rgba(20,35,42,.45); }
 html.theme-mist #hub #tq :is(.tq-ychip, .tq-mchip, .tq-fchip, .tq-chip):not(.on):not(:disabled):is(:hover, :focus-visible){ background: #FFFFFF !important; color: #1D2428 !important; border-color: rgba(178,58,44,.45) !important; }
 html.theme-mist #hub #screen .hero .kick{ color: #7C4A10; }
+/* 삼재 보조 지표(2026-11-24): 밝은 배경에서는 만세력과 같은 진한 남보라 */
+html.theme-mist #hub .tq{ --sj: #4A47C9; --sj-solid: #4A47C9; }
+html.theme-mist #hub .tq-bar.sjy u{ background: repeating-linear-gradient(135deg, rgba(74,71,201,.22) 0 2px, transparent 2px 6px), rgba(52,72,80,.06); }
+html.theme-mist #hub .tq-sjc{ background: rgba(74,71,201,.06) !important; }
