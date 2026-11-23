@@ -8,7 +8,7 @@
 (function (root) {
   'use strict';
   var R = root.ReportV2 = root.ReportV2 || {};
-  var VERSION = 'health-chapters-20261115-1';
+  var VERSION = 'health-chapters-20261124-sj';
   var EK = ['목', '화', '토', '금', '수'], EH = ['木', '火', '土', '金', '水'];
   var IDS = ['timeline_self_h1', 'timeline_self_h2', 'timeline_self_h3', 'timeline_self_h4', 'timeline_self_h5', 'timeline_self_h6'];
   var TITLES = { timeline_self_h1: '내 몸의 오행 지도', timeline_self_h2: '나는 언제 쉽게 지칠까?', timeline_self_h3: '스트레스가 몸으로 오는 길', timeline_self_h4: '올해·이번 달 몸 챙길 때', timeline_self_h5: '사고수 신호 읽기 — 조심할 장면', timeline_self_h6: '앞으로 10년 안전 흐름과 삼재' };
@@ -165,20 +165,54 @@
   }
 
   // h6 앞으로 10년 안전 흐름과 삼재
+  // 2026-11-24: 삼재를 더 자세히 — 띠 묶음과 삼재 3년, 10년 안 삼재 해마다 단계·사고수 주의 지수·10년 중 순위·그해 주의 지수가 높은 달,
+  //  단계별 생활 조심 장면(공용 /samjae-copy.js, 만세력·타임라인과 같은 문장), 입춘 경계·설날 띠 차이. 모두 엔진 값(getSamjae·evaluateDomainLuck·wolun)만 쓴다.
+  var SJ_ORDER = ['들삼재', '눌삼재', '날삼재'];
+  function sjCycle(C, y) {
+    var S = root.MantraSamjae; if (S) { try { return S.cycle(C.M, C.ch.pillars.year.b, y); } catch (e) { } }
+    var cur = samjaeLine(C, y), pos = cur ? SJ_ORDER.indexOf(cur.stage) : -1, start = cur ? y - pos : null;
+    if (!cur) for (var k = 1; k <= 12; k++) { var q = samjaeLine(C, y + k); if (q && q.stage === SJ_ORDER[0]) { start = y + k; cur = q; break; } }
+    if (start == null) return null;
+    return { group: cur.group, pos: pos, start: start, gap: pos >= 0 ? 0 : start - y, next: start + 12, years: [0, 1, 2].map(function (i) { return { year: start + i, stage: SJ_ORDER[i], nick: '', tip: '', br: C.M.BR_K[((start + i - 4) % 12 + 12) % 12] }; }) };
+  }
+  function monthPeaks(C, y) {
+    var ms = []; try { ms = C.M.wolun(C.ch, y) || []; } catch (e) { return []; }
+    return ms.map(function (m, i) { var d = dom(C, m, 'wolun'); return d && d.accident ? { i: i, term: m.termName, gz: C.M.gzName(m), s: d.accident.score } : null; }).filter(Boolean)
+      .sort(function (p, q) { return q.s - p.s || p.i - q.i; }).slice(0, 2).sort(function (p, q) { return p.i - q.i; });
+  }
   function h6(C) {
     var xs = seun(C, C.nowY, C.nowY + 9); if (xs.length < 5) return null;
     var rows0 = xs.map(function (x) { var d = dom(C, x, 'seun'); return { y: x.year, gz: C.M.gzName(x), s: d && d.accident ? d.accident.score : null, sj: samjaeLine(C, x.year) }; }).filter(function (r) { return r.s != null; });
     var top = rows0.slice().sort(function (a, b) { return b.s - a.s || a.y - b.y; }).slice(0, 3), calm = rows0.slice().sort(function (a, b) { return a.s - b.s || a.y - b.y; }).slice(0, 2);
+    var rank = function (r) { return rows0.filter(function (q) { return q.s > r.s; }).length + 1; };
     var sjYears = rows0.filter(function (r) { return r.sj; });
     var yl = function (a) { return a.map(function (r) { return r.y + '년'; }).join('·'); };
+    var S = root.MantraSamjae, cyc = sjCycle(C, C.nowY), brNow = C.M.BR_K[C.ch.pillars.year.b];
+    var nowSj = samjaeLine(C, C.nowY), nowPos = nowSj ? SJ_ORDER.indexOf(nowSj.stage) + 1 : 0;
+    var nick = function (st) { return S && S.STAGE[st] ? S.STAGE[st][0] : ''; }, tip = function (st) { return S && S.STAGE[st] ? S.STAGE[st][1] : ''; };
+    var lb = C.ch.lunar && C.ch.lunar.y ? ((C.ch.lunar.y - 4) % 12 + 12) % 12 : C.ch.pillars.year.b;
+    // 10년 안 삼재 해마다 한 문단: 단계·별칭, 사고수 주의 지수와 10년 중 순위, 그해 지수가 높은 달 두 개, 겹침 여부
+    var sjPara = sjYears.map(function (r) {
+      var pk = monthPeaks(C, r.y), k = rank(r), both = k <= 3;
+      return r.y + '년(' + r.gz + ')은 ' + r.sj.stage + (nick(r.sj.stage) ? '(' + nick(r.sj.stage) + ')' : '') + '예요. 이 해의 사고수 주의 지수는 ' + Math.round(r.s) + '점으로 ' +
+        (both ? '10년 중 ' + (k === 1 ? '가장 높아요' : k + '번째로 높아요') + '. 삼재와 주의 지수가 함께 겹치는 해라, 두 신호를 나눠 보지 말고 한 해 내내 안전 습관을 한 단계 올려 두면 좋아요.' : '10년 ' + rows0.length + '개 해 가운데 ' + k + '번째라 높지 않은 편이에요. 삼재라도 실제 운의 주의 신호는 낮으니, 겁낼 해라기보다 확인 절차를 하나 더 붙이는 해로 읽으면 충분해요.') +
+        (pk.length ? ' 그해 안에서는 ' + pk.map(function (p) { return p.term + '부터 이어지는 ' + p.gz + '월(' + Math.round(p.s) + '점)'; }).join('과 ') + '에 주의 지수가 가장 높아요.' : '');
+    });
+    var stageTips = sjYears.length && S ? sjYears.map(function (r) { return r.sj.stage; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).map(function (st) { return st + '(' + nick(st) + ')에는 ' + tip(st).replace(/^[^.]*해예요.\s*/, ''); }) : [];
+    var whatSj = cyc ? '삼재(三災)는 띠를 기준으로 12년마다 한 번 돌아오는 3년의 조심 시기를 가리키는 전통 민속이에요. 셋이 한 묶음인 띠(삼합)끼리 삼재 해가 같아서, ' + brNow + '년생이 속한 ' + cyc.group + '는 ' + cyc.years.map(function (q) { return q.br; }).join('·') + '년이 삼재예요. 첫해를 들삼재(들어오는 해), 둘째 해를 눌삼재(머무는 해), 셋째 해를 날삼재(나가는 해)라고 불러요.' : '';
+    var nextLine = !sjYears.length && cyc ? ' 다음 삼재는 ' + cyc.start + '~' + (cyc.start + 2) + '년이에요.' : '';
     var core = {
-      title: who(C) + '의 앞으로 10년 중 안전을 한 번 더 챙길 해는 ' + yl(top.slice().sort(function (a, b) { return a.y - b.y; })) + '이에요.',
-      reality: join([top.map(function (r) { return r.y + '년(' + r.gz + ')은 주의 지수 ' + Math.round(r.s) + '점으로 10년 중 높은 편이에요.'; }).join(' '), calm.length ? yl(calm) + '은 비교적 차분한 해예요.' : '']),
-      strength: calm.length ? yl(calm) + '처럼 차분한 해에는 이사·여행·운동처럼 몸을 쓰는 계획을 잡기 좋아요.' : '',
-      risk: join([sjYears.length ? '전통 민속의 삼재로 보면 ' + sjYears.map(function (r) { return r.y + '년(' + r.sj.stage + ')'; }).join('·') + '이 해당해요. 삼재는 전통 민속의 참고일 뿐, 10년 주의 지수 계산에는 들어가지 않아요.' : '앞으로 10년 안에 삼재에 해당하는 해는 없어요.', NOTE.timeline_self_h6]),
-      reinforce: '주의 지수가 높은 해에는 큰 이동·무리한 운동·위험한 작업을 한꺼번에 몰지 말고, 하나씩 나눠 잡으세요.',
-      practice: '달력의 ' + top[0].y + '년 첫 페이지에 \'안전 점검의 해\'라고 적어 두고, 그해 시작에 보험·차량·집 안 안전을 한 번 점검해 보세요.',
-      why: join(['연도별 주의 지수: ' + rows0.map(function (r) { return r.y + '년 ' + Math.round(r.s) + '점'; }).join(' · ') + ' — 만세력 운세 흐름 탭의 사고수 지수와 같은 계산이에요(높을수록 조심).', '삼재는 띠(년지) 기준 전통 민속 계산(getSamjae)이에요.']),
+      title: (nowSj ? who(C) + '의 ' + C.nowY + '년은 삼재 3년 중 ' + nowPos + '번째 해(' + nowSj.stage + ')예요. 앞으로 10년 중 안전을 한 번 더 챙길 해는 ' : who(C) + '의 앞으로 10년 중 안전을 한 번 더 챙길 해는 ') + yl(top.slice().sort(function (a, b) { return a.y - b.y; })) + '이에요.',
+      reality: join([top.map(function (r) { return r.y + '년(' + r.gz + ')은 주의 지수 ' + Math.round(r.s) + '점으로 10년 중 높은 편이에요.'; }).join(' '), calm.length ? yl(calm) + '은 비교적 차분한 해예요.' : '', whatSj]),
+      strength: calm.length ? yl(calm) + '처럼 차분한 해에는 이사·여행·운동처럼 몸을 쓰는 계획을 잡기 좋아요.' + (sjYears.length && calm.some(function (r) { return r.sj; }) ? ' 특히 ' + yl(calm.filter(function (r) { return r.sj; })) + '은 삼재여도 주의 지수가 낮은 해라, 미리 점검만 해 두면 평소처럼 움직여도 괜찮아요.' : '') : '',
+      risk: join([sjYears.length ? '앞으로 10년 중 삼재에 해당하는 해는 ' + sjYears.map(function (r) { return r.y + '년(' + r.sj.stage + ')'; }).join('·') + '이에요.' : '앞으로 10년 안에 삼재에 해당하는 해는 없어요.' + nextLine].concat(sjPara, [stageTips.join(' '),
+        sjYears.length ? '삼재 해는 양력 1월 1일이 아니라 입춘(2월 4일 무렵)부터 바뀌어요.' + (sjYears[0].sj.stage === '들삼재' ? ' 그래서 ' + sjYears[0].y + '년 1월은 아직 삼재 전이고, ' + (sjYears[0].y + 3) + '년 입춘에 삼재가 끝나요.' : ' 지금 이어지는 삼재는 ' + (sjYears[sjYears.length - 1].y + 1) + '년 입춘에 끝나요.') : '',
+        lb !== C.ch.pillars.year.b ? '태어난 날이 입춘과 설날 사이라, 사주(입춘) 기준으로는 ' + brNow + '년생이지만 설날 기준 민간 띠로는 ' + C.M.BR_K[lb] + '년생이에요. 여기서는 입춘 기준으로 계산했고, 설날 기준으로 보면 삼재 해가 달라질 수 있어요.' : '',
+        '삼재는 전통 민속의 참고일 뿐, 10년 주의 지수 계산에는 들어가지 않아요.', NOTE.timeline_self_h6])),
+      reinforce: '주의 지수가 높은 해에는 큰 이동·무리한 운동·위험한 작업을 한꺼번에 몰지 말고, 하나씩 나눠 잡으세요.' + (sjYears.length ? ' 삼재 3년은 큰일을 미루는 시기가 아니라 확인을 한 번 더 붙이는 시기예요. 계약서 다시 읽기, 정기 검진, 운전 전 컨디션 확인처럼 방어 습관 하나를 정해 3년 동안 이어 가면 충분해요.' : ''),
+      practice: '달력의 ' + top[0].y + '년 첫 페이지에 \'안전 점검의 해\'라고 적어 두고, 그해 시작에 보험·차량·집 안 안전을 한 번 점검해 보세요.' + (sjYears.length ? ' ' + (sjYears[0].sj.stage === '들삼재' ? '삼재가 시작되는 ' + sjYears[0].y + '년' : '삼재가 이어지는 ' + sjYears[0].y + '년') + ' 입춘 무렵에는 보험 보장·차량 정비·중요 서류의 만기를 한 번에 확인해 두세요.' : ''),
+      why: join(['연도별 주의 지수: ' + rows0.map(function (r) { return r.y + '년 ' + Math.round(r.s) + '점' + (r.sj ? '(' + r.sj.stage + ')' : ''); }).join(' · ') + ' — 만세력 운세 흐름 탭의 사고수 지수와 같은 계산이에요(높을수록 조심).',
+        '삼재는 띠(년지 ' + brNow + ') 기준 전통 민속 계산(getSamjae, 입춘 기준 연지)이에요.' + (cyc ? ' ' + cyc.group + ' → 삼재 년지 ' + cyc.years.map(function (q) { return q.br; }).join('·') + '.' : '') + ' 그해 달별 지수는 월운 사고수 지수와 같은 계산이에요.']),
     };
     return chapter('timeline_self_h6', core, { name: C.nm });
   }
@@ -216,8 +250,11 @@
   }
   function readyWithin(ms) {
     var saved = function () { try { var d = root.MantraLastGood && root.MantraLastGood.saved('/api/luck-flags'); return !!(d && d.healthChapters === true); } catch (e) { return false; } };
-    return Promise.race([ready(), new Promise(function (ok) { setTimeout(function () { ok(saved()); }, ms || 2500); })]);
+    return Promise.race([ready().then(function (v) { return sjP.then(function () { return v; }); }), new Promise(function (ok) { setTimeout(function () { ok(saved()); }, ms || 2500); })]);
   }
+  // 삼재 단계별 생활 조심 문장은 공용 /samjae-copy.js(만세력·타임라인과 같은 문장). 못 불러오면 단계 이름만 쓴다
+  var sjP = Promise.resolve();
+  if (root.document && !root.MantraSamjae) { try { sjP = new Promise(function (ok) { var sjs = root.document.createElement('script'); sjs.src = '/samjae-copy.js?v=20261124-sj'; sjs.onload = sjs.onerror = function () { ok(); }; (root.document.head || root.document.documentElement).appendChild(sjs); }); } catch (e) { } }
   if (root.document && root.fetch) { try { ready(); } catch (e) { } }
   R.HealthChapters = { VERSION: VERSION, IDS: IDS, TITLES: TITLES, BANNED: BANNED, MED: MED, SAFE: SAFE, NOTE: NOTE, buildAll: buildAll, add: add, ready: ready, readyWithin: readyWithin, localFlag: localFlag };
   if (typeof module !== 'undefined' && module.exports) module.exports = R.HealthChapters;

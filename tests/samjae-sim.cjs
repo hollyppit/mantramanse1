@@ -61,5 +61,29 @@ ok(tl.includes("if (!c || c.pos < 0) return '';"), '타임라인 삼재 카드: 
 ok(!/>삼재<\/text>/.test(html) && !/>삼재<\/text>/.test(tl), '그래프 SVG 안에 "삼재" 글씨 없음');
 ok(tl.includes("esc(sj.stage[0]) + '</q>'"), '타임라인 막대 꼬리표는 들·눌·날 한 글자');
 
+console.log('7. 상세풀이 삼재 장(timeline_self_h6) 상세 풀이');
+{
+  globalThis.Manse = M; globalThis.MantraSamjae = MS;
+  require(path.join(root, 'health-body.js')); require(path.join(root, 'accident-hint.js'));
+  const HC = require(path.join(root, 'report/v2/health-chapters.js'));
+  const NOW = Date.UTC(2026, 10, 24, 3), Y = M.yearPillarAt(NOW).sajuYear;
+  for (let i = 0; i < 60; i++) {
+    const ch = M.compute({ year: 1950 + i, month: 1 + (i * 5) % 12, day: 1 + (i * 7) % 28, hour: 12, minute: 0, gender: i % 2 ? 'M' : 'F', calendar: 'solar', school: 'eokbu' });
+    const c = HC.buildAll(M, ch, '', NOW).timeline_self_h6; if (!c) { ok(false, '장 없음 ' + i); continue; }
+    const r = c.readingCore, all = Object.values(r).join('\n');
+    ok(!/NaN|undefined|null/.test(all) && !HC.BANNED.test(all), 'h6 빈 값·금지 표현 ' + i);
+    const sjs = M.seunRange(ch, Y, Y + 9).filter(x => M.getSamjae(ch.pillars.year.b, x.year).active);
+    sjs.forEach(x => { const st = M.getSamjae(ch.pillars.year.b, x.year).stage, sc = Math.round(M.evaluateDomainLuck(ch, x, 'seun', {}).accident.score);
+      ok(r.risk.includes(x.year + '년(' + M.gzName(x) + ')은 ' + st) && r.risk.includes(sc + '점'), 'h6 삼재 해 단계·지수 ' + i + ' ' + x.year);
+      ok(r.risk.includes(st + '(' + MS.STAGE[st][0] + ')에는'), 'h6 단계별 조심 문장 ' + st); });
+    const cy = MS.cycle(M, ch.pillars.year.b, Y);
+    ok(r.reality.includes(cy.years.map(q => q.br).join('·') + '년이 삼재'), 'h6 띠 묶음·삼재 년지 설명 ' + i);
+    if (!sjs.length) ok(r.risk.includes('다음 삼재는 ' + cy.start + '~'), 'h6 다음 삼재 안내 ' + i);
+    const nowSj = M.getSamjae(ch.pillars.year.b, Y); ok(!nowSj.active || r.title.includes('삼재 3년 중'), 'h6 올해 삼재면 제목에 몇 번째 해 ' + i);
+  }
+  ok(/samjae-copy\.js\?v=/.test(fs.readFileSync(path.join(root, 'report/v2/health-chapters.js'), 'utf8')), 'h6 공용 문안 불러오기');
+  ok(/health-chapters\.js\?v=20261124-sj/.test(fs.readFileSync(path.join(root, 'report/v2/index.html'), 'utf8')), '상세풀이 캐시 꼬리표');
+}
+
 console.log(fail ? `\n✗ ${fail}/${n} 실패` : `\n✓ 삼재 검증 ${n}항목 통과`);
 process.exit(fail ? 1 : 0);
