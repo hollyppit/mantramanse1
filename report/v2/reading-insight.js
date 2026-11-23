@@ -123,6 +123,13 @@ function facts(sd){var f={},P=sd.pillars||{};
  return f;}
 // 자리 설명은 같은 관점에서 자리마다 세 가지 표현을 돌려 쓰고, 한 문단 묶음 안에서 같은 자리를 다시 말할 때는 생략한다. 다 쓰고 나면 생략한다.
 function pillarLine(lens,pillar,opt){if(opt.skipPillar)return '';var d=D(),arr=d.PILLAR&&d.PILLAR[lens]&&d.PILLAR[lens][pillar];if(!arr||!arr.length)return '';var i=opt.pv||0;return i<arr.length?arr[i]+' ':'';}
+// 생활 모습 먼저(2026-11-23): "건록은 스스로 서는 단단한 기운이라, 자립심이 강하고 …해요." 꼴 문장을
+//   "자립심이 강하고 …해요. 어린 시절·첫인상 자리(년주)에 스스로 서는 단단한 기운(건록)이 있어서예요." 로 바꾼다. 꼴이 다르면 null(예전 문장).
+var PLACE_PLAIN={year:'어린 시절·첫인상 자리',month:'사회생활·부모 자리',day:'나 자신·배우자 자리',hour:'자녀·말년 자리'};
+var LIFE_FIRST=/^(\S+?)[은는] (.{2,40}?)(?:이라,?|라,) (.+)$/;
+function lifeFirst(t,pillar,where,opt){var m=String(t).match(LIFE_FIRST);if(!m||!PLACE_PLAIN[pillar])return null;var life=m[3].trim(),desc=m[2].trim(),term=m[1];
+ if(opt&&opt.noIntro)return life;
+ return life+' '+PLACE_PLAIN[pillar]+'('+where+')에 '+desc+'('+term+')'+josa(desc,'이','가')+' 있어서예요.';}
 // 관점(lens)·요소·값에 맞는 문단 하나. 없으면 ''.
 function text(lens,slot,v,opt){var d=D(),t,x;opt=opt||{};var J=function(lead,rest){return opt.noIntro?rest:lead+rest;};
  if(slot==='pair'){t=d.PAIR&&d.PAIR[lens]&&d.PAIR[lens][v.s+'|'+v.w];return t?J('가장 큰 기운 '+v.s+'('+GLOSS[v.s]+')과 가장 작은 기운 '+v.w+'('+GLOSS[v.w]+')의 조합이에요. ',t):'';}
@@ -130,8 +137,10 @@ function text(lens,slot,v,opt){var d=D(),t,x;opt=opt||{};var J=function(lead,res
  if(slot==='lack'){t=d.LACK&&d.LACK[lens]&&d.LACK[lens][v.el];return t?J('원국에 '+v.el+'('+EL_GLOSS[v.el]+') 기운이 거의 없어요. ',t):'';}
  if(slot==='clim'){t=d.CLIMATE&&d.CLIMATE[lens]&&d.CLIMATE[lens][v.key];var lb=d.CLIMATE&&d.CLIMATE.LABEL&&d.CLIMATE.LABEL[v.key];return t&&lb?J('사주 전체의 기후는 '+lb+josa(lb,'이에요','예요')+'. ',t):'';}
  if(/^st_/.test(slot)){t=d.STAGE&&d.STAGE[lens]&&d.STAGE[lens][v.stage];var nm=PILLAR_NAME[v.pillar]+'주';
+  var pf=t&&lifeFirst(t,v.pillar,nm,opt);if(pf)return pf;
   return t?J(nm+'의 12운성은 ‘'+v.stage+'’'+josa(v.stage,'이에요','예요')+'. '+pillarLine(lens,v.pillar,opt),t):'';}
  if(/^tg_/.test(slot)){var tgm=d.TG&&d.TG[lens]&&d.TG[lens][v.tg];var pos=PILLAR_NAME[v.pillar]+(v.stem?'간':'지');
+  var pf2=tgm&&lifeFirst(tgm,v.pillar,pos,opt);if(pf2)return pf2;
   return tgm?J(pos+'에 '+v.tg+josa(v.tg,'이','가')+' 놓여 있어요. '+pillarLine(lens,v.pillar,opt),tgm):'';}
  if(slot==='rel1'||slot==='rel2'||slot==='rel3'){var key=REL_TYPE_KEY[v.type],tm=d.RELTYPE&&d.RELTYPE[lens]&&d.RELTYPE[lens][key],pm=d.RELPAIR&&d.RELPAIR[lens]&&d.RELPAIR[lens][v.pair];
   return tm&&pm?J(relPlace(v.type,v.members)+' 사이에 '+v.type+josa(v.type,'이','가')+' 걸려 있어요. '+pm+' ',tm):'';}

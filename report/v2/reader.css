@@ -368,3 +368,26 @@ body #wstrip button{max-width:none;text-overflow:clip}
 
 /* 계절·월령 한 줄(2026-11-20): 오행 그래프 아래 — 글자 수와 실제 힘의 차이 */
 .reading-chart-note{margin:8px 0 0;font-size:.82em;line-height:1.55;opacity:.78}
+/* 용어 각주(term-notes.js, 2026-11-23): 본문 속 용어 단추와 뜻 말풍선 */
+button.tn{all:unset;display:inline;cursor:pointer;color:inherit;font:inherit;line-height:inherit;border-bottom:1px dashed rgba(213,185,127,.75);padding:0 1px;border-radius:2px;-webkit-tap-highlight-color:transparent}
+button.tn:hover,button.tn[aria-expanded="true"]{background:rgba(213,185,127,.18);border-bottom-style:solid}
+button.tn:focus-visible{outline:2px solid #D5B97F;outline-offset:2px}
+.tn-pop{position:fixed;z-index:9999;width:min(320px,calc(100vw - 24px));box-sizing:border-box;padding:14px 16px 12px;border-radius:14px;background:#1d1a16;color:#ece6d8;border:1px solid rgba(213,185,127,.45);box-shadow:0 12px 32px rgba(0,0,0,.45);font-size:14px;line-height:1.65;word-break:keep-all;text-align:left}
+.tn-pop-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin-bottom:6px}.tn-pop-h b{font-size:15px;color:#D5B97F}.tn-pop-h span{font-size:13px;color:#cfc6b4}
+.tn-pop p{margin:0 0 8px}.tn-pop .tn-here{padding:8px 10px;border-radius:10px;background:rgba(213,185,127,.12)}.tn-pop .tn-here em{display:block;font-style:normal;font-size:12px;color:#D5B97F}
+.tn-pop .tn-x{display:block;margin:4px 0 0 auto;min-height:32px;padding:4px 14px;border-radius:999px;border:1px solid rgba(213,185,127,.5);background:transparent;color:#ece6d8;font:inherit;font-size:13px;cursor:pointer}
+/* 시기표 카드(reading-text.js periodsHtml, 2026-11-23): 지나온 10년 · 지금 · 다음 10년 · 그다음 */
+.rd-periods h3{margin:0 0 10px}
+.rd-periods .rp-list{list-style:none;margin:0;padding:0 0 0 14px;border-left:2px solid rgba(213,185,127,.3)}
+.rd-periods .rp-item{position:relative;margin:0 0 12px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);word-break:keep-all}
+.rd-periods .rp-item::before{content:"";position:absolute;left:-21px;top:18px;width:10px;height:10px;border-radius:50%;background:var(--t,#7f8696);box-shadow:0 0 0 3px rgba(0,0,0,.35)}
+.rd-periods .t-good{--t:#6fbf8c}.rd-periods .t-ok{--t:#9aa1b0}.rd-periods .t-care{--t:#d27a4c}
+.rd-periods .rp-now{background:rgba(213,185,127,.12);border-color:rgba(213,185,127,.55)}
+.rd-periods .rp-past{opacity:.86}
+.rd-periods .rp-when{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;margin-bottom:6px}
+.rd-periods .rp-when b{font-size:15px;color:#D5B97F}.rd-periods .rp-age{font-size:13px;color:#d9d2c3}
+.rd-periods .rp-tone{font-style:normal;font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid var(--t);color:var(--t)}
+.rd-periods .rp-item p{margin:0;line-height:1.7}
+.rd-periods .rp-gz{display:block;margin-top:4px;font-size:12px;color:#a39c8e}
+.rd-periods .rp-note{margin:4px 0 8px;padding:10px 12px;border-radius:10px;background:rgba(210,122,76,.12);border-left:3px solid #d27a4c;line-height:1.65}
+.rd-periods .rp-foot{margin:6px 0 0;font-size:12.5px;color:#a39c8e;line-height:1.6}

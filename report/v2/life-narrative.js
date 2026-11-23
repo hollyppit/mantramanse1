@@ -184,6 +184,51 @@
   function crossing(cur, next, now) { return !!(cur && next && cur.end - now < CROSS_YEARS * YEAR); }
   function crossLead(cur, next) { return '지금은 ' + cur.gz + ' 대운이 저물고 ' + next.gz + ' 대운으로 넘어가는 교운기예요(' + next.year0 + '년 무렵 바뀌어요). 끝나 가는 10년보다 새로 들어오는 ' + next.gz + ' 대운을 기준으로 보는 게 맞아요.'; }
   var CROSS_TIP = '대운이 바뀌는 앞뒤 1~2년은 일·관계·생활의 판이 흔들리기 쉬워요. 지난 10년의 방식을 정리하고, 큰 결정은 바뀐 흐름이 자리 잡는지 확인한 뒤에 내리세요.';
+  // ───────── 시기표 카드(2026-11-23) ─────────
+  // "몇 살~몇 살(연도)에는 이렇다"를 한눈에: 지나온 10년 · 지금 · 다음 10년 · 그다음. 나이·연도·흐름(tone)은 periods()의 엔진 값만 쓰고,
+  // 문장은 장마다 고유한 CH_LUCK 문장(지금 운 단계와 같은 출처)을 시기별로 나눠 쓴다. reading-text.js 가 카드로 그리고, 카드가 다룬 운 문단은 본문에서 뺀다.
+  function cardItem(p, label, text) { return { tense: p.tense, label: label, age: ageTxt(p), years: p.year0 + '~' + new Date(p.end).getUTCFullYear() + '년', gz: p.gz, tone: p.tone, text: text }; }
+  function pastFirst(t) { return pastOne(sentences(t)[0] || ''); }
+  function pastAll(t) { return sentences(t).map(pastOne).join(' '); }
+  function pastOne(f) {
+    return f.replace(/시기예요\.$/, '시기였어요.').replace(/때예요\.$/, '때였어요.').replace(/쉬워요\.$/, '쉬웠어요.').replace(/있어요\.$/, '있었어요.').replace(/늘어나요\.$/, '늘어났어요.').replace(/늘어요\.$/, '늘었어요.').replace(/와요\.$/, '왔어요.').replace(/모아요\.$/, '모았어요.').replace(/여요\.$/, '였어요.').replace(/져요\.$/, '졌어요.').replace(/커져요\.$/, '커졌어요.').replace(/돼요\.$/, '됐어요.').replace(/이에요\.$/, '이었어요.').replace(/([가-힣])예요\.$/, '$1였어요.');
+  }
+  function luckSpec(M, ch, now, chapterId) {
+    var D0 = D(); if (!D0) return null;
+    var ss = D0.CH_LUCK_SENIOR && D0.CH_LUCK_SENIOR[chapterId]; if (ss && profile(M, ch, now).has('age:senior')) return Object.assign({ senior: true }, ss);
+    var ys = D0.CH_LUCK_YOUNG && D0.CH_LUCK_YOUNG[chapterId]; if (ys && profile(M, ch, now).has('age:young')) return Object.assign({ young: true }, ys);
+    return D0.CH_LUCK && D0.CH_LUCK[chapterId] || null;
+  }
+  function periodCard(M, ch, now, chapterId) {
+    var spec = luckSpec(M, ch, now, chapterId), ps = periods(M, ch, now), ci = ps.findIndex(function (p) { return p.tense === 'current'; }), items = [];
+    if (!spec || !spec.g) {
+      // 장 고유 문장(CH_LUCK)이 없는 장: luckStage0 와 같은 주제별 대운 문장(periodText)을 앞 두 문장만 쓴다. 문형 돌림 순번은 따로 둬 본문 문장이 바뀌지 않게 한다
+      var lens = CHAPTERS[chapterId], D0 = D(); if (!lens || chapterId === 'timeline_self_20' || ci < 0 || !D0 || !D0.OUT || !D0.OUT[lens]) return null;
+      var tmp = { variant: {} }, TR = /^(?:잘 굴러가던 흐름이 한 번 꺾이는|막혀 있던 흐름이 뒤집히는|앞 10년보다 확실히 숨통이|앞 10년보다 무게가)/, two = function (p, prev) { return sentences(periodText(D0, tmp, lens, p, prev)).filter(function (x) { return !TR.test(x); }).slice(0, 2).join(' '); };
+      var c0 = ps[ci], p0 = ps[ci - 1], q1 = ps[ci + 1], q2 = ps[ci + 2], cx = crossing(c0, q1, now);
+      if (p0 && p0.age0 >= 16) items.push(cardItem(p0, '지나온 10년', pastAll(two(p0, ps[ci - 2]))));   // 어린 시절 구간은 주제별 문장이 없어(공통 YOUTH) 여러 장에 같은 문장이 되므로 뺀다
+      items.push(cardItem(c0, cx ? '지금 · 곧 끝나요' : '지금', two(c0, p0)));
+      if (q1 && q1.age0 < 85) items.push(cardItem(q1, cx ? '곧 들어와요' : '다음 10년', two(q1, c0)));
+      if (q2 && q2.age0 < 85) items.push(cardItem(q2, '그다음 10년', two(q2, q1)));
+      return items.length >= 2 ? { items: items, cross: cx ? CROSS_TIP : '' } : null;
+    }
+    var g = spec.g;
+    if (spec.late) {
+      ps.filter(function (p) { return p.age0 >= 50 && p.age0 < 85; }).slice(0, 3).forEach(function (p, k, a) {
+        var same = k > 0 && a[k - 1].group === p.group;
+        items.push(cardItem(p, p.tense === 'past' ? '지나온 시기' : p.tense === 'current' ? '지금' : '앞으로', same ? '앞 시기와 같은 성격의 기운이 이어져요. 그때 만든 생활 방식이 그대로 굳어지기 쉬워요.' : p.tense === 'past' ? pastFirst(g[p.group]) : g[p.group]));
+      });
+      return items.length >= 2 ? { items: items, cross: '' } : null;
+    }
+    if (ci < 0) return null;
+    var cur = ps[ci], prev = ps[ci - 1], n1 = ps[ci + 1], n2 = ps[ci + 2], cross = crossing(cur, n1, now), adultOnly = function (p) { return !(spec.young && p.age0 >= 20); };
+    if (prev && prev.age1 >= 20 && !spec.young) items.push(cardItem(prev, '지나온 10년', pastFirst(g[prev.group])));
+    items.push(cardItem(cur, cross ? '지금 · 곧 끝나요' : '지금', g[cur.group]));
+    if (n1 && n1.age0 < 85 && adultOnly(n1)) items.push(cardItem(n1, cross ? '곧 들어와요' : '다음 10년', n1.group === cur.group ? '같은 흐름이 10년 더 이어져요. ' + (sentences(g[n1.group])[0] || '') : g[n1.group]));
+    if (n2 && n2.age0 < 85 && n1 && adultOnly(n2) && !spec.months) items.push(cardItem(n2, '그다음 10년', n2.group === n1.group ? '앞 시기와 같은 흐름이 이어져요. ' + (sentences(g[n2.group])[0] || '') : g[n2.group]));
+    items.forEach(function (x) { x.text = String(x.text || '').trim(); });
+    return items.length >= 2 ? { items: items, cross: cross ? CROSS_TIP : '' } : null;
+  }
   function chapterLuck(M, ch, now, spec, st) {
     var ps = periods(M, ch, now), ci = ps.findIndex(function (p) { return p.tense === 'current'; }), out = [];
     var eye = spec.eye, g = spec.g, line = function (p) { return dedupe(st, g[p.group]); };
@@ -385,12 +430,14 @@
       }
     }
     if (res && !res.trace.length) res.trace = trace;
+    if (res && !res.card) { try { res.card = periodCard(M, ch, now, chapterId); } catch (e) { res.card = null; } }
     st.cache[chapterId] = res; return res;
   }
   function composeLife(M, ch, now, P, st, D0) {
     var ps = periods(M, ch, now); if (ps.length < 3) return null;
     var arc = arcOf(ps), A = D0.ARC[arc], hookS = sentences(A.hook), past = ps.filter(function (p) { return p.tense === 'past'; }), cur = ps.find(function (p) { return p.tense === 'current'; }), fut = ps.filter(function (p) { return p.tense === 'future' && p.age0 < 80; });
-    var line = function (p, prev) { return ageTxt(p) + ' · ' + p.gz + ' 대운 (' + p.year0 + '년~) — ' + periodText(D0, st, 'life', p, prev); };
+    var cardItems = [];   // 시기표 카드: 같은 periodText 문장을 시기별 칸으로도 내보낸다(본문 문단과 같은 문장)
+    var line = function (p, prev) { var t = periodText(D0, st, 'life', p, prev); cardItems.push(cardItem(p, p.tense === 'past' ? '지나온 시기' : p.tense === 'current' ? '지금' : '앞으로', t)); return ageTxt(p) + ' · ' + p.gz + ' 대운 (' + p.year0 + '년~) — ' + t; };
     var rows = [];
     rows.push({ stage: 'core', label: '내 인생의 모양: ' + A.name, text: hookS.slice(1).join(' ') + (cur ? ' 지금은 ' + ageTxt(cur) + ' 구간을 지나고 있어요.' : '') });
     if (past.length) rows.push({ stage: 'life', label: '지나온 시기 — 맞춰 보기', text: past.map(function (p) { return line(p, ps[p.i - 1 - ps[0].i]); }).join('\n\n') });
@@ -401,7 +448,7 @@
     rows.push({ stage: 'advice', label: '흐름을 내 편으로 쓰는 법', text: A.tip + ' 앞으로 남은 시기 중에는 ' + (best ? josa(ageTxt(best) + '(' + best.gz + ' 대운)', '이/가') + ' 가장 힘이 실리는 구간이니 큰 움직임은 그 구간에 맞추세요.' : '가장 좋았던 구간이 이미 지나갔으니, 그때 만든 것을 지키고 다듬는 쪽이 남은 시기의 핵심이에요.') });
     rows.forEach(function (r) { r.text = dedupe(st, r.text); });
     var evd = evidenceRows(P, null, D0, ['대운은 ' + (ch.daeun.forward ? '순행' : '역행') + '이며, 첫 대운은 실제로 만 ' + (ps[0].age0).toFixed(1) + '세에 시작해요(대운수 ' + ch.daeun.num + '). 나이 구간은 대운이 바뀌는 실제 시각으로 계산했어요.', '인생의 모양은 대운마다의 흐름 점수(통합 용신·관계·구조)를 이어 분류했어요: ' + ps.filter(function (p) { return p.age0 < 80; }).map(function (p) { return Math.floor(p.age0) + '세 ' + Math.round(p.fit); }).join(' · ') + '.', TIME_NOTE]);
-    return { chapterId: 'timeline_self_20', lens: 'life', rule: 'arc:' + arc, arc: arc, hook: hookS[0], rows: rows.filter(function (r) { return r.text; }), evidence: evd, trace: [], version: VERSION };
+    return { card: cardItems.length >= 2 ? { items: cardItems, cross: '' } : null, chapterId: 'timeline_self_20', lens: 'life', rule: 'arc:' + arc, arc: arc, hook: hookS[0], rows: rows.filter(function (r) { return r.text; }), evidence: evd, trace: [], version: VERSION };
   }
 
   // ───────── 규칙 검증·게시본 병합 (관리자 화면·API·테스트가 같은 함수를 쓴다) ─────────

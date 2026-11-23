@@ -129,7 +129,7 @@
     // 1) 그릇 이미지 + 이름
     out.push(scene(sec('dp-hero', cap('MY WEALTH BOWL · 나의 재물 그릇') + fig(H, 'wealth:' + bk, 'wealth', BW[0], '') + '<h3 class="dp-h">' + esc(nz(H) + ' ' + BW[0] + ' 같은 그릇입니다') + '</h3><p class="lead">' + esc(BW[1]) + '</p>' +
       '<div class="dp-tags">' + chip('힘 · ' + P.name) + chip('성질 · ' + RT.name) + (p.role ? chip('재물 인연 · ' + p.role) : '') + '</div>' +
-      '<p class="dp-note">①그릇의 힘(신강·신약 × 재성) ②재물의 성질(정재·편재·통로) ③보관과 누수(재고·겁재탈재) ④재물 인연(재성이 용신인가 기신인가)을 차례로 읽은 <b>상징적 비유</b>입니다. 아래 점수는 전통 규칙을 시각화한 서비스 내부 지표이며, 실제 재산 규모·소득 상한·투자 수익률을 뜻하지 않습니다. 개인의 소득·부채·지출은 실제 자료로 따로 확인합니다.</p>')));
+      '<p class="dp-note">①그릇이 얼마나 단단한지 ②돈이 어떤 길로 들어오는지 ③어디로 새는지 ④돈과 인연이 깊은지, 네 가지를 차례로 본 <b>비유</b>예요. 아래 점수는 내 사주 안에서 견줘 본 값이라 실제 재산이나 수입 액수를 뜻하지는 않아요.</p>')));
     // 2) ① 그릇의 힘
     out.push(scene(sec('', cap('① 그릇의 힘 · ' + P.name + '(' + P.short + ')') + '<p class="lead">' + esc(P.head) + '</p>' + P.body.map(function (t) { return '<p class="lead">' + esc(t) + '</p>'; }).join('') +
       '<div class="dp-card" style="margin-top:12px"><h4>명리 근거</h4><ul class="dp-ul">' + li('일간의 힘 · ' + (p.band || '중화') + (sd.strength && sd.strength.zone ? ' (' + sd.strength.zone + ')' : '')) + li('재성(돈의 기운) ' + rd(p.C) + '% — 정재 ' + rd(p.pj) + '% · 편재 ' + rd(p.pp) + '%') + li(p.C >= 26 ? '재성이 많은 편(재왕)' : p.C < 14 ? '재성이 적은 편(재약)' : '재성이 보통') + '</ul></div>')));

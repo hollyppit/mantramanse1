@@ -83,7 +83,7 @@
     out.push(scene(sec('', cap('지금 달리는 도로 · 날씨') + '<div class="dp-road">' +
       (road ? '<div><small>도로(대운)</small><b>' + esc(road.ganzhi) + ' 대운</b><span>' + esc(SEA[road.season] || '') + ' · ' + esc(road.condition || '') + '</span></div>' : '') +
       (se ? '<div><small>날씨(세운)</small><b>' + esc(se.year + ' ' + se.ganzhi) + '</b><span>' + esc(SEA[se.season] || '') + ' · ' + esc(se.condition || '') + '</span></div>' : '') +
-      (mo ? '<div><small>교통 상황(월운)</small><b>이번 달 ' + esc(mo.ganzhi) + '</b><span>' + esc(SEA[mo.season] || '') + ' · ' + esc(mo.condition || '') + '</span></div>' : '') + (day?'<div><small>당일 세부 조건(일진)</small><b>'+esc(H.M.gzNameK(day))+'</b><span>'+esc(H.M.flowLabel(day.ev))+' · 서비스 내부 지표</span></div>':'') + '</div><p class="dp-note">원국은 차의 기본 구조, 일간은 운전의 중심, 오행·십성은 부품, 통근·강약은 구동 안정성에 대한 교육용 비유입니다. 도로(대운), 날씨(세운), 교통 상황(월운)은 별도의 시기 조건입니다. 실제 판단과 행동은 운전자인 개인의 선택이며, 이 비유를 운세 계산 공식으로 사용하지 않습니다. 이어지는 "운의 흐름" 챕터에서 시기별로 자세히 봅니다.</p>')));
+      (mo ? '<div><small>교통 상황(월운)</small><b>이번 달 ' + esc(mo.ganzhi) + '</b><span>' + esc(SEA[mo.season] || '') + ' · ' + esc(mo.condition || '') + '</span></div>' : '') + (day?'<div><small>당일 세부 조건(일진)</small><b>'+esc(H.M.gzNameK(day))+'</b><span>'+esc(H.M.flowLabel(day.ev))+' · 참고 점수</span></div>':'') + '</div><p class="dp-note">원국은 차의 기본 구조, 일간은 운전의 중심, 오행·십성은 부품, 통근·강약은 구동 안정성에 대한 교육용 비유입니다. 도로(대운), 날씨(세운), 교통 상황(월운)은 별도의 시기 조건입니다. 실제 판단과 행동은 운전자인 개인의 선택이며, 이 비유를 운세 계산 공식으로 사용하지 않습니다. 이어지는 "운의 흐름" 챕터에서 시기별로 자세히 봅니다.</p>')));
     return { title: '내 사주를 자동차에 비유하면', sub: car[0], scenes: out };
   };
   function carPros(H, car) {
