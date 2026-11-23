@@ -43,7 +43,7 @@ IDS.forEach(id => assert.ok(has[id] >= n * (id === 'timeline_self_24' ? 0.8 : 0.
 // 화면 연결
 const rd = f => fs.readFileSync(path.join(root, f), 'utf8');
 const hub = rd('report/hub/hub-timeline.js');
-assert.ok(/'\/luck-layers-view\.js'/.test(hub) && /lvHtml\(it, lvl, /.test(hub) && /graph \+ spanHtml\(\) \+ body;/.test(hub), '타임라인 연결');
+assert.ok(/'\/luck-layers-view\.js'/.test(hub) && /lvHtml\(it, lvl, /.test(hub) && /graph\)? \+ spanHtml\(\) \+ body;/.test(hub), '타임라인 연결');
 // 2026-11-20: 시대 흐름(삼원구운·원회운세·오운육기)은 만세력 운세 흐름 카드에만 — 타임라인·종합풀이 장에서는 뺀다
 assert.ok(!/eraHtml|macro-era|MacroBridge|woonGi|시대의 바람/.test(hub) && !('timeline_self_20' in B.MAP), '타임라인에서 시대 흐름 제거');
 // 2026-11-18 읽기 쉽게: 시기 카드의 구조·①~④는 '더 깊이 보기' 하나로, 자미두수 막대·2년 전략은 접는 상자로, 시대 흐름은 짧게(compact)

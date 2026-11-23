@@ -345,3 +345,40 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 #hub .sw-g{ color: #178a4a !important; font-weight: 700; } #hub .sw-b{ color: #c9412d !important; font-weight: 700; } html:not(.theme-mist) #hub .sw-g{ color: #5fd68d !important; } html:not(.theme-mist) #hub .sw-b{ color: #ff7a66 !important; }
 /* 모바일: 바로가기 칩 줄 — 마이페이지는 아이콘만(칩을 덜 가리게), 칩 높이 44px */
 @media (max-width: 480px){ #hub .tq-nav a{ min-height: 44px; } #hub .tq-nav a.tq-edit{ font-size: 0; gap: 0; min-width: 44px; padding: 8px 12px; justify-content: center; } #hub .tq-nav a.tq-edit svg{ width: 18px; height: 18px; } }
+/* ── 대운·세운·월운 단위 구분(2026-11-23): 단위 머리띠·눈금자·색·막대 모양을 다르게 ──
+   대운 = 10년 · 인생의 계절(호박색, 이어진 넓은 띠) / 세운 = 1년 · 그해의 날씨(청록, 기둥) / 월운 = 1달 · 이번 달의 기온(보라, 점 막대) */
+#hub .u-daeun{ --u: #C08A3E; --u-bg: rgba(192,138,62,.08); }
+#hub .u-seun{ --u: #2E9C93; --u-bg: rgba(46,156,147,.08); }
+#hub .u-wolun{ --u: #8A6AD8; --u-bg: rgba(138,106,216,.08); }
+#hub .tq-unit{ margin: 18px 0 10px; padding: 12px 12px 6px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--u) 35%, transparent); border-left: 5px solid var(--u); background: var(--u-bg); }
+#hub .tq-unit-h{ margin-bottom: 4px; }
+#hub .tq-unit-t{ display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1rem; }
+#hub .tq-unit-t b{ font-family: var(--f-serif); }
+#hub .tq-unit-k{ font-style: normal; flex: none; min-width: 44px; text-align: center; padding: 3px 8px; border-radius: 999px; background: var(--u); color: #fff; font-weight: 800; font-size: .82rem; letter-spacing: .02em; }
+#hub .tq-unit-d{ margin: 4px 0 8px; font-size: .84rem; opacity: .85; }
+#hub .tq-ruler{ list-style: none; display: flex; flex-wrap: wrap; align-items: stretch; gap: 4px; margin: 0 0 4px; padding: 0; }
+#hub .tq-ruler li{ display: flex; flex-direction: column; gap: 1px; padding: 5px 10px; border-radius: 10px; border: 1px dashed color-mix(in srgb, var(--u) 45%, transparent); opacity: .62; font-size: .74rem; line-height: 1.3; }
+#hub .tq-ruler li + li::before{ content: "▸"; position: absolute; margin: 6px 0 0 -14px; opacity: .6; }
+#hub .tq-ruler li{ position: relative; margin-left: 10px; } #hub .tq-ruler li:first-child{ margin-left: 0; }
+#hub .tq-ruler li b{ color: var(--u); font-weight: 800; } #hub .tq-ruler li span{ opacity: .85; }
+#hub .tq-ruler li.on{ opacity: 1; border-style: solid; border-color: var(--u); background: color-mix(in srgb, var(--u) 14%, transparent); }
+/* 대운: 넓은 계절 띠가 이어지게 */
+#hub .tq .tq-unit .tq-chart.daeun{ gap: 0; }
+#hub .tq .tq-unit .tq-chart.daeun .tq-bar{ border-radius: 0; flex-basis: clamp(64px, 10vw, 92px); }
+#hub .tq .tq-unit .tq-chart.daeun .tq-bar u{ width: 100%; border-radius: 0; box-shadow: inset -1px 0 0 rgba(255,255,255,.35); }
+#hub .tq .tq-unit .tq-chart.daeun .tq-bar u i{ border-radius: 0; }
+#hub .tq .tq-unit .tq-chart.daeun .tq-bar:first-child u{ border-radius: 10px 0 0 10px; } #hub .tq .tq-unit .tq-chart.daeun .tq-bar:last-child u{ border-radius: 0 10px 10px 0; }
+#hub .tq .tq-unit .tq-chart.daeun .tq-bar span{ font-weight: 800; }
+/* 세운: 기둥 */
+#hub .tq .tq-unit .tq-chart.seun .tq-bar u{ width: 22px; border-radius: 4px 4px 2px 2px; }
+/* 월운: 가는 막대 끝에 점(롤리팝) */
+#hub .tq .tq-unit .tq-chart.wolun .tq-bar u{ width: 4px; overflow: visible; border-radius: 2px; }
+#hub .tq .tq-unit .tq-chart.wolun .tq-bar u i{ position: relative; border-radius: 2px; overflow: visible; }
+#hub .tq .tq-unit .tq-chart.wolun .tq-bar u i::before{ content: ""; position: absolute; top: -7px; left: 50%; width: 14px; height: 14px; border-radius: 50%; transform: translateX(-50%); background: var(--bc, var(--kc, var(--u))); box-shadow: 0 0 0 2px color-mix(in srgb, var(--u) 35%, transparent); }
+/* 상세 카드도 단위 색 띠 */
+#hub .tq-card.u-daeun, #hub .tq-card.u-seun, #hub .tq-card.u-wolun{ border-left: 4px solid var(--u); }
+#hub .tq-card.u-daeun .tq-ct::before, #hub .tq-card.u-seun .tq-ct::before, #hub .tq-card.u-wolun .tq-ct::before{ display: inline-block; margin-right: 6px; padding: 1px 7px; border-radius: 999px; background: var(--u); color: #fff; font-size: .72rem; font-weight: 800; }
+#hub .tq-card.u-daeun .tq-ct::before{ content: "10년"; } #hub .tq-card.u-seun .tq-ct::before{ content: "1년"; } #hub .tq-card.u-wolun .tq-ct::before{ content: "1달"; }
+/* 인생 전체 그래프 단위 안내 */
+#hub .tq-unit-key{ display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 4px 0 2px; font-size: .8rem; }
+#hub .tq-unit-key span{ display: inline-flex; align-items: center; gap: 6px; } #hub .tq-unit-key i{ font-style: normal; padding: 1px 7px; border-radius: 999px; background: var(--u); color: #fff; font-weight: 800; font-size: .72rem; }

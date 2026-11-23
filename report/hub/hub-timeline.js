@@ -153,7 +153,7 @@
       var head = cp
         ? '<h3>' + esc(cp.hook) + '<small>' + esc(tg.label) + ' · ' + esc(tg.meaning) + '</small></h3>' + qk + '<p class="tq-copy">' + esc(cp.body) + '</p>' + (qk ? '' : '<ul class="tq-copy-l"><li><b>해 볼 것</b>' + esc(cp.do) + '</li><li><b>조심할 것</b>' + esc(cp.trap) + '</li></ul>')
         : '<h3>' + esc(tg.label) + '<small>' + esc(tg.meaning || '') + '</small></h3>' + qk;
-      return '<article class="tq-card ' + KEYC(it) + (cp ? ' has-copy' : '') + '"><p class="tq-ct">' + esc(title) + '</p>' + head + '<p class="tq-rule"><b>십신</b> ' + esc(tg.line || '') + '</p>' + ov + (TG && it._ref ? domHtml(it, lvl) : fieldBars(it)) +
+      return '<article class="tq-card u-' + lvl + ' ' + KEYC(it) + (cp ? ' has-copy' : '') + '"><p class="tq-ct">' + esc(title) + '</p>' + head + '<p class="tq-rule"><b>십신</b> ' + esc(tg.line || '') + '</p>' + ov + (TG && it._ref ? domHtml(it, lvl) : fieldBars(it)) +
         '<p class="tq-sc">흐름 점수 ' + pct(it.scores.fit) + ' · 운의 세기 ' + it.scores.intensity + ' · 변화 신호 ' + it.scores.volatility + (root.MantraLuckGrade && it.scores.fit != null ? ' · 등급 ' + root.MantraLuckGrade.flow(it.scores.fit).n : it.condition ? ' · 상태 ' + esc(it.condition) : '') + '</p>' + ovFig(it, lvl) + lvHtml(it, lvl, (TG && it._ref ? structHtml(it, lvl) : '') + (lvl === 'seun' && LV ? pairHtml(it.year) : '')) +
         '<div class="tq-card-acts"><button type="button" class="tq-lnk" data-ev="' + lvl + '" aria-expanded="' + open + '">' + (open ? '근거 닫기' : '자세한 근거 보기') + '</button><a class="tq-lnk" href="#/go?to=future" data-track="timeline_topic_click" data-p="detail_' + lvl + '">이 시기 상세 풀이 →</a></div>' +
         (open ? '<div class="tq-evbox">' + TL.evidenceHtml(TL.evidence(M, ch, it)) + '</div>' : '') + '</article>';
@@ -177,6 +177,18 @@
         '<p class="tq-sub">' + esc(note) + '</p>' +
         '<details class="tq-how"' + (mobile ? '' : ' open') + '><summary>그래프 보는 법</summary><p class="tq-sgleg">' + TG.SIG.map(function (g) { return sgChip(g); }).join('') + '</p><p class="tq-sub">' + esc(legendTxt) + '</p></details></div>';
     }
+    /* ── 단위 머리띠(2026-11-23): 대운·세운·월운을 헷갈리지 않게 그래프마다 단위(10년·1년·1달)·비유·색을 다르게 하고,
+          세 단위가 겹쳐 있는 눈금자(10년 ▸ 1년 ▸ 1달)에 지금 보는 단위와 그 시기를 표시한다. 값은 이미 계산된 대운·해·달 목록 그대로. ── */
+    var UNIT = { daeun: { k: '10년', n: '대운', p: '인생의 계절', d: '10년마다 바뀌는 큰 환경이에요. 막대 하나가 10년이에요.' },
+      seun: { k: '1년', n: '세운', p: '그해의 날씨', d: '대운(계절) 안에서 해마다 바뀌는 분위기예요. 막대 하나가 1년이에요.' },
+      wolun: { k: '1달', n: '월운', p: '이번 달의 기온', d: '한 해 안에서 달마다 바뀌는 흐름이에요(절기 기준). 막대 하나가 한 달이에요.' } };
+    function unitHead(u, ctx) {
+      var U = UNIT[u], dd = ctx && ctx.d || real.filter(function (x) { return x.idx === st.d; })[0] || cur, yy = ctx && ctx.y || st.y, mm = ctx && ctx.m != null ? ctx.m : st.m != null ? st.m : (yy === nowY ? new Date(now + 9 * 3600e3).getUTCMonth() + 1 : null);
+      var step = function (k, label, val) { return '<li class="u-' + k + (k === u ? ' on' : '') + '"' + (k === u ? ' aria-current="true"' : '') + '><b>' + label + '</b><span>' + esc(val || '—') + '</span></li>'; };
+      return '<div class="tq-unit-h"><p class="tq-unit-t"><i class="tq-unit-k">' + U.k + '</i><b>' + tip(U.n) + ' · ' + esc(U.p) + '</b></p><p class="tq-unit-d">' + esc(U.d) + '</p>' +
+        '<ol class="tq-ruler" aria-label="운의 단위: 10년 안에 1년, 1년 안에 1달">' + step('daeun', '10년 · 대운', dd ? dd.ganzhi + ' ' + dd.startYear + '~' + dd.endYear : '') + step('seun', '1년 · 세운', yy + '년') + step('wolun', '1달 · 월운', mm ? mm + '월' : '') + '</ol></div>';
+    }
+    function unitWrap(u, inner, ctx) { return '<section class="tq-unit u-' + u + '">' + unitHead(u, ctx) + inner + '</section>'; }
     function barChart(items, o) { // 막대 그래프: 버튼 하나가 막대 하나. 높이 = 고른 지표 점수, 색·위 글자 = 신호등 단계, 아래 글자 = 십신(천간 기준)
       return '<div class="tq-chart ' + (o.cls || '') + '" role="group" aria-label="' + esc(o.label) + '">' + items.map(function (it, i) {
         if (it.pre) return '<span class="tq-bar pre" aria-label="' + esc(it.startAge + '~' + it.endAge + '세 대운 전') + '"><b>—</b><u></u><span>' + esc(it.startAge) + '세</span><small>대운 전</small></span>';
@@ -216,7 +228,7 @@
         if (q.age % 10 === 0) s += '<text x="' + (x + step / 2) + '" y="' + (H0 - B0 + 13) + '" font-size="9" text-anchor="middle" fill="#8a8f9c">' + q.age + '세</text><text x="' + (x + step / 2) + '" y="' + (H0 - B0 + 24) + '" font-size="8" text-anchor="middle" fill="#6c7180">' + q.year + '</text>';
       });
       s += '</svg>';
-      return '<h4 class="tq-h4">인생 전체 · ' + esc(mName()) + '</h4><p class="tq-sub">태어난 해부터 90년을 한 해씩 막대로 그렸어요. 배경 띠는 대운 10년 구간이에요. 막대를 누르면 아래 "지금과 앞으로"에서 그 해가 열려요.</p><div class="tq-life">' + s + '</div>';
+      return '<h4 class="tq-h4">인생 전체 · ' + esc(mName()) + '</h4><p class="tq-unit-key"><span class="u-seun"><i>1년</i>가는 막대 하나 = 한 해(세운)</span><span class="u-daeun"><i>10년</i>뒤의 넓은 띠 = 대운 한 구간</span></p><p class="tq-sub">태어난 해부터 90년을 한 해씩 그렸어요. 막대를 누르면 아래 "지금과 앞으로"에서 그 해가 열려요.</p><div class="tq-life">' + s + '</div>';
     }
     // 30년 장기 구간(대운 3개 묶음)·2년 천간 오행 구간 — luck-cycle.js(사전 문구 조합, 스위치 luckCycle)
     var LCm = function () { return GF && GF.lc && root.MantraLuckCycle ? root.MantraLuckCycle : null; }, lcSpans = null;
@@ -339,11 +351,11 @@
         body = detail(sel, '대운 ' + sel.ganzhi + ' · ' + sel.startYear + '~' + sel.endYear + '년 (' + sel.startAge + '~' + sel.endAge + '세)', 'daeun');
         if (G.seun) {
           var ys = years(sel.startYear);
-          body += '<h4 class="tq-h4">이 10년 안의 해</h4><p class="tq-sub">해를 누르면 아래 “지금과 앞으로”에서 그 해의 세운과 월운이 열립니다.</p>' + barChart(ys, { label: sel.ganzhi + ' 대운 안의 해별 흐름', cls: 'seun', attr: function (it) { return 'data-y="' + it.year + '"'; }, sel: function (it) { return st.y === it.year; }, now: function (it) { return !!it.isNow; }, name: function (it) { return it.year + '년 ' + it.ganzhi + ' 세운'; }, top: function (it) { return String(it.year).slice(2) + '년'; }, sub: function (it) { return it.age + '세'; } });
+          body += unitWrap('seun', '<h4 class="tq-h4">' + esc(sel.ganzhi) + ' 대운 10년 안의 해</h4><p class="tq-sub">해를 누르면 아래 “지금과 앞으로”에서 그 해의 세운과 월운이 열립니다.</p>' + barChart(ys, { label: sel.ganzhi + ' 대운 안의 해별 흐름', cls: 'seun', attr: function (it) { return 'data-y="' + it.year + '"'; }, sel: function (it) { return st.y === it.year; }, now: function (it) { return !!it.isNow; }, name: function (it) { return it.year + '년 ' + it.ganzhi + ' 세운'; }, top: function (it) { return String(it.year).slice(2) + '년'; }, sub: function (it) { return it.age + '세'; } }), { d: sel });
         }
       }
-      if (TG) return carHtml() + metricBar() + lifeHtml() + '<h4 class="tq-h4">대운 10년 · ' + esc(mName()) + '</h4><p class="tq-sub">막대가 높을수록 ' + (metric() === 'accident' ? '주의 신호가 많은 시기예요(사고수는 낮을수록 좋음)' : '나에게 유리한 시기예요') + '. 막대 위 글자는 좋고 나쁨 단계, 아래 작은 글자는 그 시기의 성격이에요. 막대를 누르면 자세한 풀이가 열려요.</p>' + graph + spanHtml() + body;
-      return '<p class="tq-sub">막대가 높을수록 내 사주에 잘 맞는 시기예요(흐름 점수 0~100, 50이 보통). 색과 이름은 그 시기의 성격 6가지 중 하나예요. 막대를 누르면 자세한 풀이가 열려요.</p>' + graph + legend + spanHtml() + body;
+      if (TG) return carHtml() + metricBar() + lifeHtml() + unitWrap('daeun', '<p class="tq-sub">지표: ' + esc(mName()) + ' · 막대가 높을수록 ' + (metric() === 'accident' ? '주의 신호가 많은 시기예요(사고수는 낮을수록 좋음)' : '나에게 유리한 시기예요') + '. 막대 위 글자는 좋고 나쁨 단계, 아래 작은 글자는 그 시기의 성격이에요. 막대를 누르면 자세한 풀이가 열려요.</p>' + graph) + spanHtml() + body;
+      return unitWrap('daeun', '<p class="tq-sub">막대가 높을수록 내 사주에 잘 맞는 시기예요(흐름 점수 0~100, 50이 보통). 색과 이름은 그 시기의 성격 6가지 중 하나예요. 막대를 누르면 자세한 풀이가 열려요.</p>' + graph + legend) + spanHtml() + body;
     }
 
     /* ── 영역 3: 지금과 앞으로 ── */
@@ -351,9 +363,11 @@
       var yi = yearItem(st.y), ms = months(st.y), isThis = st.y === nowY;
       var yr = '<div class="tq-yrnav"><button type="button" data-yy="-1" aria-label="이전 해"' + (st.y <= 1901 ? ' disabled' : '') + '>‹</button><h3>' + st.y + '년' + (isThis ? ' <small>올해</small>' : '') + '</h3><button type="button" data-yy="1" aria-label="다음 해"' + (st.y >= 2098 ? ' disabled' : '') + '>›</button></div>';
       var seun = yi ? detail(yi, '세운 ' + yi.ganzhi + ' · ' + yi.year + '년' + (yi.age != null ? ' (' + yi.age + '세)' : ''), 'seun') : '';
-      var mon = G.wolun ? '<h4 class="tq-h4">월별 흐름 (절기 기준)</h4>' + barChart(ms, { label: st.y + '년 월별 흐름', cls: 'wolun', attr: function (it) { return 'data-m="' + it.month + '"'; }, sel: function (it) { return st.m === it.month; }, now: function (it) { return !!it.isNow; }, name: function (it) { return st.y + '년 ' + it.month + '월 ' + it.ganzhi + ' 월운'; }, top: function (it) { return it.month + '월'; }, sub: function (it) { return it.ganzhi; } }) : '';
+      var mon = G.wolun ? '<h4 class="tq-h4">' + st.y + '년 월별 흐름 (절기 기준)</h4>' + barChart(ms, { label: st.y + '년 월별 흐름', cls: 'wolun', attr: function (it) { return 'data-m="' + it.month + '"'; }, sel: function (it) { return st.m === it.month; }, now: function (it) { return !!it.isNow; }, name: function (it) { return st.y + '년 ' + it.month + '월 ' + it.ganzhi + ' 월운'; }, top: function (it) { return it.month + '월'; }, sub: function (it) { return it.ganzhi; } }) : '';
       var cm = st.m != null ? ms.filter(function (x) { return x.month === st.m; })[0] : null, monthCard = cm ? detail(cm, '월운 ' + cm.ganzhi + ' · ' + st.y + '년 ' + cm.month + '월 (' + cm.term + ' 이후)', 'wolun') : '';
-      return (TG ? metricBar(true) + tenHtml() : '') + yr + seun + (LV && LV.quick ? '' : pairHtml()) + mon + monthCard + '<p class="tq-sub">월운은 절기를 기준으로 하며, 1월 막대는 소한 이후입니다. 일별 흐름과 택일은 일진 캘린더에서 볼 수 있습니다.</p>';
+      var dy = dOf(st.y);
+      return (TG ? metricBar(true) + tenHtml() : '') + unitWrap('seun', yr + seun + (LV && LV.quick ? '' : pairHtml()), { d: dy }) +
+        (mon ? unitWrap('wolun', mon + monthCard + '<p class="tq-sub">월운은 절기를 기준으로 하며, 1월 막대는 소한 이후입니다. 일별 흐름과 택일은 일진 캘린더에서 볼 수 있습니다.</p>', { d: dy }) : '<p class="tq-sub">일별 흐름과 택일은 일진 캘린더에서 볼 수 있습니다.</p>');
     }
 
     /* ── 영역 4: 인생의 주요 주제 = 운명 세계 ──
