@@ -408,3 +408,12 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 #hub .tq-glance{ width: 100%; max-width: none; }
 #hub .tq-g, html.theme-mist #hub .tq .tq-g{ color: #fff !important; }
 html.theme-mist #hub #tq .tq-body > ol.tq-glance, #hub #tq .tq-body > ol.tq-glance{ max-width: none; }
+/* 2026-11-24 홈 구성: '한눈에 보는 나'를 명부 첫 장처럼 — PC 에서는 일주 초상(왼쪽)과 다섯 줄(오른쪽)을 나란히 */
+@media (min-width: 900px){
+  #hub #tq-glance{ display: grid; grid-template-columns: minmax(220px, 280px) 1fr; column-gap: 28px; align-items: start; }
+  #hub #tq-glance > .tq-ava{ grid-column: 1; grid-row: 1 / span 2; margin: 8px 0 0; position: sticky; top: 120px; }
+  #hub #tq-glance > .tq-ava .tq-ava-ring{ width: clamp(200px, 20vw, 260px); }
+  #hub #tq-glance > .tq-sech, #hub #tq-glance > .tq-body{ grid-column: 2; }
+}
+/* 펼쳐 보기(인생 90년 그래프) */
+#hub .tq-lifef{ margin: 14px 0 6px; }
