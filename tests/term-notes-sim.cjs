@@ -41,7 +41,7 @@ for(const [y,mo,d,h,g] of BIRTHS){
  const sd=ReportV2.SajuData.build(ch,{now}),vd=Object.assign({},sd,{name:'민준'});
  for(const id of ['timeline_wealth_06','timeline_career_01','timeline_self_20']){const c={id,editorialContractId:id,title:'t',readingVisualData:vd,readingParagraphs:[]};Object.defineProperty(c,'readingFeature',{value:{M:Manse,ch,sd,now,name:'민준',assets:{},videos:{}}});
   const r=L.compose(Manse,ch,now,id);if(!r||!r.card)continue;const html=ReportV2.ReadingText.html(c,0);
-  assert(/class="rd-periods"/.test(html),id+' 카드 없음');assert(!/곧 들어올 만 \d|지금 지나는 만 \d|\d{4}년 무렵\(만 \d+~\d+세\)부터는/.test(html.replace(/<[^>]+>/g,'')),id+' 카드가 다룬 대운 문단이 본문에 남음');
+  assert(/class="rd-periods[ "]/.test(html),id+' 카드 없음');assert(!/곧 들어올 만 \d|지금 지나는 만 \d|\d{4}년 무렵\(만 \d+~\d+세\)부터는/.test(html.replace(/<[^>]+>/g,'')),id+' 카드가 다룬 대운 문단이 본문에 남음');
   assert(/class="tn"/.test(html),id+' 용어 단추 없음');}
  // 5) 포인트: 12운성·십성 문단은 생활 모습으로 시작
  for(const id of ['timeline_self_22','timeline_love_09','timeline_career_06']){(ReportV2.ReadingInsight.paragraphs({id,editorialContractId:id},sd)||[]).forEach(p=>assert(!/^(?:[년월일시]주의 12운성은|[년월일시][간지]에 \S+ 놓여 있어요)/.test(p.text),id+' 용어로 시작: '+p.text.slice(0,40)));}

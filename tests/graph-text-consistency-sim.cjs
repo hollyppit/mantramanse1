@@ -20,7 +20,7 @@ for(let y=1950;y<=2010;y+=3)for(const [m,d,h,g] of [[1,15,3,'M'],[4,9,11,'F'],[6
  if(R.StoryDirector&&R.StoryDirector.lifeMap){const lm=R.StoryDirector.lifeMap(M,ch,now).filter(x=>x.isCurrent);ok(lm.length===1&&lm[0].ganzhi===cur.ganzhi,tag+' 타임라인 화면의 지금 대운 '+lm.map(x=>x.ganzhi)+' ≠ '+cur.ganzhi);}
  const c=R.PeakReading.build(sd,'검사'),core=c.readingCore,txt=Object.values(core).join(' ');
  ok(!/undefined|NaN|\[object/.test(txt),tag+' 전성기 문장에 undefined/NaN');
- const ov=R.ReadingText.overview(c),rank=(strip(ov).match(/앞으로 힘이 실리는 시기 순위(.*)$/)||['',''])[1];
+ const ov=R.ReadingText.overview(c),rank=(strip(ov).match(/앞으로 힘이 실리는 (?:시기|10년) 순위(.*)$/)||['',''])[1];
  const rankGz=[...rank.matchAll(/(\d)위 (\S+) 대운/g)].map(x=>x[2]);
  const picks=(c.readingVisualData.peakPicks||[]).map(sy=>sd.daewoon.find(p=>p.startYear===sy)).filter(Boolean);
  const shift=sd.daewoonShift;
