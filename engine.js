@@ -2114,6 +2114,14 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     const idx = g ? g.years.indexOf(mod(targetYear - 4, 12)) : -1;
     return { active: idx >= 0, stage: idx >= 0 ? SAMJAE_RULES.stages[idx] : null, group: g ? g.name : null, targetYear };
   }
+  // 삼재 한 바퀴(3년): targetYear 가 삼재 안이면 그 바퀴, 아니면 다음에 올 바퀴. 표시 전용(점수 불변, 2026-11-24)
+  //  years: [{year, stage}] 3개 · pos: 지금 몇 번째 해(0~2, 바깥이면 -1) · gap: 다음 바퀴 첫해까지 남은 해(안이면 0) · next: 그다음 바퀴 첫해
+  function samjaeCycle(birthYearBranch, targetYear) {
+    const g = SAMJAE_RULES.groups.find(x => x.birth.includes(birthYearBranch)); if (!g) return null;
+    const pos = g.years.indexOf(mod(targetYear - 4, 12));
+    const start = pos >= 0 ? targetYear - pos : targetYear + mod(g.years[0] - mod(targetYear - 4, 12), 12);
+    return { group: g.name, pos, start, years: [0, 1, 2].map(i => ({ year: start + i, stage: SAMJAE_RULES.stages[i] })), gap: pos >= 0 ? 0 : start - targetYear, next: start + 12 };
+  }
 
   const hourPillarsOfDay = ds => Array.from({ length: 12 }, (_, hb) => gz(gzIndex(hourStem(ds, hb), hb)));
   // 손 방향: 음력 일 끝자리 1·2 동, 3·4 남, 5·6 서, 7·8 북, 9·0 없음
@@ -3802,7 +3810,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
 
   G.Manse = {
     pickDays, TAEK_PURPOSE, JIAN12, gongmangFxOf, groupPull,
-    compute, elementFlow, ELEMENT_FLOW_CFG, natalFlow, NATAL_FLOW_CFG, luckStructures, integrateYongsin, unifiedLuckFit, unifiedSupport, gyeokCore, jongCore, chainLink, UNIFIED_CFG, josa, evaluateLuckFlow, composeFlowState, flowLabel, flowSummary, flowName, migrateLegacyPhase, FLOW_CONFIG, LEVEL_WEIGHTS, ROOT_RULES, ROOT_CONFIG, ROOT_LEVEL_WEIGHTS, getRootRelation, rootRuleTable, validateRootHiddenData, analyzeNatalRoot, analyzeLuckRootSupport, evaluateCurrentRootState, rootFitEffect, rootSummary, rootLevelLabel, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, SUB_DOMAIN_KEYS, SUB_CONFIG, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, gyoungi, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
+    compute, elementFlow, ELEMENT_FLOW_CFG, natalFlow, NATAL_FLOW_CFG, luckStructures, integrateYongsin, unifiedLuckFit, unifiedSupport, gyeokCore, jongCore, chainLink, UNIFIED_CFG, josa, evaluateLuckFlow, composeFlowState, flowLabel, flowSummary, flowName, migrateLegacyPhase, FLOW_CONFIG, LEVEL_WEIGHTS, ROOT_RULES, ROOT_CONFIG, ROOT_LEVEL_WEIGHTS, getRootRelation, rootRuleTable, validateRootHiddenData, analyzeNatalRoot, analyzeLuckRootSupport, evaluateCurrentRootState, rootFitEffect, rootSummary, rootLevelLabel, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, samjaeCycle, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, SUB_DOMAIN_KEYS, SUB_CONFIG, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, gyoungi, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
     solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, currentTerm, termsOf, surroundingJie,
     yearPillarAt, monthPillarAt, dayPillarOfJdn, jdnFromYMD, pillarsFor, relationsAmong, tenGod, unseong, sinsal12, gongmangOf,
     STEM, STEM_K, BR, BR_K, EL, EL_K, TG, TG_GROUP, stemEl, BR_EL, HIDDEN, JIJANGGAN, WOLRYUL, hiddenLabels, mainHidden, yang, gzName, gzNameK,

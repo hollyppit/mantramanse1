@@ -17,6 +17,7 @@
   --wood-on: #fff; --fire-on: #fff; --earth-on: #2A2100; --metal-on: #1D2230; --water-on: #fff;
   --d-atk: #1E9E57; --d-ext: #0E9AA7; --d-hrv: #8A5CF6; --d-acc: #2F6BFF; --d-chg: #E08A00; --d-def: #E5533D;
   --good: #1E9E57; --bad: #F0563F; --mid: #BAC1CE; --good-soft: #E3F5EA; --bad-soft: #FFEAE6;
+  --samjae: #4A47C9;   /* 삼재(전통 참고 보조 지표): 좋음·무난·조심 3색·변화·부담 색과 겹치지 않는 남보라 + 빗금 */
   --sg-good: #2DB36B; --sg-ok: #B5BDCB; --sg-care: #E8622C;   /* 운 신호 등급: 좋음·무난·조심(luck-grade.js COLORS 와 같은 색) */
   --shadow: 0 1px 2px rgba(18, 21, 31, .04), 0 10px 30px -12px rgba(30, 40, 90, .12);
   --f-display: "Noto Serif KR", "Nanum Myeongjo", "Apple SD Gothic Neo", serif;
@@ -936,6 +937,19 @@ tr.row-g-avoid td { background: color-mix(in srgb, var(--bad) 7%, transparent); 
 .sj-chip { border: 0; cursor: pointer; background: color-mix(in srgb, var(--d-chg) 16%, var(--surface)); color: var(--d-chg); font-weight: 700; }
 .sj-banner { display: grid; gap: 2px; padding: 8px 12px; border-radius: 12px; background: var(--surface-2); border-left: 4px solid var(--d-chg); }
 g.sj { cursor: pointer; text-decoration: none; }
+.sj-chip.sj-s { background: color-mix(in srgb, var(--samjae) 14%, var(--surface)); color: var(--samjae); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--samjae) 40%, transparent); }
+.sj-banner.sj-s { border-left-color: var(--samjae); background: color-mix(in srgb, var(--samjae) 6%, var(--surface-2)); }
+.sj-box { margin: 10px 0 4px; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--samjae) 6%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--samjae) 28%, transparent); display: grid; gap: 6px; }
+.sj-box .sj-h { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 0.86rem; }
+.sj-mark { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--samjae); color: #fff; font-size: 0.74rem; font-weight: 800; letter-spacing: .02em; }
+.sj-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.sj-step { display: grid; gap: 1px; padding: 6px 8px; border-radius: 10px; border: 1px dashed color-mix(in srgb, var(--samjae) 45%, transparent); background: var(--surface); font: inherit; font-size: 0.76rem; line-height: 1.35; cursor: pointer; text-align: left; color: var(--ink); }
+.sj-step b { font-size: 0.84rem; color: var(--samjae); } .sj-step .yy { font-weight: 800; }
+.sj-step.on { border-style: solid; border-width: 2px; background: color-mix(in srgb, var(--samjae) 12%, var(--surface)); }
+.sj-step > span:first-child { display: flex; flex-wrap: wrap; gap: 0 4px; align-items: baseline; } .sj-step .now { color: var(--seal); font-weight: 800; white-space: nowrap; }
+.sj-box p { margin: 0; font-size: 0.82rem; line-height: 1.55; } .sj-box .sj-tip { color: var(--ink-2); }
+.sj-box ul { margin: 4px 0 0; padding-left: 18px; font-size: 0.8rem; line-height: 1.55; }
+.sw.sj-sw { background: repeating-linear-gradient(135deg, var(--samjae) 0 2px, color-mix(in srgb, var(--samjae) 18%, transparent) 2px 5px); }
 .admin-link-row { text-align: right; margin-top: 24px; }
 .admin-link { font-size: 0.7rem; color: var(--ink-3); text-decoration: none; padding: 3px 8px; border: 1px solid var(--line); border-radius: 999px; }
 .admin-link:hover { color: var(--accent); border-color: var(--accent); }
@@ -5245,12 +5259,38 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const se = M.seunRange(S.ch, Y, Y)[0];
     return `<div class="sj-banner"><div><b>${term('교운기')}</b> <span class="muted small">${fmtKST(g.at)}부터 ${M.gzName(g.prev)} → ${M.gzName(g.next)} 대운</span></div><div class="small muted">이 해의 흐름 점수 ${se ? signed(se.combined) : ''}는 그해 중반의 ${M.gzName(g.used)} 대운을 기준으로 계산했어요. ${M.gzName(g.other)} 대운을 기준으로 보면 ${signed(g.otherFit)}(${esc(g.otherCondition)})입니다. 새 대운이 이 해의 약 ${g.newShare}%를 차지해요. 두 대운의 기운이 섞이는 해라, 큰 결정은 두 흐름을 함께 보고 서두르지 않는 편이 좋아요.</div></div>`;
   };
-  const samjaeTag = sj => sj.active ? `<span class="term chip sj-chip" data-term="${sj.stage}">${sj.stage}</span>` : '';
+  const samjaeTag = sj => sj.active ? `<span class="term chip sj-chip sj-s" data-term="${sj.stage}">${sj.stage}</span>` : '';
+  // 삼재 3년의 단계별 생활 조심 포인트(2026-11-24). 겁주는 말 대신 "이런 장면에서 한 번 더 확인"으로 쓴다. 점수·판정에는 쓰지 않는다
+  const SJ_STAGE = {
+    '들삼재': ['들어오는 해', '새로 시작하는 일·이사·계약·큰 지출이 몰리기 쉬운 해예요. 서명 전에 조건을 한 번 더 읽고, 남의 보증이나 급하게 권유받은 투자는 한 템포 미루면 충분해요.'],
+    '눌삼재': ['머무는 해', '이미 벌여 놓은 일이 무겁게 느껴지기 쉬운 해예요. 일을 늘리기보다 지금 하는 일을 안정시키고, 건강검진·쉬는 날·운전 안전 같은 기본기를 챙기면 좋아요.'],
+    '날삼재': ['나가는 해', '정리하고 빠져나오는 해예요. 미뤄 둔 서류·빚·관계를 깔끔하게 마무리하고, 끝났다고 방심해 막판에 서두르지만 않으면 다음 해 출발이 가벼워져요.'],
+  };
+  const sjCycleOf = Y => M.samjaeCycle ? M.samjaeCycle(S.ch.pillars.year.b, Y) : null;
+  const sjBr = Y => M.BR_K[((Y - 4) % 12 + 12) % 12];
+  // 연도별 흐름 카드 안의 삼재 상자: 내 띠의 삼재 3년, 고른 해(없으면 올해)가 몇 번째 해인지, 그 단계의 조심 장면, 접힌 설명
+  function samjaeBox(Y) {
+    const c = sjCycleOf(Y); if (!c) return '';
+    const nowY = M.yearPillarAt(NOW).sajuYear;
+    const steps = c.years.map((q, i) => { const se = M.seunRange(S.ch, q.year, q.year)[0]; return `<button type="button" class="sj-step${i === c.pos ? ' on' : ''}" data-pick="seun:${q.year}"><span><span class="yy">${q.year}년</span> <span class="muted">${sjBr(q.year)}년</span>${q.year === nowY ? ' <span class="now">올해</span>' : ''}</span><b>${q.stage}</b><span class="muted">${SJ_STAGE[q.stage][0]}${se ? ' · 흐름 ' + esc(flowGrade(se).n) : ''}</span></button>`; }).join('');
+    const se = M.seunRange(S.ch, Y, Y)[0];
+    const st = c.pos >= 0 ? c.years[c.pos].stage : null;
+    const head = c.pos >= 0
+      ? `<b>${Y}년은 삼재 3년 중 ${c.pos + 1}번째 해, ${esc(st)}(${SJ_STAGE[st][0]})</b>예요.${se ? ` 이 해의 흐름 점수 ${signed(se.combined)}(${esc(flowGrade(se).n)})는 삼재로 깎은 값이 아니라 원국·대운·세운 관계로만 계산한 값이에요.` : ''}`
+      : `<b>${Y}년은 삼재가 아니에요.</b> 다음 삼재는 ${c.start}~${c.start + 2}년(${c.gap}년 뒤)이고, 그다음은 ${c.next}~${c.next + 2}년이에요.`;
+    const why = `<p>삼재(三災)는 띠를 기준으로 12년마다 한 번 돌아오는 <b>3년의 조심 시기</b>를 가리키는 전통 민속이에요. 셋이 한 묶음인 띠(삼합)끼리는 삼재 해가 같아서, ${esc(c.group)}는 ${sjBr(c.start)}·${sjBr(c.start + 1)}·${sjBr(c.start + 2)}년이 삼재예요.</p>
+      <ul>${c.years.map(q => `<li><b>${q.stage}(${SJ_STAGE[q.stage][0]})</b> · ${SJ_STAGE[q.stage][1]}</li>`).join('')}</ul>
+      <p class="muted small" style="margin-top:6px">이 앱은 삼재를 <b>보조 지표</b>로만 보여 주고 흐름 점수에는 넣지 않아요. 삼재인 해라도 흐름이 좋음이면 "확인을 한 번 더 하는 좋은 해", 조심이면 "두 신호가 겹친 해"로 읽으면 됩니다. 띠는 입춘 기준 연지(${M.BR_K[S.ch.pillars.year.b]}년생)로 계산해요.</p>`;
+    return `<div class="sj-box"><div class="sj-h"><span class="sj-mark">삼재</span><span>${esc(c.group)} · 사주(입춘) 기준 ${M.BR_K[S.ch.pillars.year.b]}년생</span><span class="muted small">전통 참고 · 점수 미반영</span></div>
+      <div class="sj-steps">${steps}</div><p>${head}</p>${st ? `<p class="sj-tip">${SJ_STAGE[st][1]}</p>` : ''}
+      ${foldBox('삼재가 뭔가요? · 들삼재·눌삼재·날삼재 읽는 법', why)}</div>`;
+  }
   const samjaeBanner = Y => {
     const sj = samjaeOf(Y), lb = S.ch.lunar ? ((S.ch.lunar.y - 4) % 12 + 12) % 12 : S.ch.pillars.year.b, alt = lb !== S.ch.pillars.year.b ? M.getSamjae(lb, Y) : null;
     if (!sj.active && !(alt && alt.active)) return '';
     const note = alt ? `<div class="small muted">띠 기준 차이: 사주(입춘)로는 ${M.BR_K[S.ch.pillars.year.b]}년생, 설날 기준 민간 띠로는 ${M.BR_K[lb]}년생이라 삼재 여부가 ${sj.active === alt.active ? '같지만 단계가 다를 수 있습니다' : '달라집니다'}${alt.active ? ` (설날 기준: ${alt.stage})` : ' (설날 기준: 해당 없음)'}.</div>` : '';
-    return `<div class="sj-banner"><div><b>${term('삼재')} · ${sj.active ? term(sj.stage) : '사주 기준 해당 없음'}</b> <span class="muted small">전통 민속 참고 신호 · ${sj.group || alt.group}</span></div><div class="small muted">삼재는 흐름 점수에 감점되지 않습니다. 기본은 입춘 기준 연지로 계산합니다.</div>${note}</div>`;
+    const c = sj.active ? sjCycleOf(Y) : null;
+    return `<div class="sj-banner sj-s"><div><b>${term('삼재')} · ${sj.active ? term(sj.stage) + ` (3년 중 ${c ? c.pos + 1 : ''}번째 · ${SJ_STAGE[sj.stage][0]})` : '사주 기준 해당 없음'}</b> <span class="muted small">전통 민속 참고 신호 · ${sj.group || alt.group}</span></div>${sj.active ? `<div class="small">${SJ_STAGE[sj.stage][1]}</div>` : ''}<div class="small muted">삼재는 흐름 점수에 감점되지 않습니다. 기본은 입춘 기준 연지로 계산합니다.</div>${note}</div>`;
   };
   // 2026-11-20: 운 시기 표시는 옛 6분류(기회·확장·수확·축적·변동·방어) 대신 십신(ten-god-luck.js). 천간 십신이 대표, 상세는 지지 본기 십신도 함께.
   //  엔진의 stemTG/branchTG 를 읽기만 한다. 흐름 점수·길흉(신호등)·변화/부담 신호는 그대로다.
@@ -7303,6 +7343,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const x = Y => L + (Y - y0) / (y1 - y0) * (W - L - R), y = v => T + (100 - v) / 100 * (H - T - B);
     let s = svgEl(W, H);
     s += metricZones(k, y, L, W - R);
+    const SJL = samjaeLayer({ x, y0, y1, T, H, B, stepX: (W - L - R) / (y1 - y0 + 1), badges: false }); s += SJL.back;
     ch.daeun.list.forEach((d, i) => { const a = Math.max(y0, d.startYear), b = Math.min(y1, d.startYear + 10); if (b <= a) return; if (i % 2 === 0) s += `<rect x="${x(a)}" y="${T}" width="${x(b) - x(a)}" height="${H - T - B}" style="fill:var(--surface-2)"/>`; if (x(b) - x(a) > 28) s += `<text x="${(x(a) + x(b)) / 2}" y="${T - 9}" text-anchor="middle" style="fill:var(--ink-2);font-size:12px;font-weight:700;font-family:var(--f-display)">${M.gzName(d)}</text>`; });
     for (const g of [0, 25, 50, 75, 100]) s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:${g === 0 ? 'var(--ink-3)' : 'var(--line)'}" ${g && g !== 100 ? 'stroke-dasharray="3 3"' : ''}/><text x="${L - 6}" y="${y(g) + 3.5}" text-anchor="end" style="fill:var(--ink-3);font-size:10px">${g}</text>`;
     for (let Y = Math.ceil(y0 / 10) * 10; Y <= y1; Y += 10) s += `<text x="${x(Y)}" y="${H - 8}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${Y}</text>`;
@@ -7312,9 +7353,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (k === 'windfall') s += `<text x="${L - 6}" y="${y(0) + 14}" text-anchor="end" style="fill:var(--bad);font-size:9px;font-weight:800">손실</text>`;
     if (k === 'wealth') { s += `<text x="${L - 6}" y="${y(0) + 17}" text-anchor="end" style="fill:var(--ink-3);font-size:9px;font-weight:800">뜻밖</text>`; data.forEach(d => { const w = d.res.windfall, cx = x(d.year); if (w.score >= WF_ON()) s += `<circle cx="${cx.toFixed(1)}" cy="${(y(0) + 9).toFixed(1)}" r="${Math.max(2, Math.min(3.2, bw))}" style="fill:${sigMetric('windfall', w.score).c}"/>`; if (w.loss && w.loss.score >= LOSS_ON()) s += `<circle cx="${cx.toFixed(1)}" cy="${(y(0) + 20).toFixed(1)}" r="${Math.max(2, Math.min(3.2, bw))}" style="fill:${sigMetric('windfallLoss', w.loss.score).c}"/>`; }); }
     const curY = M.yearPillarAt(NOW).sajuYear;
-    if (curY >= y0 && curY <= y1) s += `<line x1="${x(curY)}" x2="${x(curY)}" y1="${T}" y2="${H - B}" style="stroke:var(--seal);stroke-width:1.5" stroke-dasharray="4 3"/><text x="${x(curY) + 4}" y="${T + 11}" style="fill:var(--seal);font-size:10px;font-weight:700">올해</text>`;
+    if (curY >= y0 && curY <= y1) s += `<line x1="${x(curY)}" x2="${x(curY)}" y1="${T}" y2="${H - B}" style="stroke:var(--seal);stroke-width:1.5" stroke-dasharray="4 3"/><text x="${x(curY) + 4}" y="${T + (samjaeOf(curY).active ? 30 : 11)}" style="fill:var(--seal);font-size:10px;font-weight:700">올해</text>`;
     const sel = S.sel && S.sel.kind === 'seun' ? S.sel.Y : null;
     if (sel && sel >= y0 && sel <= y1) { const d = data.find(q => q.year === sel); if (d) s += `<circle cx="${x(sel)}" cy="${y(d.res[k].score)}" r="4.5" style="fill:var(--ink);stroke:var(--surface);stroke-width:2"/>`; }
+    s += SJL.front;
     s += `<line class="xh" x1="0" x2="0" y1="${T}" y2="${H - B}" style="stroke:var(--ink);stroke-width:1;opacity:0"/><circle class="xd" r="4" style="fill:var(--ink);opacity:0"/><rect class="hit ov" x="${L}" y="0" width="${W - L - R}" height="${H}" style="fill:transparent"/>`;
     el.innerHTML = s + '</svg>';
     { const sy = S.sel && S.sel.kind === 'seun' ? S.sel.Y : null; chartFit(el, W, x(sy && sy >= y0 && sy <= y1 ? sy : curY)); }
@@ -8316,14 +8358,16 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     <section class="card">
       <div class="card-h"><h2>연도별 흐름 · ${term('세운')} <span class="lvl">${LEVEL_ROLE.seun}</span></h2></div>
       ${chartLegend()}
+      <div class="legend sj-leg" style="margin:4px 0 2px"><span><i class="sw sj-sw"></i><b style="color:var(--samjae)">빗금 띠·들/눌/날 = 삼재 3년</b> · 띠 기준 전통 참고 보조 지표(막대 색·점수와 별개)</span></div>
       <div class="chart" data-chart="life"></div>
+      ${samjaeBox(sel.kind === 'seun' ? sel.Y : curY)}
       ${yearSummary(curY)}
       ${lcSeunHTML(sel.kind === 'seun' ? sel.Y : curY)}
       ${foldBox('환경 변화 타임라인 보기 · 직업·재물·인연·이동·학습이 부각되는 해', envTimeline('seun'))}
       ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60%를 섞은 흐름 점수, 색은 좋고 나쁨(좋음·무난·조심), 테두리·아래 글자는 변화·부담 신호입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
     </section>
     <section class="card">
-      <div class="card-h"><h2>${Y}년 ${term('월운')} <span class="lvl">${LEVEL_ROLE.wolun}</span></h2><span class="seg"><button data-act="year:-1" aria-label="이전 해">‹</button><button data-act="year:1" aria-label="다음 해">›</button></span></div>
+      <div class="card-h"><h2>${Y}년 ${term('월운')} <span class="lvl">${LEVEL_ROLE.wolun}</span>${samjaeTag(samjaeOf(Y))}</h2><span class="seg"><button data-act="year:-1" aria-label="이전 해">‹</button><button data-act="year:1" aria-label="다음 해">›</button></span></div>
       ${chartLegend()}
       <div class="chart" data-chart="wolun"></div>
       ${envTimeline("wolun")}
@@ -10451,6 +10495,25 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     el.innerHTML = s + '</svg>';
     { let k = items.findIndex(q => q.sel); if (k < 0) k = items.findIndex(q => q.cur); chartFit(el, W, k >= 0 ? L + step * (k + 0.5) : null); }
   }
+  // 삼재 보조 지표 층(2026-11-24): 연도 그래프 뒤 빗금 띠 + 위쪽 "삼재" 꼬리표, (흐름 그래프만) 아래 들·눌·날 배지. 막대·점수·색과 별개
+  function samjaeLayer(o) {
+    const { x, y0, y1, T, H, B, stepX, badges } = o; let back = '', front = '';
+    back += `<defs><pattern id="sjh-life" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:var(--samjae);opacity:.07"/><line x1="0" y1="0" x2="0" y2="6" style="stroke:var(--samjae);stroke-width:2;opacity:.22"/></pattern></defs>`;
+    for (let Y = y0; Y <= y1; Y++) {
+      const sj = samjaeOf(Y); if (!sj.active) continue;
+      back += `<rect x="${(x(Y) - stepX / 2).toFixed(1)}" y="${T}" width="${stepX.toFixed(1)}" height="${H - T - B}" style="fill:url(#sjh-life)"/>`;
+      if (sj.stage === '들삼재' || Y === y0) {
+        const st = Y - ['들삼재', '눌삼재', '날삼재'].indexOf(sj.stage);
+        const a = x(Math.max(y0, st)) - stepX / 2, b = x(Math.min(y1, st + 2)) + stepX / 2;
+        front += `<g class="term sj" data-term="삼재"><title>삼재 ${st}~${st + 2}</title><rect x="${a.toFixed(1)}" y="${T}" width="${(b - a).toFixed(1)}" height="3" style="fill:var(--samjae)"/>${b - a >= 18 ? `<rect x="${((a + b) / 2 - 13).toFixed(1)}" y="${T + 4}" width="26" height="13" rx="6.5" style="fill:var(--samjae)"/><text x="${((a + b) / 2).toFixed(1)}" y="${T + 13.5}" text-anchor="middle" style="fill:#fff;font-size:9px;font-weight:800">삼재</text>` : ''}</g>`;
+      }
+      if (badges) {
+        const bwid = Math.max(2.5, stepX - 0.8), by = H - B + 6;
+        front += `<g class="term sj" data-term="${sj.stage}"><title>${sj.stage}</title><rect x="${(x(Y) - bwid / 2).toFixed(1)}" y="${by}" width="${bwid.toFixed(1)}" height="12" rx="2.5" style="fill:var(--samjae)"/>${stepX >= 8 ? `<text x="${x(Y).toFixed(1)}" y="${by + 9}" text-anchor="middle" style="fill:#fff;font-size:8px;font-weight:700">${sj.stage[0]}</text>` : ''}</g>`;
+      }
+    }
+    return { back, front };
+  }
   function drawLife(el) {
     const ch = S.ch; const y0 = ch.solar.y, y1 = Math.min(y0 + 90, M.MAX_Y - 1);
     const data = M.seunRange(ch, y0, y1);
@@ -10465,24 +10528,20 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (x(b) - x(a) > 28) s += `<text x="${(x(a) + x(b)) / 2}" y="${T - 9}" text-anchor="middle" style="fill:var(--ink-2);font-size:12px;font-weight:700;font-family:var(--f-display)">${M.gzName(d)}</text>`;
     });
     s += flowZones(y, L, W - R, RG);
+    const SJL = samjaeLayer({ x, y0, y1, T, H, B, stepX: (W - L - R) / (y1 - y0 + 1), badges: true }); s += SJL.back;
     for (const g of [30, 0, -30]) s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:${g === 0 ? 'var(--ink-3)' : 'var(--line)'}" ${g ? 'stroke-dasharray="3 3"' : ''}/><text x="${L - 6}" y="${y(g) + 3.5}" text-anchor="end" style="fill:var(--ink-3);font-size:10px">${g > 0 ? '+' + g : g < 0 ? '−' + (-g) : '0'}</text>`;
     for (let Y = Math.ceil(y0 / 10) * 10; Y <= y1; Y += 10) s += `<text x="${x(Y)}" y="${H - 8}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${Y}</text>`;
     const bw = Math.max(1.5, (W - L - R) / (y1 - y0 + 1) - 1.2);
     data.forEach(d => { const v = d.combined, yy = y(v), z = y(0); const h = Math.max(1.5, Math.abs(yy - z)); const col = sigFlow(v).c; s += `<rect x="${(x(d.year) - bw / 2).toFixed(1)}" y="${Math.min(yy, z).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(2, bw / 2)}" style="fill:${col};${ovStroke(d.ev.overlays)}"/>`; });
     if (showGhost()) s += `<polyline class="ghost-line" points="${data.map(d => `${x(d.year).toFixed(1)},${y(altOf(d)).toFixed(1)}`).join(' ')}"/>`;
     const curY = M.yearPillarAt(NOW).sajuYear;
-    if (curY >= y0 && curY <= y1) s += `<line x1="${x(curY)}" x2="${x(curY)}" y1="${T}" y2="${H - B}" style="stroke:var(--seal);stroke-width:1.5" stroke-dasharray="4 3"/><text x="${x(curY) + 4}" y="${T + 11}" style="fill:var(--seal);font-size:10px;font-weight:700">올해</text>`;
+    if (curY >= y0 && curY <= y1) s += `<line x1="${x(curY)}" x2="${x(curY)}" y1="${T}" y2="${H - B}" style="stroke:var(--seal);stroke-width:1.5" stroke-dasharray="4 3"/><text x="${x(curY) + 4}" y="${T + (samjaeOf(curY).active ? 30 : 11)}" style="fill:var(--seal);font-size:10px;font-weight:700">올해</text>`;
     const sel = S.sel && S.sel.kind === 'seun' ? S.sel.Y : null;
     if (sel && sel >= y0 && sel <= y1) { const d = data.find(q => q.year === sel); if (d) s += `<circle cx="${x(sel)}" cy="${y(d.combined)}" r="4.5" style="fill:var(--ink);stroke:var(--surface);stroke-width:2"/>`; }
     s += `<line class="xh" x1="0" x2="0" y1="${T}" y2="${H - B}" style="stroke:var(--ink);stroke-width:1;opacity:0"/><circle class="xd" r="4" style="fill:var(--ink);opacity:0"/>`;
     s += `<rect class="hit ov" x="${L}" y="0" width="${W - L - R}" height="${H}" style="fill:transparent"/>`;
-    // 삼재 배지(참고 정보): 막대·점수·색에는 영향 없음. 연도 라벨 위쪽에 작게 표시하고 누르면 용어 설명이 열린다
-    const stepX = (W - L - R) / (y1 - y0 + 1);
-    data.forEach(d => {
-      const sj = samjaeOf(d.year); if (!sj.active) return;
-      const bwid = Math.max(2.5, stepX - 0.8), bx = x(d.year) - bwid / 2, by = H - B + 6;
-      s += `<g class="term sj" data-term="${sj.stage}"><title>${sj.stage}</title><rect x="${bx.toFixed(1)}" y="${by}" width="${bwid.toFixed(1)}" height="12" rx="2.5" style="fill:var(--d-chg);opacity:.85"/>${stepX >= 8 ? `<text x="${x(d.year).toFixed(1)}" y="${by + 9}" text-anchor="middle" style="fill:#fff;font-size:8px;font-weight:700">${sj.stage[0]}</text>` : ''}</g>`;
-    });
+    // 삼재 꼬리표·배지(보조 지표): 막대·점수·색에는 영향 없음. 누르면 용어 설명이 열린다
+    s += SJL.front;
     el.innerHTML = s + '</svg>';
     chartFit(el, W, x(sel && sel >= y0 && sel <= y1 ? sel : curY));
     const svg = el.querySelector('svg'), ov = el.querySelector('.ov'), xh = el.querySelector('.xh'), xd = el.querySelector('.xd');
