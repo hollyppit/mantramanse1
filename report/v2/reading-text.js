@@ -60,10 +60,92 @@
   [/(비겁|식상|재성|관성|인성)가 /g,'$1이 '],[/(무·기|병·정|임·계|갑·을|경·신)은 /g,function(m,a){var c=a.charCodeAt(a.length-1);return a+((c-0xAC00)%28?'은 ':'는 ');}],
   [/(비겁|식상|재성|관성|인성)의 세력이 높은 편이고,/g,'$1이 많은 편이고,'],[/(비겁|식상|재성|관성|인성)의 세력이 중간이고,/g,'$1이 보통이고,'],
   [/원국에 ([가-힣]+살|[가-힣]+귀인) 요소가 있고,/g,'타고난 사주에 $1이 있고,'],
-  [/원국에 (충|형|파|해|원진|합)(([^)]+))? 요소가 있고,/g,function(m,r,d){return '타고난 사주에 '+r+(d||'')+(/[해파]$/.test(r)?'가':'이')+' 있고,';}],
+  [/원국에 (충|형|파|해|원진|합)(\([^)]+\))? 요소가 있고,/g,function(m,r,d){return '타고난 사주에 '+r+(d||'')+(/[해파]$/.test(r)?'가':'이')+' 있고,';}],
   [/(?:해석|생활 패턴|생활 습관|전통 상징|상징)이고, (마음이나 몸|몸|체력이나 건강|사고의 발생이나 건강)(?:의)? 상태를 판정하지 않아요\./g,function(m,a){return '풀이이고, '+a+' 상태를 진단하지는 않아요.';}],
   [/이 해석은 대운·세운 값만 근거로 하고,/g,'이 풀이는 대운·세운 계산값만 근거로 하고,']];
- function plainSay(t){var v=String(t||'');PLAIN_SAY.forEach(function(p){v=v.replace(p[0],p[1]);});return v.replace(/\s{2,}/g,' ').trim();}
+ // 용어 바로 뒤 괄호 뜻풀이('관성(압박·평가·책임에 쓰는 에너지)의')를 쉬운 말 규칙보다 먼저 걷는다. 걷는 기준은 용어 각주(term-notes.js)와 같고, 뜻은 각주 단추로 보여 줘요(2026-11-24).
+ var GLOSS_RE=null;function glossRe(){if(GLOSS_RE!==null)return GLOSS_RE;var D=root.MantraTermNotesData;if(!D){return null;}var keys=Object.keys(D).filter(function(k){return k.length>=2;}).sort(function(a,b){return b.length-a.length;}).map(function(k){return k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');});GLOSS_RE=keys.length?new RegExp('('+keys.join('|')+')\\(([^()%~]{1,40})\\)','g'):false;return GLOSS_RE;}
+ function stripGloss(v){var re=glossRe();if(!re)return v;return v.replace(re,function(m,k,g,off,all){if(off>0&&/[가-힣]/.test(all.charAt(off-1)))return m;if(!/[가-힣]/.test(g)||/\d{3,}|\d+\s*(?:점|세|살)/.test(g))return m;return k;});}
+ function plainSay(t){var v=stripGloss(String(t||''));PLAIN_SAY.forEach(function(p){v=v.replace(p[0],p[1]);});return v.replace(/\s{2,}/g,' ').trim();}
+ // 접힌 근거 칸(왜 이렇게 풀이했는지·명리 근거) 전용 쉬운 말(2026-11-24). 본문에는 쓰지 않는다.
+ //   원국→타고난 사주, 일간의 힘→내 힘, 한자 글자쌍→한글+뜻, '○○격 성격'(成格)→'○○격이 잘 짜인', 정의 문장 끝 '십성군·신살·분류예요'→'뜻해요', 조사 오류
+ var HZ_K={'子':'자','丑':'축','寅':'인','卯':'묘','辰':'진','巳':'사','午':'오','未':'미','申':'신','酉':'유','戌':'술','亥':'해','甲':'갑','乙':'을','丙':'병','丁':'정','戊':'무','己':'기','庚':'경','辛':'신','壬':'임','癸':'계','木':'목','火':'화','土':'토','金':'금','水':'수'};
+ function hzK(s){return String(s).replace(/[子丑寅卯辰巳午未申酉戌亥甲乙丙丁戊己庚辛壬癸木火土金水]/g,function(c){return HZ_K[c];});}
+ function jo(w,a,b){var c=String(w).charCodeAt(String(w).length-1);return c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28?a:b;}
+ var REL_K={'반합':'반합(절반 묶임)','삼합':'삼합(셋이 묶임)','방합':'방합(같은 계절로 묶임)','충':'충(부딪힘)','합':'합(묶임)','원진':'원진(서로 꺼림)','자형':'자형(스스로 깎임)','형':'형(서로 깎임)','파':'파(깨짐)','해':'해(틀어짐)'};
+ var SEAT_K={'일지':'나와 배우자 자리','월지':'사회생활 자리','연지':'집안 자리','년지':'집안 자리','시지':'자녀·말년 자리','일간':'나','월간':'사회생활 자리 윗글자'};
+ var PLAIN_WHY=[
+  // 값 줄: '함께 본 조건: 일지 亥巳충 / 관성 42% · 인성 24% · 정인격 성격.'
+  [/^(?:함께 본 조건|이 사주에서 확인된 조건):\s*/,'함께 확인한 것: '],
+  [/ — 지지 정기 포함 판정/g,''],[/ — 둘 다 천간에 드러남/g,' — 둘 다 윗글자에 드러남'],
+  [/(일지|월지|연지|년지|시지|일간|월간) ([子丑寅卯辰巳午未申酉戌亥甲乙丙丁戊己庚辛壬癸]{2}) ?(반합|삼합|방합|충|원진|자형|형|파|해|합)([木火土金水])?/g,function(m,seat,pair,rel,el){var a=hzK(pair);return SEAT_K[seat]+'('+seat+')의 '+a.charAt(0)+'·'+a.charAt(1)+' '+REL_K[rel]+(el?'→'+hzK(el)+' 기운':'');}],
+  [/([子丑寅卯辰巳午未申酉戌亥]{2})(자형|충|원진|형|파|해|합)/g,function(m,pair,rel){var a=hzK(pair);return a.charAt(0)+'·'+a.charAt(1)+' '+REL_K[rel];}],
+  [/([가-힣]{2})격 성격/g,'$1격이 잘 짜인 사주'],[/([가-힣]{2})격 파격/g,'$1격이 흐트러진 사주'],
+  [/원국 온도 ([+-]?\d+(?:\.\d+)?)/g,function(m,n){var v=Number(n);return '타고난 사주의 온도 '+(v>=0.3?'따뜻한 편':v<=-0.3?'차가운 편':'보통')+'('+n+')';}],
+  [/용신이 원국에 (\d+)%/g,'가장 필요한 기운(용신)이 사주에 $1%뿐'],
+  [/근거 강도: ([가-힣]+) — 맞는 세부 규칙이 없어, 가장 큰 기운 묶음으로 읽은 바탕 풀이예요\./g,'확신 정도: $1 — 딱 맞는 세부 조건이 없어서, 가장 큰 기운으로 읽은 기본 풀이예요.'],
+  [/근거 강도:/g,'확신 정도:'],
+  // 내 힘(일간)
+  [/일간\(나를 뜻하는 글자\)을 돕는 힘이 원국에서 적은 상태예요\./g,'나를 돕는 기운이 타고난 사주에 적은 편이에요.'],
+  [/일간을 돕는 힘이 원국에서 적은 상태예요\./g,'나를 돕는 기운이 타고난 사주에 적은 편이에요.'],
+  [/일간의 힘이 신약이라/g,'내 힘이 약한 편이라'],[/일간의 힘이 중화이라/g,'내 힘이 한쪽으로 기울지 않아서'],[/일간의 힘이 신강이라/g,'내 힘이 센 편이라'],
+  [/일간의 힘\(신강·중화\)에 따라/g,'내 힘의 크기에 따라'],
+  [/일간의 힘이 약한데\(신약\)/g,'내 힘이 약한 편인데'],
+  [/일간의 힘이 약하고 원국의 지지에 일간의 뿌리\(통근\)가 거의 없어요\./g,'내 힘이 약하고, 그 힘을 받쳐 줄 뿌리(통근)도 아래 글자에 거의 없어요.'],
+  [/일간이 지지에 뿌리\(통근\)를 두지 못했어요\./g,'내 힘을 받쳐 줄 뿌리(통근)가 아래 글자에 없어요.'],[/일간이 지지에 뿌리를 두지 못했어요\(통근 없음\)\./g,'내 힘을 받쳐 줄 뿌리(통근)가 아래 글자에 없어요.'],
+  [/일간의 힘이 약하고 뿌리\(통근\)도 얕아요\./g,'내 힘이 약하고, 받쳐 줄 뿌리(통근)도 얕아요.'],
+  [/일간의 뿌리\(통근\)가 원국 지지에 단단하고/g,'내 힘을 받쳐 줄 뿌리(통근)가 아래 글자에 단단하고'],
+  [/통근 모델 구간이 [가-힣·\s]+?이에요\./g,'내 힘을 받쳐 줄 뿌리(통근)가 약한 편이에요.'],
+  [/일간이 크게 강하지 않아요/g,'내 힘이 크게 세지 않아요'],
+  [/일간(?:의 힘)?(이|은) (약해|약하|약한|넉넉하지|충분한|충분하)/g,function(m,j,w){return '내 힘'+(j==='은'?'은':'이')+' '+w;}],
+  [/일간의 힘이/g,'내 힘이'],[/일간의 힘은/g,'내 힘은'],[/일간의 힘과/g,'내 힘과'],[/일간의 힘/g,'내 힘'],
+  [/일간을 다스리는 힘/g,'나를 다스리는 기운'],[/일간이 다루는 대상의 힘/g,'내가 다루는 대상의 기운'],[/일간을 덜어내는/g,'내 힘을 빼 가는'],[/일간을 돕는 힘/g,'나를 돕는 힘'],[/나와 같은 오행의 힘/g,'나와 같은 기운'],
+  // 정의 문장 끝
+  [/를 뜻하는 십성군이에요\./g,'를 뜻해요.'],[/을 뜻하는 십성군이에요\./g,'을 뜻해요.'],
+  [/(와|과) 연결해 보는 신살이에요\./g,'$1 연결해 보는 별이에요.'],[/을 상징하는 신살이에요\./g,'을 상징하는 별이에요.'],[/를 상징하는 신살이에요\./g,'를 상징하는 별이에요.'],
+  [/(?:가|이) 상대적으로 많다는 분류예요\./g,'이 상대적으로 많다는 뜻이에요.'],[/크게 기울지 않았다는 분류예요\./g,'어느 쪽으로도 크게 기울지 않았다는 뜻이에요.'],
+  [/(?:구조|구도|경우)로 계산된 경우예요\./g,'구조라는 뜻이에요.'],[/(?:크다고|많다고) 계산된 경우예요\./g,'크다는 뜻이에요.'],
+  // 대운·세운
+  [/대운은 (순행|역행)이며, 첫 대운은 실제로 만 ([\d.]+)세에 시작해요\(대운수 \d+\)\./g,function(m,d,a){return '10년 운(대운)은 '+(d==='순행'?'앞으로 흐르는 순서(순행)':'거꾸로 흐르는 순서(역행)')+'이고, 첫 10년 운은 만 '+a+'세에 시작해요.';}],
+  [/나이 구간은 대운이 바뀌는 실제 시각으로 계산했어요\./g,'나이 구간은 10년 운이 실제로 바뀌는 날짜에 맞췄어요.'],
+  [/(현재|다음) 대운 천간 십성이 ([가-힣]{2}) 쪽이고/g,function(m,w,g){return (w==='현재'?'지금':'다음')+' 10년 운(대운)의 윗글자가 '+g+' 쪽이고';}],
+  [/다음 대운 교체까지/g,'다음 10년 운으로 바뀌기까지'],[/교체까지 (\d+)년 이내예요/g,'바뀌기까지 $1년이 안 남았어요'],
+  [/올해 세운이 일지와 충·형·파·해 계열의 관계를 이루(?:는 구조이)?고(?: 내 힘이 약한 편이고)?, 올해 세운이 원국 일지와 부딪히는 관계(?:인 데다|라)/g,'올해 운이 나와 배우자 자리(일지)와 부딪히는 해인 데다'],
+  [/올해 세운이 일지와 충·형·파·해 계열의 관계를 이루/g,'올해 운이 나와 배우자 자리(일지)와 부딪히는 관계를 이루'],
+  [/(현재 대운|올해 세운) 흐름이 전환기·방어기로 분류되고/g,function(m,w){return (w==='현재 대운'?'지금 10년 운':'올해 운')+'이 바뀌거나 지키는 흐름이고';}],
+  [/이 풀이는 (?:대운·세운|10년 운·1년 운) 계산값만 근거로 하고,/g,'이 풀이는 10년 운·1년 운만 보고,'],
+  // 자리·관계
+  [/일지가 원진·귀문관을 이(뤄요|루고 있어요)\./g,'나와 배우자 자리(일지)에 서로 꺼리고 예민해지는 관계(원진·귀문관)가 있어요.'],
+  [/일지나 월지에 형\(서로 깎아내는 긴장\)이 걸려 있어요\./g,'나와 배우자 자리나 사회생활 자리에 서로 깎아내는 긴장(형)이 걸려 있어요.'],
+  [/원국 글자 사이에 천간충이 있어요\./g,'타고난 사주의 윗글자끼리 부딪히는 관계(천간충)가 있어요.'],
+  [/배우자 자리인 일지에/g,'나와 배우자 자리(일지)에'],
+  [/지지 속에 숨은 글자\(지장간\)에/g,'아래 글자 속에 숨은 글자(지장간)에'],
+  // 오행·십성 비중
+  [/원국에서 ([목화토금수])(\([^)]+\))? 오행의 비중이 (높은|낮은) 편이에요\./g,function(m,e,d,h){return '타고난 사주에 '+EL_WORD[e]+' 기운'+(d||'')+'이 '+(h==='높은'?'많은':'적은')+' 편이에요.';}],
+  [/([목화토금수])\(([^)]+?)(?:의 기운)?\)(?:이|가) 높고 ([목화토금수])\(([^)]+?)(?:의 기운)?\)(?:이|가) 낮음 조합이라 전통에서는 [^,]+? 읽어서,/g,function(m,a,da,b,db){return EL_WORD[a]+' 기운('+da+')은 많고 '+EL_WORD[b]+' 기운('+db+')은 적어서,';}],
+  [/([가-힣]{2})(?:이|가) 높고 (?:내 힘|일간의 힘)이 약함 조합이라/g,function(m,a){return a+jo(a,'은','는')+' 많은데 내 힘은 약해서';}],
+  [/([가-힣]{2})(?:이|가) 높고 ([가-힣]{2})(?:이|가) 낮음 조합이라/g,function(m,a,b){return a+jo(a,'은','는')+' 많고 '+b+jo(b,'은','는')+' 적어서';}],
+  [/([가-힣]{2})의 세력이 높고 ([가-힣]{2})의 세력이 낮은 불균형이라,/g,function(m,a,b){return a+jo(a,'은','는')+' 많고 '+b+jo(b,'은','는')+' 적어서,';}],
+  [/([가-힣]{2})(?:이|가) 높고 ([가-힣]{2})(?:이|가) 중간이라/g,function(m,a,b){return a+jo(a,'은','는')+' 많고 '+b+jo(b,'은','는')+' 보통이라';}],
+  [/(비겁|식상|재성|관성|인성)의 세력이 (?:낮은 편이고|낮은 편이에요)/g,function(m,g){return g+jo(g,'이','가')+' 적은 편'+(/이고$/.test(m)?'이고':'이에요');}],
+  [/(비겁|식상|재성|관성|인성)의 세력(?:이|은) (높은 편|중간|낮은 편)이에요/g,function(m,g,h){return g+jo(g,'이','가')+' '+(h==='높은 편'?'많은 편':h==='중간'?'보통':'적은 편')+'이에요';}],
+  [/(비겁|식상|재성|관성|인성)과 (비겁|식상|재성|관성|인성)의 세력이 모두 큰 편이고/g,'$1과 $2이 모두 많은 편이고'],
+  [/(비겁|식상|재성|관성|인성) 세력이/g,'$1이'],
+  [/원국 전체에서는? /g,'타고난 사주 전체에서 '],[/원국 십성의/g,'사주 전체 기운의'],[/원국의 (\d+)%/g,'사주의 $1%'],
+  [/원국에 /g,'타고난 사주에 '],[/원국에서 /g,'타고난 사주에서 '],[/원국의 /g,'타고난 사주의 '],[/원국 /g,'타고난 사주 '],
+  // 조사: '겁재이', '편재이', '인성가'
+  [/([가-힣])·([가-힣]{2})(이|가) (있고|있어요|많|두드러)/g,function(m,a,b,j,t){return a+'·'+b+jo(b,'이','가')+' '+t;}],
+  [/(정관|편관|정인|편인|식신|상관|정재|편재|비견|겁재|비겁|식상|재성|관성|인성)(이|가) /g,function(m,w){return w+jo(w,'이','가')+' ';}],
+  [/중화이라/g,'중화라'],
+  [/억부와 조후 기준이 같은 용신 오행이 ([목화토금수])(\([^)]+\))?(?:이에요|예요)/g,function(m,e,d){return '내게 가장 필요한 기운(용신)은 '+EL_WORD[e]+' 기운'+(d||'')+'이에요';}],
+  [/용신은 균형을 맞추는 쪽의 상징이고, 이 전략은 그 상징을 분기 단위의 행동 원칙으로 옮긴 것이에요\./g,'용신(가장 필요한 기운)은 균형을 맞추는 쪽의 상징이고, 이 전략은 그걸 석 달 단위 행동 원칙으로 옮긴 거예요.'],
+  [/일간 ([갑을병정무기경신임계][목화토금수])([은는]) /g,'태어난 날 글자인 $1$2 '],
+  // 문장 첫머리 십성 이름: 생활 말을 앞에 붙여 '용어로 시작'을 피한다(뒤 조사는 용어에 맞춘 그대로)
+  [/(^|[.?!] )(비겁|식상|재성|관성|인성|정관|편관|정인|편인|식신|상관|정재|편재|비견|겁재)(이 |가 |과 |와 |은 많|는 많|은 적|는 적)/g,function(m,a,g,j){return a+TG_PLAIN[g]+'('+g+')'+j;}],
+  [/용신은 균형을 맞추는 쪽의 상징이고, 이 해석은 그 상징을 생활 습관으로 옮긴 것이에요\./g,'용신(가장 필요한 기운)은 균형을 맞추는 쪽의 상징이고, 이 풀이는 그걸 생활 습관으로 옮긴 거예요.'],
+  [/같은 구조도 내 힘의 크기에 따라 행동으로 나타나는 모습이 달라서 나눠서 풀었어요\./g,'같은 구조라도 내 힘의 크기에 따라 행동으로 드러나는 모습이 달라서 나눠 풀었어요.']];
+ var TG_PLAIN={비겁:'나와 같은 기운',식상:'표현의 기운',재성:'돈과 결과의 기운',관성:'책임의 기운',인성:'배움과 도움의 기운',정관:'바른 책임의 기운',편관:'강한 압박의 기운',정인:'따뜻한 도움의 기운',편인:'혼자 깊이 보는 기운',식신:'꾸준한 재주의 기운',상관:'솔직한 표현의 기운',정재:'꾸준히 쌓는 돈',편재:'크게 오가는 돈',비견:'나란한 동료의 기운',겁재:'경쟁하는 동료의 기운'};
+ function plainBasis(t){var v=plainSay(t);PLAIN_WHY.forEach(function(p){v=v.replace(p[0],p[1]);});return v.replace(/\s{2,}/g,' ').trim();}
  function readingParagraphs(text,shorten){var blocks=[];String(text||'').split(/\n+/).filter(function(t){return t.trim();}).forEach(function(block){block=plainSay(block);if(!block)return;if(shorten)block=concise(block.trim());var group=[],size=0;sentences(block).forEach(function(sentence){var example=/^예를\s*들[어면]/.test(sentence);if(group.length&&(example||group.length>=2||size+sentence.length>110)){blocks.push(group.join(' '));group=[];size=0;}group.push(sentence);size+=sentence.length+1;});if(group.length)blocks.push(group.join(' '));});return blocks;}
  function withPart(part,html){return part&&R.ReadingPlus?html+R.ReadingPlus.feedback(part):html;}
  function readingParagraphHtml(text,role,shorten){return readingParagraphs(text,shorten).map(function(t){var part=R.ReadingPlus&&R.ReadingPlus.partFor?R.ReadingPlus.partFor(t):'';return '<p class="lead'+(/^예를\s*들[어면]/.test(t)?' reading-example':'')+'" data-reading-role="'+esc(role)+'">'+esc(t)+'</p>';}).join('');}
@@ -222,7 +304,7 @@
    +cpList('서로 끌리는 일주','양쪽 끌림이 모두 높은 조합',cp.mutual,false,'',3)
    +'<p class="rc-note">충돌·마찰 일주는 만나면 안 된다는 뜻이 아니에요. 서로 자극이 큰 조합이라 속도를 맞추고 대화를 더 해야 편해진다는 뜻이고, 끌림이 강해도 궁합 조건은 따로 볼 수 있어요.</p></div>';}
  // 서사 엔진(life-narrative.js, 스위치 lifeNarrative): 결과가 있으면 본문 5단계·후킹·근거 펼쳐보기를 그 결과로 쓴다. 없으면 기존 DB 문안 그대로.
- function narrativeBasis(ln){var ev=ln.evidence||{};return '<details class="reading-basis-group reading-narrative-basis"><summary>명리 근거 펼쳐보기</summary>'+(ev.lines||[]).map(function(t){t=plainSay(t);return t?'<p data-reading-role="why">'+esc(t)+'</p>':'';}).join('')+((ev.terms||[]).length?'<dl class="reading-terms">'+ev.terms.map(function(x){return '<dt>'+esc(x.term)+'</dt><dd>'+esc(x.text)+'</dd>';}).join('')+'</dl>':'')+'</details>';}
+ function narrativeBasis(ln){var ev=ln.evidence||{};return '<details class="reading-basis-group reading-narrative-basis"><summary>명리 근거 펼쳐보기</summary>'+(ev.lines||[]).map(function(t){t=plainBasis(t);return t?'<p data-reading-role="why">'+esc(t)+'</p>':'';}).join('')+((ev.terms||[]).length?'<dl class="reading-terms">'+ev.terms.map(function(x){return '<dt>'+esc(x.term)+'</dt><dd>'+esc(plainBasis(x.text))+'</dd>';}).join('')+'</dl>':'')+'</details>';}
  // 시기표 카드가 다루는 운 문단(life-narrative.js chapterLuck·luckStage0 의 대운 문장): 지금 대운·교운기·다음 대운·말년 대운
  var PERIOD_PARA=/^(?:지금 지나는 만 \d|지금은 \S+ 대운이 저물고|곧 들어올 만 \d|\d{4}년 무렵\(만 \d+~\d+세\)(?:부터는| \S+ 대운으로 넘어가면)|만 \d+~\d+세\(\S+ 대운, \d{4}년~\))/;
  var TONE_TAG={good:['t-good','흐름 좋음'],mixed:['t-ok','좋고 나쁨 섞임'],hard:['t-care','무게 실림']};
@@ -253,7 +335,7 @@
   var shownMedia=new Set(),feedbackAt=Math.floor(out.rows.length/2),feedbackDone=false;
   out.rows.forEach(function(row,i){if(row.role==='periods'){h+=section(c,ci,'periods',periodsHtml(row.card,c),'text-reading-periods');return;}if(R.ReadingMedia){(c.readingMedia||[]).forEach(function(media,mi){var phase=media.phase||'daily',at=out.creative?row.scenePhase===phase:(c.editorialContractId||c.id)==='timeline_self_03'?i===1:phase==='conflict'?row.role==='risk':phase==='practice'?row.role==='practice':i===1;if(at&&!shownMedia.has(mi)){shownMedia.add(mi);h+=section(c,ci,'panel_'+i+'_'+mi,R.ReadingMedia.html(media),'text-reading-media');}});}if(i===0&&isOriginChapter(c)){var oc=originHtml(c);if(oc)h+=section(c,ci,'chart',oc,'text-reading-chart text-reading-origin');}h+=section(c,ci,'body_'+i,(row.narr?'<h3>'+esc(row.label)+'</h3>':out.creative||out.education?(row.label?'<h3>'+esc(row.label)+'</h3>':''):row.role==='luck-context'?'<h3>지금 내 운 흐름, 쉽게 말하면</h3>':row.role==='insight'?'<h3>사주에서 드러나는 내 모습</h3>':row.role==='strength'?'<h3>이게 내 무기예요</h3>':row.role==='reinforce'?'<h3>이렇게 쓰면 더 잘 풀려요</h3>':'')+((row.role==='narr-luck'||row.role==='luck-context')?unitParasHtml(row.text,row.role):readingParagraphHtml(row.text,row.role,!out.creative&&!out.education))+(!feedbackDone&&i>=feedbackAt?(function(){var f=midFeedback(row.text);if(f)feedbackDone=true;return f;})():''));if(i===0){var chart=(c.editorialContractId||c.id)==='timeline_self_03'?'':overview(c);if(chart)h+=section(c,ci,'chart',chart,'text-reading-chart');var whyHtml=ln?narrativeBasis(ln):basisGroup('why');if(whyHtml)h+=section(c,ci,'why',whyHtml,'text-reading-why');var plusHtml=R.ReadingPlus?R.ReadingPlus.html(c):'';if(plusHtml)h+=section(c,ci,'plus',plusHtml,'text-reading-plus');if(feat&&feat.rest)h+=section(c,ci,'feature',feat.rest,'text-reading-feature');}});
    function basisGroup(role){var items=out.basis.filter(function(b){return (b.reason==='why'?'why':'evidence')===role;});var MINE=/^이 사주: /;   // 서버가 붙인 '이 사주의 실제 값' 한 줄(functions/_reading-personal.js)은 숫자가 있어도 남기고 강조한다(2026-11-07)
-   var paras=items.map(function(b){return readingParagraphs(b.text,false).filter(function(t){return MINE.test(t)||(!NOTE_SENTENCE.test(t)&&!CALC_SENTENCE.test(t));}).map(function(t){return MINE.test(t)?'<p class="reading-mine" data-reading-role="'+role+'"><b>내 사주에서는</b> '+esc(t.replace(MINE,''))+'</p>':'<p data-reading-role="'+role+'">'+esc(t)+'</p>';}).join('');}).join('');if(!paras)return '';return '<div class="reading-basis-group"><h3>'+(role==='why'?'왜 이렇게 풀이했는지 짚어 볼게요':'명리로 본 근거')+'</h3>'+paras+'</div>';}
+   var paras=items.map(function(b){return readingParagraphs(plainBasis(b.text),false).filter(function(t){return MINE.test(t)||(!NOTE_SENTENCE.test(t)&&!CALC_SENTENCE.test(t));}).map(function(t){return MINE.test(t)?'<p class="reading-mine" data-reading-role="'+role+'"><b>내 사주에서는</b> '+esc(t.replace(MINE,''))+'</p>':'<p data-reading-role="'+role+'">'+esc(t)+'</p>';}).join('');}).join('');if(!paras)return '';return '<div class="reading-basis-group"><h3>'+(role==='why'?'왜 이렇게 풀이했는지 짚어 볼게요':'명리로 본 근거')+'</h3>'+paras+'</div>';}
   if((c.editorialContractId||c.id)==='timeline_self_28'&&!out.creative&&!out.education&&!(feat&&feat.rest)){var cph=compatHtml(c);if(cph)h+=section(c,ci,'compat',cph,'text-reading-compat');}
   if(R.ReadingDepth&&!out.creative&&!out.education){var depth=R.ReadingDepth.html(c,esc);if(depth)h+=section(c,ci,'depth',depth,'text-reading-depth');}
   // 안 쓰던 엔진 블록(engine-blocks.js): 전체 인생 흐름 ← 30년 대운 구간, 기질·자동차 비유 ← 격국
