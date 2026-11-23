@@ -11,7 +11,7 @@ var DAEWOON={opportunity:'이번 10년은 새로운 시도로 판을 여는 시�
 var TG_TASK={비견:'과제는 내 힘으로 서는 기반을 만드는 거예요.',겁재:'과제는 경쟁 속에서 내 몫을 지키는 기준을 세우는 거예요.',식신:'과제는 재능을 꾸준한 결과물로 만드는 거예요.',상관:'과제는 표현과 개성을 일로 연결하는 거예요.',편재:'과제는 넓어진 기회를 관리하는 구조를 만드는 거예요.',정재:'과제는 안정적인 수입과 저축의 틀을 다지는 거예요.',편관:'과제는 압박을 버티되 소진되지 않는 리듬을 찾는 거예요.',정관:'과제는 책임과 평판을 쌓아 자리를 다지는 거예요.',편인:'과제는 나만의 전문 영역을 깊게 파는 거예요.',정인:'과제는 배움과 자격으로 기반을 단단히 하는 거예요.'};
 var EL_TIP={목:'배우고 키우는 활동',화:'사람과 어울리고 표현하는 활동',토:'규칙적인 생활 리듬',금:'정리와 마무리 습관',수:'생각을 정리하고 쉬는 시간'};
 var CONDITION={순풍:' 흐름이 순한 때라 미뤄 둔 일을 꺼내기 좋아요.',주의:' 다만 부담 신호가 있어서 속도를 한 단계 낮추고 확인을 한 번 더 하세요.',부담:' 다만 부담이 큰 때라 새로 벌이기보다 쉬는 시간과 여유를 먼저 확보하세요.'};
-var TIMING_NOTE='시기 해석은 엔진이 계산한 운의 흐름을 생활 과제로 바꾼 것이고, 사건이나 결과를 예측하지 않아요.';
+var TIMING_NOTE='시기 풀이는 "이때 이런 걸 챙기면 좋다"는 방향이에요. 일이 꼭 그렇게 일어난다는 뜻은 아니에요.';
 var DISPLAY={연살:'도화살'};
 function topicOf(id){var m=/^timeline_([a-z]+)_([0-9]+)$/.exec(id||'');return m?{topic:m[1],n:Number(m[2])}:null;}
 // ───────── 시그니처: 사주 요소를 성향군으로 묶어 점수를 매긴다(드문 요소일수록 무겁게) ─────────
@@ -48,7 +48,7 @@ function partFor(text){
 function signatureCard(sd){
  var s=signature(sd);if(!s)return '';var name=sd.name?esc(sd.name)+'님':'이 사주';
  return '<div class="plus-card plus-signature"><h3>나의 시그니처</h3><p class="plus-lead">'+name+'을 가장 잘 설명하는 세 가지 성향이에요. 아래 장들의 풀이는 이 세 가지가 장면마다 어떻게 나타나는지를 보여 줘요.</p><ol>'+
-  s.top.map(function(f){return '<li><strong>'+esc(f.label)+'</strong><span>'+esc(f.core)+'</span>'+(f.sources.length?'<small>계산 근거: '+esc(f.sources.join(' · '))+'</small>':'')+'</li>';}).join('')+'</ol>'+
+  s.top.map(function(f){return '<li><strong>'+esc(f.label)+'</strong><span>'+esc(f.core)+'</span>'+(f.sources.length?'<small>근거: '+esc(f.sources.join(' · '))+'</small>':'')+'</li>';}).join('')+'</ol>'+
   (s.pair?'<p class="plus-pair">'+esc(s.pair)+'</p>':'')+(s.band?'<p>'+esc(s.band)+'</p>':'')+feedback('sig:'+s.top[0].key)+'</div>';
 }
 function summaryCard(sd){

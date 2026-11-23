@@ -29,7 +29,7 @@ const E=globalThis.MantraEverydayReading;
  const SKIP=new Set(['self_02','self_03','self_20','self_21','wealth_06','wealth_10','career_08','career_12','love_08','health_06','health_07']);
  const LEGACY_TIMING=new Set(['wealth_10','career_08']); // 먼저 있던 천을귀인 문장(사건이 아닌 사람 인연 경향)만 이 두 장에 있다.
  const FIRST=[/^사주에 ([가-힣]+)(?:이|가) 있어요[.]/,/^사주 글자들 사이에 ([가-힣]+)(?:이|가) 걸려 있어요[.]/,/^사주에 ([가-힣]+)의 힘이 두드러져요[.]/];
- const AGAINS=[/^([가-힣]+?)(?:은|는) 이 장에서도 (?:드러나요|한몫해요)[.]/,/^([가-힣]+)의 (?:결이 여기서도 이어져요|흔적은 이 장에도 있어요|영향이 여기서도 보여요|결은 이 장에도 이어져요|힘은 이 장에서도 이어져요|기운이 여기서도 눈에 띄어요|결은 이 장에도 나타나요)[.]/,/^이 장에서도 ([가-힣]+)의 (?:영향을 빼놓을 수 없어요|흐름이 보여요|힘이 한몫해요)[.]/];
+ const AGAINS=[/^앞에서 본 ([가-힣]+?)(?:의 힘)?(?:이|가)? 여기서(?:는 이렇게 나타나요|도 영향을 줘요)[.]/,/^([가-힣]+?)(?:은|는|의 힘은) 이 주제에서도 (?:힘을 써요|이어져요)[.]/,/^([가-힣]+?)(?:이|가|의 기운이) 이 이야기에도 닿아 있어요[.]/,/^([가-힣]+?)(?:을|를|의 힘을) 이 주제로 옮겨 보면 이래요[.]/];   // 2026-11-23 재등장 문형(내부 단위 '이 장' 대신)
  const elementOf=text=>{for(const re of [...FIRST,...AGAINS]){const m=re.exec(text);if(m)return {name:m[1]==='도화살'?'연살':m[1],first:FIRST.includes(re)};}return null;};
  const holds=(sd,name)=>new Set([...(sd.specialStars||[]).map(x=>x.name),...Object.values(sd.sinsal12||{}),...[...(sd.combinations||[]),...(sd.clashes||[])].map(r=>r.type),...Object.entries(sd.tenGods||{}).filter(([,v])=>Number(v)>=20).map(([k])=>k)]).has(name);
  const per={};let totalLines=0,perChart=[];

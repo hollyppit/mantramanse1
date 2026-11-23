@@ -23,7 +23,8 @@ function paragraphs(c,sd){var id=c&&(c.editorialContractId||c.id),d=R.ReadingDep
  var top=pickStrongest(sd),weak=pickWeakest(sd),band=sd.strength&&sd.strength.band,yong=sd.usefulElements&&sd.usefulElements.yong,dw=sd.currentDaewoon,tg=dw&&TG_GROUP[dw.stemTG],nowY=sd.nowYear;
  var ti=GROUPS.indexOf(top),wi=GROUPS.indexOf(weak),bi=BANDS.indexOf(band),yi=ELS.indexOf(yong),FO=R.FactOnce,first=function(k){return !FO||FO.own(sd,k,id);};
  if(ti>=0&&d.g&&d.g[ti])out.push({key:'strong',text:(first('strong:'+top)?lead(LEAD_STRONG,id,0,'{g}',top+'('+GLOSS[top]+')')+' ':'')+d.g[ti]});
- if(wi>=0&&d.w&&d.w[wi]&&weak!==top)out.push({key:'weak',text:(first('weak:'+weak)?lead(LEAD_WEAK,id,1,'{g}',weak+'('+GLOSS[weak]+')')+' ':'')+d.w[wi]});
+ // 2026-11-23: 머리말 없이 강점 문단 바로 뒤에 오면 '대신'을 붙여 모순이 아니라 보완으로 읽히게(예: 규칙으로 모으는 힘 ↔ 대신 모으는 감각은 약해요)
+ if(wi>=0&&d.w&&d.w[wi]&&weak!==top){var wl=first('weak:'+weak)?lead(LEAD_WEAK,id,1,'{g}',weak+'('+GLOSS[weak]+')')+' ':'',wt=d.w[wi];if(!wl&&out.length&&!/^(?:다만|대신|하지만|그런데|반면|또)/.test(wt))wt='대신 '+wt;out.push({key:'weak',text:wl+wt});}
  if(bi>=0&&d.b&&d.b[bi])out.push({key:'band',text:first('band:'+band)?BAND_LEADS[band][hashId(id)%BAND_LEADS[band].length]+' '+trimBand(d.b[bi]):d.b[bi]});
  if(yi>=0&&d.y&&d.y[yi])out.push({key:'yong',text:first('yong:'+yong)?lead(LEAD_YONG,id,2,'{e}',yong+'('+EL_GLOSS[yong]+')')+' '+trimYong(d.y[yi]):d.y[yi]});
  if(d.t&&tg&&dw&&(!nowY||(dw.startYear<=nowY&&nowY<=dw.endYear))){var ki=GROUPS.indexOf(tg);if(ki>=0&&d.t[ki])out.push({key:'luck',text:(first('luck:'+tg+':'+dw.ganzhi)?lead(LEAD_LUCK,id,3,'{g}',tg+'('+GLOSS[tg]+')')+' ':'')+d.t[ki]});}

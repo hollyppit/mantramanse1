@@ -189,6 +189,8 @@
   // 문장은 장마다 고유한 CH_LUCK 문장(지금 운 단계와 같은 출처)을 시기별로 나눠 쓴다. reading-text.js 가 카드로 그리고, 카드가 다룬 운 문단은 본문에서 뺀다.
   function cardItem(p, label, text) { return { tense: p.tense, label: label, age: ageTxt(p), years: p.year0 + '~' + new Date(p.end).getUTCFullYear() + '년', gz: p.gz, tone: p.tone, text: text }; }
   function pastFirst(t) { return pastOne(sentences(t)[0] || ''); }
+  // 같은 성격의 10년이 이어질 때: 장마다 다른 그 장의 문장을 '한 번 더 이어져요'로 바꿔 쓴다(장마다 같은 머리말이 반복되지 않게)
+  function contFirst(t) { var f = sentences(t)[0] || ''; var o = f.replace(/시기예요.$/, '시기가 한 번 더 이어져요.').replace(/10년이에요.$/, '10년이 한 번 더 이어져요.').replace(/때예요.$/, '때가 한 번 더 이어져요.'); return o !== f ? o : '같은 흐름이 이어져요. ' + f; }
   function pastAll(t) { return sentences(t).map(pastOne).join(' '); }
   function pastOne(f) {
     return f.replace(/시기예요\.$/, '시기였어요.').replace(/때예요\.$/, '때였어요.').replace(/쉬워요\.$/, '쉬웠어요.').replace(/있어요\.$/, '있었어요.').replace(/늘어나요\.$/, '늘어났어요.').replace(/늘어요\.$/, '늘었어요.').replace(/와요\.$/, '왔어요.').replace(/모아요\.$/, '모았어요.').replace(/여요\.$/, '였어요.').replace(/져요\.$/, '졌어요.').replace(/커져요\.$/, '커졌어요.').replace(/돼요\.$/, '됐어요.').replace(/이에요\.$/, '이었어요.').replace(/([가-힣])예요\.$/, '$1였어요.');
@@ -222,10 +224,12 @@
     }
     if (ci < 0) return null;
     var cur = ps[ci], prev = ps[ci - 1], n1 = ps[ci + 1], n2 = ps[ci + 2], cross = crossing(cur, n1, now), adultOnly = function (p) { return !(spec.young && p.age0 >= 20); };
-    if (prev && prev.age1 >= 20 && !spec.young) items.push(cardItem(prev, '지나온 10년', pastFirst(g[prev.group])));
+    // 자녀·결혼 장은 스무 살 안팎의 지나온 칸을 뺀다(그 나이에 '자녀를 돌봤다' 같은 단정이 어색해서)
+    var ADULT_CH = { timeline_self_34: 1, timeline_self_29: 1, timeline_love_07: 1, timeline_love_08: 1, timeline_love_09: 1, timeline_love_11: 1 };
+    if (prev && prev.age1 >= 20 && !spec.young && !(ADULT_CH[chapterId] && prev.age0 < 25)) items.push(cardItem(prev, '지나온 10년', pastFirst(g[prev.group])));
     items.push(cardItem(cur, cross ? '지금 · 곧 끝나요' : '지금', g[cur.group]));
-    if (n1 && n1.age0 < 85 && adultOnly(n1)) items.push(cardItem(n1, cross ? '곧 들어와요' : '다음 10년', n1.group === cur.group ? '같은 흐름이 10년 더 이어져요. ' + (sentences(g[n1.group])[0] || '') : g[n1.group]));
-    if (n2 && n2.age0 < 85 && n1 && adultOnly(n2) && !spec.months) items.push(cardItem(n2, '그다음 10년', n2.group === n1.group ? '앞 시기와 같은 흐름이 이어져요. ' + (sentences(g[n2.group])[0] || '') : g[n2.group]));
+    if (n1 && n1.age0 < 85 && adultOnly(n1)) items.push(cardItem(n1, cross ? '곧 들어와요' : '다음 10년', n1.group === cur.group ? contFirst(g[n1.group]) : g[n1.group]));
+    if (n2 && n2.age0 < 85 && n1 && adultOnly(n2) && !spec.months) items.push(cardItem(n2, '그다음 10년', n2.group === n1.group ? contFirst(g[n2.group]) : g[n2.group]));
     items.forEach(function (x) { x.text = String(x.text || '').trim(); });
     return items.length >= 2 ? { items: items, cross: cross ? CROSS_TIP : '' } : null;
   }
@@ -279,6 +283,13 @@
     }
     if (spec.decades) {
       var fut = ps.filter(function (p) { return p.tense !== 'past' && p.age0 < 80; }).map(function (p) { return { p: p, s: p.fit + wBonus(p.group) }; });
+      // 2026-11-23: 같은 장 그래프('앞으로 힘이 실리는 시기 순위')와 같은 점수·같은 후보로 고른다(ReadingText.topDecades). 없으면 예전 계산
+      var RT = R.ReadingText, tdSd = null; try { if (RT && RT.topDecades && R.SajuData) { st.sdCache = st.sdCache || R.SajuData.build(ch, { now: now }); tdSd = RT.topDecades(st.sdCache, 'wealth', 2); } } catch (e) { tdSd = null; }
+      if (tdSd && tdSd.top.length) {
+        var pOf = function (d) { return ps.filter(function (p) { return Math.abs(p.year0 - d.startYear) <= 1; })[0]; };
+        var b2 = tdSd.top.map(pOf).filter(Boolean).sort(function (a, b) { return a.age0 - b.age0; }), lw = tdSd.low && pOf(tdSd.low);
+        if (b2.length) { var bl2 = b2.map(function (p) { return ageTxt(p) + '(' + p.year0 + '년~)'; }); out.push('앞으로 재물에 힘이 가장 실리는 10년은 ' + (bl2.length > 1 ? josa(bl2[0], '과/와') + ' ' + bl2[1] : bl2[0]) + ' 구간이에요.'); if (lw && b2.indexOf(lw) < 0) out.push(josa(ageTxt(lw) + '(' + lw.year0 + '년~)', '은/는') + ' 재물 면에서 넓히기보다 지키는 데 집중해야 하는 10년이에요.'); fut = []; }
+      }
       if (fut.length) {
         var best2 = fut.slice().sort(function (a, b) { return b.s - a.s; }).slice(0, 2).sort(function (a, b) { return a.p.age0 - b.p.age0; });
         var bl = best2.map(function (x) { return ageTxt(x.p) + '(' + x.p.year0 + '년~)'; }); out.push('남은 인생에서 재물에 힘이 가장 실리는 10년은 ' + (bl.length > 1 ? josa(bl[0], '과/와') + ' ' + bl[1] : bl[0]) + ' 구간이에요.');
@@ -367,12 +378,25 @@
       return sentences(para).filter(function (s) { var k = norm(s); if (k.length < 8) return true; if (st.sentences.has(k)) return false; st.sentences.add(k); return true; }).join(' ');
     }).filter(Boolean).join('\n\n');
   }
+  // 근거 줄 쉬운 말(2026-11-23): 한자 글자쌍·온도 숫자·머리말·근거 강도 문장을 읽히는 말로. 판정과 값은 그대로다
+  var BR_HJ = '子丑寅卯辰巳午未申酉戌亥', BR_KO = '자축인묘진사오미신유술해';
+  var REL_PLAIN = { '충': '부딪힘', '형': '서로 깎아냄', '파': '깨뜨림', '해': '어긋남', '원진': '괜히 미워함', '합': '끌어당김', '반합': '끌어당김', '삼합': '끌어당김', '육합': '끌어당김' };
+  function plainEv(t) {
+    return String(t || '')
+      .replace(/^이 사주에서 확인된 조건:\s*/, '내 사주에서 확인한 것: ').replace(/^함께 본 조건:\s*/, '함께 확인한 것: ')
+      .replace(/^근거 강도: 보통 — 구조 하나가 아니라 기운의 비율로 읽은 해석이라, 맞지 않는 부분은 걸러 읽어 주세요\./, '확신 정도: 보통 · 다섯 기운의 비율로 읽은 풀이라, 내 경험과 다른 부분은 걸러 읽어 주세요.')
+      .replace(/^근거 강도: 높음 — 원국의 구조\(격국·강약·십성 배치\)에서 직접 나온 해석이에요\./, '확신 정도: 높음 · 타고난 사주의 짜임에서 바로 나온 풀이예요.')
+      .replace(/([子丑寅卯辰巳午未申酉戌亥])([子丑寅卯辰巳午未申酉戌亥])(원진|반합|삼합|육합|충|형|파|해|합)/g, function (m, a, b, r) { return BR_KO[BR_HJ.indexOf(a)] + '·' + BR_KO[BR_HJ.indexOf(b)] + ' ' + r + (REL_PLAIN[r] ? '(' + REL_PLAIN[r] + ')' : ''); })
+      .replace(/원국 온도 ([+-]?\d+(?:\.\d+)?)/g, function (m, v) { v = +v; return '타고난 온도: ' + (v > 0.3 ? '따뜻한 편' : v < -0.3 ? '서늘한 편' : '고른 편'); })
+      .replace(/원국 습도 ([+-]?\d+(?:\.\d+)?)/g, function (m, v) { v = +v; return '타고난 습도: ' + (v > 0.3 ? '습한 편' : v < -0.3 ? '건조한 편' : '고른 편'); });
+  }
   function evidenceRows(P, rule, D0, extra) {
     var conds = rule ? rule.all.concat(rule.any.map(function (g) { return g.find(function (t) { return P.has(t); }); })).filter(Boolean) : [];
     var lines = [];
     if (rule) lines.push(rule.basis);
     if (conds.length) lines.push('이 사주에서 확인된 조건: ' + conds.map(function (t) { return P.tags[t]; }).join(' · ') + '.');
     (extra || []).forEach(function (x) { lines.push(x); });
+    lines = lines.map(plainEv);
     var terms = (rule ? rule.terms : []).concat(['대운', '세운']).filter(function (t, i, a) { return a.indexOf(t) === i && D0.TERMS[t]; });
     return { lines: lines, terms: terms.map(function (t) { return { term: t, text: D0.TERMS[t] }; }), conds: conds };
   }

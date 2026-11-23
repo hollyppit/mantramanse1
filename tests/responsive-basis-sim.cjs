@@ -3,7 +3,7 @@ global.window=globalThis;vm.runInThisContext(fs.readFileSync('report/v2/reading-
 const source='갑목과 정재의 조합을 살펴요. 이는 결과를 보장하지 않아요.';
 const chapter={id:'timeline_wealth_01',readingParagraphs:[{role:'title',text:'돈의 흐름을 돌아보세요.'},{role:'why',text:source},{role:'evidence',text:'출처의 조건과 현재 원국을 함께 확인해요.'}],readingVisualData:{pillars:{day:{ko:'갑자'}},strength:{band:'중화'}}};
 const html=ReportV2.ReadingText.html(chapter,0);
-for(const text of ['왜 이렇게 풀이했는지 짚어 볼게요'/* c6c2aec(2026-10-26) 소제목 변경 */,'명리 설명과 해석 범위','내 사주 원국'/* 원국 표 제목 변경 */,'갑목과 정재의 조합을 살펴요.','이는 결과를 보장하지 않아요.','출처의 조건과 현재 원국을 함께 확인해요.'])assert(html.includes(text),text);
+for(const text of ['왜 이렇게 풀이했는지 짚어 볼게요'/* c6c2aec(2026-10-26) 소제목 변경 */,'명리로 본 근거'/* 2026-11-23 쉬운 말 */,'내 사주 원국'/* 원국 표 제목 변경 */,'갑목과 정재의 조합을 살펴요.','이는 결과를 보장하지 않아요.','출처의 조건과 현재 원국을 함께 확인해요.'])assert(html.includes(text),text);
 assert.equal((html.match(/<summary>풀이 근거/g)||[]).length,0)/* c6c2aec(2026-10-26)부터 근거는 접지 않고 펼쳐 보인다 */;
 assert.equal((html.match(/reading-basis-group/g)||[]).length,2);
 assert(!html.includes('max-height:'),'expanded evidence must not be clipped by inline heights');

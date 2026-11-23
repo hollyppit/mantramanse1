@@ -53,6 +53,8 @@
   /* ── 기회의 해 준비 달력 ── */
   FB.add('fx:actcal', function (H, part) {
     var t = topicFor(H, part.topic), ys = years(H, 10), best = ys.slice(1).sort(function (a, b) { return b.s - a.s || a.y - b.y; })[0] || ys[0];
+    // 2026-11-23: 재물·커리어·인연은 장 첫 문장·그래프와 같은 순위(ReadingFeature.rank)에서 '가장 좋은 해'를 고른다(올해 제외) — 같은 장 안에서 해가 엇갈리지 않게
+    try { var RF = R.ReadingFeature, rk = RF && RF.rank && /^(wealth|career|love)$/.test(part.topic) ? RF.rank(H.M, H.ch, H.now || Date.now(), part.topic, 'year') : null, nowY0 = ys[0] && ys[0].y, pick = rk && rk.filter(function (r) { return r.y > nowY0; })[0]; var full = pick && ys.filter(function (x) { return x.y === pick.y; })[0]; if (full) best = full; } catch (e) { }
     var cells = [[best.y - 1, '準 · 준비하는 해', t.before], [best.y, '行 · 실행하는 해', t.on], [best.y + 1, '守 · 지키는 해', t.after]];
     return '<section class="dp-embed dp fx">' + head('命簿 · 준비 달력', t.word + ' 기회의 해, 세 해로 준비하기', '앞으로 10년 중 ' + best.y + '년(' + best.gz + ')이 ' + t.word + ' 쪽 바람이 가장 좋아요. 기회는 그해 하루에 오지 않으니, 앞뒤 해까지 묶어 준비해요.') +
       '<ol class="fx-steps">' + cells.map(function (c) { return '<li><small>' + esc(c[0] + '년 · ' + c[1]) + '</small><p>' + esc(c[2]) + '</p></li>'; }).join('') + '</ol>' +

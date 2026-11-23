@@ -98,6 +98,15 @@ function relMembers(name,sd){
  return out;
 }
 // 처음 나올 때만 붙는 한두 문장. 사전에 없거나 사주에 해당 자리가 없으면 있는 부분만 돌려준다.
+// 2026-11-23: 뜻(def)과 내 사주의 자리(place)를 나눠 돌려준다 — 화면은 '있어요 → 뜻 → 생활 풀이 → 자리' 순서로 놓는다(정의가 조언 뒤에 오지 않게).
+// 자리 문장은 쉬운 말로: '이 별은 내 사주의 어린 시절·가족 자리에 있어요.' (예전 '내 사주에서는 년주(…)에 있어서 …'는 조사가 겹쳤다)
+var PLACE={year:'어린 시절·가족 자리',month:'사회생활·직장 자리',day:'나와 배우자 자리',hour:'자녀·말년 자리'};
+function depthParts(kind,name,sd){
+ var row=(D[kind]||{})[name];if(!row)return null;var place='';
+ if(kind==='star'||kind==='s12'){var p=where(kind,name,sd||{});if(p)place='이 별은 내 사주의 '+PLACE[p]+'에 있어요. '+row[IDX[p]];}
+ else if(kind==='rel'){var ms=relMembers(name,sd||{});place=ms.length?'이 관계는 내 사주의 '+ms.map(function(m){return PLACE[m];}).join('와 ')+'를 잇고 있어요. '+row[1]:row[1];}
+ else if(kind==='tg'){var v=Number(((sd||{}).tenGods||{})[name]);if(isFinite(v)&&v>0)place='내 사주에서 이 힘은 전체의 약 '+Math.round(v)+'%예요.';}
+ return {def:row[0],place:place};}
 function depth(kind,name,sd){
  var row=(D[kind]||{})[name];if(!row)return '';
  var out=[row[0]],n=name==='연살'?'도화살':name;
@@ -114,6 +123,6 @@ function depth(kind,name,sd){
  }
  return out.join(' ');
 }
-root.MantraChartLinesDepth={D:D,depth:depth,where:where};
+root.MantraChartLinesDepth={D:D,depth:depth,depthParts:depthParts,where:where};
 if(typeof module!=='undefined'&&module.exports)module.exports={D:D,depth:depth,where:where};
 })(typeof window!=='undefined'?window:globalThis);

@@ -135,7 +135,7 @@ function text(lens,slot,v,opt){var d=D(),t,x;opt=opt||{};var J=function(lead,res
  if(slot==='pair'){t=d.PAIR&&d.PAIR[lens]&&d.PAIR[lens][v.s+'|'+v.w];return t?J('가장 큰 기운 '+v.s+'('+GLOSS[v.s]+')과 가장 작은 기운 '+v.w+'('+GLOSS[v.w]+')의 조합이에요. ',t):'';}
  if(slot==='pat1'||slot==='pat2'){t=d.PATTERN&&d.PATTERN[lens]&&d.PATTERN[lens][v.name];var pl=d.PATTERN&&d.PATTERN.PLAIN&&d.PATTERN.PLAIN[v.name];return t&&pl?J('이 사주는 '+pl+'예요('+v.name+'). ',t):'';}
  if(slot==='lack'){t=d.LACK&&d.LACK[lens]&&d.LACK[lens][v.el];return t?J('원국에 '+v.el+'('+EL_GLOSS[v.el]+') 기운이 거의 없어요. ',t):'';}
- if(slot==='clim'){t=d.CLIMATE&&d.CLIMATE[lens]&&d.CLIMATE[lens][v.key];var lb=d.CLIMATE&&d.CLIMATE.LABEL&&d.CLIMATE.LABEL[v.key];return t&&lb?J('사주 전체의 기후는 '+lb+josa(lb,'이에요','예요')+'. ',t):'';}
+ if(slot==='clim'){t=d.CLIMATE&&d.CLIMATE[lens]&&d.CLIMATE[lens][v.key];var lb=d.CLIMATE&&d.CLIMATE.LABEL&&d.CLIMATE.LABEL[v.key];return t&&lb?J('타고난 사주의 온도는 '+lb+josa(lb,'이에요','예요')+'. ',t):'';}
  if(/^st_/.test(slot)){t=d.STAGE&&d.STAGE[lens]&&d.STAGE[lens][v.stage];var nm=PILLAR_NAME[v.pillar]+'주';
   var pf=t&&lifeFirst(t,v.pillar,nm,opt);if(pf)return pf;
   return t?J(nm+'의 12운성은 ‘'+v.stage+'’'+josa(v.stage,'이에요','예요')+'. '+pillarLine(lens,v.pillar,opt),t):'';}
@@ -143,6 +143,8 @@ function text(lens,slot,v,opt){var d=D(),t,x;opt=opt||{};var J=function(lead,res
   var pf2=tgm&&lifeFirst(tgm,v.pillar,pos,opt);if(pf2)return pf2;
   return tgm?J(pos+'에 '+v.tg+josa(v.tg,'이','가')+' 놓여 있어요. '+pillarLine(lens,v.pillar,opt),tgm):'';}
  if(slot==='rel1'||slot==='rel2'||slot==='rel3'){var key=REL_TYPE_KEY[v.type],tm=d.RELTYPE&&d.RELTYPE[lens]&&d.RELTYPE[lens][key],pm=d.RELPAIR&&d.RELPAIR[lens]&&d.RELPAIR[lens][v.pair];
+  if(tm&&pm){var rm=String(tm).match(LIFE_FIRST);   // 2026-11-23: 생활 모습 먼저, 자리와 관계 이름은 끝의 근거 한 줄로
+   if(rm){var rl=rm[3].trim();return opt.noIntro?rl:rl+' '+pm+' 근거는 '+relPlace(v.type,v.members)+' 사이의 '+v.type+'('+rm[2].trim()+')'+josa(rm[2].trim(),'이에요','예요')+'.';}}
   return tm&&pm?J(relPlace(v.type,v.members)+' 사이에 '+v.type+josa(v.type,'이','가')+' 걸려 있어요. '+pm+' ',tm):'';}
  if(slot==='dwg'){t=d.DWG&&d.DWG[lens]&&d.DWG[lens][v.group+'|'+v.state];return t||'';}
  if(slot==='dwy'){t=d.DWY&&d.DWY[lens]&&d.DWY[lens][v.role];var rl=d.DWY&&d.DWY.ROLE&&d.DWY.ROLE[v.role];return t&&rl?J('지금 대운의 천간은 '+v.el+'이고, 내 사주에서 '+v.el+josa(v.el,'은','는')+' '+v.role+'에 해당해요. ',t):'';}
@@ -152,6 +154,10 @@ function text(lens,slot,v,opt){var d=D(),t,x;opt=opt||{};var J=function(lead,res
  if(slot==='sen'){t=d.SEN&&d.SEN[lens]&&d.SEN[lens][v.group];return t?J(v.year+'년 세운의 천간은 '+v.group+'('+GLOSS[v.group]+') 기운이에요. ',t):'';}
  if(slot==='dwr'){var k3=SEUN_TYPE_KEY[v.type],p3=d.DWR&&d.DWR.POS&&d.DWR.POS[lens]&&d.DWR.POS[lens][v.place],t3=d.DWR&&d.DWR.TYPE&&d.DWR.TYPE[lens]&&d.DWR.TYPE[lens][k3];
   return p3&&t3?J('지금 대운의 지지는 내 '+(v.place==='day'?'일지':'월지')+'와 '+v.type+josa(v.type,'이','가')+' 걸려 있어요. '+p3+' ',t3):'';}
+ // 2026-11-23: 운의 관계 문단(올해·지금 대운)도 생활 모습 먼저 — '형은 마찰로 단련하는 관계라, 올해는 …' → '올해는 … 올해 들어온 글자가 내 배우자 자리와 형(마찰로 단련하는 관계)을 이뤄서예요.'
+ function luckRelFirst(ty,ps,who,place,type,opt){var m=String(ty).match(LIFE_FIRST);if(!m)return null;var life=m[3].trim();if(opt&&opt.noIntro)return life;return life+(ps?' '+ps:'')+' '+who+' '+(place==='day'?'나와 배우자 자리(일지)':'사회생활 자리(월지)')+'와 '+type+'('+m[2].trim()+')'+josa(type,'을','를')+' 이뤄서예요.';}
+ if(slot==='ser'){var _k=SEUN_TYPE_KEY[v.type],_ps=d.SER&&d.SER.POS&&d.SER.POS[lens]&&d.SER.POS[lens][v.place],_ty=d.SER&&d.SER.TYPE&&d.SER.TYPE[lens]&&d.SER.TYPE[lens][_k];var _lf=_ps&&_ty&&luckRelFirst(_ty,_ps,v.year+'년에 들어온 글자가',v.place,v.type,opt);if(_lf)return _lf;}
+ if(slot==='dwr'){var _k2=SEUN_TYPE_KEY[v.type],_p2=d.DWR&&d.DWR.POS&&d.DWR.POS[lens]&&d.DWR.POS[lens][v.place],_t2=d.DWR&&d.DWR.TYPE&&d.DWR.TYPE[lens]&&d.DWR.TYPE[lens][_k2];var _lf2=_p2&&_t2&&luckRelFirst(_t2,_p2,'지금 10년 운의 글자가',v.place,v.type,opt);if(_lf2)return _lf2;}
  if(slot==='ser'){var key2=SEUN_TYPE_KEY[v.type],ps=d.SER&&d.SER.POS&&d.SER.POS[lens]&&d.SER.POS[lens][v.place],ty=d.SER&&d.SER.TYPE&&d.SER.TYPE[lens]&&d.SER.TYPE[lens][key2];
   return ps&&ty?J(v.year+'년 세운의 지지는 내 '+(v.place==='day'?'일지':'월지')+'와 '+v.type+josa(v.type,'이','가')+' 걸려요. '+ps+' ',ty):'';}
  return '';}

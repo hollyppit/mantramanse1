@@ -18,9 +18,9 @@ function prefix(kind,name){var n=DISPLAY[name]||name;
  if(kind==='tg')return '사주에 '+n+'의 힘이 두드러져요.';
  return '사주에 '+n+josa(n,'이','가')+' 있어요.';}
 // 같은 요소가 한 리포트에서 다시 나올 때는 같은 문장을 되풀이하지 않고 표현을 바꾼다(첫 등장은 prefix).
-var AGAIN={star:['{n}{은} 이 장에서도 드러나요.','{n}의 결이 여기서도 이어져요.','{n}의 흔적은 이 장에도 있어요.','이 장에서도 {n}의 영향을 빼놓을 수 없어요.'],s12:['{n}{은} 이 장에서도 드러나요.','{n}의 결이 여기서도 이어져요.','{n}의 흔적은 이 장에도 있어요.','이 장에서도 {n}의 영향을 빼놓을 수 없어요.'],
- rel:['{n}{은} 이 장에서도 한몫해요.','{n}의 영향이 여기서도 보여요.','{n}의 결은 이 장에도 이어져요.','이 장에서도 {n}의 흐름이 보여요.'],tg:['{n}의 힘은 이 장에서도 이어져요.','{n}의 기운이 여기서도 눈에 띄어요.','{n}의 결은 이 장에도 나타나요.','이 장에서도 {n}의 힘이 한몫해요.']};
-function again(kind,name,times){var n=DISPLAY[name]||name,list=AGAIN[kind]||AGAIN.star,t=list[(Math.max(1,times)-1)%list.length];return t.replace('{n}',n).replace('{은}',josa(n,'은','는'));}
+var AGAIN={star:['앞에서 본 {n}{이} 여기서는 이렇게 나타나요.','{n}{은} 이 주제에서도 힘을 써요.','{n}{이} 이 이야기에도 닿아 있어요.','{n}{을} 이 주제로 옮겨 보면 이래요.'],s12:['앞에서 본 {n}{이} 여기서는 이렇게 나타나요.','{n}{은} 이 주제에서도 힘을 써요.','{n}{이} 이 이야기에도 닿아 있어요.','{n}{을} 이 주제로 옮겨 보면 이래요.'],
+ rel:['앞에서 본 {n}{이} 여기서도 영향을 줘요.','{n}{은} 이 주제에서도 힘을 써요.','{n}{이} 이 이야기에도 닿아 있어요.','{n}{을} 이 주제로 옮겨 보면 이래요.'],tg:['앞에서 본 {n}의 힘이 여기서는 이렇게 나타나요.','{n}의 힘은 이 주제에서도 이어져요.','{n}의 기운이 이 이야기에도 닿아 있어요.','{n}의 힘을 이 주제로 옮겨 보면 이래요.']};   // 2026-11-23: '이 장에서도' 같은 내부 단위 말 없이
+function again(kind,name,times){var n=DISPLAY[name]||name,list=AGAIN[kind]||AGAIN.star,t=list[(Math.max(1,times)-1)%list.length];return t.replace('{n}',n).replace('{은}',josa(n,'은','는')).replace('{이}',josa(n,'이','가')).replace('{을}',josa(n,'을','를'));}
 var TABLE={star:STARS,s12:S12,rel:REL,tg:TG};
 function ids(){var out=[];Object.keys(TABLE).forEach(function(k){Object.keys(TABLE[k]).forEach(function(name){Object.keys(TABLE[k][name]||{}).forEach(function(key){var id='timeline_'+key;if(out.indexOf(id)<0)out.push(id);});});});return out;}
 function present(sd){
@@ -35,7 +35,8 @@ function candidates(sd,id){
  return out.sort(function(a,b){return a.rank-b.rank||(a.kind+a.name<b.kind+b.name?-1:1);});
 }
 function depth(kind,name,sd){return DEPTH&&DEPTH.depth?DEPTH.depth(kind,name,sd):'';}
-var api={depth:depth,candidates:candidates,ids:ids,prefix:prefix,again:again,FREQ:FREQ,TABLE:TABLE,DISPLAY:DISPLAY,version:'chart-lines-20261026-1'};
+function depthParts(kind,name,sd){return DEPTH&&DEPTH.depthParts?DEPTH.depthParts(kind,name,sd):null;}
+var api={depthParts:depthParts,depth:depth,candidates:candidates,ids:ids,prefix:prefix,again:again,FREQ:FREQ,TABLE:TABLE,DISPLAY:DISPLAY,version:'chart-lines-20261026-1'};
 root.MantraChartLines=api;
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

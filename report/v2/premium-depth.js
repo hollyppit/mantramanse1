@@ -116,12 +116,12 @@
       pf: pf, P: c.P, pick: c.pick, young: pf.young, senior: pf.senior, female: c.ch.gender === 'F',
       pc: pc, josa: josa, v: function (g) { return pf.G[i(g)] || 0; }, p: function (g) { return pc(pf.G[i(g)]); },
       name: function (g) { return gName(D, g); }, plain: function (g) { return D.G[g]; },
-      np: function (g) { return D.G[g] + '(' + D.GT[g] + ' ' + pc(pf.G[i(g)]) + ')'; },   // '나와 같은 편 기운(비겁 34%)' — 뒤 조사는 '기운' 받침 기준(은·이·과·을)
-      domNP: D.G[pf.dom] + '(' + D.GT[pf.dom] + ' ' + pc(pf.G[i(pf.dom)]) + ')', minNP: D.G[pf.min] + '(' + D.GT[pf.min] + ' ' + pc(pf.G[i(pf.min)]) + ')',
+      np: function (g) { return D.G[g] + '(' + pc(pf.G[i(g)]) + ')'; },   // 2026-11-23: 본문 비율 표기에서 명리 용어를 뺀다('돈을 다루는 힘(9%)')   // '나와 같은 편 기운(비겁 34%)' — 뒤 조사는 '기운' 받침 기준(은·이·과·을)
+      domNP: D.G[pf.dom] + '(' + pc(pf.G[i(pf.dom)]) + ')', minNP: D.G[pf.min] + '(' + pc(pf.G[i(pf.min)]) + ')',
       tg: function (n) { return tg[n] || 0; }, tgp: function (n) { return pc(tg[n] || 0); },
       help: pf.help, helpP: pc(pf.help), str: strWord(pf.help, pf.zone), weak: pf.help < 42, strong: pf.help > 58,
       dom: pf.dom, min: pf.min, domName: gName(D, pf.dom), minName: gName(D, pf.min), domP: pc(pf.G[i(pf.dom)]), minP: pc(pf.G[i(pf.min)]),
-      yong: pf.yongG, yongEl: pf.yong != null ? EL_PLAIN[pf.yong] : '', yongP: pc(pf.yongPct), yongName: pf.yongG ? gName(D, pf.yongG) : '',
+      yong: pf.yongG, yongEl: pf.yong != null ? EL_PLAIN[pf.yong] : '', yongP: pc(pf.yongPct), yongName: pf.yongG ? D.G[pf.yongG] : '',   // 2026-11-23: '쇠의 성질(내 뜻을 지키는 힘(비겁))'처럼 괄호가 겹치지 않게 이름만
       dayEl: EL_PLAIN[pf.dayEl], dj: pf.djg, djName: gName(D, pf.djg), has: function (t) { return c.P.has(t); }, t: pf.tensions
     };
   }
