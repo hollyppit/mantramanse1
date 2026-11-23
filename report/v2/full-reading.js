@@ -190,7 +190,15 @@
           if(d.style){item.c.readingStyle=d.style;rep.readingStyle=rep.readingStyle || d.style;}
           remember(d.result,acceptedTexts,item.c.id);status.completed++;
           if(onReady)onReady(item.c,job,d.result);
-        } else if (d && d.error === 'locked') { item.c.readingLocked = true; status.skipped = (status.skipped || 0) + 1; }   // 유료 잠금: 오류로 다루지 않는다(화면은 paywall.js 가 가린다)
+        } else if (d && d.error === 'locked') {
+          // 유료 잠금: 오류로 다루지 않는다. 화면 쪽 잠금 정보(paywall.js)가 아직 없거나 서버와 어긋나도 '불러오는 중'에 멈추지 않게,
+          // 서버 판정을 장에 남기고(paywall.lockOf 가 읽는다) 화면에 알린다(viewer.js 가 구매 안내로 바꾼다)
+          var lockInfo = d.locked && typeof d.locked === 'object' ? d.locked : {};
+          item.c.readingLocked = { world: lockInfo.world || null, reason: lockInfo.reason || 'purchase', freeChapter: lockInfo.freeChapter || null };
+          item.c.readingNotice = lockInfo.reason === 'login' ? '이 장은 로그인하고 구매하면 열립니다.' : '이 장은 구매 후 열립니다.';
+          status.skipped = (status.skipped || 0) + 1;
+          try { root.dispatchEvent(new root.CustomEvent('mantra:reading-locked', { detail: { id: item.c.id, locked: item.c.readingLocked } })); } catch (e) { }
+        }
         else defer(item,d,d && d.ok?'client-validation-failed':'server-communication-failed');
       } catch (e) { if(!session.cancelled)defer(item,null,e && e.name==='AbortError'?'server-timeout':e instanceof SyntaxError?'server-response-invalid':'server-communication-failed'); }
       finally {root.clearTimeout(timer);if(ctl)session.controllers=session.controllers.filter(function(c){return c!==ctl;});}
@@ -239,8 +247,10 @@
       var result=await session.requestMany(ids).done;return !session.cancelled && !result.cancelled && !result.failed;
     };
     session.retry=function(id){var item=jobs.find(function(x){return x.c.id===id;});if(!item || !item.c.readingWarning)return;status.failed=Math.max(0,status.failed-1);unavailable=null;item.started=false;item.settled=false;item.c.readingWarning=null;item.c.readingFailure=null;item.c.readingNotice='검수된 문안을 다시 불러오고 있습니다.';if(onReady)onReady(item.c,item.job,{paragraphs:[]});warm=[];selected=item;item.visibleRequested=true;pump();};
+    // 구매·로그인 뒤: 서버가 잠갔던 장을 다시 받을 수 있게 되돌린다(새로 고침 없이 이어 읽기). 지금 보는 장은 바로 다시 요청한다
+    session.unlock=function(ids,currentId){var want=Array.isArray(ids)?ids:null,again=[];jobs.forEach(function(item){if(item===runningItem || want && want.indexOf(item.c.id)<0)return;if(!(item.c.readingLocked || want && item.settled && item.c.readingDeferred && !item.c.readingWarning))return;item.c.readingLocked=null;item.started=false;item.settled=false;item.c.readingNotice='검수된 문안을 불러오고 있습니다. 잠시만 기다려 주세요.';status.skipped=Math.max(0,(status.skipped||0)-1);again.push(item.c.id);});var cur=currentId&&jobs.find(function(x){return x.c.id===currentId&&!x.started;});if(cur){warm=[];selected=cur;cur.visibleRequested=true;pump();}return again;};
     session.prioritize=function(id){var item=jobs.find(function(x){return x.c.id===id;});if(!item)return;warm=[];selected=item.started?null:item;if(item===runningItem)item.visibleRequested=true;else if(item.started)neighbours(item);pump();};
     return {first:Promise.resolve(),status:status};
   }
-  R.FullReading = { requestMany:function(ids,options){return active && active.requestMany?active.requestMany(ids,options):{status:{total:0,completed:0,failed:0,pending:0,cancelled:true},done:Promise.resolve({total:0,completed:0,failed:0,pending:0,cancelled:true}),cancel:function(){}};},cancelMany:function(){if(active && active.cancelMany)active.cancelMany();},ensure:function(ids){return active && !active.cancelled && active.ensure?active.ensure(ids):Promise.resolve(false);}, retry:function(id){if(active && !active.cancelled && active.retry)active.retry(id);}, prioritize:function(id){if(active && !active.cancelled && active.prioritize)active.prioritize(id);}, adviceHistory: adviceHistory, deferredParagraphs: deferredParagraphs, uniqueAcross: uniqueAcross, collect: collect, apply: apply, prepare: prepare };
+  R.FullReading = { requestMany:function(ids,options){return active && active.requestMany?active.requestMany(ids,options):{status:{total:0,completed:0,failed:0,pending:0,cancelled:true},done:Promise.resolve({total:0,completed:0,failed:0,pending:0,cancelled:true}),cancel:function(){}};},cancelMany:function(){if(active && active.cancelMany)active.cancelMany();},ensure:function(ids){return active && !active.cancelled && active.ensure?active.ensure(ids):Promise.resolve(false);}, retry:function(id){if(active && !active.cancelled && active.retry)active.retry(id);}, unlock:function(ids,currentId){return active && !active.cancelled && active.unlock?active.unlock(ids,currentId):[];}, prioritize:function(id){if(active && !active.cancelled && active.prioritize)active.prioritize(id);}, adviceHistory: adviceHistory, deferredParagraphs: deferredParagraphs, uniqueAcross: uniqueAcross, collect: collect, apply: apply, prepare: prepare };
 })(typeof window !== 'undefined' ? window : globalThis);

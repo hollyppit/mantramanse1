@@ -643,6 +643,13 @@
     if (!PREVIEW) S.rep.readingPrefetch = true;
     // 서사 엔진(life-narrative.js) 스위치·게시 규칙이 본문보다 늦게 도착하면, 이미 그려진 시범 장만 다시 그린다
     if(!PREVIEW&&R.LifeNarrative&&window.addEventListener)window.addEventListener('mantra:life-narrative',function(){(S.rep&&S.rep.chapters||[]).forEach(function(c,ci){var id=c.editorialContractId||c.id,article=document.getElementById('ch-'+c.id);if(!R.LifeNarrative.CHAPTERS[id]||!article||!c.readingCore||!c.readingFeature||!R.ReadingText)return;try{var f=R.SealReader&&R.SealReader.capture(article);if(R.SealReader)R.SealReader.unmount(article);if(R.ReadingMedia)R.ReadingMedia.unmount(article);R.ReadingText.update(article,c,ci);mountSeal(article,c,ci);if(R.SealReader)R.SealReader.restoreFocus(article,f);if(R.ReadingMedia)R.ReadingMedia.mount(article,{reduce:reduce,saveData:saveData});linkBasisReferences(article);}catch(e){elog('caught','life-narrative.rerender');}});});
+    // 서버가 장 본문을 잠갔을 때(402·401): '불러오는 중'에 멈추지 않게 안내 문구를 바꾸고, 지금 보는 장이면 구매 창을 띄운다
+    if(!PREVIEW&&!S.lockListen&&window.addEventListener){S.lockListen=true;window.addEventListener('mantra:reading-locked',function(e){try{
+      var id=e.detail&&e.detail.id,ci=S.rep?S.rep.chapters.findIndex(function(x){return x.id===id;}):-1;if(ci<0)return;var c=S.rep.chapters[ci];
+      if(e.detail.locked){c.readingLocked=e.detail.locked;c.readingNotice=e.detail.locked.reason==='login'?'이 장은 로그인하고 구매하면 열립니다.':'이 장은 구매 후 열립니다.';}
+      var article=document.getElementById('ch-'+id);if(article){article.querySelectorAll('[data-reading-notice]').forEach(function(n){n.textContent=c.readingNotice;if(!n.parentNode.querySelector('[data-reading-unlock]'))n.insertAdjacentHTML('afterend','<button type="button" class="chipbtn" data-reading-unlock>구매 안내 보기</button>');});}
+      if(S.view==='reader'&&ci===S.idx&&R.Paywall&&!document.getElementById('pw-sheet'))R.Paywall.show(c,{worldName:paywallWorldName(ci),who:S.name,onClose:function(){showHome(S.wmap&&S.wmap.idx[ci]);}});
+    }catch(err){elog('caught','reading.locked');}});}
     var reading = !PREVIEW && R.FullReading ? R.FullReading.prepare(S.rep, S.sd, S.name, function (c, job, result) {
       var liveChapter=S.rep.chapters.find(function(item){return item.id===c.id;});
       if(liveChapter && liveChapter!==c){Object.keys(c).forEach(function(k){if(/^reading/.test(k)||['scenes','headline','chapterHook','chapterQuality','interpretationAnalysis','writingQuality','hookName'].indexOf(k)>=0)liveChapter[k]=c[k];});}
@@ -1015,6 +1022,7 @@
     root.addEventListener('click', function (e) {
       var c = chOf(e.target);
       if(e.target.closest('[data-reading-retry]')){if(R.FullReading && R.FullReading.retry)R.FullReading.retry(c.id);return;}
+      if(e.target.closest('[data-reading-unlock]')){if(R.Paywall&&c){var li=S.rep.chapters.indexOf(c);if(!R.Paywall.show(c,{worldName:paywallWorldName(li),who:S.name})&&R.FullReading&&R.FullReading.unlock)R.FullReading.unlock([c.id],c.id);}return;}
       var feedback=e.target.closest('[data-reading-feedback]');if(feedback){T('chapter_feedback',{chapter:c.id,answer:feedback.dataset.readingFeedback});feedback.parentNode.querySelector('[data-feedback-status]').textContent='의견을 남겼습니다. 수집이 켜진 경우에만 익명 집계됩니다.';return;}
       var dkOpt = { sd: S.sd, onPause: function () { if (S.mv) S.mv.pause(); }, onMeasure: function () { if (S.mv) S.mv.measure(); }, onContinue: function () { var w = e.target.closest && e.target.closest('.rd-deep'); if (w) w.dataset.completed = '1'; if (S.mv) { S.mv.measure(); S.mv.play(); } }, onTrack: function (n, p) { T(n, p); } };
       if (R.DeepAsk && R.DeepAsk.handleClick(e.target, dkOpt)) return;

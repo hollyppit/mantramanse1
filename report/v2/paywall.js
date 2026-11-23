@@ -63,15 +63,27 @@
       return P.sb;
     });
   }
-  function fetchInfo() {
+  function fetchOnce() {
     return fetch('/api/commerce/access', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, headers()), body: JSON.stringify({ sd: safeSd(P.sd) }) })
       .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+  }
+  // 잠금 정보가 한 번 실패하면 예전에는 끝까지 비어 있어(아무것도 잠그지 않음) 서버가 잠근 장이 '불러오는 중'에 멈췄다. 두 번 더 묻는다
+  function fetchInfo() {
+    var wait = function (ms) { return new Promise(function (ok) { setTimeout(ok, ms); }); };
+    return fetchOnce().then(function (d) { return d || wait(1500).then(fetchOnce); }).then(function (d) { return d || wait(4000).then(fetchOnce); });
+  }
+  // 서버가 잠근 장(full-reading.js 의 readingLocked)인데 새 잠금 정보로는 열려 있으면(구매·로그인 뒤) 다시 받게 되돌린다
+  function releaseLocks(d) {
+    if (!d || !d.worlds || !R.FullReading || !R.FullReading.unlock) return;
+    var ids = P.chapters().filter(function (c) { if (!c || !c.readingLocked) return false; var w = c.readingLocked.world || worldOf(c), s = w && d.worlds[w]; return !!(s && (!s.paid || s.owned)); }).map(function (c) { c.readingLocked = null; return c.id; });
+    if (ids.length) R.FullReading.unlock(ids, P.current && ids.indexOf(P.current.id) >= 0 ? P.current.id : null);
   }
   // 서버에는 기둥·성별만 보낸다(이름·생일 원문 제외)
   function safeSd(sd) { if (!sd || !sd.pillars) return null; var p = sd.pillars, h = function (k) { return p[k] ? { hanja: p[k].hanja } : null; }; return { pillars: { year: h('year'), month: h('month'), day: h('day'), hour: h('hour') }, gender: sd.gender }; }
   function refresh() {
     P.loading = fetchInfo().then(function (d) {
       P.info = d;
+      releaseLocks(d);
       if (d && d.configured && d.configured.login && !P.sb) sbClient().then(function (sb) { return sb.auth.getSession(); }).then(function (r) { var t = r && r.data && r.data.session && r.data.session.access_token || ''; if (t && t !== P.token) { P.token = t; refresh(); } }).catch(function () { });
       if (P.onChange) P.onChange(d);
       return d;
@@ -82,6 +94,11 @@
   function worldOf(c) { return c && c.editorialTopicId ? (TOPIC_WORLD[c.editorialTopicId] || 'w1') : null; }
   // 잠겼으면 { world, info } 아니면 null
   function lockOf(c) {
+    // 서버가 이 장을 잠갔다고 답했으면(402·401) 화면 쪽 정보보다 서버를 따른다
+    if (c && c.readingLocked) {
+      var sw = c.readingLocked.world || worldOf(c) || 'w1', ss = P.info && P.info.worlds && P.info.worlds[sw];
+      return { world: sw, state: ss || { paid: true, owned: false, freeChapter: c.readingLocked.freeChapter }, server: c.readingLocked };
+    }
     var d = P.info, w = worldOf(c); if (!d || !w || !d.worlds || !d.worlds[w]) return null;
     var s = d.worlds[w]; if (!s.paid || s.owned) return null;
     if ((c.editorialContractId || c.id) === s.freeChapter) return null;
@@ -100,10 +117,12 @@
     opts = opts || {}; close();
     var lk = lockOf(c); if (!lk) return false;
     P.current = c;
-    var d = P.info, worldName = (opts.worldName || '').trim() || '이 주제';
-    var products = (d.products || []).filter(function (p) { return p.worlds.indexOf(lk.world) >= 0; });
+    var d = P.info || {}, worldName = (opts.worldName || '').trim() || '이 주제';
+    var products = (d.products || []).filter(function (p) { return p.worlds && p.worlds.indexOf(lk.world) >= 0; });
     var logged = !!(d.member), canPay = d.configured && d.configured.pay, canLogin = d.configured && d.configured.login;
     var body;
+    // 서버는 잠갔는데 화면 정보로는 구매(또는 관리자)로 보이는 경우: 구매 버튼 대신 확인 방법을 안내한다(로그인이 풀렸거나 다른 사주·계정)
+    var mismatch = lk.server && lk.state && lk.state.owned;
     // 상품·가격은 로그인 전에도 보여 준다(결제사 심사 요건: 상품 정보·결제 금액·환불 정보를 한 곳에서 확인). 구매 버튼만 로그인 뒤에 나타난다
     var list = function (buy) {
       return '<ul class="pw-list">' + products.map(function (p) {
@@ -112,7 +131,9 @@
       }).join('') + '</ul>';
     };
     var fine = '<p class="pw-fine">이 사주(' + esc(opts.who || '지금 보고 있는 사주') + ')에만 열리고, 결제 즉시 열리고 결제일로부터 12개월 동안 볼 수 있습니다. 디지털 콘텐츠 특성상 열람을 시작하면 청약 철회가 제한될 수 있습니다. 구매 후 7일 이내·유료 장 미열람 시 전액 환불. <a href="/report/legal/products.html" target="_blank" rel="noopener">상품 안내</a> · <a href="/report/legal/refund.html" target="_blank" rel="noopener">환불정책</a> · <a href="/report/legal/terms.html" target="_blank" rel="noopener">이용약관</a></p>';
-    if (!products.length || !canPay) body = '<p class="pw-note">지금은 결제를 준비하고 있습니다. 조금만 기다려 주세요.</p>';
+    if (mismatch) body = '<p class="pw-note">구매 내역을 서버에서 확인하지 못해 이 장을 열지 못했습니다. 로그인이 풀렸거나, 구매한 사주·계정과 지금 보는 사주·계정이 다를 수 있어요.</p><div class="pw-login"><button type="button" class="pw-btn pw-buy" data-pw-recheck>다시 확인하기</button></div><p class="pw-fine"><a href="/report/my/" target="_blank" rel="noopener">내 구매 내역</a></p>';
+    else if (!P.info) body = '<p class="pw-note">구매 정보를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.</p><div class="pw-login"><button type="button" class="pw-btn pw-buy" data-pw-recheck>다시 확인하기</button></div>';
+    else if (!products.length || !canPay) body = '<p class="pw-note">지금은 결제를 준비하고 있습니다. 조금만 기다려 주세요.</p>';
     else if (!logged) body = list(false) + '<p class="pw-note">구매하려면 먼저 로그인해 주세요. 구매한 내용은 계정에 저장되어 다른 기기에서도 다시 볼 수 있어요.</p>' +
       (canLogin ? '<div class="pw-login">' + loginBtn('kakao') + loginBtn('google') + (d.configured.naver ? loginBtn('naver') : '<button type="button" class="pw-btn" disabled title="준비 중">네이버(준비 중)</button>') + '</div>' +
         (lastLogin() ? '<p class="pw-fine">구매한 계정과 <b>같은 방법</b>으로 로그인해야 구매한 주제가 열려요. 이 기기에서는 지난번에 <b>' + LN[lastLogin()] + '</b>로 로그인했어요.</p>' : '') : '<p class="pw-note">로그인을 준비하고 있습니다.</p>') + fine;
@@ -126,7 +147,9 @@
       if (e.target === el || e.target.closest('[data-pw-close]')) { close(); if (opts.onClose) opts.onClose(); return; }
       var lg = e.target.closest('[data-pw-login]'); if (lg) { login(lg.dataset.pwLogin); return; }
       var by = e.target.closest('[data-pw-buy]'); if (by) { buy(by.dataset.pwBuy, opts.who, by); return; }
-      if (e.target.closest('[data-pw-logout]')) { logout(); }
+      if (e.target.closest('[data-pw-logout]')) { logout(); return; }
+      // 다시 확인: 서버가 잠근 표시를 풀고 다시 요청한다. 여전히 잠겨 있으면 서버 답에 따라 이 창이 다시 뜬다
+      var rc = e.target.closest('[data-pw-recheck]'); if (rc) { rc.disabled = true; rc.textContent = '확인 중…'; close(); refresh().then(function () { c.readingLocked = null; if (R.FullReading && R.FullReading.unlock) R.FullReading.unlock([c.id], c.id); }); }
     });
     document.body.appendChild(el); track('paywall_view', { world: lk.world, chapter: c.id, logged: logged });
     if (logged && products.length && canPay) loginHint(el.querySelector('#pw-hint'));
