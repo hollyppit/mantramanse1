@@ -7,6 +7,8 @@ import { pathToFileURL } from 'node:url';
 const P = process.cwd() + '/editorial/rebuild-20261022/';
 const { CONCRETE_ALL } = await import(pathToFileURL(P + 'concrete-20261107.mjs').href);
 const { bundles } = await import(pathToFileURL(P + 'index.mjs').href);
+const { applyConsistency } = await import(pathToFileURL(P + 'consistency-20261124.mjs').href);   // 2026-11-24: 사람 검토 정리가 장면 문장 몇 개를 다시 다듬으므로, 기대값도 같은 정리를 거친다
+const after = t => applyConsistency([{ x: t }])[0].x;
 const LIFE = eval(fs.readFileSync('tools/rebuild-audit.mjs', 'utf8').match(/const LIFE = (\/.*\/);/)[1]);
 const E = Object.values(bundles).flat();
 let fields = 0;
@@ -15,7 +17,7 @@ for (const [id, x] of Object.entries(CONCRETE_ALL)) {
   for (const [f, t] of Object.entries(x)) {
     fields++;
     // 장면 칸은 그대로 들어가야 하고, 근거·제목 칸은 뒤 단계(용어 괄호 뜻·쉬운 말)가 이어서 다듬는다.
-    if (['example', 'positive', 'negative', 'advice'].includes(f)) for (const e of es) assert.equal(e[f], t, `${id}.${f} not applied as written`);
+    if (['example', 'positive', 'negative', 'advice'].includes(f)) for (const e of es) assert.equal(e[f], after(t), `${id}.${f} not applied as written`);
     if (['example', 'positive', 'negative', 'advice'].includes(f)) assert(LIFE.test(t), `${id}.${f} has no everyday scene`);
     assert(!/[{}<>]|반드시|무조건|100%|확실히|엔진|계산/.test(t), `${id}.${f} has a banned or internal word`);
     const ss = t.split(/(?<=[.!?])\s+/); assert.equal(new Set(ss).size, ss.length, `${id}.${f} repeats a sentence`);

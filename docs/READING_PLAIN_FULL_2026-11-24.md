@@ -60,3 +60,22 @@
 ## 검사
 - `tests/premium-depth-sim.cjs`, `tests/chart-lines-sim.cjs`(재등장 문형 갱신), `tests/responsive-basis-sim.cjs`(소제목 갱신), `tests/term-notes-sim.cjs`, `tests/reading-insight-sim.cjs`, `tests/amhap-sim.cjs`, `tests/report-repeat-sim.cjs` 외 관련 테스트
 - 캐시 꼬리표: `20261124-plain`(상세풀이 22개 파일, `/report/` 허브 HV, 타임라인 모듈)
+
+## 추가: DB 문안 모순 정리·재게시 (2026-11-24, 사용자 승인 "고치고 재게시해")
+- DB 문안: `editorial/rebuild-20261022/consistency-20261124.mjs`
+  - 31줄을 정확한 문장 단위로 바꿔요(조립의 맨 끝, polish 뒤). 원문이 바뀌어 대상을 못 찾으면 멈춰요.
+  - 개운 장: 유료 수업 권유를 무료 대안으로 바꾸고, 강도 확인을 먼저 하도록 했어요. 회사 면담에 생활 목표를 적으라던 조언과 행정 말투도 고쳤어요.
+  - 건강 장: '열이 오래 가요' → '활기가 오래 가요', 건강 장의 '배우자 자리'를 '중심 자리(나와 배우자 자리)'로 바꿨어요. 반복과 추상 요점도 정리했어요.
+  - 자아 장: 후킹과 정반대이던 강점 문장, '한 가지로 정해지지 않아서', '힘이 작은 사주라서'(9곳) → '타고난 힘을 아껴 써야 하는 사주라서'.
+  - 한 사람 이야기인데 '누구는… 누구는'으로 쓰여 남 얘기처럼 읽히던 후킹 3개를 고쳤어요.
+- 운영 재게시: `output/rebuild-publication-20261124-consistency/`
+  - 읽기 전용 관찰: 107행, draft==published, 이력 없음
+  - 23장 준비: 검증 문제 0, 조건 누락 0
+  - 드라이런 23/23 ok
+  - remedy_02 먼저 게시·확인 → 나머지 22장 게시
+  - 게시 후 확인: 23/23 해시 일치, 나머지 84장 그대로(`verify-after.txt`)
+- 화면 코드: 같은 사람 성향이 엇갈리던 17문장
+  - 뜨거운 기질 장면을 '속으로 끓다 식는' 쪽으로 바꿨어요(premium-depth-scenes·data).
+  - reading-depth-data-5의 약점 문장, 조객살 '따뜻한/서늘한' 충돌, 금지어 문장 등을 고쳤어요.
+  - 캐시 꼬리표는 `20261124-cons`예요.
+- 테스트: `rebuild-concrete-sim`은 정리 뒤 문장을 기대값으로 바꿨어요.
