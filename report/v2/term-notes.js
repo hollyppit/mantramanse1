@@ -51,7 +51,8 @@
       if (p.charAt(0) === '<') {
         var tm = p.match(/^<\/?([a-zA-Z0-9]+)/); if (!tm) continue; var tag = tm[1].toLowerCase();
         if (tag === 'details' && !/\bopen\b/.test(p)) { folded += p.charAt(1) === '/' ? -1 : 1; if (folded < 0) folded = 0; continue; }
-        if (!SKIP_TAGS[tag]) continue;
+        // 이미 자체 용어 풍선이 붙은 요소(타임라인 .tip)는 건드리지 않는다
+        if (!SKIP_TAGS[tag]) { if (p.charAt(1) !== '/' && /\bclass="(?:[^"]*\s)?tip(?:\s[^"]*)?"/.test(p)) skip.push(tag); else if (p.charAt(1) === '/' && skip.length && skip[skip.length - 1] === tag) skip.pop(); continue; }
         if (p.charAt(1) === '/') { var at = skip.lastIndexOf(tag); if (at >= 0) skip.splice(at, 1); }
         else if (!/\/>$/.test(p)) skip.push(tag);
         continue;
@@ -90,8 +91,16 @@
     scrollAt = root.scrollY || 0;
     try { pop.querySelector('.tn-x').focus({ preventScroll: true }); } catch (e) { }
   }
+  // 스타일은 이 모듈이 직접 넣는다(상세풀이·타임라인 어디서 불러도 같은 모양). 페이지 CSS 가 같은 규칙을 다시 정의해도 된다.
+  var CSS = 'button.tn{all:unset;display:inline;cursor:pointer;color:inherit;font:inherit;line-height:inherit;border-bottom:1px dashed rgba(192,150,80,.85);padding:0 1px;border-radius:2px;-webkit-tap-highlight-color:transparent}'
+    + 'button.tn:hover,button.tn[aria-expanded="true"]{background:rgba(213,185,127,.2);border-bottom-style:solid}button.tn:focus-visible{outline:2px solid #D5B97F;outline-offset:2px}'
+    + '.tn-pop{position:fixed;z-index:9999;width:min(320px,calc(100vw - 24px));box-sizing:border-box;padding:14px 16px 12px;border-radius:14px;background:#1d1a16;color:#ece6d8;border:1px solid rgba(213,185,127,.45);box-shadow:0 12px 32px rgba(0,0,0,.45);font-size:14px;line-height:1.65;word-break:keep-all;text-align:left;font-family:inherit}'
+    + '.tn-pop-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin-bottom:6px}.tn-pop-h b{font-size:15px;color:#D5B97F}.tn-pop-h span{font-size:13px;color:#cfc6b4}'
+    + '.tn-pop p{margin:0 0 8px;color:#ece6d8}.tn-pop .tn-here{padding:8px 10px;border-radius:10px;background:rgba(213,185,127,.12)}.tn-pop .tn-here em{display:block;font-style:normal;font-size:12px;color:#D5B97F}'
+    + '.tn-pop .tn-x{display:block;margin:4px 0 0 auto;min-height:32px;padding:4px 14px;border-radius:999px;border:1px solid rgba(213,185,127,.5);background:transparent;color:#ece6d8;font:inherit;font-size:13px;cursor:pointer}';
   function install() {
     var doc = root.document; if (!doc || doc.__tnInstalled) return; doc.__tnInstalled = true;
+    try { if (!doc.getElementById('tn-css')) { var stl = doc.createElement('style'); stl.id = 'tn-css'; stl.textContent = CSS; (doc.head || doc.documentElement).appendChild(stl); } } catch (e) { }
     doc.addEventListener('click', function (e) {
       var t = e.target && e.target.closest ? e.target : null; if (!t) return;
       var b = t.closest('button.tn');

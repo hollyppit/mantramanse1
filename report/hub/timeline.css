@@ -382,3 +382,29 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 /* 인생 전체 그래프 단위 안내 */
 #hub .tq-unit-key{ display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 4px 0 2px; font-size: .8rem; }
 #hub .tq-unit-key span{ display: inline-flex; align-items: center; gap: 6px; } #hub .tq-unit-key i{ font-style: normal; padding: 1px 7px; border-radius: 999px; background: var(--u); color: #fff; font-weight: 800; font-size: .72rem; }
+/* ── 명리를 몰라도 읽히게(2026-11-23): 한눈에 보는 나 · 그래프 한 줄 결론 · 명리 자세히 보기 접기 · 처음 안내 ── */
+#hub .u-day{ --u: #C2554A; --u-bg: rgba(194,85,74,.08); }
+#hub .tq-glance{ list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 10px; }
+#hub .tq-gl-r{ display: grid; grid-template-columns: auto 1fr auto; align-items: start; gap: 12px; padding: 14px 14px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--u, #C08A3E) 35%, transparent); border-left: 5px solid var(--u, #C08A3E); background: var(--u-bg, rgba(192,138,62,.06)); }
+#hub .tq-gl-me{ --u: #9a8a6a; --u-bg: rgba(154,138,106,.08); }
+#hub .tq-gl-r .tq-unit-k{ margin-top: 2px; }
+#hub .tq-gl-w{ margin: 0; font-size: .82rem; opacity: .8; }
+#hub .tq-gl-h{ margin: 3px 0 0; font-size: 1.02rem; font-weight: 700; line-height: 1.55; word-break: keep-all; }
+#hub .tq-gl-d{ margin: 4px 0 0; font-size: .86rem; opacity: .85; word-break: keep-all; }
+#hub .tq-gl-go{ align-self: center; font-size: 1.4rem; line-height: 1; padding: 4px 8px; text-decoration: none; color: var(--u); opacity: .8; }
+#hub .tq-g{ display: inline-block; padding: 0 8px; border-radius: 999px; font-size: .78rem; font-weight: 800; color: #fff; background: #8a8f9c; vertical-align: 1px; }
+#hub .tq-g-good{ background: #2f9e5b; } #hub .tq-g-care{ background: #d2693f; } #hub .tq-g-ok{ background: #7f8696; }
+#hub .tq-unit-line{ margin: 6px 0 4px; padding: 8px 12px; border-radius: 10px; background: color-mix(in srgb, var(--u) 12%, transparent); font-size: .92rem; line-height: 1.7; word-break: keep-all; }
+#hub .tq-pro{ margin: 14px 0 6px; border-radius: 14px; border: 1px dashed rgba(160,150,130,.55); padding: 0 12px; }
+#hub .tq-pro > summary{ cursor: pointer; list-style: none; padding: 14px 4px; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+#hub .tq-pro > summary::-webkit-details-marker{ display: none; }
+#hub .tq-pro > summary b::before{ content: "＋ "; } #hub .tq-pro[open] > summary b::before{ content: "－ "; }
+#hub .tq-pro > summary span{ font-size: .82rem; opacity: .75; }
+#hub .tq-two-me{ display: block; }
+#hub .tq-guide{ position: relative; margin: 14px auto 4px; max-width: 1080px; padding: 14px 16px 12px; border-radius: 14px; border: 1px solid rgba(192,138,62,.5); background: rgba(192,138,62,.1); line-height: 1.7; word-break: keep-all; }
+#hub .tq-guide ol{ margin: 6px 0 8px; padding-left: 20px; } #hub .tq-guide li{ margin: 2px 0; }
+#hub .tq-guide .tq-unit-k{ font-size: .72rem; padding: 1px 7px; min-width: 0; }
+#hub .tq-guide-x{ display: block; margin-left: auto; padding: 6px 16px; border-radius: 999px; border: 1px solid rgba(192,138,62,.7); background: transparent; color: inherit; font: inherit; cursor: pointer; }
+#hub .tq-glance{ width: 100%; max-width: none; }
+#hub .tq-g, html.theme-mist #hub .tq .tq-g{ color: #fff !important; }
+html.theme-mist #hub #tq .tq-body > ol.tq-glance, #hub #tq .tq-body > ol.tq-glance{ max-width: none; }
