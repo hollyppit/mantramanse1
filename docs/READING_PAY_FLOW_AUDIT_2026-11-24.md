@@ -34,9 +34,16 @@
 
 ## 확인하지 못한 것·남은 것
 - 실제 결제(돈이 나가는 결제창)는 하지 않았어요.
-- 감사에서 '확실하지 않음'으로 나온 것: 모바일 복귀 때 로그인 SDK가 두 번 실리는 문제, 잠금 정보 응답 순서 보호 없음, 결제 중 이미 요청한 장이 잠금으로 남을 수 있음(다시 확인 버튼으로 풀림).
+- 감사에서 '확실하지 않음'으로 나온 3가지는 추가로 고쳤어요(아래).
 - 흐름과 무관한 낡은 테스트 실패: world-entry(테스트가 viewer 일부만 잘라 실행), report-v2 PDF, signal 비율, unseong 배치, ux-writing(node 내부 모듈), reading-detail-profiles·coherent·health-narrative.
 
 ## 검사
 - `tests/commerce-sim.cjs`(낡은 결제 날짜 고침, 결제 완료 주문 권한 실패 경우 추가), `tests/paywall-return-sim.cjs`(새, 예전 코드에서는 실패 확인), `tests/panel-repeat-sim.cjs`(다시 배정 경우 추가) 외 결제·패널·리더 검사 13개 통과
 - 캐시 꼬리표: `20261124-pay`(reading-media·viewer·paywall, 신년운세 paywall 포함)
+
+## 추가: 불확실하던 결제 항목 3가지 (2026-11-24)
+- 로그인 도구 두 번 싣기: 모바일 복귀 때 로그인 도구(Supabase)를 동시에 부르면 스크립트·클라이언트·상태 감시가 두 번 생기던 것 → 싣는 중인 약속을 다시 씀(`paywall.js` sbClient, 실패하면 다음에 다시 시도)
+- 잠금 정보 응답 순서: 늦게 도착한 옛 답(구매 안 함)이 새 답(구매함)을 덮던 것 → 요청 번호로 가장 최근 답만 씀(`paywall.js` refresh)
+- 결제 중 요청하던 장: 잠금 해제 때 이미 요청 중이던 장은 표시해 두고, 그 답이 잠금이면 잠금 안내 대신 바로 다시 받음(`full-reading.js` unlock·recheck)
+- 검사: `tests/paywall-return-sim.cjs`(최근 답만 쓰기·로그인 도구 한 번), 새 `tests/reading-unlock-recheck-sim.cjs`. 둘 다 예전 코드에서는 실패하는 것을 확인했어요.
+- 캐시 꼬리표: `20261124-pay2`(paywall·full-reading, 신년운세 포함)

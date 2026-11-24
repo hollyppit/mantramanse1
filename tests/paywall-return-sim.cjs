@@ -70,5 +70,40 @@ async function run({ search, confirm, pending, failNetwork }) {
   const body = SRC.slice(SRC.indexOf('function payPortone'), SRC.indexOf('function confirmPortone'));
   assert.ok(body.indexOf('if (!res) return;') >= 0 && body.indexOf('if (!res) return;') < body.indexOf('dropResume();'), '모바일 이동이면 이어 읽기 값을 지우지 않는다');
   assert.ok(/confirmPortone\(o\.orderId\)\.catch\(/.test(body), 'PC 확인 끊김은 결제 시작 실패로 넘어가지 않는다');
-  console.log('PASS paywall-return-sim: 모바일 복귀 처리 중·성공·실패·권한 실패·끊김, 남은 결제 다시 확인, 이어 읽기 보존');
+  // 6) 로그인 도구는 동시에 여러 번 불러도 한 번만 싣고 한 번만 만든다 / 7) 잠금 정보는 가장 최근 요청의 답만 쓴다
+  {
+    const scripts = [], pend = [], win = {
+      location: { href: 'https://x.test/report/v2/', search: '', hash: '', origin: 'https://x.test', pathname: '/report/v2/' }, history: { replaceState() { } },
+      sessionStorage: store(), localStorage: store(), console: { warn() { }, log() { } }, setTimeout: (f) => { f(); return 0; }, clearTimeout() { },
+      URL, URLSearchParams, Promise, JSON, Object, Array, String, Number, Error, Date, Math, RegExp, ReportV2: { toast() { } },
+      fetch: (u) => new Promise(ok => pend.push({ u, ok })),
+    };
+    win.window = win; win.globalThis = win;
+    let created = 0;
+    win.document = { createElement: t => { const e = el(); if (t === 'script') scripts.push(e); return e; }, head: { appendChild: e => { if (scripts.includes(e)) setImmediate(() => { win.supabase = { createClient: () => { created++; return { auth: { onAuthStateChange() { }, getSession: async () => ({ data: { session: null } }) } }; } }; e.onload(); }); } }, body: el(), querySelector: () => null, querySelectorAll: () => [], addEventListener() { }, getElementById: () => null };
+    vm.runInContext(SRC.replace(/\(typeof window !== 'undefined' \? window : globalThis\)\s*;?\s*$/, '(window);'), vm.createContext(win));
+    const PW = win.ReportV2.Paywall, st = PW._state;
+    // 7) 첫 요청(옛 답: 구매 안 함)과 두 번째 요청(새 답: 구매함)을 거꾸로 답한다
+    const r1 = PW.refresh(), r2 = PW.refresh();
+    await new Promise(r => setImmediate(r));
+    const reply = (p, worlds) => p.ok({ ok: true, json: async () => ({ configured: {}, worlds, keys: {} }) });
+    reply(pend[1], { w2: { paid: true, owned: true } });
+    await new Promise(r => setImmediate(r)); await new Promise(r => setImmediate(r));
+    reply(pend[0], { w2: { paid: true, owned: false } });
+    await r1; await r2; await new Promise(r => setImmediate(r));
+    assert.equal(st.info.worlds.w2.owned, true, '늦게 온 옛 잠금 정보가 새 정보를 덮지 않는다');
+    // 6) 로그인 키가 있을 때 로그인 도구를 동시에 두 번 부른다
+    st.info = { keys: { supabaseUrl: 'https://sb.test', supabaseAnonKey: 'anon' } }; st.sb = null; st.sbP = null;
+    const before = scripts.length; win.alert = () => { };
+    // 로그인 버튼을 두 번 빠르게 누른 것과 같다: 두 번 모두 로그인 도구를 부른다(signInWithOAuth 가 없는 모의라 뒤는 조용히 실패)
+    PW.login('kakao'); PW.login('kakao');
+    for (let i = 0; i < 5; i++) await new Promise(r => setImmediate(r));
+    assert.equal(scripts.length - before, 1, '로그인 도구 스크립트는 한 번만 싣는다');
+    assert.equal(created, 1, '로그인 도구는 한 번만 만든다(상태 감시도 하나)');
+  }
+  // 8) 결제 중 요청 중이던 장: 잠금 해제 표시(recheck)가 있으면 잠금 답 대신 다시 요청한다(full-reading.js)
+  const FR = fs.readFileSync(path.join(__dirname, '..', 'report/v2/full-reading.js'), 'utf8');
+  assert.ok(/if\(item===runningItem\)\{item\.recheck=true;return;\}/.test(FR), '요청 중인 장은 잠금 해제 표시');
+  assert.ok(/if\(item\.recheck\)\{item\.recheck=false;if\(item\.c\.readingLocked\)\{item\.c\.readingLocked=null;item\.started=false;item\.settled=false;/.test(FR), '표시된 장의 잠금 답은 다시 요청으로 바뀐다');
+  console.log('PASS paywall-return-sim: 모바일 복귀 처리 중·성공·실패·권한 실패·끊김, 남은 결제 다시 확인, 이어 읽기 보존, 최근 잠금 정보만 쓰기, 로그인 도구 한 번, 요청 중 장 다시 받기');
 })().catch(e => { console.error(e); process.exit(1); });

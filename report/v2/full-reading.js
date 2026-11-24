@@ -228,6 +228,8 @@
       running=true;runningItem=item;
       runningPromise=run(item).finally(function(){
         item.settled=true;running=false;runningItem=null;
+        // 요청 중에 구매·로그인으로 잠금이 풀렸는데 이 답이 잠금이었다: 잠금 안내 대신 바로 다시 받는다(2026-11-24)
+        if(item.recheck){item.recheck=false;if(item.c.readingLocked){item.c.readingLocked=null;item.started=false;item.settled=false;item.c.readingNotice='검수된 문안을 불러오고 있습니다. 잠시만 기다려 주세요.';status.skipped=Math.max(0,(status.skipped||0)-1);selected=item;item.visibleRequested=true;}}
         if(foreground || item.visibleRequested){item.visibleRequested=false;if(!selected)neighbours(item);}
         updateBatches();pump();
       });
@@ -248,7 +250,7 @@
     };
     session.retry=function(id){var item=jobs.find(function(x){return x.c.id===id;});if(!item || !item.c.readingWarning)return;status.failed=Math.max(0,status.failed-1);unavailable=null;item.started=false;item.settled=false;item.c.readingWarning=null;item.c.readingFailure=null;item.c.readingNotice='검수된 문안을 다시 불러오고 있습니다.';if(onReady)onReady(item.c,item.job,{paragraphs:[]});warm=[];selected=item;item.visibleRequested=true;pump();};
     // 구매·로그인 뒤: 서버가 잠갔던 장을 다시 받을 수 있게 되돌린다(새로 고침 없이 이어 읽기). 지금 보는 장은 바로 다시 요청한다
-    session.unlock=function(ids,currentId){var want=Array.isArray(ids)?ids:null,again=[];jobs.forEach(function(item){if(item===runningItem || want && want.indexOf(item.c.id)<0)return;if(!(item.c.readingLocked || want && item.settled && item.c.readingDeferred && !item.c.readingWarning))return;item.c.readingLocked=null;item.started=false;item.settled=false;item.c.readingNotice='검수된 문안을 불러오고 있습니다. 잠시만 기다려 주세요.';status.skipped=Math.max(0,(status.skipped||0)-1);again.push(item.c.id);});var cur=currentId&&jobs.find(function(x){return x.c.id===currentId&&!x.started;});if(cur){warm=[];selected=cur;cur.visibleRequested=true;pump();}return again;};
+    session.unlock=function(ids,currentId){var want=Array.isArray(ids)?ids:null,again=[];jobs.forEach(function(item){if(want && want.indexOf(item.c.id)<0)return;if(item===runningItem){item.recheck=true;return;}if(!(item.c.readingLocked || want && item.settled && item.c.readingDeferred && !item.c.readingWarning))return;item.c.readingLocked=null;item.started=false;item.settled=false;item.c.readingNotice='검수된 문안을 불러오고 있습니다. 잠시만 기다려 주세요.';status.skipped=Math.max(0,(status.skipped||0)-1);again.push(item.c.id);});var cur=currentId&&jobs.find(function(x){return x.c.id===currentId&&!x.started;});if(cur){warm=[];selected=cur;cur.visibleRequested=true;pump();}return again;};
     session.prioritize=function(id){var item=jobs.find(function(x){return x.c.id===id;});if(!item)return;warm=[];selected=item.started?null:item;if(item===runningItem)item.visibleRequested=true;else if(item.started)neighbours(item);pump();};
     return {first:Promise.resolve(),status:status};
   }

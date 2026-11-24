@@ -56,12 +56,15 @@
   }
   function sbClient() {
     if (P.sb) return Promise.resolve(P.sb);
+    if (P.sbP) return P.sbP;   // 이미 싣는 중: 같은 약속을 돌려줘 로그인 도구·상태 감시가 두 번 생기지 않게(2026-11-24)
     var k = P.info && P.info.keys; if (!k || !k.supabaseUrl || !k.supabaseAnonKey) return Promise.reject(new Error('login-not-configured'));
-    return (root.supabase ? Promise.resolve() : script(SB_SDK)).then(function () {
+    P.sbP = (root.supabase ? Promise.resolve() : script(SB_SDK)).then(function () {
+      if (P.sb) return P.sb;
       P.sb = root.supabase.createClient(k.supabaseUrl, k.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } });
       P.sb.auth.onAuthStateChange(function (_e, session) { var t = session && session.access_token || ''; if (t !== P.token) { P.token = t; refresh(); } });
       return P.sb;
-    });
+    }).catch(function (e) { P.sbP = null; throw e; });
+    return P.sbP;
   }
   function fetchOnce() {
     return fetch('/api/commerce/access', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, headers()), body: JSON.stringify({ sd: safeSd(P.sd) }) })
@@ -81,7 +84,9 @@
   // 서버에는 기둥·성별만 보낸다(이름·생일 원문 제외)
   function safeSd(sd) { if (!sd || !sd.pillars) return null; var p = sd.pillars, h = function (k) { return p[k] ? { hanja: p[k].hanja } : null; }; return { pillars: { year: h('year'), month: h('month'), day: h('day'), hour: h('hour') }, gender: sd.gender }; }
   function refresh() {
+    var seq = P.seq = (P.seq || 0) + 1;
     P.loading = fetchInfo().then(function (d) {
+      if (seq !== P.seq) return P.loading;   // 더 최근 요청이 있다: 이 답은 버리고 최근 답을 기다린다(2026-11-24)
       P.info = d;
       releaseLocks(d);
       if (d && d.configured && d.configured.login && !P.sb) sbClient().then(function (sb) { return sb.auth.getSession(); }).then(function (r) { var t = r && r.data && r.data.session && r.data.session.access_token || ''; if (t && t !== P.token) { P.token = t; refresh(); } }).catch(function () { });
