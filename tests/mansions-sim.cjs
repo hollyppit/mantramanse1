@@ -119,6 +119,15 @@ ok(d1.omens.status === 'edition-unconfirmed' && d1.omens.events.every(e => e.ver
 eq(d1.omens.events.filter(e => ['move', 'open', 'contract'].includes(e.id)).map(e => e.text), ['미확정 — 원문에 이 행사 언급 없음', '미확정 — 원문에 이 행사 언급 없음', '미확정 — 원문에 이 행사 언급 없음'], '이사·개업·계약은 원문 언급 없음');
 ok(d1.omens.events.find(e => e.id === 'build').reference === '흉' && /원문 참고/.test(d1.omens.events.find(e => e.id === 'build').text), '女수 건축: 원문 참고 흉(판정은 미확정)');
 E.status = 'verified'; ok(X.omens('jiao').events.find(e => e.id === 'wedding').verdict === '길' && X.omens('jiao').events.find(e => e.id === 'funeral').verdict === '흉', '검증 프로필이면 원문 읽기대로 판정'); E.status = 'edition-unconfirmed';
+// 옥갑기 두 판본: 道藏본(판본 확인) 28수 원문·근거 구절, 판정은 둘 다 미확정, 머리줄 길흉 13수만 일치
+{ const P = DD.OMEN_PROFILES, Z = P.find(p => p.id === 'yuxiaji-daozang'), W = P.find(p => p.id === 'yuxiaji-wikisource');
+  ok(Z && Z.status === 'edition-verified' && MD.MANSIONS.every(m => Z.entries[m.id] && Z.entries[m.id].original.length === 2), '道藏본 28수 모두 원문');
+  ok(MD.MANSIONS.every(m => { const e = Z.entries[m.id], t = e.original.join(''); return Object.values(e.readings).every(r => t.includes(r.evidence)) && e.original.every(l => l.split(/[，；。]/).filter(Boolean).length === 4); }), '道藏본 근거 구절은 원문 그대로, 수마다 8구');
+  ok(MD.MANSIONS.filter(m => Z.entries[m.id].headVerdict === W.entries[m.id].headVerdict).length === 13, '두 판본 머리줄 길흉 13수 일치(15수 반대)');
+  const dd = X.day(DD.ASSIGN_PROFILES[0].anchor.jdn);
+  ok(dd.omensAll.length === 2 && dd.omensAll.every(o => o.events.every(e => e.verdict === null)), '두 판본 모두 판정 없음(미확정)');
+  const zo = dd.omensAll.find(o => o.profile.id === 'yuxiaji-daozang');
+  ok(zo.events.find(e => e.id === 'move').reference === '흉' && /판본 선택 전/.test(zo.events.find(e => e.id === 'move').text) && zo.events.find(e => e.id === 'contract').reference === null, '道藏본 女수 이사: 원문 참고 흉, 계약은 언급 없음'); }
 // 伏斷日: 승인 프로필, 12쌍(卯女 포함), 84일에 12번, 판정은 '이 날이 伏斷인가'만
 { const FP = DD.FUDUAN_PROFILES[0], AP = DD.ASSIGN_PROFILES[0];
   ok(FP.status === 'approved' && Object.keys(FP.pairs).length === 12 && FP.pairs['卯'] === 'nu' && AP.fuduan['卯'] === 'nu' && AP.approval.status === 'approved', '伏斷·배속 승인 기록, 卯女 포함 12쌍');
@@ -139,10 +148,11 @@ ok(order.every(i => i > 0) && order.every((v, i) => !i || v > order[i - 1]), '�
 ok(/body \+= spMansionSection\(kind, i, an\);/.test(html) && /28수 천문방위 분석/.test(html) && /통합 공간 해석/.test(html), '28수·통합 카드 연결');
 ok(html.indexOf('body += an ? spResult(kind, i, an)') < html.indexOf('body += spMansionSection(kind, i, an)'), 'B(현공) 다음 C·D 순서');
 ok(/\$\{tkMansionCard\(list\)\}/.test(html) && /tkMansionCell\(r\.jdn\)/.test(html), '택일 28수 연결');
+ok(/<h3>옥갑기 두 판본 나란히<\/h3>/.test(html) && /r0\.omensAll/.test(html) && /\.ms-two\{/.test(html), '택일 화면 옥갑기 두 판본 나란히');
 ok(/<h3>복단일\(伏斷日\)<\/h3>/.test(html) && /r\.fuduan && r\.fuduan\.is \? ' <span class="chip warn">복단일<\/span>'/.test(html) && /\.chip\.warn \{/.test(html), '택일 화면 복단일 표시(카드·표·칩)');
 ok(/return F\.analyze\(\{ ch: S\.ch, facingDeg: \+c\.facing,/.test(html), '현공 호출(spRun)은 기존 그대로');
 ok(!/Mansion|28수|宿/.test(fs.readFileSync(path.join(root, 'engine.js'), 'utf8')), '택일 점수(engine.js pickDays)에 28수를 더하지 않음');
-ok((html.match(/\$\{MS_SRC_WARN\}/g) || []).length === 2 && /다른 판본과의 교차 확인과 택일 길흉 노래\(옥갑기\)의 판본 확인은 아직 끝나지 않았습니다/.test(html), '28수·택일 카드에 출처 경고(교차 확인·옥갑기 판본 미완) 표시');
+ok((html.match(/\$\{MS_SRC_WARN\}/g) || []).length === 2 && /다른 판본과의 교차 확인과, 옥갑기 후대 노래\(위키문헌본\)의 판본 확인은 아직 끝나지 않았습니다/.test(html), '28수·택일 카드에 출처 경고(교차 확인·옥갑기 판본 미완) 표시');
 ok(/중화서국본 교감 반영/.test(MD.DEGREE_PROFILES[0].title) && /사고전서 원본 면/.test(MD.DEGREE_PROFILES[0].notes[0]) && MD.DEGREE_PROFILES[0].extents.wei_roof === 17 && MD.DEGREE_PROFILES[0].extents.bi_wall === 9, '기본 도수 프로필: 교감값(危17·壁9) 유지, 근거는 중화서국본 교감으로 표시');
 ok(net === 0, '네트워크 호출 없음');
 

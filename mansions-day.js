@@ -7,7 +7,7 @@
   'use strict';
   var D = G.MantraMansionsData, DD = G.MantraMansionDayData;
   if (!D || !DD) throw new Error('mansions-data.js · mansions-day-data.js 를 먼저 불러오세요');
-  var VERSION = 'mansions-day-20261125-1';
+  var VERSION = 'mansions-day-20261125-2';
   var mod = function (a, n) { return ((a % n) + n) % n; };
   var BR = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
   var LUM_TO_DOW = [3, 4, 5, 6, 0, 1, 2];   // 칠요 순번(목금토일월화수) → JDN 요일(0=월)
@@ -46,12 +46,13 @@
     var p = omenProfile(profileId);
     if (!p) return { status: 'none', events: DD.EVENTS.map(function (e) { return { id: e[0], label: e[1], verdict: null, text: '미확정 — 원문 자료 없음' }; }) };
     var e = p.entries && p.entries[mansionId], ok = p.status === 'verified';
-    return { status: ok ? 'verified' : p.status, profile: { id: p.id, title: p.title, edition: p.edition, sourceUrl: p.sourceUrl, statusText: p.statusText, readingStatus: p.readingStatus, transcriptionNotes: p.transcriptionNotes || [] },
+    return { status: ok ? 'verified' : p.status, profile: { id: p.id, title: p.title, shortName: p.shortName || p.title, order: p.order || 9, edition: p.edition, sourceUrl: p.sourceUrl, statusText: p.statusText, readingStatus: p.readingStatus, transcriptionNotes: p.transcriptionNotes || [] },
       head: e ? e.head : null, headVerdict: e ? e.headVerdict : null, original: e ? e.original.slice() : [], plain: e ? e.plain : null,
       events: DD.EVENTS.map(function (ev) {
-        var r = e && e.readings ? e.readings[ev[0]] : null;
-        if (!ev[2] || !r) return { id: ev[0], label: ev[1], term: ev[2], verdict: null, reference: null, evidence: null, text: '미확정 — 원문에 이 행사 언급 없음' };
-        return { id: ev[0], label: ev[1], term: ev[2], verdict: ok ? r.verdict : null, reference: r.verdict, evidence: r.evidence, text: ok ? r.verdict : '미확정 — 판본 미확인(원문 참고: ' + r.verdict + ')' };
+        var r = e && e.readings ? e.readings[ev[0]] : null, term = (p.terms && p.terms[ev[0]]) || ev[2];
+        if (!term) return { id: ev[0], label: ev[1], term: null, verdict: null, reference: null, evidence: null, text: '미확정 — 원문에 이 행사 언급 없음' };
+        if (!r) return { id: ev[0], label: ev[1], term: term, verdict: null, reference: null, evidence: null, text: p.terms ? '미확정 — 이 수의 원문에 언급이 없거나 길흉이 분명하지 않음' : '미확정 — 원문에 이 행사 언급 없음' };
+        return { id: ev[0], label: ev[1], term: term, verdict: ok ? r.verdict : null, reference: r.verdict, evidence: r.evidence, text: ok ? r.verdict : '미확정 — ' + (p.status === 'edition-verified' ? '판본 선택 전' : '판본 미확인') + '(원문 참고: ' + r.verdict + ')' };
       }) };
   }
   // 伏斷日 판정: 승인(approved)된 프로필에서만 판정한다. 행사별 쓰임은 문헌별 원문(uses)만 돌려주고 판정하지 않는다.
@@ -62,7 +63,7 @@
     var b = BR[branchOfJdn(jdn)], want = p.pairs[b];
     return { status: 'ok', is: want === mansionId, branch: b, pairMansion: byId(want), profile: { id: p.id, title: p.title, sources: p.sources, note: p.note, uses: p.uses, approval: p.approval } };
   }
-  function day(jdn, o) { o = o || {}; var a = mansionOf(jdn, o.assign); if (a.status !== 'ok') return a; return Object.assign(a, { omens: omens(a.mansion.id, o.omen), fuduan: fuduanOf(jdn, a.mansion.id, o.fuduan) }); }
+  function day(jdn, o) { o = o || {}; var a = mansionOf(jdn, o.assign); if (a.status !== 'ok') return a; return Object.assign(a, { omens: omens(a.mansion.id, o.omen), omensAll: (DD.OMEN_PROFILES || []).map(function (p) { return omens(a.mansion.id, p.id); }), fuduan: fuduanOf(jdn, a.mansion.id, o.fuduan) }); }
 
   G.MantraMansionDay = { VERSION: VERSION, branchOfJdn: branchOfJdn, checkAssign: checkAssign, weekdayOk: weekdayOk, assignProfile: assignProfile, omenProfile: omenProfile, fuduanProfile: fuduanProfile, fuduanOf: fuduanOf, mansionOf: mansionOf, omens: omens, day: day };
   if (typeof module !== 'undefined' && module.exports) module.exports = G.MantraMansionDay;
