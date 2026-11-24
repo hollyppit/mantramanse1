@@ -49,6 +49,11 @@
   function D() { return R.Deep; }
   function bar(label, v, o) { var Dp = D(); if (Dp && Dp.bar) return Dp.bar(label, v, o); return '<div class="dp-bar"><span class="dp-bl">' + esc(label) + '</span><span class="dp-bt"><i style="width:' + Math.round(clamp(v, 0, 100)) + '%"></i></span><b>' + esc(o && o.text != null ? o.text : Math.round(v)) + '</b></div>'; }
   function box(cap, lead, body) { return '<section class="dp-embed dp td-blk"><div class="cap">' + esc(cap) + '</div>' + (lead ? '<p class="lead">' + lead + '</p>' : '') + body + '</section>'; }
+  // 오행 색(2026-11-25, /luck-element-theme.js — 만세력·타임라인·상세풀이 타이밍 그래프와 같은 기준): 막대 색 = 그 시기에 두드러지는 오행(길흉 아님), 등급은 숫자 옆 보조
+  var EL_COL = ['#46C27E', '#F2604F', '#EDBB3A', '#C9CED9', '#6A8FEA'];
+  function LT() { return root.MantraLuckTheme || null; }
+  function elOf(M, x) { var T = LT(); if (!T || !x) return null; try { var m = T.mainEl(M, x); return m ? m.el : null; } catch (e) { return null; } }
+  function elLegend(key) { var T = LT(); if (!T) return ''; var L = T.legendFor ? T.legendFor(key) : T.LEGEND; return '<p class="td-elleg">' + L.map(function (g) { return '<span><i style="background:' + EL_COL[g.el] + '"></i><b>' + g.hanja + ' ' + g.name + '</b> ' + esc(g.words.slice(0, 2).join('·')) + '</span>'; }).join('') + '<small>막대 색 = 그 시기에 두드러지는 기운(길흉 아님) · 막대 길이 = 점수 · 숫자 옆 좋음·무난·조심 = 점수 등급(보조)</small></p>'; }
   function chip(s) { return '<span class="td-chip" style="background:' + s.c + '">' + esc(s.n) + '</span>'; }
   function who(H) { return H.name ? esc(H.name) + '님' : '당신'; }
   function rolesOf(ch) { var u = ch.unified && ch.unified.roles; if (u) { var o = {}; Object.keys(u).forEach(function (k) { o[k] = u[k] ? String(u[k]).replace(/^조건부 /, '') : u[k]; }); return o; } return (ch.yong && ch.yong.roles) || (ch.yongAll && ch.yongAll.eokbu && ch.yongAll.eokbu.roles) || {}; }   // 2026-11-20: 통합 용신 우선(만세력·서사와 같은 출처)
@@ -63,12 +68,13 @@
       var d; try { d = M.evaluateDomainLuck(ch, x, lv); } catch (e) { return null; }
       var o = d && d[key]; if (!o) return null;
       var v = Math.round(clamp(o.score, 0, 100)), label = scope === 'month' ? (new Date(x.startMs).getMonth() + 1) + '월' : x.year + '년';
-      return { i: i, v: v, s: sig(key, v), label: label, gz: M.gzNameK ? M.gzNameK(x) : '', age: scope === 'month' ? null : x.year - ch.solar.y, sum: o.summary || '', why: (o.reasons || [])[0] || '', loss: o.loss || null };
+      return { i: i, v: v, s: sig(key, v), el: elOf(M, x), label: label, gz: M.gzNameK ? M.gzNameK(x) : '', age: scope === 'month' ? null : x.year - ch.solar.y, sum: o.summary || '', why: (o.reasons || [])[0] || '', loss: o.loss || null };
     }).filter(Boolean);
     if (rows.length < 3) return null;
     var top = rows.slice().sort(function (a, b) { return b.v - a.v || a.i - b.i; }).slice(0, 3), low = rows.slice().sort(function (a, b) { return a.v - b.v || a.i - b.i; })[0];
     var star = top.map(function (r) { return r.i; });
-    var body = '<div class="dp-bars">' + rows.map(function (r) { return bar((star.indexOf(r.i) >= 0 ? '★ ' : '') + r.label + (r.gz ? ' ' + r.gz : ''), r.v, { text: r.v + ' · ' + r.s.n, color: r.s.c }); }).join('') + '</div>';
+    var body = '<div class="dp-bars">' + rows.map(function (r) { return bar((star.indexOf(r.i) >= 0 ? '★ ' : '') + r.label + (r.gz ? ' ' + r.gz : ''), r.v, { text: r.v + ' · ' + (r.el != null ? LT().EL_H[r.el] + ' · ' : '') + r.s.n, color: r.el != null ? EL_COL[r.el] : r.s.c }); }).join('') + '</div>';
+    if (rows.some(function (r) { return r.el != null; })) body = elLegend(key) + body;
     body += '<h4 class="td-h">' + esc(S.name) + '이 가장 살아나는 ' + (scope === 'month' ? '달' : '해') + ' TOP 3</h4><ol class="td-ol">' + top.map(function (r) {
       return '<li><b>' + esc(r.label) + (r.age != null ? ' (' + r.age + '세)' : '') + '</b> ' + chip(r.s) + ' <span class="td-sc">' + r.v + '점</span><br>' + esc(r.sum) + (r.why ? '<br><small>근거: ' + esc(r.why) + '</small>' : '') + '</li>';
     }).join('') + '</ol>';
@@ -77,7 +83,7 @@
       var lossTop = rows.filter(function (r) { return r.loss; }).sort(function (a, b) { return b.loss.score - a.loss.score; }).slice(0, 2);
       if (lossTop.length) body += '<p class="td-note td-warn"><b>뜻밖의 재물 손실 위험이 큰 ' + (scope === 'month' ? '달' : '해') + '</b>: ' + lossTop.map(function (r) { return esc(r.label) + ' (손실 위험 ' + r.loss.score + '점 · ' + esc(r.loss.band) + ')'; }).join(', ') + '. 이 시기엔 보증·고위험 투자·큰 지출을 한 번 더 확인하세요.</p>';
     }
-    var lead = who(H) + '의 <b>' + esc(S.name) + '</b>(' + esc(S.what) + ')을 ' + (scope === 'month' ? '앞으로 12개월' : '앞으로 10년') + ' 동안 계산했어요. 색은 만세력 ‘운세 흐름’ 그래프와 같은 기준이에요.';
+    var lead = who(H) + '의 <b>' + esc(S.name) + '</b>(' + esc(S.what) + ')을 ' + (scope === 'month' ? '앞으로 12개월' : '앞으로 10년') + ' 동안 계산했어요. 막대 색은 그 시기에 두드러지는 오행(만세력·타임라인과 같은 기준)이고, 좋음·무난·조심은 숫자 옆 보조 표시예요.';
     return box((scope === 'month' ? '앞으로 12개월 ' : '앞으로 10년 ') + S.name + ' 그래프', lead, body + '<p class="td-foot">점수는 이 앱 해석 모델의 상대 지표이며 사건을 예측하지 않습니다.</p>');
   }
 
@@ -279,7 +285,7 @@
       cpSel.gender = rec.gender; savePartner(rec); cpSel[id] = 0; rerender(id);
     });
     var st = DOC.createElement('style');
-    st.textContent = '.td-blk .td-h{margin:14px 0 6px;font-size:.95rem}.td-ol{margin:6px 0 0;padding-left:1.1em}.td-ol li{margin:8px 0;line-height:1.6}.td-ol li.td-top b{color:#D5B97F}.td-chip{display:inline-block;font-size:.7rem;color:#fff;border-radius:999px;padding:1px 8px;vertical-align:1px}.td-sc{font-size:.8rem;opacity:.8}.td-mut{opacity:.7;font-size:.82rem}.td-note{margin:10px 0 0;font-size:.88rem;line-height:1.6}.td-warn{color:#E79A88}.td-foot{margin:10px 0 0;font-size:.74rem;opacity:.6;line-height:1.5}.td-axes{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.td-axis{border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 10px}.td-axis small{display:block;opacity:.7}.td-axis b{display:block;margin:2px 0}.td-cph{display:flex;align-items:baseline;gap:6px;margin:6px 0}.td-cps{font-size:2.2rem;color:#D5B97F}.td-cpt{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}.td-btn{display:inline-block;border:1px solid rgba(213,185,127,.6);background:transparent;color:inherit;border-radius:999px;padding:5px 12px;font:inherit;font-size:.85rem;cursor:pointer;text-decoration:none}.td-btn.on{background:#D5B97F;color:#1b1b1b}.td-cpf{margin-top:8px}.td-cpr{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.td-cpr input,.td-cpr select{flex:1 1 70px;min-width:0;padding:7px 9px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:inherit;font:inherit;font-size:.88rem}.td-err{color:#E79A88;font-size:.82rem}.td-fix{color:#8FD3A8;font-weight:600}.td-axis p{margin:4px 0;font-size:.86rem;line-height:1.55}.td-more{margin-top:10px}.td-more summary{cursor:pointer;font-size:.85rem;opacity:.85}';
+    st.textContent = '.td-elleg{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;margin:6px 0 8px;font-size:.78rem}.td-elleg span{display:inline-flex;align-items:center;gap:4px}.td-elleg i{width:10px;height:10px;border-radius:3px;display:inline-block}.td-elleg small{flex-basis:100%;font-size:.72rem;opacity:.75}.td-blk .td-h{margin:14px 0 6px;font-size:.95rem}.td-ol{margin:6px 0 0;padding-left:1.1em}.td-ol li{margin:8px 0;line-height:1.6}.td-ol li.td-top b{color:#D5B97F}.td-chip{display:inline-block;font-size:.7rem;color:#fff;border-radius:999px;padding:1px 8px;vertical-align:1px}.td-sc{font-size:.8rem;opacity:.8}.td-mut{opacity:.7;font-size:.82rem}.td-note{margin:10px 0 0;font-size:.88rem;line-height:1.6}.td-warn{color:#E79A88}.td-foot{margin:10px 0 0;font-size:.74rem;opacity:.6;line-height:1.5}.td-axes{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.td-axis{border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 10px}.td-axis small{display:block;opacity:.7}.td-axis b{display:block;margin:2px 0}.td-cph{display:flex;align-items:baseline;gap:6px;margin:6px 0}.td-cps{font-size:2.2rem;color:#D5B97F}.td-cpt{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}.td-btn{display:inline-block;border:1px solid rgba(213,185,127,.6);background:transparent;color:inherit;border-radius:999px;padding:5px 12px;font:inherit;font-size:.85rem;cursor:pointer;text-decoration:none}.td-btn.on{background:#D5B97F;color:#1b1b1b}.td-cpf{margin-top:8px}.td-cpr{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.td-cpr input,.td-cpr select{flex:1 1 70px;min-width:0;padding:7px 9px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:inherit;font:inherit;font-size:.88rem}.td-err{color:#E79A88;font-size:.82rem}.td-fix{color:#8FD3A8;font-weight:600}.td-axis p{margin:4px 0;font-size:.86rem;line-height:1.55}.td-more{margin-top:10px}.td-more summary{cursor:pointer;font-size:.85rem;opacity:.85}';
     DOC.head.appendChild(st);
   }
 

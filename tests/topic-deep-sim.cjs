@@ -7,7 +7,7 @@ const root = path.join(__dirname, '..');
 const store = {}; globalThis.localStorage = { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); }, removeItem: k => { delete store[k]; } };
 globalThis.window = globalThis;
 const load = f => vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
-load('engine.js'); load('luck-grade.js');
+load('engine.js'); load('luck-grade.js'); load('luck-element-theme.js');
 ['compat-pair.js', 'fengshui-data.js', 'fengshui-engine.js', 'wealth-career-data.js', 'wealth-career-data-2.js', 'wealth-career-data-3.js', 'wealth-career-jobs.js', 'wealth-career.js', 'region-data.js', 'region-reading-data.js', 'region-reading.js', 'wish-spots.js'].forEach(load);
 ['report/v2/saju-data.js', 'report/v2/reading-feature-data-1.js', 'report/v2/reading-feature-data-2.js', 'report/v2/reading-feature.js', 'report/v2/topic-deep.js'].forEach(load);
 const M = globalThis.Manse, R = globalThis.ReportV2, TD = R.TopicDeep, RF = R.ReadingFeature;
@@ -54,7 +54,9 @@ Object.keys(nullCount).forEach(k => ok(false, `그려지지 않은 블록 ${k} $
 { const H = mk(1992, 6, 23, 1, 'M'), out = TD.render({ custom: 'td:sub', key: 'windfall' }, H, 'timeline_wealth_06');
   ok(/TOP 3/.test(out) && /가장 조심할 해/.test(out), '횡재운: TOP3·조심할 해');
   const se = M.seunRange(H.ch, 2026, 2026)[0], v = Math.round(M.evaluateDomainLuck(H.ch, se, 'seun').windfall.score), s = TD.sig('windfall', v);
-  ok(out.indexOf(v + ' · ' + s.n) >= 0, '2026년 횡재 점수·등급 표시 ' + v + ' ' + s.n); }
+  const el = globalThis.MantraLuckTheme.mainEl(M, se).el, hj = globalThis.MantraLuckTheme.EL_H[el];
+  ok(out.indexOf(v + ' · ' + hj + ' · ' + s.n) >= 0, '2026년 횡재 점수·오행·등급 표시 ' + v + ' ' + hj + ' ' + s.n);
+  ok(/class="td-elleg"/.test(out) && out.indexOf('막대 색 = 그 시기에 두드러지는 기운(길흉 아님)') >= 0, '분야 지표 그래프 위 오행 범례(2026-11-25)'); }
 // 6 궁합: 상대 없음 → 입력 폼 / 1명 → 점수 / 2명 → 순위
 { const H = mk(1992, 6, 23, 1, 'M');
   let o = TD.render({ custom: 'td:compat', rel: 'lover' }, H, 'timeline_love_05'); ok(/data-td-cpf/.test(o) && !/td-cps/.test(o), '상대 없음: 입력 폼');
