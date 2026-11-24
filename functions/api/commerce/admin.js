@@ -45,14 +45,15 @@ export async function onRequestGet({ request, env }) {
   if (supabaseReady(env)) { try { orders = await sbRest(env, 'commerce_orders?select=order_id,user_id,saju_label,product_id,product_name,worlds,amount,status,method,failure,created_at,paid_at,canceled_at,cancel_reason,is_test&order=created_at.desc&limit=100'); } catch (e) { ordersError = 'commerce-unavailable'; } }
   try { const v = await viewedByOrder(env, (orders || []).map(o => o.order_id)); (orders || []).forEach(o => { o.viewed_at = v[o.order_id] || null; }); } catch { }
   // 판매 준비 점검(실판매 전환 체크리스트): 각 항목 { ok: true|false|null(확인 불가), note }
-  const [channel, hook] = await Promise.all([readSignal(env, 'portone-channel'), readSignal(env, 'portone-webhook')]);
+  const [channel, hook, badHook] = await Promise.all([readSignal(env, 'portone-channel'), readSignal(env, 'portone-webhook'), readSignal(env, 'portone-webhook-bad')]);
+  const badNewer = !!badHook && (!hook || String(badHook.at) > String(hook.at));   // 서명이 틀린 알림이 정상 알림보다 최근
   const forSale = products.filter(p => p.active && p.price > 0), paidWorlds = Object.values(worlds).filter(w => w.enabled && w.paid);
   const lastPaid = (orders || []).find(o => o.status === 'paid' && String(o.order_id).startsWith('mt') && !String(o.order_id).includes('_'));
   const readiness = [
     { id: 'provider', label: '결제사: 포트원', ok: payProvider(env) === 'portone', note: payProvider(env) === 'portone' ? '포트원으로 결제창을 엽니다' : '지금 결제사: ' + (payProvider(env) || '없음') },
     { id: 'live-channel', label: '실연동 채널(실제 돈이 오가는 채널)', ok: channel ? channel.type === 'LIVE' : null, note: channel ? '마지막 결제의 채널: ' + (channel.type || '?') + (channel.pg ? ' · ' + channel.pg : '') + ' (' + String(channel.at).slice(0, 16).replace('T', ' ') + ')' + (channel.type === 'LIVE' ? '' : ' → KPN 승인 뒤 PORTONE_CHANNEL_KEY 를 실연동 채널 키로 바꾸고 재배포, 소액 결제로 확인') : '아직 포트원 결제 기록이 없습니다' },
     { id: 'webhook', label: '포트원 웹훅 수신', ok: hook ? true : null, note: hook ? '마지막 수신 ' + String(hook.at).slice(0, 16).replace('T', ' ') + (hook.type ? ' · ' + hook.type : '') : '받은 적 없음 → 포트원 콘솔 결제알림(Webhook)에 https://mantrafortune.com/api/commerce/webhook 등록(실연동 탭에도)' },
-    { id: 'webhook-secret', label: '웹훅 서명 확인(권장)', ok: !!env.PORTONE_WEBHOOK_SECRET, note: env.PORTONE_WEBHOOK_SECRET ? (hook && hook.signed === false ? '⚠ 마지막 웹훅 서명이 맞지 않았습니다(시크릿 값 확인)' : '설정됨') : '선택: 포트원 웹훅 시크릿을 PORTONE_WEBHOOK_SECRET 에 넣으면 서명까지 확인' },
+    { id: 'webhook-secret', label: '웹훅 서명 확인(권장)', ok: !!env.PORTONE_WEBHOOK_SECRET && !badNewer, note: env.PORTONE_WEBHOOK_SECRET ? (badNewer || (hook && hook.signed === false) ? '⚠ 최근 웹훅 서명이 맞지 않았습니다(' + String((badHook || hook).at).slice(0, 16).replace('T', ' ') + ') → 포트원 콘솔의 웹훅 시크릿과 PORTONE_WEBHOOK_SECRET 값 확인' : '설정됨') : '선택: 포트원 웹훅 시크릿을 PORTONE_WEBHOOK_SECRET 에 넣으면 서명까지 확인' },
     { id: 'products', label: '판매 상품·가격', ok: forSale.length > 0, note: forSale.map(p => p.name + ' ' + p.price.toLocaleString('ko-KR') + '원').join(' · ') || '판매 중인 상품이 없습니다' },
     { id: 'worlds', label: '유료 주제', ok: paidWorlds.length > 0, note: paidWorlds.map(w => w.name).join(' · ') || '유료로 설정된 주제가 없습니다(주제·표지 설정 → 이용 권한)' },
     { id: 'login', label: '로그인(카카오·구글·네이버)', ok: !!(env.SUPABASE_URL && env.SUPABASE_ANON_KEY), note: '카카오·구글 켜짐' + (naverReady(env) ? ' · 네이버 켜짐(검수 통과·서비스 적용)' : ' · 네이버 꺼짐') },

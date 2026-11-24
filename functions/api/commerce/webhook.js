@@ -11,7 +11,8 @@ export async function onRequestPost({ request, env }) {
   const raw = await request.text(); if (raw.length > 20000) return json({ error: 'too-large' }, 413);
   const signed = env.PORTONE_WEBHOOK_SECRET ? await verifyPortoneWebhook(env.PORTONE_WEBHOOK_SECRET, request.headers, raw) : null;
   let b; try { b = JSON.parse(raw); } catch { b = null; }
-  if (signed === false) return json({ error: 'bad-signature' }, 401);
+  // 서명이 틀린 알림은 처리하지 않되, 따로 기록해 관리자 판매 준비 점검표가 '시크릿 값 확인' 경고를 띄우게 한다(2026-11-24: 예전엔 기록 전에 끝나 경고가 뜰 수 없었다)
+  if (signed === false) { await noteSignal(env, 'portone-webhook-bad', { reason: 'bad-signature' }); return json({ error: 'bad-signature' }, 401); }
   if (!b) return json({ error: 'bad-payload' }, 400);
   const paymentId = b && b.data && typeof b.data.paymentId === 'string' ? b.data.paymentId : '';
   // 우리 주문이 아닌 결제·결제 외 알림(빌링키 등)은 받았다고만 답한다(포트원이 재전송하지 않게)

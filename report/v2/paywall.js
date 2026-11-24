@@ -284,12 +284,16 @@
       saveResume();
       return root.PortOne.requestPayment({ storeId: k.storeId, channelKey: chKey, paymentId: o.orderId, orderName: o.orderName, totalAmount: o.amount, currency: 'KRW', payMethod: 'CARD', redirectUrl: u.toString(), customer: cust });
     }).then(function (res) {
+      if (!res) return;   // 모바일: 이미 다른 페이지로 이동 중 — 이어 읽기 값은 돌아왔을 때 써야 하므로 지우지 않는다(2026-11-24)
       dropResume();   // 여기까지 오면 PC 결제창: 페이지를 떠나지 않았다
-      if (!res) return;   // 모바일: 이미 다른 페이지로 이동 중
       if (res.code != null) { var e = new Error(/취소/.test(res.message || '') ? 'user-cancel' : (res.message || res.code)); e.portone = true; throw e; }
-      return confirmPortone(o.orderId);
+      // 결제창은 끝났고 돈은 나갔을 수 있다: 확인 요청이 끊겨도 '결제를 시작하지 못했습니다'로 다시 사게 하지 않고, 다음에 다시 확인한다
+      return confirmPortone(o.orderId).catch(function () { pendingPay(o.orderId); toast('결제 확인 중 연결이 끊겼습니다. 새로고침하면 다시 확인합니다.'); });
     });
   }
+  // 확인이 끝나지 않은 결제(처리 중·서버 오류·연결 끊김): 이 탭에 주문번호를 남겨 다음에 열 때 다시 확인한다
+  var PENDING_KEY = 'mt_pay_pending';
+  function pendingPay(oid) { try { if (oid) root.sessionStorage.setItem(PENDING_KEY, oid); else root.sessionStorage.removeItem(PENDING_KEY); } catch (e) { } }
   // 서버 확인: 결제사 승인이 막 끝나 '처리 중'이면 잠깐 기다렸다 두 번 더 묻는다
   function confirmPortone(paymentId, tries) {
     tries = tries || 0;
@@ -301,22 +305,29 @@
       });
   }
   function finishPurchase(x, oid) {
+    var unsettled = !(x.ok && x.j.ok) && (x.status === 202 || x.status >= 500);   // 아직 답이 정해지지 않음: 다음에 다시 확인
+    pendingPay(unsettled ? oid : null);
     if (x.ok && x.j.ok) { track('purchase_done', { order: oid }); toast('구매가 완료되었습니다. 이어서 읽어 보세요.'); }
-    else toast(x.j.error === 'grant-failed' ? '결제는 되었지만 열람 권한 기록에 실패했습니다. 문의해 주시면 바로 열어 드립니다(주문번호 ' + oid + ').' : x.status === 202 ? '결제를 확인하고 있습니다. 잠시 후 새로고침해 주세요.' : '결제를 확인하지 못했습니다: ' + (x.j.message || x.j.error || ''));
-    return refresh().then(function () { if (x.ok && x.j.ok) { close(); if (P.onPurchased) { try { P.onPurchased(); } catch (e) { } } } });
+    else toast(x.j.error === 'grant-failed' ? '결제는 되었지만 열람 권한 기록이 늦어지고 있습니다. 새로고침하면 다시 확인하고, 계속 안 되면 문의해 주세요(주문번호 ' + oid + ').' : unsettled ? '결제를 확인하고 있습니다. 잠시 후 새로고침하면 다시 확인합니다.' : '결제를 확인하지 못했습니다: ' + (x.j.message || x.j.error || ''));
+    return refresh().then(function () { if (x.ok && x.j.ok) { close(); if (P.onPurchased) { try { P.onPurchased(); } catch (e) { } } } }).then(function () { return x; });
   }
 
   // 결제창에서 돌아왔을 때: 성공이면 서버 승인 → 잠금 정보 다시 받기. 주소의 결제 값은 바로 지운다.
   function handleReturn() {
-    var u = new URL(root.location.href), st = u.searchParams.get('pay'); if (!st) return Promise.resolve(null);
-    var pk = u.searchParams.get('paymentKey'), oid = u.searchParams.get('orderId'), amt = u.searchParams.get('amount'), msg = u.searchParams.get('message');
+    var u = new URL(root.location.href), st = u.searchParams.get('pay');
+    var pk =u.searchParams.get('paymentKey'), oid = u.searchParams.get('orderId'), amt = u.searchParams.get('amount'), msg = u.searchParams.get('message');
     // 주소의 결제 값은 서버가 확실한 답을 준 뒤에 지운다(연결이 끊기면 남겨 두어 새로고침으로 다시 승인할 수 있게)
     var clearUrl = function () { PAY_KEYS.forEach(function (k) { u.searchParams.delete(k); }); try { root.history.replaceState(null, '', u.pathname + (u.search || '') + u.hash); } catch (e) { } };
     var getToken = function () { return (P.loading || Promise.resolve()).then(function () { return P.token ? null : sbClient().then(function (sb) { return sb.auth.getSession(); }).then(function (r) { P.token = r && r.data && r.data.session && r.data.session.access_token || ''; }).catch(function () { }); }); };
+    if (!st) {   // 결제 값이 없는 보통 열기: 지난번에 확인이 끝나지 않은 결제가 있으면 다시 확인한다(2026-11-24)
+      var pend = ''; try { pend = root.sessionStorage.getItem(PENDING_KEY) || ''; } catch (e) { }
+      return pend ? getToken().then(function () { return confirmPortone(pend); }).catch(function () { }) : Promise.resolve(null);
+    }
     if (st === 'portone') {   // 포트원 모바일 복귀: ?pay=portone&paymentId=…(&code=…&message=… 이면 실패·취소)
       var pid = u.searchParams.get('paymentId'), code = u.searchParams.get('code');
       if (!pid || code) { clearUrl(); if (code && !/취소/.test(msg || '')) toast('결제가 완료되지 않았습니다: ' + (msg || code)); return Promise.resolve(null); }
-      return getToken().then(function () { return confirmPortone(pid); }).then(clearUrl).catch(function () { toast('결제 확인 중 연결이 끊겼습니다. 새로고침하면 다시 확인합니다.'); });
+      // 답이 정해진 뒤에만 주소의 결제 값을 지운다: 처리 중(202)·서버 오류(5xx)면 남겨 두어 새로고침으로 다시 확인
+      return getToken().then(function () { return confirmPortone(pid); }).then(function (x) { if (!x || !(x.status === 202 || x.status >= 500) || (x.ok && x.j && x.j.ok)) clearUrl(); }).catch(function () { pendingPay(pid); toast('결제 확인 중 연결이 끊겼습니다. 새로고침하면 다시 확인합니다.'); });
     }
     if (st !== 'success' || !pk || !oid) { clearUrl(); if (st === 'fail' && msg) toast('결제가 완료되지 않았습니다: ' + msg); return Promise.resolve(null); }
     return getToken()

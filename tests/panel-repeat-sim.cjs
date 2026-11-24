@@ -24,6 +24,11 @@ for (const [y, mo, d, h, g] of [[1992, 6, 23, 7, 'M'], [1985, 11, 2, 14, 'F'], [
   assert.ok((plan.timeline_self_02 || []).some(m => m.id === 'reviewed-slot:car'), '장 전용 그림(자동차)은 그 장에 남는다');
   // 주제마다 그림이 앞쪽 장에만 몰리지 않는다: 그림 있는 장이 주제 뒤쪽 절반에도 있다
   for (const t of TOPICS) { const list = chapters.filter(c => c.editorialTopicId === t), withPic = list.map((c, i) => (plan[c.id] || []).length ? i : -1).filter(i => i >= 0); if (withPic.length >= 2) assert.ok(withPic.some(i => i >= list.length / 2), t + ' 뒤쪽 장에도 그림'); }
+  // 이미 그린 장은 고정: 목록이 늦게 늘어 다시 배정해도 그 장의 그림은 그대로이고 다른 장에 다시 나오지 않는다
+  const small = full.filter((m, i) => i % 3 === 0), first = RM.planReport(small, chapters, sd, 3), fixed = {}; chapters.slice(0, 5).forEach(c => { if ((first[c.id] || []).length) fixed[c.id] = first[c.id]; });
+  const again = RM.planReport(full, chapters.concat([{ id: 'timeline_love_flow', editorialTopicId: 'love' }]), sd, 3, null, fixed), seen2 = new Map();
+  Object.keys(fixed).forEach(id => assert.deepEqual(again[id].map(RM.identity), fixed[id].map(RM.identity), id + ' 고정 그림 유지'));
+  Object.entries(again).forEach(([id, list]) => list.forEach(m => { const k = RM.identity(m); assert.ok(!seen2.has(k), '다시 배정 뒤 반복: ' + k + ' ' + seen2.get(k) + ' · ' + id); seen2.set(k, id); }));
   // 같은 입력이면 같은 배정
   assert.deepEqual(JSON.stringify(RM.planReport(full, chapters, sd, 3)), JSON.stringify(RM.planReport(full, chapters, sd, 3)), '결정성');
   charts++;

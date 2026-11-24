@@ -68,6 +68,7 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
       return res(rows);
     }
     if (u.includes('/rest/v1/commerce_entitlements')) {
+      if (method === 'POST' && db.failEnt) return res({ message: 'grant down' }, 500);   // 권한 기록 실패 모의(2026-11-24)
       if (method === 'POST') { for (const r of body) if (!db.ent.some(e => e.user_id === r.user_id && e.saju_key === r.saju_key && e.world === r.world && e.order_id === r.order_id)) db.ent.push({ ...r, revoked_at: null }); return res(null, 201); }
       const oid = q(u, 'order_id'), inList = oid && oid.startsWith('in.(') ? oid.slice(4, -1).split(',') : null, fv = q(u, 'first_viewed_at');
       const rows = db.ent.filter(e => (!q(u, 'user_id') || e.user_id === eqv(q(u, 'user_id'))) && (!q(u, 'saju_key') || e.saju_key === eqv(q(u, 'saju_key'))) && (!q(u, 'world') || e.world === eqv(q(u, 'world')))
@@ -176,6 +177,8 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   ok(r.status === 200 && d.ok && op1.status === 'paid' && op1.payment_key === 'portone:' + P1 && op1.method === '카드' && ents() === 'w2,w7', '포트원 결제 완료: 묶음 권한 2건');
   ok(poCalls[0].auth === 'PortOne po-secret-x' && poCalls[0].u.includes('storeId=store-x'), '포트원 조회: 시크릿 머리글·상점 ID');
   r = await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-a', body: { paymentId: P1 } }), env: penv }); d = await r.json(); ok(d.ok && d.already && ents() === 'w2,w7', '포트원 재확인: 중복 없음');
+  // 이미 결제 완료인 주문인데 권한 기록이 다시 실패하면 성공으로 답하지 않는다(웹훅 재시도·사용자 재확인이 이어지게)
+  db.failEnt = true; r = await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-a', body: { paymentId: P1 } }), env: penv }); d = await r.json(); db.failEnt = false; ok(r.status === 500 && d.error === 'grant-failed', '결제 완료 주문의 권한 기록 실패는 500 grant-failed');
   // 금액 바꿔 치기: 결제창에서 100원만 결제 → 자동 취소·실패
   db.ent.forEach(e => { if (e.order_id === P1) e.revoked_at = 'x'; }); op1.status = 'canceled';
   o = await poOrder(); const P2 = o.orderId; po[P2] = { id: P2, status: 'PAID', amount: { total: 100 }, currency: 'KRW', storeId: 'store-x' }; poCalls = [];
@@ -303,7 +306,7 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   ok(mails.length === 0, '메일 키가 없으면 보내지 않음');
   const mailEnv = { ...penv, RESEND_API_KEY: 're_test' };
   o = await (await order.onRequestPost({ request: req('/api/commerce/order', { tok: 'tok-b', body: { productId: 'w2', sd: { ...sd, pillars: { ...sd.pillars, hour: { hanja: '甲子' } } }, label: '테스트' } }), env: mailEnv })).json();
-  const PM = o.orderId; po[PM] = { id: PM, status: 'PAID', amount: { total: 9900 }, currency: 'KRW', storeId: 'store-x', method: { type: 'PaymentMethodCard' }, paidAt: '2026-11-12T01:00:00Z' };
+  const PM = o.orderId; po[PM] = { id: PM, status: 'PAID', amount: { total: 9900 }, currency: 'KRW', storeId: 'store-x', method: { type: 'PaymentMethodCard' }, paidAt: new Date(Date.now() - 3600e3).toISOString() };
   await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-b', body: { paymentId: PM } }), env: mailEnv });
   await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-b', body: { paymentId: PM } }), env: mailEnv });
   await webhook.onRequestPost({ request: new Request('https://x.test/api/commerce/webhook', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ type: 'Transaction.Paid', data: { paymentId: PM } }) }), env: mailEnv });

@@ -237,7 +237,8 @@ const methodOf = m => !m ? null : m.type === 'PaymentMethodEasyPay' ? '간편결
 // 포트원 결제를 서버에서 조회해 주문을 정리한다(결제창 복귀·웹훅 공용). 브라우저가 보낸 금액·상태는 쓰지 않는다.
 // 반환: { ok, already?, pending?, error?, worlds? }
 export async function settlePortone(env, order) {
-  if (order.status === 'paid') { try { await grantOrder(env, order, 'payment'); } catch { } return { ok: true, already: true, worlds: order.worlds }; }
+  // 이미 '결제 완료'인 주문도 권한 기록이 실패하면 실패로 알린다: 성공으로 답하면 웹훅 재시도가 멈추고 사용자는 잠긴 채 남는다(2026-11-24)
+  if (order.status === 'paid') { try { await grantOrder(env, order, 'payment'); } catch { return { ok: false, error: 'grant-failed', orderId: order.order_id }; } return { ok: true, already: true, worlds: order.worlds }; }
   if (order.status !== 'pending' && !revivable(order)) return { ok: false, error: 'order-' + order.status };
   const from = order.status;   // 'pending', 또는 정리로 만료된 주문('failed' + expired)
   const t = await portoneCall(env, `payments/${encU(order.order_id)}?storeId=${encU(env.PORTONE_STORE_ID)}`);

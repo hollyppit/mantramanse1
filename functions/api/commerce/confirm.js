@@ -28,7 +28,7 @@ export async function onRequestPost({ request, env }) {
 
   const paymentKey = typeof b.paymentKey === 'string' ? b.paymentKey.slice(0, 200) : '', amount = +b.amount;
   if (!paymentKey || !Number.isInteger(amount)) return json({ error: 'bad-payload' }, 400);
-  if (order.status === 'paid') { try { await grantOrder(env, order, 'payment'); } catch { } return json({ ok: true, already: true, worlds: order.worlds }); }
+  if (order.status === 'paid') { try { await grantOrder(env, order, 'payment'); } catch { return json({ error: 'grant-failed', orderId: order.order_id }, 500); } return json({ ok: true, already: true, worlds: order.worlds }); }
   if (order.status !== 'pending') return json({ error: 'order-' + order.status }, 409);
   if (order.amount !== amount) {
     await sbRest(env, `commerce_orders?order_id=eq.${enc(orderId)}&status=eq.pending`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ status: 'failed', failure: 'amount-mismatch' }) }).catch(() => { });

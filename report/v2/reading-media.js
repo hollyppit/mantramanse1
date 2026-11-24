@@ -42,8 +42,11 @@ function pick(list,c,sd,count,exclude){var items=pool(list),by={};items.forEach(
 // 리포트 전체 배정(2026-11-24): 읽는 순서대로 장마다 고르되, 앞 장에서 이미 보여 준 그림(포스터·영상 주소 기준)은 다시 쓰지 않는다.
 // 같은 주제의 장면 그림(일상·갈등·실천)이 주제·오행·성별마다 한 벌뿐이라, 장마다 따로 고르면 수십 장에 같은 그림이 반복됐다. 남는 그림이 없는 장은 그림 없이 글만 보여 준다.
 function identity(m){return m&&(m.poster||m.video)||'';}
-function planReport(list,chapters,sd,count,choose){var used=new Set(),result={},order=(chapters||[]).filter(function(c,k,a){return c&&c.id&&a.findIndex(function(x){return x&&x.id===c.id;})===k;}),want=count||3;
+function planReport(list,chapters,sd,count,choose,fixed){var used=new Set(),result={},order=(chapters||[]).filter(function(c,k,a){return c&&c.id&&a.findIndex(function(x){return x&&x.id===c.id;})===k;}),want=count||3;
  order.forEach(function(c){result[c.id]=[];});
+ // 이미 화면에 그린 장의 그림(fixed)은 그대로 두고 먼저 '쓴 그림'으로 친다: 목록이 늦게 도착해 다시 배정해도 같은 그림이 다른 장에 또 나오지 않게(2026-11-24)
+ var done={};Object.keys(fixed||{}).forEach(function(id){if(!result[id])return;done[id]=1;result[id]=(fixed[id]||[]).filter(function(m){var k=identity(m);if(!k||used.has(k))return false;used.add(k);return true;});});
+ order=order.filter(function(c){return !done[c.id];});
  // 주제 안에서 그림이 앞쪽 장에 몰리지 않게 방문 순서를 펼친다(0, 끝, 가운데, 1/4 …). 주제끼리는 번갈아 돈다
  var groups={},tops=[];order.forEach(function(c){var t=topicOf(c);if(!groups[t]){groups[t]=[];tops.push(t);}groups[t].push(c);});
  function spread(list){var n=list.length,out=[],seen={};function add(k){k=Math.max(0,Math.min(n-1,Math.round(k)));if(!seen[k]){seen[k]=1;out.push(list[k]);}}add(0);add(n-1);for(var step=(n-1)/2;step>=0.5&&out.length<n;step/=2)for(var x=step;x<n-1;x+=step*2)add(x);for(var k=0;k<n;k++)add(k);return out;}
