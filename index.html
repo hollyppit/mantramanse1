@@ -572,6 +572,7 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 .lts { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(92px, 1fr); gap: 6px; overflow-x: auto; padding: 2px 2px 6px; scrollbar-width: thin; }
 .lt { border: 0; border-top: 4px solid var(--c, transparent); box-shadow: inset 0 0 0 1px var(--line); background: var(--surface); border-radius: 16px; padding: 8px 6px; display: grid; gap: 3px; justify-items: center; align-content: start; cursor: pointer; text-align: center; }
 .lt:hover { box-shadow: inset 0 0 0 2px var(--accent); }
+.lt.lt-el { background: color-mix(in srgb, var(--c) 9%, var(--surface)); } .lt .lt-eh { font-style: normal; font-weight: 900; margin-left: 4px; font-family: var(--f-display); }   /* 2026-11-25 운 타일 오행 색 */
 .lt.sel { box-shadow: inset 0 0 0 2px var(--ink); }
 .lt.cur { background: var(--accent-soft); }
 .lt-top { font-size: 0.7rem; color: var(--ink-3); font-weight: 600; white-space: nowrap; }
@@ -7217,8 +7218,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   function luckTile(x, top, pick, on, cur) {
     const se = M.stemEl(x.s), be = M.BR_EL[x.b];
-    return `<button type="button" class="lt${on ? ' sel' : ''}${cur ? ' cur' : ''}" data-pick="${pick}" style="${sgVars(tileSig(x))}">
-      <span class="lt-top num">${top}</span>
+    const te = elOf(x);   // 2026-11-25: 칸 위 띠·옅은 배경 = 그 시기의 주요 오행(길흉 아님), 등급은 아래 칩(보조)
+    return `<button type="button" class="lt${on ? ' sel' : ''}${cur ? ' cur' : ''}${te != null ? ' lt-el' : ''}" data-pick="${pick}" style="${te != null ? `--c:${elFill(te)};--on:#fff` : sgVars(tileSig(x))}">
+      <span class="lt-top num">${top}${te != null ? `<i class="lt-eh" style="color:${elInk(te)}" title="${LT().EL_K[te]} 기운">${LT().EL_H[te]}</i>` : ''}</span>
       <span class="lt-tg" title="${esc((t => t.line + (t.meaning ? ' — ' + t.meaning : ''))(tgOf(x)))}">${x.stemTG}</span>
       <span class="lt-g ${ECLS[se]}"><b>${M.STEM[x.s]}</b><i>${M.STEM_K[x.s]}${M.EL_K[se]}</i></span>
       <span class="lt-g ${ECLS[be]}"><b>${M.BR[x.b]}</b><i>${M.BR_K[x.b]}${M.EL_K[be]}</i></span>
