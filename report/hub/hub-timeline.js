@@ -180,7 +180,7 @@
     // 고른 시기 카드의 오행 테마(만세력 운세 흐름 상세와 같은 공용 계산)
     var themeHtml = function (it, lvl) {
       var T = LTm(), r0 = it && it._ref, dm = domEl(); if (!T || !r0 || (metric() !== 'flow' && !dm)) return '';
-      var r; try { r = dm ? T.readDomain(M, ch, r0.p, lvl, metric(), { score: valOf(it).v, name: mName() + (/운$/.test(mName()) ? '' : '운') }) : T.read(M, ch, r0.p, lvl); } catch (e) { return ''; } if (!r) return '';
+      var r; try { r = dm ? T.readDomain(M, ch, r0.p, lvl, metric(), { score: valOf(it).v, name: mName() + (/운$/.test(mName()) ? '' : '운'), grade: valOf(it).sig ? valOf(it).sig.k : null }) : T.read(M, ch, r0.p, lvl); } catch (e) { return ''; } if (!r) return '';
       var li = function (a) { return a.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join(''); };
       return '<div class="tq-elth" style="--ec:' + elC(r.el) + '"><p class="tq-elth-h"><b>' + r.hanja + ' ' + r.elName + '</b> ' + (r.area ? esc(r.area) + '에서 두드러지는 기운' : '이 시기에 두드러지는 기운') + ' <span>' + esc(r.words.join(' · ')) + '</span></p><p class="tq-elth-s">' + esc(r.summary) + '</p>' +
         '<div class="tq-elth-g"><div><b>내 원국과의 작용</b><ul>' + li(r.interact) + '</ul></div><div><b>' + (r.area ? esc(r.area) + ' 쪽 추천·활용 방향' : '추천 활동·활용 방향') + '</b><ul>' + li(r.recommend) + '</ul></div>' + (r.caution.length ? '<div><b>주의할 점</b><ul>' + li(r.caution) + '</ul></div>' : '') + '</div>' +

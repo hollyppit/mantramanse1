@@ -199,8 +199,29 @@
   var DOMAIN_NOTE = { health: '몸 상태는 진단이 아니라 생활 관리 방향으로만 봐 주세요.', accident: '사고를 예측하는 값이 아니라 조심할 쪽을 알려 주는 참고예요.', windfall: '투자·도박의 수익을 뜻하지 않아요. 뜻밖의 돈일수록 확인하고 지키는 쪽이 먼저예요.' };
   // 원국과 부딪히는 글자가 있을 때 분야별 주의(없으면 기본 문장)
   var DOMAIN_CLASH = { accident: '부딪히는 글자가 있어 이동·작업·운전은 서두르지 말고 한 번 더 확인하세요.', health: '부딪히는 글자가 있어 몸 관리는 무리하게 바꾸기보다 조금씩 늘려 가세요.', love: '부딪히는 글자가 있어 관계의 중요한 말·약속은 감정이 가라앉은 뒤 한 번 더 확인하세요.', child: '부딪히는 글자가 있어 아이와 부딪칠 때는 바로 정하기보다 한 번 쉬고 이야기하세요.', family: '부딪히는 글자가 있어 집안 일은 한 번에 정하기보다 가족과 단계를 나눠 이야기하세요.', social: '부딪히는 글자가 있어 말이 오해로 번지기 쉬워요. 중요한 말은 글로 한 번 더 확인하세요.' };
+  // 지표 점수 등급별 한 줄(좋음|무난|조심) — 그 지표 말로, 사건 예측 없이. 사고수·대인·구설은 높을수록/낮을수록 뜻이 달라 등급 기준(luck-grade.js)을 그대로 따른다
+  var GRADE_RAW = {
+    love: '사람을 만나고 마음을 나누는 흐름이 평소보다 살아나는 시기예요.|관계 흐름은 평소 수준이에요. 지금 관계를 꾸준히 챙기기 좋아요.|관계에 부담 신호가 겹쳐요. 중요한 말·약속은 서두르지 마세요.',
+    wealth: '돈이 들어오고 도는 흐름이 평소보다 살아나는 시기예요.|돈 흐름은 평소 수준이에요. 새로 벌이기보다 지금 구조를 다듬기 좋아요.|돈 흐름에 부담 신호가 겹쳐요. 큰 지출·투자는 한 번 더 따져 보세요.',
+    health: '몸과 생활의 균형이 평소보다 잘 잡히는 시기예요.|균형은 평소 수준이에요. 지금 생활 리듬을 지키면 충분해요.|균형에 부담 신호가 겹쳐요. 무리한 일정은 줄이고 쉬는 시간을 먼저 챙기세요.',
+    accident: '조심할 신호가 적은 편이에요. 평소 안전 습관만 지키면 돼요.|조심할 신호는 평소 수준이에요. 이동·작업 때 기본만 챙기세요.|변화·충돌 신호가 겹쳐요. 이동·작업·운전 때 서두르지 마세요.',
+    job: '조직과 닿는 신호가 살아나 지원·면접에 힘을 싣기 좋은 시기예요.|취업 흐름은 평소 수준이에요. 준비를 꾸준히 쌓기 좋아요.|취업 쪽 부담 신호가 겹쳐요. 지원 범위를 좁혀 준비를 더 다지세요.',
+    move: '옮길 때의 유리함과 안착 신호가 함께 살아나는 시기예요.|이동 신호는 평소 수준이에요. 옮길지 말지 정보만 모아 두기 좋아요.|옮긴 뒤 안착에 부담 신호가 있어요. 조건을 충분히 비교한 뒤 정하세요.',
+    career: '타고난 적성이 일에서 잘 쓰이는 시기예요. 성과를 드러내기 좋아요.|일의 흐름은 평소 수준이에요. 맡은 일을 다듬기 좋아요.|일에 부담 신호가 겹쳐요. 새 일을 늘리기보다 지금 일을 정리하세요.',
+    business: '거래·사업 활동이 평소보다 살아나는 시기예요.|사업 흐름은 평소 수준이에요. 운영을 다지기 좋아요.|사업 쪽 부담 신호가 겹쳐요. 확장보다 자금·운영 점검을 먼저 하세요.',
+    child: '자녀와 관련된 흐름이 평소보다 살아나는 시기예요.|자녀 쪽 흐름은 평소 수준이에요. 함께하는 시간을 꾸준히 챙기세요.|자녀 쪽 부담 신호가 겹쳐요. 다그치기보다 이야기를 먼저 들어 주세요.',
+    marriage: '관계가 이어지고 묶이는 신호가 살아나는 시기예요.|결혼·배우자 흐름은 평소 수준이에요. 생활을 맞춰 가기 좋아요.|배우자 쪽 부담 신호가 겹쳐요. 중요한 결정은 충분히 대화한 뒤 하세요.',
+    noble: '도와주는 사람과 닿기 쉬운 시기예요. 먼저 도움을 청해 보세요.|도움의 흐름은 평소 수준이에요. 있는 인연을 꾸준히 챙기세요.|도움보다 경쟁·긴장 신호가 커요. 혼자 감당할 일과 부탁할 일을 나누세요.',
+    study: '공부·시험에 집중이 잘 붙는 시기예요.|공부 흐름은 평소 수준이에요. 계획대로 꾸준히 하기 좋아요.|집중에 부담 신호가 겹쳐요. 목표를 작게 나눠 하나씩 끝내세요.',
+    estate: '문서·계약·거처 쪽 흐름이 평소보다 살아나는 시기예요.|문서·거처 흐름은 평소 수준이에요. 서류를 정리해 두기 좋아요.|문서·거처 쪽 부담 신호가 겹쳐요. 계약 조건과 날짜를 한 번 더 확인하세요.',
+    social: '사람 사이 마찰 신호가 적어 교류하기 편한 시기예요.|대인 흐름은 평소 수준이에요. 평소처럼 말과 약속을 지키면 돼요.|마찰·구설 신호가 겹쳐요. 말은 줄이고 오해는 바로 푸세요.',
+    family: '가족과 집안 흐름이 평소보다 안정되는 시기예요.|가족 흐름은 평소 수준이에요. 안부와 집안 일을 꾸준히 챙기세요.|가족·집안 쪽 부담 신호가 겹쳐요. 큰 결정은 가족과 나눠 이야기하세요.',
+    windfall: '뜻밖의 수입·기회 신호가 평소보다 살아나는 시기예요. 들어온 것은 먼저 지키세요.|뜻밖의 수입 흐름은 평소 수준이에요. 꾸준한 수입에 집중하세요.|뜻밖의 수입 신호가 약해요. 쉽게 버는 제안일수록 거르세요.'
+  };
+  var GRADE_LINE = {}; Object.keys(GRADE_RAW).forEach(function (k) { var p = GRADE_RAW[k].split('|'); GRADE_LINE[k] = { good: p[0], ok: p[1], care: p[2] }; });
+  function gradeLine(key, gk) { return GRADE_LINE[key] && GRADE_LINE[key][gk] || ''; }
   // 분야 지표 해석: read()의 주요 오행·역할·원국 작용은 그대로 쓰고, 핵심어·활용 방향·추천만 그 분야 말로 바꾼다
-  //  opt.score: 그 분야 점수(막대 높이, 엔진 값) · opt.name: 지표 이름(예: 재물운)
+  //  opt.score: 그 분야 점수(막대 높이, 엔진 값) · opt.name: 지표 이름(예: 재물운) · opt.grade: 그 점수의 등급 키(good·ok·care)
   function readDomain(M, ch, x, kind, key, opt) {
     var D = DOMAIN[key], base = read(M, ch, x, kind); if (!D || !base) return base;
     opt = opt || {};
@@ -224,9 +245,14 @@
     if (typeof opt.score === 'number') basis.push((opt.name || D.area) + ' ' + opt.score + '점(막대 높이, 엔진 값 그대로)');
     if (base.fit != null) basis.push('전체 흐름 점수 ' + (base.fit > 0 ? '+' : '') + Math.round(base.fit));
     var tail = state === 'use' ? ' 쪽을 적극 활용해 보세요.' : state === 'mixed' ? ' 쪽을 단계적으로 활용하세요.' : state === 'careful' ? ' 쪽 일이 늘지만 과하지 않게 조절하세요.' : state === 'steady' ? ' 쪽 일이 늘어나니 속도를 조절하세요.' : ' 쪽을 무리 없이 해 보세요.';
-    // 사고수(안전)는 활용할 기운이 아니라 챙길 쪽 — 활용·추천 대신 조심할 쪽으로 말한다
+    // 그 지표 점수의 등급(opt.grade: good·ok·care, luck-grade.js 엔진 값)과 어긋나지 않게 — 오행 상태가 좋아도 지표가 조심이면 작게, 반대면 기회를 살리되 조절
+    var g = opt.grade, nm = opt.name || D.area;
+    if (key !== 'accident' && g === 'care' && (state === 'use' || state === 'neutral')) { tail = ' 쪽을 살리되, ' + nm + ' 점수가 조심 구간이라 작게 시험해 보고 넓히세요.'; caution.unshift(J(nm, '은', '는') + ' 이 시기 조심 구간이에요. ' + D.area + ' 쪽 큰 결정은 조건을 한 번 더 확인하세요.'); }
+    else if (key !== 'accident' && g === 'care' && state === 'mixed') caution.unshift(J(nm, '은', '는') + ' 이 시기 조심 구간이에요. ' + D.area + ' 쪽은 단계를 나눠 진행하세요.');
+    else if (key !== 'accident' && g === 'good' && (state === 'careful' || state === 'steady')) { tail = ' 쪽 기회가 보이니, 필요한 만큼만 살려 보세요.'; recommend.unshift(J(nm, '은', '는') + ' 이 시기 좋음 구간이에요. ' + D.area + ' 쪽 기회는 살리되 범위를 정해 두세요.'); }
+    // 사고수(안전)는 활용할 기운이 아니라 챙길 쪽 — 활용·추천 대신 조심할 쪽으로 말한다(등급 good = 조심 신호가 적음)
     if (key === 'accident') {
-      var hard = state === 'careful' || state === 'steady' || state === 'mixed';
+      var hard = g === 'care' || (g !== 'good' && (state === 'careful' || state === 'steady' || state === 'mixed'));
       tail = hard ? ' 쪽을 평소보다 더 챙겨 주세요.' : ' 쪽만 가볍게 챙기면 돼요.';
       recommend = [D.area + '에서는 ' + E.use + '을 ' + (hard ? '평소보다 더 ' : '') + '챙겨 주세요.', '챙길 것: ' + acts.join(' · ')];
       caution = caution.filter(function (t) { return !/쏠리지 않게/.test(t); });
@@ -240,7 +266,7 @@
     var D = DOMAIN[key]; if (!D) return LEGEND;
     return EL_K.map(function (k, e) { return { el: e, name: k, hanja: EL_H[e], words: D.e[e].words, area: D.area }; });
   }
-  var api = { VERSION: VERSION, EL_K: EL_K, EL_H: EL_H, THEME: THEME, LEGEND: LEGEND, DOMAIN: DOMAIN, mainEl: mainEl, read: read, readDomain: readDomain, legendFor: legendFor };
+  var api = { VERSION: VERSION, EL_K: EL_K, EL_H: EL_H, THEME: THEME, LEGEND: LEGEND, DOMAIN: DOMAIN, mainEl: mainEl, read: read, readDomain: readDomain, legendFor: legendFor, GRADE_LINE: GRADE_LINE, gradeLine: gradeLine };
   root.MantraLuckTheme = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

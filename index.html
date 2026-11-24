@@ -7391,7 +7391,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     wolun: { love: '해당 달의 구체적인 관계 흐름', wealth: '해당 달의 구체적인 재정 흐름', health: '해당 달의 균형·부담 흐름', accident: '해당 달의 주의 신호입니다', job: '해당 달의 취업 활동 흐름', move: '해당 달의 이동 신호 흐름', career: '해당 달의 직업 활동 흐름', business: '해당 달의 사업 활동 흐름', child: '해당 달의 자녀 영역 흐름' },
     ilun: { love: '해당 날짜의 단기적인 관계 흐름', wealth: '해당 날짜의 단기적인 재정 흐름', health: '해당 날짜의 단기적인 균형·부담 흐름', accident: '해당 날짜의 단기적인 주의 신호입니다', job: '해당 날짜의 단기적인 취업 활동 흐름', move: '해당 날짜의 단기적인 이동 신호', career: '해당 날짜의 단기적인 직업 활동 흐름', business: '해당 날짜의 단기적인 사업 활동 흐름', child: '해당 날짜의 단기적인 자녀 영역 흐름' },
   };
-  { const T = { daeun: '10년 동안의', seun: '해당 연도의', wolun: '해당 달의', ilun: '해당 날짜의 단기적인' }; ['study', 'estate', 'social', 'family', 'windfall'].forEach(k => Object.keys(T).forEach(lv => { DOM_SCOPE[lv][k] = `${T[lv]} ${DOM_INFO[k].name} 영역 흐름`; })); }
+  { const T = { daeun: '10년 동안의', seun: '해당 연도의', wolun: '해당 달의', ilun: '해당 날짜의 단기적인' }; ['marriage', 'noble', 'study', 'estate', 'social', 'family', 'windfall'].forEach(k => Object.keys(T).forEach(lv => { DOM_SCOPE[lv][k] = `${T[lv]} ${DOM_INFO[k].name} 영역 흐름`; })); }
   const DOM_LEVEL_NAME = { daeun: '대운', seun: '세운', wolun: '월운', ilun: '일진' };
   // ───────────── 운 신호 등급 ─────────────
   // 색 = 이 시기가 나에게 얼마나 유리한가: 좋음(초록) · 무난(회색) · 조심(주황). 2026-11-20 사용자 결정으로 5단계 → 3단계.
@@ -7425,7 +7425,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function themeBox(x, kind) {
     const T = LT(); if (!T || !x || !x.ev) return '';
     const dk = isDomain() ? S.metric : null; if (dk && !elDomOn()) return '';
-    let r; try { if (dk) { let sc; try { sc = domOf(x, kind)[dk].score; } catch (e) { } r = T.readDomain(M, S.ch, x, kind, dk, { score: sc, name: DOM_INFO[dk].full }); } else r = T.read(M, S.ch, x, kind); } catch (e) { return ''; } if (!r) return '';
+    let r; try { if (dk) { let sc; try { sc = domOf(x, kind)[dk].score; } catch (e) { } r = T.readDomain(M, S.ch, x, kind, dk, { score: sc, name: DOM_INFO[dk].full, grade: typeof sc === 'number' ? sigMetric(dk, sc).k : null }); } else r = T.read(M, S.ch, x, kind); } catch (e) { return ''; } if (!r) return '';
     const li = a => a.map(t => `<li>${esc(t)}</li>`).join('');
     return `<div class="el-theme" style="--ec:${elFill(r.el)};--ei:${elInk(r.el)}"><p class="elt-h"><b>${r.hanja} ${r.elName}</b> ${r.area ? `${esc(r.area)}에서 두드러지는 기운` : '이 시기에 두드러지는 기운'} <span>${r.words.join(' · ')}</span></p><p class="elt-s">${esc(r.summary)}</p>`
       + `<div class="elt-g"><div><b>내 원국과의 작용</b><ul>${li(r.interact)}</ul></div><div><b>${r.area ? esc(r.area) + ' 쪽 추천·활용 방향' : '추천 활동·활용 방향'}</b><ul>${li(r.recommend)}</ul></div>${r.caution.length ? `<div><b>주의할 점</b><ul>${li(r.caution)}</ul></div>` : ''}</div>`
@@ -7453,10 +7453,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const id = 'd' + (++domSeq); DOM_CTX[id] = { res, kind, title, x };
     return `<div class="dom"><div class="dom-h"><b>분야별 지수</b><span class="muted small">${DOM_LEVEL_NAME[kind]} 기준 · 누르면 근거가 열립니다</span></div>
       <div class="dom-g">${DOM_ORDER.map(k => { const r = res[k];
-        return `<button type="button" class="dcard" data-dom="${id}:${k}" aria-label="${DOM_INFO[k].full} ${r.score} ${sigMetric(k, r.score).n}"><span class="dn">${k === 'health' ? '건강 균형' : DOM_INFO[k].name}</span><b class="dv num" style="color:${domCol(k, r.score)}">${r.score}</b><span class="db">${sigMetric(k, r.score).n}</span>${r.tags.length ? `<span class="dt">${r.tags.join(' · ')}</span>` : ''}<span class="dbar"><i style="width:${r.score}%;background:${domCol(k, r.score)}"></i></span></button>`; }).join('')}</div>
+        return `<button type="button" class="dcard${S.metric === k ? ' on' : ''}" data-dom="${id}:${k}" aria-label="${DOM_INFO[k].full} ${r.score} ${sigMetric(k, r.score).n}"><span class="dn">${k === 'health' ? '건강 균형' : DOM_INFO[k].name}</span><b class="dv num" style="color:${domCol(k, r.score)}">${r.score}</b><span class="db">${sigMetric(k, r.score).n}</span>${r.tags.length ? `<span class="dt">${r.tags.join(' · ')}</span>` : ''}<span class="dbar"><i style="width:${r.score}%;background:${domCol(k, r.score)}"></i></span></button>`; }).join('')}</div>
       <div class="dom-h dom-h2"><b>직업·가족 세부 지수</b><span class="muted small">취업 · 이직 · 직업 · 사업 · 자식 · 결혼 · 귀인 · 학업 · 문서·이사 · 대인·구설 · 부모·가족 · 횡재</span></div>
       <div class="dom-g dom-g5">${DOM_SUB.map(k => { const r = res[k];
-        return `<button type="button" class="dcard" data-dom="${id}:${k}" aria-label="${DOM_INFO[k].full} ${r.score} ${sigMetric(k, r.score).n}"><span class="dn">${DOM_INFO[k].name}</span><b class="dv num" style="color:${domCol(k, r.score)}">${r.score}</b><span class="db">${sigMetric(k, r.score).n}</span>${(k === 'windfall' && r.loss ? [...r.tags, ...r.loss.tags] : r.tags).length ? `<span class="dt">${(k === 'windfall' && r.loss ? [...r.tags, ...r.loss.tags] : r.tags).join(' · ')}</span>` : ''}<span class="dbar"><i style="width:${r.score}%;background:${domCol(k, r.score)}"></i></span></button>`; }).join('')}</div>
+        return `<button type="button" class="dcard${S.metric === k ? ' on' : ''}" data-dom="${id}:${k}" aria-label="${DOM_INFO[k].full} ${r.score} ${sigMetric(k, r.score).n}"><span class="dn">${DOM_INFO[k].name}</span><b class="dv num" style="color:${domCol(k, r.score)}">${r.score}</b><span class="db">${sigMetric(k, r.score).n}</span>${(k === 'windfall' && r.loss ? [...r.tags, ...r.loss.tags] : r.tags).length ? `<span class="dt">${(k === 'windfall' && r.loss ? [...r.tags, ...r.loss.tags] : r.tags).join(' · ')}</span>` : ''}<span class="dbar"><i style="width:${r.score}%;background:${domCol(k, r.score)}"></i></span></button>`; }).join('')}</div>
       <p class="small muted dom-n">${DOM_INFO.health.note} ${DOM_INFO.accident.short} 세부 지수도 사건·결과를 예측하지 않는 참고 지표입니다.</p></div>`;
   }
   const domRow = (label, v, inverse) => `<div class="dpart"><span>${label}</span><span class="dbar"><i style="width:${Math.round(v)}%;background:${domCol('health', inverse ? 100 - v : v)}"></i></span><b class="num">${Math.round(v)}</b></div>`;
@@ -7484,6 +7484,29 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <button class="btn x" data-act="close">닫기</button>`;
   }
 
+  // ── 지표 풀이(2026-11-25): 운세 흐름 그래프에서 지표(연애·재물·…·횡재 16개)를 고른 채 시기를 누르면, 상세 맨 위에 그 지표만의 풀이를 먼저 보여 준다.
+  //    점수·등급·성분·이유는 엔진(evaluateDomainLuck·luck-grade.js) 값 그대로. 등급별 한 줄은 luck-element-theme.js gradeLine. 아래 ①~④는 이 시기 전체(전체 흐름) 풀이
+  const domPartRows = (k, r) => k === 'accident' ? r.parts.map(p => domRow(p.label, p.v, true)).join('')
+    : k === 'health' ? r.parts.map(p => p.key === 'volatility' ? domRow(p.label, p.v, true) : domRow(p.label, p.v, p.inverse)).join('')
+      : r.parts.map(p => p.key === 'volatility' ? domRow(p.label, p.v, true) : domRow(p.label, p.v, false)).join('');
+  function domFocusBox(x, kind) {
+    if (!isDomain() || !kind || !x || !x.ev) return '';
+    const k = S.metric, I = DOM_INFO[k]; let res; try { res = domOf(x, kind); } catch (e) { return ''; } const r0 = res && res[k]; if (!r0) return ''; const r = Object.assign({ parts: [], reasons: [], tags: [] }, r0);
+    const g = sigMetric(k, r.score), lv = DOM_LEVEL_NAME[kind] || '', fg = flowGrade(x), T = LT();
+    const hook = T && T.gradeLine ? T.gradeLine(k, g.k) : '', scope = DOM_SCOPE[kind] && DOM_SCOPE[kind][k];
+    const li = a => a.map(t => `<li>${esc(t)}</li>`).join('');
+    const wf = k === 'wealth' && res.windfall ? (() => { const w = res.windfall, wg = sigMetric('windfall', w.score); return `<p class="small"><b>뜻밖의 수입 신호</b> <span class="num">${w.score}</span> · ${wg.n}${w.loss ? ` · <b>뜻밖의 재물손실 위험</b> <span class="num">${w.loss.score}</span> · ${sigMetric('windfallLoss', w.loss.score).n} <span class="muted">(낮을수록 좋음)</span>` : ''}</p>`; })()
+      : k === 'windfall' && r.loss ? `<p class="small"><b>뜻밖의 재물손실 위험</b> <span class="num">${r.loss.score}</span> · ${sigMetric('windfallLoss', r.loss.score).n} <span class="muted">(낮을수록 좋음)</span> — ${esc(r.loss.summary)}</p>` : '';
+    const calm = /무난|뚜렷한 쏠림이 없/.test(r.summary || '') && g.k !== 'ok';   // 엔진 요약(절대 기준)이 '무난'인데 등급(이 사주 평소 대비)이 좋음·조심이면 요약은 빼고 등급 한 줄만
+    const diff = fg.k !== g.k ? ` ${I.name} 지표와 전체 흐름은 따로 계산해서 서로 다를 수 있어요.` : '';
+    return `<div class="dfocus" style="${sgVars(g)}"><p class="df-h"><b>${esc(I.full)} 풀이</b><span class="muted small">${lv} 기준</span><span class="df-s"><b class="num">${r.score}</b>${gradeChip(g)}</span></p>`
+      + (hook ? `<p class="df-hook">${esc(hook)}</p>` : '') + `<p class="small">${calm ? '' : esc(r.summary)}${r.tags.length ? ` <span class="muted">${r.tags.map(esc).join(' · ')}</span>` : ''}</p>${wf}`
+      + `<div class="df-g"><div><b class="small">점수를 만든 성분</b><div class="dparts">${domPartRows(k, r)}</div><p class="small muted">${k === 'accident' ? '막대가 길수록 그 신호가 커요(사고수는 낮을수록 좋음).' : k === 'health' ? '막대가 길수록 좋아요. 부담도·변동성은 짧을수록 좋아요.' : '막대가 길수록 좋아요. 변동성은 짧을수록 안정적이에요.'}</p></div>`
+      + `<div><b class="small">${esc(I.name)} 쪽에서 읽히는 이유</b><ul class="pos-ul small">${r.reasons.length ? li(r.reasons) : '<li>뚜렷한 쏠림이 없는 무난한 시기예요.</li>'}</ul></div></div>`
+      + `<p class="small muted">${scope ? `<b>${lv}에서의 의미</b> — ${esc(scope)}. ` : ''}이 시기 전체 흐름: ${esc(fg.n)} ${signed(luckV(x))}.${diff} ${leOn() ? '아래 ①~④는' : '아래 풀이는'} ${esc(I.name)}${(c => c >= 0 && c <= 11171 && c % 28 ? '과' : '와')(I.name.charCodeAt(I.name.length - 1) - 0xAC00)} 상관없이 이 시기 전체를 본 풀이예요.</p>`
+      + `<p class="cp-disc">${I.note}</p></div>`;
+  }
+  { const st = document.createElement('style'); st.textContent = '.dfocus{margin:8px 0 10px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--c) 7%,var(--surface));box-shadow:inset 3px 0 0 var(--c),inset 0 0 0 1px color-mix(in srgb,var(--c) 25%,transparent)}.dfocus .df-h{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:0 0 4px}.dfocus .df-h .df-s{margin-left:auto;display:inline-flex;align-items:center;gap:6px}.dfocus .df-h .df-s .num{font-size:1.15rem}.dfocus .df-hook{margin:2px 0 4px;font-weight:700;font-size:.92rem}.dfocus .df-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px 16px;margin:6px 0}.dfocus .cp-disc{margin:4px 0 0}.dcard.on{box-shadow:inset 0 0 0 2px var(--accent)}'; document.head.appendChild(st); }
   // ── 지표 선택과 그래프
   const METRICS = [['flow', '전체 흐름'], ['love', '연애'], ['wealth', '재물'], ['health', '건강'], ['accident', '사고수']];
   const METRICS_SUB = DOM_SUB.map(k => [k, DOM_INFO[k].name]);   // 취업·이직·직업·사업·자식
@@ -8312,6 +8335,13 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="note">해마다의 좋고 나쁨은 타일·그래프 점수 그대로입니다. 이 상자는 두 해에 공통인 천간 오행만 묶어 2년 전략을 보여 줍니다. 해를 누르면 그해 근거가 열립니다.</p></div>`;
   }
   { const st = document.createElement('style'); st.textContent = '.lc-tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(112px,1fr);gap:6px;overflow-x:auto;padding:10px 2px 6px}.lc-tab{position:relative;border:0;border-top:4px solid var(--c);box-shadow:inset 0 0 0 1px var(--line);background:var(--surface);border-radius:12px;padding:8px 6px;display:grid;gap:2px;justify-items:center;cursor:pointer;font:inherit;color:var(--ink)}.lc-tab span{font-size:.76rem;color:var(--ink-2)}.lc-tab.on{box-shadow:inset 0 0 0 2px var(--ink);background:var(--surface-2)}.lc-now{position:absolute;top:-9px;right:6px;font-style:normal;font-size:.66rem;font-weight:800;background:var(--seal);color:#fff;border-radius:8px;padding:1px 6px}.lc-hook{font-size:1rem;margin:8px 0 2px;line-height:1.5}.lc-steps{margin:8px 0;padding-left:0;list-style:none;font-size:.9rem;line-height:1.7}.lc-steps li{margin:8px 0}.lc-steps b{display:block;font-size:.76rem;color:var(--ink-2)}.lc .lc-steps,.lc .lc-hook,.lc .ib-cols p,.lc .ib-ul{word-break:keep-all;overflow-wrap:anywhere}.lc-steps .lc-sum{background:var(--soft,rgba(127,127,127,.08));border-radius:10px;padding:10px 12px;line-height:1.65}.lc-steps .lc-dec{margin:6px 0 0;padding-left:16px;list-style:disc}.lc-steps .lc-dec li{margin:5px 0}.lc-steps .lc-dec b{display:inline;font-size:inherit;color:inherit}.lc-yrs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}.lc-yr{border:0;box-shadow:inset 0 0 0 1px var(--line);border-radius:12px;background:var(--surface);padding:8px 10px;display:grid;gap:4px;justify-items:start;text-align:left;cursor:pointer;font:inherit;color:var(--ink)}.lc-yr.on{box-shadow:inset 0 0 0 2px var(--ink)}.ib.lc-pair{border-left:4px solid var(--c)}.lts.lc-strip{grid-auto-columns:minmax(92px,1fr)}.lcp{display:grid;gap:4px;align-content:start;border-radius:18px;padding:4px;background:color-mix(in srgb,var(--c) 16%,transparent)}.lcp-h{font-size:.72rem;font-weight:800;color:var(--ink);text-align:center;padding-top:2px}.lcp-t{display:grid;gap:4px}.lc-basis summary{cursor:pointer;font-size:.85rem;color:var(--ink-2);margin-top:8px}'; document.head.appendChild(st); }
+  // 상세 머리 점수: 지표를 골랐으면 그 지표 점수·등급, 전체 흐름은 옆에 작게(2026-11-25)
+  function detailHead(x, kind) {
+    const fl = `${gradeChip(flowGrade(x))} <b class="num">${signed(luckV(x))}</b>`;
+    if (!isDomain() || !kind) return `<span>${fl}</span>`;
+    let r; try { r = domOf(x, kind)[S.metric]; } catch (e) { r = null; } if (!r) return `<span>${fl}</span>`;
+    return `<span><span class="small muted">${esc(DOM_INFO[S.metric].full)}</span> ${gradeChip(sigMetric(S.metric, r.score))} <b class="num">${r.score}</b> <span class="small muted" style="margin-left:6px">전체 흐름 ${esc(flowGrade(x).n)} ${signed(luckV(x))}</span></span>`;
+  }
   function detailHTML(title, x, extra = '', kind = '', banner = '', tail = '') {   // extra: 근거 안에 넣을 줄 · tail: 근거 밖, 패널 끝에 그대로 보일 것(일진 시진 표)
     if (!x || !x.ev) return '';
     const e = x.ev, w = e.weights;
@@ -8334,7 +8364,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         (deep.trim() ? `<details class="ib-more le-deep"><summary>더 깊이 보기 · 오행 흐름 · 십성 구조 · 뿌리 · 들어오는 오행</summary>${deep}</details>` : '');
       const s3 = hierBox(x, kind) + olBox(x, kind);
       const s4 = domainBox(x, kind, title);
-      return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${gradeChip(flowGrade(x))} <b class="num">${signed(luckV(x))}</b></span></div>${themeBox(x, kind)}
+      return `<div class="detail"><div class="card-h"><h3>${title}</h3>${detailHead(x, kind)}</div>${themeBox(x, kind)}${domFocusBox(x, kind)}
       ${banner}
       ${quickBox(x, kind)}
       ${leSec(1, '① 외부 환경의 오행 흐름', '모두에게 같은 시간의 기운 · 좋고 나쁨 판단 없음', s1)}
@@ -8342,7 +8372,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${leSec(3, '③ 상위 운과 하위 운의 상호작용', kind === 'daeun' ? '대운은 가장 큰 층이라 원국 위에 쌓이는 모습만 봐요' : '큰 운이 배경, 작은 운이 구체화 · 위가 아래를 정하지는 않아요', s3)}
       ${leSec(4, '④ 영역별 영향', '재물·커리어·인연 등', s4)}${tail}</div>`;
     }
-    return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${gradeChip(flowGrade(x))} <b class="num">${signed(luckV(x))}</b></span></div>${themeBox(x, kind)}
+    return `<div class="detail"><div class="card-h"><h3>${title}</h3>${detailHead(x, kind)}</div>${themeBox(x, kind)}${domFocusBox(x, kind)}
       ${banner}
       ${ib}
       ${kind === 'daeun' || kind === 'seun' ? efBox(x, kind) : ''}
@@ -8432,18 +8462,27 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${ilDetail || '<p class="note">날짜를 누르면 그날의 십신·변화·부담 신호, 판정 순서, 점수 근거와 12시진 실행 등급이 열립니다. 일진 흐름 점수는 이 사주의 억부·조후·관계·구조를 종합해 그날 간지만 평가한 값이며, 대운·세운의 큰 흐름은 위 그래프에서 봅니다.</p>'}
     </section>`;
   }
+  // 지표를 골랐을 때 그래프 아래 기본 안내(2026-11-25)
+  function domNote(kind) {
+    const k = S.metric, I = DOM_INFO[k], A = LT() && LT().DOMAIN && LT().DOMAIN[k] ? LT().DOMAIN[k].area : I.name;
+    const unit = kind === 'daeun' ? '그 10년' : '그해';
+    return `<p class="note">막대 높이는 ${esc(I.full)} 점수(0~100${k === 'accident' ? ', 높을수록 조심 신호가 많음' : ''}), 막대 색은 그 시기에 두드러지는 오행(길흉 아님), 막대 위 글자는 ${esc(I.name)} 등급(보조)입니다. 막대나 타일을 누르면 ${unit}의 ${esc(I.full)} 풀이(점수를 만든 성분·이유)와 ${esc(A)} 쪽에서 그 기운을 쓰는 법이 먼저 열리고, 그 아래에 이 시기 전체 풀이가 이어집니다.</p>`;
+  }
   function yearSummary(curY) {
     const ch = S.ch;
     const ys = M.seunRange(ch, curY, curY + 9);
     const CC = M.LUCK_CFG.condition;
-    const best = [...ys].sort((a, b) => b.combined - a.combined).filter(q => q.combined >= CC.tailwind).slice(0, 3);
-    const worst = [...ys].sort((a, b) => a.combined - b.combined).filter(q => q.combined <= CC.caution).slice(0, 3);
-    const btn = q => `<button type="button" class="chip ${q.combined >= 0 ? 'good' : 'bad'}" data-pick="seun:${q.year}" style="border:0;cursor:pointer">${q.year} ${M.gzName(q)} ${signed(q.combined)}</button>`;
+    const dk = isDomain() ? S.metric : null;   // 지표를 골랐으면 그 지표 점수·등급으로(2026-11-25)
+    if (dk) ys.forEach(q => { try { q._dv = domOf(q, 'seun')[dk].score; } catch (e) { q._dv = null; } });
+    const dg = q => q._dv == null ? null : sigMetric(dk, q._dv), rk = q => dk === 'accident' ? -q._dv : q._dv;
+    const best = dk ? ys.filter(q => dg(q) && dg(q).k === 'good').sort((a, b) => rk(b) - rk(a)).slice(0, 3) : [...ys].sort((a, b) => b.combined - a.combined).filter(q => q.combined >= CC.tailwind).slice(0, 3);
+    const worst = dk ? ys.filter(q => dg(q) && dg(q).k === 'care').sort((a, b) => rk(a) - rk(b)).slice(0, 3) : [...ys].sort((a, b) => a.combined - b.combined).filter(q => q.combined <= CC.caution).slice(0, 3);
+    const btn = q => dk ? `<button type="button" class="sgchip" style="${sgVars(dg(q))};border:0;cursor:pointer" data-pick="seun:${q.year}">${q.year} ${M.gzName(q)} ${dg(q).n} ${q._dv}</button>` : `<button type="button" class="chip ${q.combined >= 0 ? 'good' : 'bad'}" data-pick="seun:${q.year}" style="border:0;cursor:pointer">${q.year} ${M.gzName(q)} ${signed(q.combined)}</button>`;
     const strip = lcOn() ? lcStrip(ys, curY) : `<div class="lts">${ys.map(q => luckTile(q, `${q.year} · ${q.age}세`, 'seun:' + q.year, S.sel && S.sel.kind === 'seun' && S.sel.Y === q.year, q.year === curY)).join('')}</div>`;
-    return `<div><h3 style="margin-bottom:8px">앞으로 10년</h3>${strip}</div>
+    return `<div><h3 style="margin-bottom:8px">앞으로 10년${dk ? ` <span class="small muted">· ${esc(DOM_INFO[dk].full)} 기준</span>` : ''}</h3>${strip}</div>
       <div class="list">
-        <div class="li"><span class="k">좋은 해</span><span class="v">${best.length ? best.map(btn).join('') : `<span class="muted small">+${CC.tailwind} 이상인 해가 없습니다</span>`}</span><span></span></div>
-        <div class="li"><span class="k">조심할 해</span><span class="v">${worst.length ? worst.map(btn).join('') : `<span class="muted small">${CC.caution} 이하인 해가 없습니다</span>`}</span><span></span></div>
+        <div class="li"><span class="k">좋은 해</span><span class="v">${best.length ? best.map(btn).join('') : `<span class="muted small">${dk ? `${esc(DOM_INFO[dk].name)} 좋음인 해가 없습니다` : `+${CC.tailwind} 이상인 해가 없습니다`}</span>`}</span><span></span></div>
+        <div class="li"><span class="k">조심할 해</span><span class="v">${worst.length ? worst.map(btn).join('') : `<span class="muted small">${dk ? `${esc(DOM_INFO[dk].name)} 조심인 해가 없습니다` : `${CC.caution} 이하인 해가 없습니다`}</span>`}</span><span></span></div>
       </div>`;
   }
   // ───────────── 풀이 DB 해설 (관리자 전용) ─────────────
@@ -8597,7 +8636,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="lts">${ch.daeun.list.map((x, i) => luckTile(x, `${x.startAge}세 · ${x.startYear}`, 'daeun:' + i, sel.kind === 'daeun' && sel.i === i, du === x)).join('')}</div>
       ${lcDaeunHTML(ch)}
       ${foldBox('대운의 12운성 변화 보기 · 기운이 자라고 쉬는 순서', unDaeunHTML(ch, du))}
-      ${daeunDetail || '<p class="note">막대 높이는 흐름 적합도, 색은 그 시기에 두드러지는 오행(길흉 아님, 좋음·무난·조심은 보조 표시), 막대 아래 글자는 그 대운 천간의 십신, 변화·부담 신호는 테두리와 아래 글자(변·부)입니다. 막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>'}
+      ${daeunDetail || (isDomain() ? domNote('daeun') : '<p class="note">막대 높이는 흐름 적합도, 색은 그 시기에 두드러지는 오행(길흉 아님, 좋음·무난·조심은 보조 표시), 막대 아래 글자는 그 대운 천간의 십신, 변화·부담 신호는 테두리와 아래 글자(변·부)입니다. 막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>')}
     </section>
     <section class="card">
       <div class="card-h"><h2>연도별 흐름 · ${term('세운')} <span class="lvl">${LEVEL_ROLE.seun}</span></h2></div>
@@ -8608,7 +8647,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${yearSummary(curY)}
       ${lcSeunHTML(sel.kind === 'seun' ? sel.Y : curY)}
       ${foldBox('환경 변화 타임라인 보기 · 직업·재물·인연·이동·학습이 부각되는 해', envTimeline('seun'))}
-      ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60%를 섞은 흐름 점수, 색은 그 시기에 두드러지는 오행(길흉 아님, 좋음·무난·조심은 보조 표시), 테두리·아래 글자는 변화·부담 신호입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
+      ${seunDetail || (isDomain() ? domNote('seun') : '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60%를 섞은 흐름 점수, 색은 그 시기에 두드러지는 오행(길흉 아님, 좋음·무난·조심은 보조 표시), 테두리·아래 글자는 변화·부담 신호입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>')}
     </section>
     <section class="card">
       <div class="card-h"><h2>${Y}년 ${term('월운')} <span class="lvl">${LEVEL_ROLE.wolun}</span>${samjaeTag(samjaeOf(Y))}</h2><span class="seg"><button data-act="year:-1" aria-label="이전 해">‹</button><button data-act="year:1" aria-label="다음 해">›</button></span></div>

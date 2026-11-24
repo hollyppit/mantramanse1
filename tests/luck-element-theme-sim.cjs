@@ -5,8 +5,8 @@
 const fs = require('fs'), path = require('path'), vm = require('vm'), assert = require('assert/strict');
 const root = path.join(__dirname, '..');
 const ctx = { console }; ctx.window = ctx; vm.createContext(ctx);
-for (const f of ['engine.js', 'luck-element-theme.js']) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
-const M = ctx.Manse, T = ctx.MantraLuckTheme, J = JSON.stringify;
+for (const f of ['engine.js', 'luck-grade.js', 'luck-element-theme.js']) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
+const M = ctx.Manse, T = ctx.MantraLuckTheme, LGm = ctx.MantraLuckGrade, J = JSON.stringify;
 const BAN = /대길|대흉|반드시|무조건|확정|망한다|undefined|NaN|null/;
 // 1) 주요 오행 규칙
 { const se = s => M.stemEl(s);
@@ -79,6 +79,39 @@ let nd = 0;
   assert.ok(/T\.readDomain\(M, S\.ch, x, kind, dk/.test(html), '선택 카드가 그 분야 말');
   assert.ok(html.includes('sigMetric(k, it.v), by = top - (it.el != null ? 25 : 22)'), '분야 등급 칩은 보조로 유지'); }
 function ch0() { return { s: 0, b: 0 }; }
+// 3-3) 지표 풀이(만세력 상세 맨 위): 16지표 × 4단위 의미 문장·등급별 한 줄·성분·이유, 오행 상자와 지표 등급이 어긋나지 않음
+let nf = 0;
+{ const blk = html.slice(html.indexOf('const DOM_ORDER = '), html.indexOf('const DOM_LEVEL_NAME'));
+  const c2 = {}; vm.createContext(c2); vm.runInContext(blk.replace(/^\s*const /gm, 'var ') , c2);
+  const keys = [...c2.DOM_ORDER, ...c2.DOM_SUB];
+  for (const lv of ['daeun', 'seun', 'wolun', 'ilun']) for (const k of keys) { const t = c2.DOM_SCOPE[lv][k]; assert.ok(t && !/undefined/.test(t), '시기별 의미 문장 ' + lv + ' ' + k); }
+  for (const k of keys) for (const gk of ['good', 'ok', 'care']) { const t = T.gradeLine(k, gk); assert.ok(t && t.length > 15 && !BAN.test(t), '등급별 한 줄 ' + k + ' ' + gk); }
+  assert.equal(new Set(keys.map(k => T.gradeLine(k, 'good'))).size, 16, '지표마다 다른 한 줄');
+  // 엔진 값: 모든 지표에 점수·성분·요약(풀이 상자가 빈 칸 없이 나옴)
+  for (let i = 0; i < 10; i++) {
+    const ch = M.compute({ year: 1955 + i * 6, month: 1 + (i * 5) % 12, day: 3 + (i * 7) % 25, hour: (i * 7) % 24, minute: 0, gender: i % 2 ? 'M' : 'F', calendar: 'solar' });
+    const items = [[ch.daeun.list[2], 'daeun'], [M.seunRange(ch, 2026, 2026)[0], 'seun'], [M.wolun(ch, 2026)[3], 'wolun'], [M.ilun(ch, 2026, 11)[4], 'ilun']];
+    for (const [x, kind] of items) { const res = M.evaluateDomainLuck(ch, x, kind); for (const k of keys) { const r = res[k]; nf++;
+      assert.ok(r && typeof r.score === 'number' && r.summary && Array.isArray(r.parts) && r.parts.length, '지표 값 ' + k + ' ' + kind);
+      const gk = LGm.metric(k, r.score), rd = T.readDomain(M, ch, x, kind, k, { score: r.score, name: k, grade: LGm.GRADES[gk.i].k });
+      const all = [rd.summary, ...rd.recommend, ...rd.caution];
+      all.forEach(t => assert.ok(!BAN.test(t), '금지 표현 ' + t));
+      if (k !== 'accident' && LGm.GRADES[gk.i].k === 'care') assert.ok(!/적극 활용/.test(rd.summary), '지표 조심인데 적극 활용 ' + k);
+      if (k === 'accident' && LGm.GRADES[gk.i].k === 'care') assert.ok(/더 챙겨/.test(rd.summary), '사고수 조심이면 더 챙기기');
+    } }
+  }
+  // 등급 반영 규칙(직접 확인)
+  { const ch = M.compute({ year: 1990, month: 3, day: 15, hour: 14, minute: 30, gender: 'F', calendar: 'solar' }); const x = ch.daeun.list[3];
+    const b = T.read(M, ch, x, 'daeun');
+    const care = T.readDomain(M, ch, x, 'daeun', 'wealth', { name: '재물운', grade: 'care' }), good = T.readDomain(M, ch, x, 'daeun', 'wealth', { name: '재물운', grade: 'good' });
+    if (b.state === 'use' || b.state === 'neutral') assert.ok(/조심 구간/.test(care.caution[0]));
+    if (b.state === 'careful' || b.state === 'steady') assert.ok(/좋음 구간/.test(good.recommend[0])); }
+  // 화면 연결
+  assert.ok(/\$\{themeBox\(x, kind\)\}\$\{domFocusBox\(x, kind\)\}/.test(html) && (html.match(/\$\{detailHead\(x, kind\)\}/g) || []).length === 2, '상세 맨 위 지표 풀이·머리 점수');
+  assert.ok(/grade: typeof sc === 'number' \? sigMetric\(dk, sc\)\.k : null/.test(html), '오행 상자에 지표 등급');
+  assert.ok(/isDomain\(\) \? domNote\('daeun'\)/.test(html) && /isDomain\(\) \? domNote\('seun'\)/.test(html), '그래프 아래 기본 안내가 지표 말');
+  assert.ok(/const dk = isDomain\(\) \? S\.metric : null;   \/\/ 지표를 골랐으면 그 지표 점수/.test(html), '앞으로 10년이 지표 기준');
+  assert.ok(/dcard\$\{S\.metric === k \? ' on' : ''\}/.test(html), '④ 분야 카드에 지금 지표 표시'); }
 // 4) 운명의 타임라인: 전체 흐름 값에 같은 주요 오행, 막대·인생 그래프·10년 칩·카드 연결
 { const TG = require(path.join(root, 'report/hub/timeline-graph.js')), ch = M.compute({ year: 1992, month: 6, day: 23, hour: 1, minute: 45, calendar: 'solar', gender: 'M' });
   for (const d of ch.daeun.list) { const v = TG.value(M, ch, d, 'daeun', 'flow'); assert.equal(v.el, T.mainEl(M, d).el, '타임라인 흐름 값의 오행'); assert.ok(v.sig && v.sig.n, '등급은 보조로 그대로'); }
@@ -101,4 +134,4 @@ function ch0() { return { s: 0, b: 0 }; }
 // 6) 운명의 타임라인 일진 캘린더 칸(hub-saju.js): 배경 = 그날의 주요 오행, 등급은 보조(2026-11-25)
 { const sj = fs.readFileSync(path.join(root, 'report/hub/hub-saju.js'), 'utf8');
   assert.ok(/var de = dayEl\(x\)/.test(sj) && /--flow:'\+elCol\(de\)/.test(sj) && /<i class="mc-el">/.test(sj), '타임라인 일진 캘린더 칸 오행 색·한자'); }
-console.log(`luck-element-theme-sim ok · 해석 ${n}건 · 분야 해석 ${nd}건 · 상태 ${J(states)} · 오행별 서로 다른 해석 ${Object.keys(byEl).map(e => T.EL_K[e] + byEl[e].size).join(' ')}`);
+console.log(`luck-element-theme-sim ok · 해석 ${n}건 · 분야 해석 ${nd}건 · 지표 풀이 ${nf}건 · 상태 ${J(states)} · 오행별 서로 다른 해석 ${Object.keys(byEl).map(e => T.EL_K[e] + byEl[e].size).join(' ')}`);
