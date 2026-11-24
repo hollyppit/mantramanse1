@@ -196,13 +196,16 @@
   if(hasClash(p))out+=' 원래 사주와 부딪히는 글자가 있어 변동이 섞여요.';
   return out;}
  // 타이밍 장 그래프: 대운(10년)·세운(해마다)·월운(달마다) 세 층. 만세력 운세 흐름 그래프처럼 가운데 선(50점=보통)에서 위(힘이 실림)·아래(조심)로 막대를 그린다.
- // 막대 색 = 점수 단계(좋음·무난·조심, 2026-11-20 3단계 — 만세력 신호 등급 /luck-grade.js 와 같은 이름·색 키), 오행은 간지 옆 작은 점으로만 보여 준다. 점수는 읽기용 지표예요(확률 아님).
+ // 막대 색 = 그 시기에 두드러지는 오행(2026-11-25, 만세력·타임라인과 같은 /luck-element-theme.js: 천간 1 + 지지 지장간). 길흉이 아니며, 좋음·무난·조심은 점수 옆 보조 표시. 점수는 읽기용 지표예요(확률 아님).
  var STEM_EL={갑:'목',을:'목',병:'화',정:'화',무:'토',기:'토',경:'금',신:'금',임:'수',계:'수'},TIMING_COLOR={목:'#6fae7f',화:'#c8705f',토:'#c4a65e',금:'#cfcabd',수:'#6f8fc4'};
  var TIERS=[{k:'good',n:'좋음',min:65},{k:'ok',n:'무난',min:45},{k:'care',n:'조심',min:-1}],SEASON_KW={opportunity:'기회',expansion:'확장',harvest:'수확',accumulation:'축적',transition:'전환',defense:'방어'};
  function tierOf(n){for(var i=0;i<TIERS.length;i++)if(n>=TIERS[i].min)return TIERS[i];return TIERS[TIERS.length-1];}
  function stemEl(gz){return STEM_EL[String(gz||'').charAt(0)]||'';}
- function colorOf(gz){return TIMING_COLOR[stemEl(gz)]||'#d5b97f';}
- function legendHtml(){return '<div class="rt-legend" aria-label="막대 색은 그 시기에 힘이 실리는 정도예요">'+TIERS.map(function(t){return '<span class="t-'+t.k+'"><i></i>'+t.n+'</span>';}).join('')+'<small>가운데 선 = 보통(50점) · 위로 길수록 힘이 실리고, 아래로 길수록 조심할 때예요 · 글자 옆 점 = 그 시기의 오행</small></div>';}
+ var EL_ORD=['목','화','토','금','수'],EL_HJ=['木','火','土','金','水'],EL_WORDS=['성장·기획','표현·창작','안정·관리','실행·계약','탐구·전략'],EL_COL=['#46C27E','#F2604F','#EDBB3A','#C9CED9','#6A8FEA'];
+ // 간지 글자(한글·한자) → 주요 오행 번호. 엔진·공용 모듈이 없으면 천간 오행으로
+ function elIdx(gz){gz=String(gz||'');var Mn=root.Manse,T=root.MantraLuckTheme;if(Mn&&T&&gz.length>=2){var s=Mn.STEM_K.indexOf(gz.charAt(0)),b=Mn.BR_K.indexOf(gz.charAt(1));if(s<0)s=Mn.STEM.indexOf(gz.charAt(0));if(b<0)b=Mn.BR.indexOf(gz.charAt(1));if(s>=0&&b>=0){try{var m=T.mainEl(Mn,{s:s,b:b});if(m)return m.el;}catch(e){}}}var e=stemEl(gz);return e?EL_ORD.indexOf(e):-1;}
+ function colorOf(gz){var i=elIdx(gz);return i>=0?EL_COL[i]:'#d5b97f';}
+ function legendHtml(){return '<div class="rt-legend" aria-label="막대 색은 그 시기에 두드러지는 오행이에요">'+EL_ORD.map(function(k,i){return '<span style="--t:'+EL_COL[i]+'"><i></i>'+EL_HJ[i]+' '+k+' '+EL_WORDS[i]+'</span>';}).join('')+'<small>막대 색 = 그 시기에 두드러지는 기운(길흉 아님) · 가운데 선 = 보통(50점), 위로 길수록 힘이 실리고 아래로 길수록 조심할 때예요 · 숫자 옆 좋음·무난·조심 = 점수 등급(보조)</small></div>';}
  function luckScore(x,topic,gender){var want=timingWant(topic,gender),sg=TG_GROUP[x.stemTG],bg=TG_GROUP[x.branchTG],cond=({순풍:8,보통:0,주의:-8,부담:-12}[x.condition]||0),n;
   if(!want)n=50+cond*1.6+({opportunity:6,expansion:7,harvest:7,accumulation:3}[x.season]||0);
   else n=50+(sg===want[0]?25:sg===want[1]?12:0)+(bg===want[0]?12:bg===want[1]?6:0)+cond;
@@ -211,7 +214,7 @@
   if(x.stemTG)out+=(x.ganzhi?x.ganzhi+'('+el+') ':'')+x.stemTG+'의 '+(unit==='해'?'해라 ':'달이라 ')+(m||'새로운 기운')+'이 들어와요.';
   if(x.condition)out+=' '+(COND_TEXT[x.condition]||'원래 사주와의 관계는 보통이에요')+'.';
   if(hasClash(x))out+=' 부딪히는 글자가 있어 서두르지 않는 게 좋아요.';return out;}
- function bars(items,aria){var dense=items.length>10?' rt-dense':'';return '<div class="rt-flow'+dense+'" role="img" aria-label="'+esc(aria)+'"><div class="rt-bands" aria-hidden="true"><span>50</span></div>'+items.map(function(x){var t=tierOf(x.n),v=Math.max(-50,Math.min(50,x.n-50)),up=v>=0;return '<div class="rt-col t-'+t.k+(up?' is-up':' is-down')+(x.cur?' is-current':'')+(x.past?' is-past':'')+'" style="--v:'+(Math.abs(v)/50).toFixed(3)+'" title="'+esc(String(x.title||'').replace(/<[^>]+>/g,''))+' '+x.n+'점 · '+t.n+'"><div class="rt-plot"><i class="rt-bar"></i><span class="rt-tag"><b>'+x.n+'</b><em>'+t.n+'</em></span></div><small class="rt-lab">'+x.label+'</small></div>';}).join('')+'</div>';}
+ function bars(items,aria){var dense=items.length>10?' rt-dense':'';return '<div class="rt-flow'+dense+'" role="img" aria-label="'+esc(aria)+'"><div class="rt-bands" aria-hidden="true"><span>50</span></div>'+items.map(function(x){var t=tierOf(x.n),v=Math.max(-50,Math.min(50,x.n-50)),up=v>=0;var ei=elIdx(x.gz||(x.p&&x.p.ganzhi)||x.ganzhi);return '<div class="rt-col t-'+t.k+(up?' is-up':' is-down')+(x.cur?' is-current':'')+(x.past?' is-past':'')+'" style="--v:'+(Math.abs(v)/50).toFixed(3)+(ei>=0?';--t:'+EL_COL[ei]:'')+'" title="'+esc(String(x.title||'').replace(/<[^>]+>/g,''))+' '+x.n+'점 · '+(ei>=0?EL_ORD[ei]+' 기운 · ':'')+t.n+'"><div class="rt-plot"><i class="rt-bar"></i><span class="rt-tag"><b>'+x.n+'</b><em>'+t.n+'</em></span></div><small class="rt-lab">'+x.label+'</small></div>';}).join('')+'</div>';}
  function rankList(items,cls){return items.length?'<ol class="rt-rank'+(cls?' '+cls:'')+'">'+items.map(function(x,i){var t=tierOf(x.n);return '<li class="t-'+t.k+'"><span class="rt-no">'+(i+1)+'위</span><div><strong><i class="rt-dot" style="--e:'+colorOf(x.gz)+'"></i>'+x.title+'</strong><em>'+x.n+'점 <span class="rt-pill">'+t.n+'</span></em><p>'+esc(x.reason)+'</p></div></li>';}).join('')+'</ol>':'';}
  function gzHtml(gz){return '<b class="rt-dw"><i class="rt-dot" style="--e:'+colorOf(gz)+'"></i>'+esc(gz||'')+'</b>';}
  function kwHtml(x){var k=SEASON_KW[x&&x.season];return k?'<span class="rt-kw">'+k+'</span>':'';}

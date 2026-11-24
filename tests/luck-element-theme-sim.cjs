@@ -94,4 +94,8 @@ function ch0() { return { s: 0, b: 0 }; }
   assert.ok(ht.includes("return (metric() === 'flow' || domEl()) && v && v.el != null") && ht.includes('LTm().legendFor(metric())') && ht.includes('T.readDomain(M, ch, r0.p, lvl, metric()'), '타임라인 분야 지표 막대·범례·카드 연결');
   const hi = fs.readFileSync(path.join(root, 'report/hub/index.html'), 'utf8'), st = fs.readFileSync(path.join(root, 'report/story/story.js'), 'utf8');
   assert.ok(/\/luck-element-theme\.js\?v=/.test(hi) && /'\/luck-element-theme\.js' \+ HV/.test(st), '허브·/report/ 둘 다 모듈을 불러옴'); }
+// 5) 상세풀이 타이밍 그래프(reading-text.js): 막대 색 = 같은 주요 오행, 범례는 오행, 페이지가 모듈을 불러옴(2026-11-25)
+{ const rt = fs.readFileSync(path.join(root, 'report/v2/reading-text.js'), 'utf8'), v2 = fs.readFileSync(path.join(root, 'report/v2/index.html'), 'utf8');
+  assert.ok(/T\.mainEl\(Mn,\{s:s,b:b\}\)/.test(rt) && /--t:'\+EL_COL\[ei\]/.test(rt) && /막대 색 = 그 시기에 두드러지는 기운\(길흉 아님\)/.test(rt), '상세풀이 막대 오행 색·범례');
+  assert.ok(/<script src="\/engine\.js"><\/script><script src="\/luck-element-theme\.js\?v=/.test(v2), '상세풀이 페이지가 모듈을 엔진 다음에 불러옴'); }
 console.log(`luck-element-theme-sim ok · 해석 ${n}건 · 분야 해석 ${nd}건 · 상태 ${J(states)} · 오행별 서로 다른 해석 ${Object.keys(byEl).map(e => T.EL_K[e] + byEl[e].size).join(' ')}`);
