@@ -200,6 +200,7 @@ html.theme-mist .flow-harvest{ --flow: #9333EA; }
 html.theme-mist .flow-accumulation{ --flow: #2563EB; }
 html.theme-mist .fortune-panel .flow-defense{ --flow: #DC2626; }
 html.theme-mist .mc-care{ background: #FFF7ED; border-color: rgba(234,88,12,.35); } html.theme-mist .mc-care-k{ color: #9A3412; } html.theme-mist .mc-care li{ color: var(--ink-2); } html.theme-mist .mc-care-c{ background: #EA580C; color: #fff; } html.theme-mist #hub .mc-care .dsub{ font-size: 12px !important; color: var(--ink-3) !important; }
+html.theme-mist #hub .fortune-panel .mc-day.elm.caution, html.theme-mist #hub .fortune-panel .mc-day.elm.caution.selected{ background: linear-gradient(180deg, color-mix(in srgb, var(--flow) 20%, #fff), color-mix(in srgb, var(--flow) 7%, #fff)) !important; border: 1px solid color-mix(in srgb, var(--flow) 38%, transparent) !important; box-shadow: inset 0 -3px 0 #EA580C !important; } html.theme-mist #hub .fortune-panel .mc-day.elm.caution :is(b, small, .mc-metric strong){ color: var(--ink) !important; } html.theme-mist #hub .mc-day .mc-el{ color: var(--flow); }   /* 2026-11-25 일진 칸 오행 색 */
 html.theme-mist .mg-good{ --flow: #16A34A; } html.theme-mist .mg-ok{ --flow: #94A3B8; } html.theme-mist .mg-care{ --flow: #EA580C; }
 html.theme-mist #hub .fortune-panel .mc-bar em.mc-tg{ color: var(--flow-ink, var(--flow)); font-size: 11.5px; }
 html.theme-mist .fortune-panel .h1, html.theme-mist .fortune-panel h2{ color: #1B2226; }

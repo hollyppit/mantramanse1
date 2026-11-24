@@ -108,6 +108,10 @@
   };
   // 일진 조심 신호(2026-11-22): 만세력 '지금의 운'과 같은 공용 계산(/luck-care.js). 선택한 날(기본 오늘) 지표마다 조심이면 무엇을 조심할지 한 줄씩. 전체 흐름 등급과 상관없이
   var CRP = null;
+  // 일진 칸 오행 색(2026-11-25, /luck-element-theme.js — 만세력 일진 달력·운세 그래프와 같은 기준). 길흉이 아니며, 등급(조심·추천)은 칸 아래 글자·밑줄로 보조
+  var ELD = ['#46C27E', '#F2604F', '#EDBB3A', '#C9CED9', '#6A8FEA'], ELL = ['#16A34A', '#DC2626', '#CA8A04', '#94A3B8', '#2F55B8'];
+  function dayEl(x) { var T = root.MantraLuckTheme; if (!T || !x) return null; try { var m = T.mainEl(root.Manse, x); return m ? m.el : null; } catch (e) { return null; } }
+  function elCol(e) { return (document.documentElement.classList.contains('theme-mist') ? ELL : ELD)[e]; }
   function careReady() {
     if (CRP) return CRP;
     var V = '?v=20261122-care';
@@ -193,9 +197,9 @@
       h += '<button type="button" id="mc-today">오늘로</button></div><div class="mc-grid" role="group" aria-label="날짜 선택">'+DOW.map(function (x) { return '<span class="mc-week">'+x+'</span>'; }).join('');
       for(var i=0;i<new Date(Date.UTC(y,m-1,1)).getUTCDay();i++) h += '<span></span>';
       days.forEach(function (x,idx) { var dd=idx+1, f=x.ev.flow, k=key(y,m,dd), pick=lookup[k], cautious=assess(x).cautious || !!(pick && pick.score < 48), recommended=!cautious && hasDate(purpose?top:tailwind,k), son=x.lunar && [9,10,19,20,29,30].indexOf(x.lunar.d)>=0;
-        h += '<button type="button" class="mc-day mg-'+assess(x).grade.k+(recommended?' favorable':'')+(cautious?' caution':'')+(dd===d?' selected':'')+(k===key(today.y,today.mo,today.d)?' is-today':'')+'" data-date="'+k+'" aria-pressed="'+(dd===d)+'" aria-label="'+m+'월 '+dd+'일 '+esc(M.gzNameK(x))+', '+esc(x.stemTG||'')+', 흐름 '+score(x)+', '+esc(assess(x).grade.n)+(cautious&&!assess(x).cautious?', 조심':'')+(son?', 손 없는 날':'')+'"><b>'+dd+'</b><small>'+esc(M.gzNameK(x))+'</small><span class="mc-metric"><strong>'+(pick?pick.score:score(x))+'</strong><span class="flow-tg-'+(TGK[x.stemTG] || 'bg')+'">'+(pick?'택일':esc(x.stemTG||''))+'</span></span><em>'+(recommended?'추천':cautious?'조심':f.overlays.defense.active?'부담 점검':f.overlays.volatility.active?'변화':esc(assess(x).grade.n))+'</em>'+(son?'<i class="mc-son" title="손 없는 날 · 음력 '+x.lunar.d+'일" aria-label="손 없는 날">손</i>':'')+'</button>';
+        var de = dayEl(x); h += '<button type="button" class="mc-day '+(de != null ? 'elm' : 'mg-'+assess(x).grade.k)+(recommended?' favorable':'')+(cautious?' caution':'')+(dd===d?' selected':'')+(k===key(today.y,today.mo,today.d)?' is-today':'')+'"'+(de != null ? ' style="--flow:'+elCol(de)+'"' : '')+' data-date="'+k+'" aria-pressed="'+(dd===d)+'" aria-label="'+m+'월 '+dd+'일 '+esc(M.gzNameK(x))+(de != null ? ', '+root.MantraLuckTheme.EL_K[de]+' 기운' : '')+', '+esc(x.stemTG||'')+', 흐름 '+score(x)+', '+esc(assess(x).grade.n)+(cautious&&!assess(x).cautious?', 조심':'')+(son?', 손 없는 날':'')+'"><b>'+dd+(de != null ? '<i class="mc-el">'+root.MantraLuckTheme.EL_H[de]+'</i>' : '')+'</b><small>'+esc(M.gzNameK(x))+'</small><span class="mc-metric"><strong>'+(pick?pick.score:score(x))+'</strong><span class="flow-tg-'+(TGK[x.stemTG] || 'bg')+'">'+(pick?'택일':esc(x.stemTG||''))+'</span></span><em>'+(recommended?'추천':cautious?'조심':f.overlays.defense.active?'부담 점검':f.overlays.volatility.active?'변화':esc(assess(x).grade.n))+'</em>'+(son?'<i class="mc-son" title="손 없는 날 · 음력 '+x.lunar.d+'일" aria-label="손 없는 날">손</i>':'')+'</button>';
       });
-      h += '</div><p class="dsub"><span class="mc-key good">추천</span> 움직이기 좋은 날 · <span class="mc-key caution">조심</span> 확인이 필요한 날<br><span class="mc-key son">손</span> 손 없는 날(음력 9·10·19·20·29·30일) · 점: 오늘<br>칸 배경색: 신호 등급(좋음 초록 · 무난 회색 · 조심 주황, 흐름 점수 +18 이상 좋음 · −12 이하 조심)<br>칸 안 글자: 그날 천간의 십신 / 테두리: 선택한 날<br>날짜를 누르면 아래 운 지수와 행동 안내가 함께 바뀝니다.</p>';
+      h += '</div><p class="dsub"><span class="mc-key good">추천</span> 움직이기 좋은 날 · <span class="mc-key caution">조심</span> 확인이 필요한 날<br><span class="mc-key son">손</span> 손 없는 날(음력 9·10·19·20·29·30일) · 점: 오늘<br>칸 배경색·숫자 옆 한자: 그날 일진에 두드러지는 오행(木 초록 · 火 빨강 · 土 노랑 · 金 회색 · 水 파랑, 길흉 아님)<br>칸 아래 글자·주황 밑줄: 조심 등급(흐름 점수 −12 이하) · 초록 밑줄: 추천 / 칸 안 글자: 그날 천간의 십신 / 테두리: 선택한 날<br>날짜를 누르면 아래 운 지수와 행동 안내가 함께 바뀝니다.</p>';
       if(purpose) {
         h += '<p class="dsub">'+searchY+'년 '+searchM+'월 '+(searchY===today.y && searchM===today.mo?today.d:1)+'일부터 '+range+'일간 · '+esc(M.TAEK_PURPOSE[purpose].label)+'</p>';
         h += '<div class="mc-lists">'+dateList(top,'추천 날짜','good',true)+dateList(avoid,'피하면 좋은 날','caution',true)+'</div>';

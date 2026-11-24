@@ -98,4 +98,7 @@ function ch0() { return { s: 0, b: 0 }; }
 { const rt = fs.readFileSync(path.join(root, 'report/v2/reading-text.js'), 'utf8'), v2 = fs.readFileSync(path.join(root, 'report/v2/index.html'), 'utf8');
   assert.ok(/T\.mainEl\(Mn,\{s:s,b:b\}\)/.test(rt) && /--t:'\+EL_COL\[ei\]/.test(rt) && /막대 색 = 그 시기에 두드러지는 기운\(길흉 아님\)/.test(rt), '상세풀이 막대 오행 색·범례');
   assert.ok(/<script src="\/engine\.js"><\/script><script src="\/luck-element-theme\.js\?v=/.test(v2), '상세풀이 페이지가 모듈을 엔진 다음에 불러옴'); }
+// 6) 운명의 타임라인 일진 캘린더 칸(hub-saju.js): 배경 = 그날의 주요 오행, 등급은 보조(2026-11-25)
+{ const sj = fs.readFileSync(path.join(root, 'report/hub/hub-saju.js'), 'utf8');
+  assert.ok(/var de = dayEl\(x\)/.test(sj) && /--flow:'\+elCol\(de\)/.test(sj) && /<i class="mc-el">/.test(sj), '타임라인 일진 캘린더 칸 오행 색·한자'); }
 console.log(`luck-element-theme-sim ok · 해석 ${n}건 · 분야 해석 ${nd}건 · 상태 ${J(states)} · 오행별 서로 다른 해석 ${Object.keys(byEl).map(e => T.EL_K[e] + byEl[e].size).join(' ')}`);
