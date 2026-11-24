@@ -50,6 +50,7 @@ ok(html.includes('<script src="tojeong-month-overlay.js"></script>'), '모듈 �
 ok(html.includes("if (opt.overlay) { try { s += opt.overlay({ L, R, W, H, T, B, step, y }); } catch (e) { } }"), 'drawDiv 보조선 자리');
 ok(html.includes("{ overlay: tjOverlay(ms) });") && html.includes("const luckV = x => x.ev ? x.ev.fitScore : 0"), '월운 막대 점수(fitScore)는 그대로, 보조선만 덧붙임');
 ok(html.includes("api('/api/newyear/reading', { method: 'POST', body: JSON.stringify({ birth: tjBirth(), year: Y }) })") && !/x-member-token/.test(html.slice(html.indexOf('function tjEnsure'), html.indexOf('function tjOverlay'))), '기존 신년운세 API 재사용 · 회원 열쇠 안 보냄(열람 기록 없음)');
+ok(html.includes('function drawDomainDiv(el, items, opt = {})') && html.includes('y: p => y(50 + p) }); } catch (e) { } }') && html.split('{ overlay: tjOverlay(ms) });').length === 3, '지표 선택 그래프에도 같은 보조선(0~100 축 가운데 기준)');
 ok(html.includes('${chartLegend()}${tjLegend(Y)}') && html.includes("tjCompare(Y, sel.i)"), '범례·고른 달 비교 칸');
 console.log('   점 ' + pts + ' · 판정 있는 겹침 ' + toned + ' · 비교 ' + JSON.stringify(kinds));
 console.log(fail ? `\n✗ ${fail}/${n} 실패` : `\n✓ 토정비결 월별 보조지표 검증 ${n}항목 통과`);

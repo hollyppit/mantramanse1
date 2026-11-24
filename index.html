@@ -7421,7 +7421,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   document.addEventListener('toggle', ev => { if (ev.target && ev.target.classList && ev.target.classList.contains('lg-fold')) S.lgOpen = ev.target.open; }, true);
   function domTip(title, res) { const k = S.metric, r = res[k]; return `<b>${esc(title)}</b><br>${DOM_INFO[k].full} <b>${r.score}</b> · ${sigMetric(k, r.score).n}${r.tags.length ? `<br>${r.tags.join(' · ')}` : ''}${k === 'wealth' && res.windfall && res.windfall.score >= WF_ON() ? `<br>뜻밖의 횡재 신호 <b>${res.windfall.score}</b> · ${sigMetric('windfall', res.windfall.score).n}` : ''}${k === 'wealth' && res.windfall && res.windfall.loss && res.windfall.loss.score >= LOSS_ON() ? `<br>뜻밖의 손재 주의 <b>${res.windfall.loss.score}</b> · ${sigMetric('windfallLoss', res.windfall.loss.score).n}` : ''}${k === 'windfall' && r.loss ? `<br>뜻밖의 재물손실 위험 <b>${r.loss.score}</b> · ${sigMetric('windfallLoss', r.loss.score).n}${r.loss.tags.length ? ' · ' + r.loss.tags.join(' · ') : ''}` : ''}<br>${r.summary}${r.reasons.slice(0, 2).map(t => `<br>· ${esc(t)}`).join('')}`; }
   // 0~100 눈금 막대(대운·월운)
-  function drawDomainDiv(el, items) {
+  function drawDomainDiv(el, items, opt = {}) {
     const k = S.metric, n = items.length, cw = el.clientWidth || 320, W = Math.max(cw, n * chartStep(cw)), H = 246, L = 34, R = 6, T = 30, B = 54, ST = k === 'windfall' ? 60 : k === 'wealth' ? 30 : 0;   // ST: 횡재운 그래프 아래의 손실 위험 띠 높이
     const step = (W - L - R) / n, bw = Math.min(30, step * 0.58), y = v => T + (100 - v) / 100 * (H - T - B);
     let s = svgEl(W, H + ST);
@@ -7442,6 +7442,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (it.sub2) s += `<text x="${cx}" y="${H - B + ST + 45}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${it.sub2}</text>`;
       s += `<rect class="hit" x="${cx - step / 2}" y="0" width="${step}" height="${H + ST}" style="fill:transparent" data-pick="${it.pick}" data-tip="${esc(it.tip)}"/>`;
     });
+    if (opt.overlay) { try { s += opt.overlay({ L, R, W, H, T, B, step, y: p => y(50 + p) }); } catch (e) { } }   // 보조지표(토정비결 월별): 지표 점수 0~100 축 가운데(50)를 기준으로 같은 4단계 자리 — 점수와 합치지 않음
     el.innerHTML = s + '</svg>';
     { const q = items.findIndex(t => t.sel); chartFit(el, W, q >= 0 ? L + step * (q + 0.5) : null); }
   }
@@ -7484,7 +7485,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       drawDomainDiv(el, ch.daeun.list.map((d, i) => { const r = domOf(d, 'daeun'); return { v: r[m].score, wf: m === 'wealth' ? r.windfall.score : null, loss: m === 'windfall' || m === 'wealth' ? r.windfall.loss.score : null, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: domTip(`${d.startAge}세 대운 ${M.gzName(d)}`, r) }; }));
     } else if (k === 'wolun') {
       const ms = M.wolun(ch, S.selYear);
-      drawDomainDiv(el, ms.map((x, i) => { const nx = ms[i + 1] ? ms[i + 1].startMs : Infinity, r = domOf(x, 'wolun'); return { v: r[m].score, wf: m === 'wealth' ? r.windfall.score : null, loss: m === 'windfall' || m === 'wealth' ? r.windfall.loss.score : null, label: M.gzName(x), sub: x.termName, pick: 'wolun:' + i, sel: S.sel && S.sel.kind === 'wolun' && S.sel.i === i, cur: NOW >= x.startMs && NOW < nx, tip: domTip(`${x.termName}~ ${M.gzName(x)}`, r) }; }));
+      drawDomainDiv(el, ms.map((x, i) => { const nx = ms[i + 1] ? ms[i + 1].startMs : Infinity, r = domOf(x, 'wolun'); return { v: r[m].score, wf: m === 'wealth' ? r.windfall.score : null, loss: m === 'windfall' || m === 'wealth' ? r.windfall.loss.score : null, label: M.gzName(x), sub: x.termName, pick: 'wolun:' + i, sel: S.sel && S.sel.kind === 'wolun' && S.sel.i === i, cur: NOW >= x.startMs && NOW < nx, tip: domTip(`${x.termName}~ ${M.gzName(x)}`, r) }; }), { overlay: tjOverlay(ms) });
     } else if (k === 'life') drawDomainLife(el);
   }
 
@@ -8452,7 +8453,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       return `<li><p class="tj-mh"><b>${esc(o.m.label)}</b> <span class="muted small">양력 ${esc(o.m.solar)} · 이 절기월과 ${o.days}일 겹침</span> <span class="tj-tone t-${o.m.tone || 'none'}">토정 ${esc(tn)}</span></p>
         ${o.m.original ? `<p class="tj-orig"><span>토정비결 원문</span>${esc(o.m.original)}</p>` : ''}${o.m.gist ? `<p class="tj-gist"><span>토정비결 현대어 풀이</span>${esc(o.m.gist)}</p>` : ''}
         <p class="tj-vs c-${c.kind}"><b>명리 ${esc(sg.n)} · 토정 ${esc(tn)}</b> — ${esc(c.text)}</p></li>`; }).join('');
-    return `<div class="tj-cmp"><p class="tj-h">토정비결과 함께 보기 <span class="muted small">명리 월운은 절기 달(${esc(x.termName)}부터), 토정비결은 음력 달이라 기간이 달라요</span></p><p class="small">명리 월운 ${esc(M.gzName(x))} — <b>${esc(sg.n)}</b> (${esc(tgOf(x).label)}) · 위 근거가 명리학 풀이예요.</p><ul class="tj-list">${rows}</ul></div>`;
+    return `<div class="tj-cmp"><p class="tj-h">토정비결과 함께 보기 <span class="muted small">명리 월운은 절기 달(${esc(x.termName)}부터), 토정비결은 음력 달이라 기간이 달라요</span></p><p class="small">명리 월운 ${esc(M.gzName(x))} 전체 흐름 — <b>${esc(sg.n)}</b> (${esc(tgOf(x).label)}) · 위 근거가 명리학 풀이예요.</p><ul class="tj-list">${rows}</ul></div>`;
   }
   function renderLuck() {
     const ch = S.ch;
