@@ -43,7 +43,7 @@
     if (!metric || metric === 'flow') { var f = x.ev.fitScore; return { v: pct(f), raw: f, sig: sigFlow(M, f), el: elOf(M, x), tags: [], summary: '' }; }
     var r; try { r = domainOf(M, ch, x, level)[metric]; } catch (e) { return null; }
     if (!r) return null;
-    return { v: Math.round(r.score), raw: r.score, sig: sigMetric(metric, r.score), tags: r.tags || [], summary: r.summary || '', reasons: r.reasons || [], loss: r.loss || null };
+    return { v: Math.round(r.score), raw: r.score, sig: sigMetric(metric, r.score), el: elOf(M, x), tags: r.tags || [], summary: r.summary || '', reasons: r.reasons || [], loss: r.loss || null };
   }
   // 인생 90년(태어난 해부터) 연도별 값
   function life(M, ch, metric, years) {

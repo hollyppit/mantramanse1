@@ -82,10 +82,16 @@ function ch0() { return { s: 0, b: 0 }; }
 // 4) 운명의 타임라인: 전체 흐름 값에 같은 주요 오행, 막대·인생 그래프·10년 칩·카드 연결
 { const TG = require(path.join(root, 'report/hub/timeline-graph.js')), ch = M.compute({ year: 1992, month: 6, day: 23, hour: 1, minute: 45, calendar: 'solar', gender: 'M' });
   for (const d of ch.daeun.list) { const v = TG.value(M, ch, d, 'daeun', 'flow'); assert.equal(v.el, T.mainEl(M, d).el, '타임라인 흐름 값의 오행'); assert.ok(v.sig && v.sig.n, '등급은 보조로 그대로'); }
-  assert.ok(TG.value(M, ch, ch.daeun.list[2], 'daeun', 'love').el === undefined, '분야 지표는 오행 없음(등급 색 그대로)');
+  // 분야 지표(인연·재물·직업·건강)도 같은 주요 오행(2026-11-25), 등급은 보조로 그대로
+  for (const mk of TG.METRICS.map(m => m[0]).filter(k => k !== 'flow')) {
+    assert.ok(T.DOMAIN[mk], '타임라인 분야 지표 ' + mk + ' 에 분야 말');
+    for (const d of ch.daeun.list) { const v = TG.value(M, ch, d, 'daeun', mk); assert.equal(v.el, T.mainEl(M, d).el, '타임라인 분야 값의 오행 ' + mk); assert.ok(v.sig && v.sig.n, '분야 등급은 보조로 그대로'); }
+    assert.ok(TG.life(M, ch, mk, 90).every(q => q.el != null), '분야 인생 전체에 오행 ' + mk);
+  }
   assert.ok(TG.life(M, ch, 'flow', 90).every(q => q.el != null), '인생 전체 연도에 오행');
   const ht = fs.readFileSync(path.join(root, 'report/hub/hub-timeline.js'), 'utf8');
   assert.ok(/E = useEl\(vv\) \? vv\.el : null/.test(ht) && /useEl\(q\) \? elC\(q\.el\) : q\.sig\.c/.test(ht) && /head \+ themeHtml\(it, lvl\)/.test(ht) && /elLegend\(\)/.test(ht), '타임라인 막대·인생·카드·범례 연결');
+  assert.ok(ht.includes("return (metric() === 'flow' || domEl()) && v && v.el != null") && ht.includes('LTm().legendFor(metric())') && ht.includes('T.readDomain(M, ch, r0.p, lvl, metric()'), '타임라인 분야 지표 막대·범례·카드 연결');
   const hi = fs.readFileSync(path.join(root, 'report/hub/index.html'), 'utf8'), st = fs.readFileSync(path.join(root, 'report/story/story.js'), 'utf8');
   assert.ok(/\/luck-element-theme\.js\?v=/.test(hi) && /'\/luck-element-theme\.js' \+ HV/.test(st), '허브·/report/ 둘 다 모듈을 불러옴'); }
 console.log(`luck-element-theme-sim ok · 해석 ${n}건 · 분야 해석 ${nd}건 · 상태 ${J(states)} · 오행별 서로 다른 해석 ${Object.keys(byEl).map(e => T.EL_K[e] + byEl[e].size).join(' ')}`);
