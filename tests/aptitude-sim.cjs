@@ -98,7 +98,7 @@ for (let i = 0; i < N; i++) {
   // 화면: 다섯 구역 순서
   if (i % 50 === 0) {
     const h = W.MantraAptitudeView.html(M, ch, { esc });
-    const ids = ['aptSummary', 'aptTalent', 'aptField', 'aptSport', 'aptFinal'].map(id => h.indexOf('id="' + id + '"'));
+    const ids = ['aptOverview', 'aptSummary', 'aptTalent', 'aptField', 'aptSport', 'aptFinal'].map(id => h.indexOf('id="' + id + '"'));
     assert.ok(ids.every((x, k) => x >= 0 && (k === 0 || x > ids[k - 1])), '화면 구역 순서 ①~⑤');
     assert.ok(!/undefined|NaN|\[object/.test(h), '화면에 빈 값 없음');
   }
