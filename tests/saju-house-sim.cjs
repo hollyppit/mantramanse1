@@ -103,7 +103,7 @@ let fail = 0, n = 0; const ok = (c, m) => { n++; if (!c) { fail++; if (fail < 40
   console.log('4. 화면·스위치');
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8'), lf = fs.readFileSync(path.join(root, 'functions/api/luck-flags.js'), 'utf8'), adm = fs.readFileSync(path.join(root, 'report/admin/v2-luckenv.js'), 'utf8');
   ok(!html.includes('<script src="saju-house.js"></script>') && !html.includes('${houseCard(ch)}'), '2026-11-24 사용자 요청: 만세력에서 사주의 집 카드 뺌(모듈은 남김)');
-  ok(/'sajuHouse'\]\);/.test(lf) && adm.includes('id="leSH"') && adm.includes('sajuHouse: v') && /'mulsangArt', 'sajuHouse'\]\.forEach/.test(html), '스위치 연결');
+  ok(/'sajuHouse'\]\);/.test(lf) && !adm.includes('id="leSH"') && !adm.includes('sajuHouse') &&/'mulsangArt', 'sajuHouse'\]\.forEach/.test(html), '스위치 연결');
   ok(html.includes("#saju-house [data-part]") && !html.includes("data-act=\"hs-gen\"") && !html.includes("a === 'hs-gen'"), '부분 누르기, 실사 버튼 없음');
 
   ok(html.includes("const XP_ART = { 'wonguk-mulsang': () => true };") && html.includes("d.open = true; d.setAttribute('open', '');"), 'PDF: 물상 도형은 늘 넣고 설명 펼침');

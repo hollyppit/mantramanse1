@@ -69,14 +69,6 @@
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운명의 타임라인 건강·사고수 장(6장)</b> — 현재: <b style="color:' + (fl && fl.healthChapters ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.healthChapters ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leHC"' + (fl ? '' : ' disabled') + '>' + (fl && fl.healthChapters ? '건강·사고수 장 끄기' : '건강·사고수 장 켜기') + '</button><a class="btn" href="/report/v2/?mantraFlags=healthChapters" target="_blank" rel="noopener">미리보기 주소</a></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 종합풀이 \'건강 및 사고수\' 장 바로 뒤에 \'내 몸의 오행 지도\'·\'나는 언제 쉽게 지칠까?\'·\'스트레스가 몸으로 오는 길\'·\'올해·이번 달 몸 챙길 때\'·\'사고수 신호 읽기\'·\'앞으로 10년 안전 흐름과 삼재\' 6장이 <b>약 1분 안에</b> 나타납니다. 건강 지도·사고수 참고·건강/사고 지수·삼재 계산으로 만든 문장(AI·DB 문안 없음)이고, 장마다 의학적 진단·사고 예측이 아니라는 안내가 붙습니다. 점수는 바뀌지 않습니다.</p></div>';
-    // 만세력 오행·강약 탭 '사주의 집'(2026-11-24, saju-house.js): 십성을 한 채의 집(기둥·물길·물탱크·담장·지붕)으로. 단면도는 계산, 실사 사진은 버튼을 누를 때만(횟수 제한 없음)
-    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>만세력 오행·강약 탭 사주의 집</b> — 현재: <b style="color:' + (fl && fl.sajuHouse ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.sajuHouse ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
-      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leSH"' + (fl ? '' : ' disabled') + '>' + (fl && fl.sajuHouse ? '사주의 집 끄기' : '사주의 집 켜기') + '</button></div>' +
-      '<p class="muted" style="margin:8px 0 0">켜면 오행·강약 탭 십성 분포 아래에 \'사주의 집\' 카드(계산으로 그린 집 단면도, 부분을 누르면 설명)와 \'실사로 보기\' 버튼이 <b>약 1분 안에</b> 나타납니다. 실사 사진은 누를 때마다 이미지 생성 비용이 듭니다(횟수 제한 없음). 꺼져 있어도 관리자 로그인 화면에서는 시험할 수 있습니다.</p></div>';
-    // 만세력 원국 탭 'AI로 물상 표현하기'(2026-11-24, mulsang.js · /api/mulsang-art): 원국을 실사 풍경 물상으로 그린다. 버튼을 누를 때만 생성, 횟수 제한 없음
-    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>만세력 원국 탭 AI 물상 그림</b> — 현재: <b style="color:' + (fl && fl.mulsangArt ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.mulsangArt ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
-      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leMS"' + (fl ? '' : ' disabled') + '>' + (fl && fl.mulsangArt ? '물상 그림 끄기' : '물상 그림 켜기') + '</button></div>' +
-      '<p class="muted" style="margin:8px 0 0">켜면 만세력 원국 탭 '원국 한눈에 보기' 아래에 'AI로 물상 표현하기' 버튼이 <b>약 1분 안에</b> 나타납니다. 누를 때만 그림을 만들고(횟수 제한 없음, 같은 원국 구조는 저장본을 다시 씀), 그림마다 이미지 생성 비용이 듭니다. 꺼져 있어도 관리자로 로그인한 만세력 화면에서는 시험해 볼 수 있습니다.</p></div>';
     // 프리미엄 심화 층(2026-11-17, report/v2/premium-depth.js): 서사 59장에 내면의 구조·양면성과 반전·알아보는 장면·내게 맞는 한 가지를 더한다
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운명의 타임라인 프리미엄 심화 층(59장)</b> — 현재: <b style="color:' + (fl && fl.premiumDepth ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.premiumDepth ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="lePD"' + (fl ? '' : ' disabled') + '>' + (fl && fl.premiumDepth ? '심화 층 끄기' : '심화 층 켜기') + '</button><a class="btn" href="/report/v2/?mantraFlags=premiumDepth" target="_blank" rel="noopener">미리보기 주소</a></div>' +
@@ -174,23 +166,6 @@
       fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify({ flags: { luckCycle: v } }) })
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
         .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '오행 사이클을 켰습니다(약 1분 안에 반영)' : '오행 사이클을 껐습니다(약 1분 안에 반영)'); });
-    };
-    $('#leSH').onclick = function () {   // 만세력 오행·강약 탭 사주의 집 스위치
-      var v = !(S.flags && S.flags.sajuHouse);
-      if (v && !confirm('만세력 오행·강약 탭의 사주의 집 카드와 실사 버튼을 모든 사용자에게 공개합니다. 실사 버튼은 누를 때마다 이미지 생성 비용이 들 수 있습니다(횟수 제한 없음).\n켜시겠습니까?')) return;
-      var who = ''; try { who = localStorage.getItem('iching_reviewer') || ''; } catch (e) { }
-      fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify({ flags: { sajuHouse: v } }) })
-        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
-        .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '사주의 집을 켰습니다(약 1분 안에 반영)' : '사주의 집을 껐습니다(약 1분 안에 반영)'); });
-    };
-    $('#leMS').onclick = function () {   // 만세력 원국 탭 AI 물상 그림 스위치
-      var v = !(S.flags && S.flags.mulsangArt);
-      if (v && !confirm('만세력 원국 탭의 AI 물상 그림 버튼을 모든 사용자에게 공개합니다. 누를 때마다 이미지 생성 비용이 들 수 있습니다(횟수 제한 없음).
-켜시겠습니까?')) return;
-      var who = ''; try { who = localStorage.getItem('iching_reviewer') || ''; } catch (e) { }
-      fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify({ flags: { mulsangArt: v } }) })
-        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
-        .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '물상 그림을 켰습니다(약 1분 안에 반영)' : '물상 그림을 껐습니다(약 1분 안에 반영)'); });
     };
     $('#leHC').onclick = function () {   // 운명의 타임라인 건강·사고수 장 스위치(따로 켜고 끈다)
       var v = !(S.flags && S.flags.healthChapters);

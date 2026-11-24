@@ -121,7 +121,7 @@ const ELK = ['목', '화', '토', '금', '수'];
   ok(/'luckAlerts', 'mulsangArt'[,\]]/.test(html), '공개 스위치 받기');
   ok(html.includes('MM.flowSVG(spec)') && html.includes('ms-steps') && !html.includes('data-act="ms-gen"') && !html.includes("a === 'ms-gen'") && html.includes("const XP_ART = { 'wonguk-mulsang': () => true };"), '원국 물상은 도형(AI 그림 버튼 없음·PDF 늘 넣기)');
   ok(/'mulsangArt'[,\]]/.test(lf), 'luck-flags 스위치 이름');
-  ok(adm.includes("id=\"leMS\"") && adm.includes('mulsangArt: v'), '관리자 스위치 버튼');
+  ok(!adm.includes("id=\"leMS\"") && !adm.includes('mulsangArt'), '관리자 스위치 단추 뺌(2026-11-24 카드 제거)');
   ok(!/하루 \d회|daily|quota/i.test(fs.readFileSync(path.join(root, 'functions/api/mulsang-art.js'), 'utf8').replace(/횟수 제한 없음/g, '')), '횟수 제한 없음');
 
   console.log(fail ? `\n✗ ${fail}/${n} 실패` : `\n✓ 물상 그림 검증 ${n}항목 통과`);
