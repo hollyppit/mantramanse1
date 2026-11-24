@@ -19,6 +19,7 @@ const textsOf = r => {
   r.sport.traits.forEach(t => out.push(t.interp, t.link || ''));
   r.sport.axes.forEach(a => out.push(a.text));
   r.sport.categories.forEach(c => out.push(c.interp || '', c.why || '', c.link || '', c.feature || '', c.myeongri || '', ...(c.consider || [])));
+  Object.values(r.details).forEach(d => { out.push(d.intro); d.axes.forEach(a => out.push(a.text)); d.subs.forEach(c => out.push(c.interp || '', c.why || '', c.link || '', c.feature || '', c.myeongri || '', ...(c.consider || []))); });
   r.final.activities.forEach(a => out.push(a.name, a.why));
   if (r.final.longTerm) out.push(r.final.longTerm.why);
   if (r.final.complement) out.push(r.final.complement.text);
@@ -31,7 +32,7 @@ const textsOf = r => {
   if (o && typeof o === 'object') Object.keys(o).forEach(k => scanData(o[k], p + '.' + k));
 })(DD, 'DATA');
 
-const cnt = { lv: {}, rec: {}, kinds1: 0, items: 0, topT: {}, topF: {}, acts: {}, cat1: {} };
+const cnt = { lv: {}, rec: {}, kinds1: 0, items: 0, topT: {}, topF: {}, acts: {}, cat1: {}, sub: {} };
 let partialNoHour = 0;
 for (let i = 0; i < N; i++) {
   const inp = { year: 1950 + (i * 7) % 55, month: 1 + (i * 5) % 12, day: 1 + (i * 11) % 28, hour: i % 13 === 0 ? null : (i * 3) % 24, minute: 0, gender: i % 2 ? 'M' : 'F', calendar: 'solar' };
@@ -86,6 +87,19 @@ for (let i = 0; i < N; i++) {
   assert.equal(new Set(f.activities.map(a => a.name)).size, f.activities.length, '활동 중복 없음');
   f.activities.forEach(a => { assert.ok(DD.REC[a.rec] === a.recK); cnt.acts[a.name] = (cnt.acts[a.name] || 0) + 1; });
   assert.ok(f.longTerm && f.longTerm.name, '장기 숙련 활동');
+  // 분야별 상세: 6분야 모두 · 세부 분야 6개 · 축 5개(같은 값, 분야의 말) · 적극 탐색 최대 2개 · 이어진 특기
+  assert.equal(J(Object.keys(r.details)), J(['sport', 'art', 'intel', 'outdoor', 'life', 'social']), '분야별 상세 6분야');
+  Object.values(r.details).forEach(d => {
+    assert.equal(d.subs.length, 6, d.id + ' 세부 분야 6개'); assert.equal(d.axes.length, 5, d.id + ' 축 5개');
+    d.axes.forEach((a, k) => { const b = r.sport.axes[k]; assert.equal(J([a.id, a.side, a.d, a.pos]), J([b.id, b.side, b.d, b.pos]), d.id + ' 축 값은 운동과 같음(이름만 다름)'); assert.ok(a.L && a.R && a.text); });
+    assert.ok(d.subs.filter(c => c.rec === 'strong').length <= 2, d.id + ' 적극 탐색 최대 2개');
+    d.subs.forEach(c => { assert.ok(c.ok && c.basis.length >= 2 && c.why && c.feature && c.myeongri && c.consider.length && c.long, d.id + '.' + c.id + ' 필드'); cnt.sub[d.id + ':' + c.id + ':' + c.rank] = 1; });
+    assert.ok(d.links.length === 2, d.id + ' 이어진 특기 2개');
+  });
+  r.fields.forEach(fd => assert.ok(fd.links && fd.links.length === 2, fd.id + ' 적성 카드 이어진 특기'));
+  // 추천 활동은 실제 세부 분야 예시에서만
+  const exAll = new Set(); Object.values(r.details).forEach(d => d.subs.forEach(c => c.ex.forEach(x => exAll.add(x))));
+  f.activities.forEach(a => assert.ok(exAll.has(a.name), '추천 활동은 세부 분야 예시: ' + a.name));
   assert.ok(f.complement && f.complement.text, '보완할 성향');
   // 용신은 점수에 쓰지 않음: 통합 용신을 지워도 점수 동일
   const chNoY = Object.assign({}, ch, { unified: null }), rn = A.build(M, chNoY);
@@ -98,7 +112,11 @@ for (let i = 0; i < N; i++) {
   // 화면: 다섯 구역 순서
   if (i % 50 === 0) {
     const h = W.MantraAptitudeView.html(M, ch, { esc });
-    const ids = ['aptOverview', 'aptSummary', 'aptTalent', 'aptField', 'aptSport', 'aptFinal'].map(id => h.indexOf('id="' + id + '"'));
+    assert.ok(!/data-apt-mode/.test(h), '직업 칸이 없으면 전환 단추도 없음');
+    const hw = W.MantraAptitudeView.html(M, ch, { esc, careerHtml: '<section class="card">직업</section>' });
+    assert.ok(/data-apt-mode="work"/.test(hw) && /data-apt-pane="work" id="aptCareer"/.test(hw) && hw.indexOf('data-apt-pane="hobby"') < hw.indexOf('data-apt-pane="work"'), '두 갈래 전환·직업 칸');
+    assert.equal((hw.match(/data-apt-fpane=/g) || []).length, 6, '분야별 상세 6칸');
+    const ids = ['aptOverview', 'aptTalent', 'aptField', 'aptDetail', 'aptFinal'].map(id => h.indexOf('id="' + id + '"'));
     assert.ok(ids.every((x, k) => x >= 0 && (k === 0 || x > ids[k - 1])), '화면 구역 순서 ①~⑤');
     assert.ok(!/undefined|NaN|\[object/.test(h), '화면에 빈 값 없음');
   }
@@ -124,3 +142,4 @@ console.log('근거 한 종류뿐인 항목 비율', (cnt.kinds1 / cnt.items * 1
 console.log('대표 특기', cnt.topT, '\n대표 적성', cnt.topF);
 console.log('1순위 종목', cnt.cat1);
 console.log('추천 활동 종류', Object.keys(cnt.acts).length, '개');
+console.log('세부 분야가 1순위로 나온 경우', Object.keys(cnt.sub).filter(k => k.endsWith(':0')).length, '/ 36');

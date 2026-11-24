@@ -52,6 +52,48 @@
       tech: { 't:skill': 0.8, 't:discipline': 0.5, 't:ind': 0.4, e3: 0.5, '식신': 0.3, 't:tactic': 0.2 },
       racket: { 't:tactic': 0.7, 't:compete': 0.6, 't:energy': 0.4, 't:skill': 0.3, e4: 0.3, e1: 0.3, '상관': 0.2 },
     },
+    detail: {
+      art: {
+        draw: { 't:skill': 0.5, g1: 0.5, '식신': 0.4, e0: 0.4, e3: 0.3, 't:ind': 0.3 },
+        music: { 't:discipline': 0.5, 't:skill': 0.5, '정인': 0.3, e4: 0.4, e1: 0.3 },
+        write: { g4: 0.6, '상관': 0.5, e4: 0.4, 't:ind': 0.4, '편인': 0.3 },
+        media: { '상관': 0.5, '편재': 0.5, e1: 0.4, e0: 0.3, 't:tactic': 0.3, yeokma: 0.3 },
+        craft: { '식신': 0.6, e2: 0.4, e3: 0.5, 't:skill': 0.5, '정재': 0.3 },
+        stage: { '상관': 0.6, e1: 0.6, 't:energy': 0.5, '겁재': 0.3, 't:coop': 0.3 },
+      },
+      intel: {
+        board: { 't:tactic': 0.7, '편관': 0.3, 't:compete': 0.4, e4: 0.4 },
+        science: { '편인': 0.5, g4: 0.4, e4: 0.5, e3: 0.3, 't:ind': 0.3 },
+        human: { '정인': 0.6, g4: 0.4, e2: 0.3, '정관': 0.3 },
+        lang: { '정인': 0.5, 't:discipline': 0.5, '식신': 0.3, e4: 0.3, '상관': 0.3 },
+        code: { '편인': 0.5, e3: 0.5, 't:skill': 0.4, 't:tactic': 0.4 },
+        read: { g4: 0.5, '상관': 0.3, 't:coop': 0.4, e0: 0.3 },
+      },
+      outdoor: {
+        hike: { e2: 0.4, e0: 0.4, 't:discipline': 0.3, root: 0.3, 't:energy': 0.3 },
+        camp: { '식신': 0.4, '정재': 0.3, e0: 0.4, 't:skill': 0.3, 't:coop': 0.3 },
+        travel: { yeokma: 0.7, '편재': 0.5, e1: 0.3, '편인': 0.3 },
+        ride: { 't:energy': 0.5, 't:ind': 0.4, e0: 0.4, yeokma: 0.3, strong: 0.3 },
+        fish: { e4: 0.6, '정인': 0.3, 't:ind': 0.4, 't:discipline': 0.3 },
+        green: { e0: 0.6, '정재': 0.4, e2: 0.4, '식신': 0.3 },
+      },
+      life: {
+        cook: { '식신': 0.6, '정재': 0.4, e1: 0.3, e2: 0.3 },
+        wood: { e3: 0.5, e0: 0.3, 't:skill': 0.5, '식신': 0.4 },
+        sew: { '정재': 0.4, 't:skill': 0.5, e3: 0.4, 't:discipline': 0.3 },
+        care: { e0: 0.5, '정인': 0.4, e2: 0.4, '정재': 0.3 },
+        fix: { '정관': 0.4, '정재': 0.4, e2: 0.4, e3: 0.4 },
+        maker: { '편인': 0.5, e3: 0.4, 't:skill': 0.4, 't:tactic': 0.3 },
+      },
+      social: {
+        club: { g2: 0.4, '정관': 0.4, 't:coop': 0.5, e1: 0.3 },
+        volunteer: { '정인': 0.4, '식신': 0.4, 't:coop': 0.4, e2: 0.3 },
+        chorus: { 't:coop': 0.5, g1: 0.4, e1: 0.3, '정관': 0.3 },
+        teach: { '상관': 0.4, g4: 0.4, e1: 0.3, '정관': 0.3 },
+        network: { '편재': 0.6, e1: 0.4, '겁재': 0.3, yeokma: 0.3 },
+        team: { 't:coop': 0.4, 't:compete': 0.4, '편관': 0.3, 't:tactic': 0.3 },
+      },
+    },
     axis: {
       solo_team: { L: { '비견': 0.6, g4: 0.4, '편인': 0.3 }, R: { g2: 0.5, '정관': 0.4, g1: 0.3, '겁재': 0.2 } },
       compete_record: { L: { '겁재': 0.6, '편관': 0.5, e1: 0.3, '상관': 0.3 }, R: { '정관': 0.4, g4: 0.4, e2: 0.4, '비견': 0.3 } },
@@ -167,6 +209,39 @@
     return o;
   }
 
+  // 세부 분야(종목) 목록: 점수 → 순위 → 추천 수준 3단계 → 고려할 점(활동 방식과 겹침·엇갈림)
+  function rankSubs(list, specs, F, T, axMap, whyOf, hourKnown) {
+    var sc = list.map(function (sx) { return scoreOf(F, specs[sx.id], T); });
+    var order = sc.map(function (c, i) { return i; }).sort(function (a, b) { return (sc[b].score - sc[a].score) || (a - b); });
+    return list.map(function (sx, i) {
+      var c = sc[i], rank = order.indexOf(i);
+      if (!c.ok || !c.basis.length) return { id: sx.id, name: sx.name, ok: false, rec: null, recK: '', interp: D().NO_DATA, basis: [], confidence: 'low', confK: D().CONF.low, rank: rank };
+      var rec = rank < 2 && c.score >= CFG.rec.strong ? 'strong' : rank < 4 && c.score >= CFG.rec.interest ? 'interest' : 'pref';
+      var fitLines = [], misLine = '';
+      Object.keys(sx.fit || {}).forEach(function (aid) {
+        var a = axMap[aid]; if (!a || !a.ok || a.side === 'bal') return;
+        if (a.side === sx.fit[aid]) fitLines.push(a.sideK);
+        else if (!misLine && sx.mis && sx.mis[aid]) misLine = sx.mis[aid];
+      });
+      var consider = [sx.consider];
+      if (fitLines.length) consider.push('이 분야의 ' + fitLines.join('·') + ' 성격이 명식에서 보이는 활동 방식과 겹쳐요.');
+      if (misLine) consider.push(misLine);
+      var cf = confOf(c, hourKnown);
+      return { id: sx.id, name: sx.name, ok: true, ex: sx.ex.slice(), score: r3(c.score), rank: rank, rec: rec, recK: D().REC[rec],
+        feature: sx.feature, myeongri: sx.myeongri, basis: c.basis, link: linkOf(c.basis), why: whyOf(sx, rec), consider: consider, long: sx.long,
+        confidence: cf, confK: D().CONF[cf] };
+    });
+  }
+  // 같은 축 값을 분야의 말로 다시 읽기(계산 불변)
+  function axesFor(base, labels) {
+    if (!labels) return base;
+    return base.map(function (a) {
+      var lb = labels[a.id]; if (!lb || !a.ok) return a;
+      var text = a.side === 'bal' ? J(lb.L, '과', '와') + ' ' + lb.R + ' 사이에서 크게 기울지 않아요. 둘 다 편하게 즐길 수 있는 쪽이에요.' : (a.deg === 'clear' ? lb[a.side + 'txt'].replace('조금 더 ', '더 ') : lb[a.side + 'txt']);
+      return Object.assign({}, a, { name: lb.L + ' ↔ ' + lb.R, L: lb.L, R: lb.R, sideK: a.side === 'bal' ? '균형' : lb[a.side], text: text });
+    });
+  }
+
   // ── 3. 운동·스포츠 상세 ──
   function sportBlock(F, hourKnown) {
     var C = CFG.trait, TX = D().TRAIT, T = {}, traits = [];
@@ -200,54 +275,49 @@
     });
     var axMap = {}; axes.forEach(function (a) { axMap[a.id] = a; });
     // 종목 6분야
-    var cats = D().SPORT.map(function (sx) {
-      var sc = scoreOf(F, CFG.sport[sx.id], T);
-      return { sx: sx, sc: sc };
+    var categories = rankSubs(D().SPORT, CFG.sport, F, T, axMap, function (sx, rec) { return sx.why[rec]; }, hourKnown);
+    return { traits: traits, axes: axes, categories: categories, T: T, axMap: axMap };
+  }
+
+  // ── 3-2. 분야별 상세(운동은 sportBlock, 나머지 5분야는 DETAIL 문안 + CFG.detail 가중치) ──
+  function detailBlock(F, hk, sport, talents, fields) {
+    var DD = D(), out = {}, tMap = {}; talents.forEach(function (t) { tMap[t.id] = t; });
+    var links = function (fid) { return (DD.FIELD_LINK[fid] || []).map(function (id) { var t = tMap[id]; return t ? { id: id, name: t.name, level: t.level, levelK: t.levelK } : null; }).filter(Boolean); };
+    fields.forEach(function (fd) {
+      if (fd.id === 'sport') { out.sport = { id: 'sport', name: fd.name, intro: '몸을 쓰고 겨루거나 기록을 세우는 분야예요.', links: links('sport'), traits: sport.traits, axes: sport.axes, subs: sport.categories }; return; }
+      var dx = DD.DETAIL[fd.id]; if (!dx) return;
+      var axes = axesFor(sport.axes, dx.axes), axMap = {}; axes.forEach(function (a) { axMap[a.id] = a; });
+      var subs = rankSubs(dx.subs, CFG.detail[fd.id], F, sport.T, axMap, function (sx, rec) { return rec === 'strong' ? sx.strong : DD.DETAIL_WHY[rec]; }, hk);
+      out[fd.id] = { id: fd.id, name: fd.name, intro: dx.intro, links: links(fd.id), axes: axes, subs: subs };
     });
-    var order = cats.map(function (c, i) { return i; }).sort(function (a, b) { return (cats[b].sc.score - cats[a].sc.score) || (a - b); });
-    var categories = cats.map(function (c, i) {
-      var sx = c.sx, sc = c.sc, rank = order.indexOf(i);
-      if (!sc.ok || !sc.basis.length) return { id: sx.id, name: sx.name, ok: false, rec: null, recK: '', interp: D().NO_DATA, basis: [], confidence: 'low', confK: D().CONF.low, rank: rank };
-      var rec = rank < 2 && sc.score >= CFG.rec.strong ? 'strong' : rank < 4 && sc.score >= CFG.rec.interest ? 'interest' : 'pref';
-      var fitLines = [], misLine = '';
-      Object.keys(sx.fit || {}).forEach(function (aid) {
-        var a = axMap[aid]; if (!a || !a.ok || a.side === 'bal') return;
-        if (a.side === sx.fit[aid]) fitLines.push(a.sideK);
-        else if (!misLine && sx.mis && sx.mis[aid]) misLine = sx.mis[aid];
-      });
-      var consider = [sx.consider];
-      if (fitLines.length) consider.push('이 분야의 ' + fitLines.join('·') + ' 성격이 명식에서 보이는 활동 방식과 겹쳐요.');
-      if (misLine) consider.push(misLine);
-      return { id: sx.id, name: sx.name, ok: true, ex: sx.ex.slice(), score: r3(sc.score), rank: rank, rec: rec, recK: D().REC[rec],
-        feature: sx.feature, myeongri: sx.myeongri, basis: sc.basis, link: linkOf(sc.basis), why: sx.why[rec], consider: consider, long: sx.long,
-        confidence: confOf(sc, hourKnown), confK: D().CONF[confOf(sc, hourKnown)] };
-    });
-    return { traits: traits, axes: axes, categories: categories, T: T };
+    return out;
   }
 
   // ── 4. 최종 추천 ──
-  function finalBlock(ch, talents, fields, sport) {
+  function finalBlock(ch, talents, fields, sport, details) {
     var acts = [], seen = {};
     var push = function (name, rec, from, why) { if (!name || seen[name] || acts.length >= 5) return; seen[name] = 1; acts.push({ name: name, rec: rec, recK: D().REC[rec], from: from, why: why }); };
-    var sf = fields.filter(function (f) { return f.id === 'sport'; })[0];
-    var cats = sport.categories.filter(function (c) { return c.ok; }).sort(function (a, b) { return a.rank - b.rank; });
-    var nSport = sf && sf.ok && sf.level !== 'lo' ? 2 : 1;
-    cats.slice(0, nSport).forEach(function (c) { push(c.ex[0], c.rec, '운동 · ' + c.name, c.why); });
     var LV2REC = { hi: 'strong', mid: 'interest', lo: 'pref' };
-    var fo = fields.filter(function (f) { return f.ok && f.id !== 'sport'; }).sort(function (a, b) { return (b.score - a.score) || (a.id < b.id ? -1 : 1); });
-    fo.slice(0, 2).forEach(function (f) { push(f.acts[0], LV2REC[f.level], '적성 · ' + f.name, f.interp); });
-    var to = talents.filter(function (t) { return t.ok; }).sort(function (a, b) { return (b.score - a.score) || (a.id < b.id ? -1 : 1); });
-    to.forEach(function (t) { if (acts.length < 4) push(t.acts[0], LV2REC[t.level], '특기 · ' + t.name, t.interp); });
-    fo.slice(2).forEach(function (f) { if (acts.length < 3) push(f.acts[0], LV2REC[f.level], '적성 · ' + f.name, f.interp); });
-    // 장기 숙련 활동: 점수 0.6 + 숙련·규율 성향 0.4
+    var fo = fields.filter(function (f) { return f.ok; }).sort(function (a, b) { return (b.score - a.score) || (a.id < b.id ? -1 : 1); });
+    var topSubs = function (fid) { var d = details[fid]; return d ? d.subs.filter(function (x) { return x.ok; }).sort(function (a, b) { return a.rank - b.rank; }) : []; };
+    // 앞선 적성 2분야에서 1순위 세부 분야 하나씩
+    fo.slice(0, 2).forEach(function (f) { var x = topSubs(f.id)[0]; if (x) push(x.ex[0], x.rec, f.name + ' · ' + x.name, x.why); });
+    // 운동이 앞 2분야에 없더라도 '은은함'이 아니면 1순위 종목 하나
+    var sf = fields.filter(function (f) { return f.id === 'sport'; })[0];
+    if (sf && sf.ok && sf.level !== 'lo' && fo.slice(0, 2).indexOf(sf) < 0) { var c0 = topSubs('sport')[0]; if (c0) push(c0.ex[0], c0.rec, sf.name + ' · ' + c0.name, c0.why); }
+    // 1순위 적성의 2순위 세부 분야, 셋째 적성의 1순위
+    if (fo[0]) { var x2 = topSubs(fo[0].id)[1]; if (x2 && x2.rec !== 'pref') push(x2.ex[0], x2.rec, fo[0].name + ' · ' + x2.name, x2.why); }
+    fo.slice(2).forEach(function (f) { if (acts.length < 3) { var x = topSubs(f.id)[0]; if (x) push(x.ex[0], x.rec, f.name + ' · ' + x.name, x.why); } });
+    var cats = topSubs('sport');
     var T = sport.T, sd = T.skill && T.discipline ? (T.skill.score + T.discipline.score) / 2 : 0;
-    var longCand = cats.map(function (c) { return { name: c.long, from: '운동 · ' + c.name, s: c.score * 0.6 + sd * 0.4 }; })
-      .concat(fo.map(function (f) { return { name: f.long, from: '적성 · ' + f.name, s: f.score * 0.6 + sd * 0.4 }; }))
-      .filter(function (x) { return x.name; }).sort(function (a, b) { return b.s - a.s; });
+    var fScore = {}; fields.forEach(function (f) { fScore[f.id] = f.ok ? f.score : 0; });
+    var longCand = [];
+    Object.keys(details).forEach(function (fid) { details[fid].subs.forEach(function (x) { if (x.ok && x.long) longCand.push({ name: x.long, from: details[fid].name + ' · ' + x.name, s: x.score * 0.5 + fScore[fid] * 0.2 + sd * 0.3 }); }); });
+    longCand.sort(function (a, b) { return (b.s - a.s) || (a.name < b.name ? -1 : 1); });
     var lt = longCand[0] || null;
     var trs = sport.traits.filter(function (t) { return t.ok && !t.bipolar; });
     var sk = trs.filter(function (t) { return t.id === 'skill' || t.id === 'discipline'; });
-    var longTerm = lt ? { name: lt.name, from: lt.from, why: '숙련·규율 쪽 성향(' + sk.map(function (t) { return t.name + ' ' + t.levelK; }).join(', ') + ')과 이 분야의 흐름을 함께 보고 골랐어요. 오래 붙잡을수록 단계가 쌓이는 활동이에요.' } : null;
+    var longTerm = lt ? { name: lt.name, from: lt.from, why: '숙련·규율 쪽 성향(' + sk.map(function (t) { return t.name + ' ' + t.levelK; }).join(', ') + ')과 적성 분야의 흐름을 함께 보고 골랐어요. 오래 붙잡을수록 단계가 쌓이는 활동이에요.' } : null;
     // 보완할 성향: 가장 은은한 성향 하나
     var low = trs.slice().sort(function (a, b) { return (a.score - b.score) || (a.id < b.id ? -1 : 1); })[0];
     var complement = low ? { id: low.id, name: low.name, levelK: low.levelK, text: D().COMP[low.id] || '' } : null;
@@ -264,7 +334,9 @@
     var talents = DD.TALENT.map(function (t) { return item(F, hk, 'talent', t, CFG.talent[t.id]); });
     var fields = DD.FIELD.map(function (f) { return item(F, hk, 'field', f, CFG.field[f.id]); });
     var sport = sportBlock(F, hk);
-    var fin = finalBlock(ch, talents, fields, sport);
+    var details = detailBlock(F, hk, sport, talents, fields);
+    fields.forEach(function (fd) { fd.links = details[fd.id] ? details[fd.id].links : []; });
+    var fin = finalBlock(ch, talents, fields, sport, details);
     var top = function (a) { return a.filter(function (x) { return x.ok; }).sort(function (x, y) { return (y.score - x.score) || (x.id < y.id ? -1 : 1); })[0]; };
     var tt = top(talents), tf = top(fields);
     var axLean = sport.axes.filter(function (a) { return a.ok && a.side !== 'bal'; }).sort(function (a, b) { return Math.abs(b.d) - Math.abs(a.d); }).slice(0, 2);
@@ -288,6 +360,7 @@
       summary: { head: tt && tf ? DD.SUMMARY_HEAD.replace('{talent}', tt.name).replace('{field}', tf.name) : '', lines: lines, base: base, topTalent: tt ? tt.id : null, topField: tf ? tf.id : null },
       talents: talents, fields: fields,
       sport: { traits: sport.traits, axes: sport.axes, categories: sport.categories },
+      details: details, roleNote: DD.TALENT_ROLE,
       final: fin, notes: notes, disclaimer: DD.DISCLAIMER,
     };
   }

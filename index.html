@@ -5502,7 +5502,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // 특기·적성(2026-11-25, aptitude.js·aptitude-data.js·aptitude-view.js): 표시 전용 새 탭. 스위치 MANTRA_FLAGS.aptitude(기본 꺼짐, 관리자 /api/luck-flags aptitude)
   const aptOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.aptitude === true && window.MantraAptitude && window.MantraAptitudeView);
   // 직업·활동 적성(renderCareer, wealth-career.js)은 2026-11-25 오행·강약 탭에서 이 탭 끝으로 옮겼다 — 화면 위치만 옮기고 계산은 섞지 않는다
-  function renderAptitude() { let a = ''; try { a = window.MantraAptitudeView.html(M, S.ch, { esc, term: (k, l) => term(k, l) }); } catch (e) { a = ''; } let c = ''; try { c = renderCareer(S.ch); } catch (e) { c = ''; } return a + (c ? `<div id="aptCareer" style="scroll-margin-top:110px">${c}</div>` : ''); }
+  function renderAptitude() { let c = ''; try { c = renderCareer(S.ch); } catch (e) { c = ''; } try { return window.MantraAptitudeView.html(M, S.ch, { esc, term: (k, l) => term(k, l), careerHtml: c }); } catch (e) { return c; } }   // 직업·일 갈래는 view 가 [활동·취미 | 직업·일] 전환 안에 넣는다
   const tabList = () => [['wonguk', '원국'], ['ohaeng', '오행·강약'], ['yong', '용신'], ['luck', '운세 흐름'], ...(aptOn() ? [['apt', '특기·적성']] : []), ...(spOn() ? [['space', '공간·명당']] : []), ['pair', '궁합'], ['tk', '택일'], ...(S.ch && S.ch.ziwei ? [['zw', '자미두수']] : []), ['face', '관상'], ...(spOn() ? [] : [['fs', '풍수']]), ['tarot', '타로'], ['iching', '주역'], ['gl', '용어']];
   function renderTop() {
     const tabs = tabList();
