@@ -133,5 +133,6 @@ let nf = 0;
   assert.ok(/<script src="\/engine\.js"><\/script><script src="\/luck-element-theme\.js\?v=/.test(v2), '상세풀이 페이지가 모듈을 엔진 다음에 불러옴'); }
 // 6) 운명의 타임라인 일진 캘린더 칸(hub-saju.js): 배경 = 그날의 주요 오행, 등급은 보조(2026-11-25)
 { const sj = fs.readFileSync(path.join(root, 'report/hub/hub-saju.js'), 'utf8');
-  assert.ok(/var de = dayEl\(x\)/.test(sj) && /--flow:'\+elCol\(de\)/.test(sj) && /<i class="mc-el">/.test(sj), '타임라인 일진 캘린더 칸 오행 색·한자'); }
+  assert.ok(/var de = dayEl\(x\)/.test(sj) && /--flow:'\+elCol\(de\)/.test(sj) && /<i class="mc-el">/.test(sj), '타임라인 일진 캘린더 칸 오행 색·한자');
+  assert.ok(/var me = dayEl\(x\)/.test(sj) && /';--flow:'\+elCol\(me\)/.test(sj) && /<var class="mc-elh"/.test(sj), '캘린더 월운 그래프 막대 오행 색·한자(span 은 절대 위치라 var 사용)'); }
 console.log(`luck-element-theme-sim ok · 해석 ${n}건 · 분야 해석 ${nd}건 · 지표 풀이 ${nf}건 · 상태 ${J(states)} · 오행별 서로 다른 해석 ${Object.keys(byEl).map(e => T.EL_K[e] + byEl[e].size).join(' ')}`);
