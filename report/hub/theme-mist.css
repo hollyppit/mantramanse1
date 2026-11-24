@@ -376,6 +376,8 @@ html.theme-mist #hub .tq .tq-bar u i{ background-image: none; }
 html.theme-mist #hub [style*="--bc:#B3BDCF" i]{ --bc: #94A3B8 !important; } html.theme-mist #hub [style*="--bc:#FFAE2E" i]{ --bc: #F59E0B !important; }
 html.theme-mist #hub [style*="--bc:#8BE6A9" i]{ --bc: #22C55E !important; } html.theme-mist #hub [style*="--bc:#1FD16A" i]{ --bc: #15803D !important; }
 html.theme-mist #hub [style*="--bc:#FF5A47" i]{ --bc: #DC2626 !important; }
+html.theme-mist #hub [style*="--bc:#5FDC8F" i]{ --bc: #16A34A !important; } html.theme-mist #hub [style*="--bc:#FF8A4C" i]{ --bc: #EA580C !important; }   /* 2026-11-25 3단계 등급 색(luck-grade.js) */
+html.theme-mist #hub .tq-elleg{ color: var(--ink-2); } html.theme-mist #hub .tq-elth-h span, html.theme-mist #hub .tq-elth ul{ color: var(--ink-2); }
 html.theme-mist #hub [style*="background:#B3BDCF" i]{ background: #94A3B8 !important; color: #0F172A !important; }
 html.theme-mist #hub [style*="background:#FFAE2E" i]{ background: #F59E0B !important; color: #3B2300 !important; }
 html.theme-mist #hub [style*="background:#8BE6A9" i]{ background: #22C55E !important; color: #052E16 !important; }

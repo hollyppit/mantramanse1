@@ -27,6 +27,8 @@
   function sigFlow(M, fit) { return SIG[LG.flow(fit, M).i]; }
   // 분야 지표(0~100): 이 사주의 평소 수준 대비(상위 30% 좋음 · 하위 30% 조심). 사고수·손실은 낮을수록 좋아 거꾸로 읽는다.
   function sigMetric(key, v) { return SIG[LG.metric(key, v).i]; }
+  // 그 시기의 주요 오행(2026-11-25, /luck-element-theme.js): 막대 색 = 두드러지는 기운(길흉 아님). 모듈이 없으면 null(예전처럼 등급 색)
+  function elOf(M, x) { var T = G.MantraLuckTheme || (typeof require === 'function' ? (function () { try { return require('../../luck-element-theme.js'); } catch (e) { return null; } })() : null); if (!T || !x) return null; try { var m = T.mainEl(M, x); return m ? m.el : null; } catch (e) { return null; } }
   var pct = function (fit) { return Math.max(0, Math.min(100, Math.round((fit + 100) / 2))); };
   // 엔진 컨텍스트(만세력과 같은 기준 시각): 세운 = 그 해 가운데, 월운 = 그 달 시작 + 12일
   function ctxOf(x, level) { return level === 'seun' ? { ms: x.midMs } : level === 'wolun' ? { ms: x.startMs + 12 * 864e5 } : {}; }
@@ -38,7 +40,7 @@
   // 막대 하나의 값: { v(0~100), sig, tags, summary }. x = 엔진 운 객체(대운·세운·월운), level = 'daeun'|'seun'|'wolun'
   function value(M, ch, x, level, metric) {
     if (!x || !x.ev) return null;
-    if (!metric || metric === 'flow') { var f = x.ev.fitScore; return { v: pct(f), raw: f, sig: sigFlow(M, f), tags: [], summary: '' }; }
+    if (!metric || metric === 'flow') { var f = x.ev.fitScore; return { v: pct(f), raw: f, sig: sigFlow(M, f), el: elOf(M, x), tags: [], summary: '' }; }
     var r; try { r = domainOf(M, ch, x, level)[metric]; } catch (e) { return null; }
     if (!r) return null;
     return { v: Math.round(r.score), raw: r.score, sig: sigMetric(metric, r.score), tags: r.tags || [], summary: r.summary || '', reasons: r.reasons || [], loss: r.loss || null };
@@ -46,11 +48,11 @@
   // 인생 90년(태어난 해부터) 연도별 값
   function life(M, ch, metric, years) {
     var y0 = ch.solar.y, y1 = Math.min(y0 + (years || 90), (M.MAX_Y || 2100) - 1);
-    return M.seunRange(ch, y0, y1).map(function (x) { var val = value(M, ch, x, 'seun', metric); return { year: x.year, age: x.age, gz: M.gzName(x), v: val ? val.v : 50, sig: val ? val.sig : SIG[1] }; });
+    return M.seunRange(ch, y0, y1).map(function (x) { var val = value(M, ch, x, 'seun', metric); return { year: x.year, age: x.age, gz: M.gzName(x), v: val ? val.v : 50, el: val ? val.el : null, sig: val ? val.sig : SIG[1] }; });
   }
   // 앞으로 10년: 고른 지표에서 좋은 해·조심할 해(각 최대 3개)
   function tenYears(M, ch, Y, metric) {
-    var ys = M.seunRange(ch, Y, Y + 9).map(function (x) { var val = value(M, ch, x, 'seun', metric); return { year: x.year, gz: M.gzName(x), v: val ? val.v : 50, sig: val ? val.sig : SIG[1] }; });
+    var ys = M.seunRange(ch, Y, Y + 9).map(function (x) { var val = value(M, ch, x, 'seun', metric); return { year: x.year, gz: M.gzName(x), v: val ? val.v : 50, el: val ? val.el : null, sig: val ? val.sig : SIG[1] }; });
     var good = ys.filter(function (q) { return q.sig.k === 'good'; }).sort(function (a, b) { return metric === 'accident' ? a.v - b.v : b.v - a.v; }).slice(0, 3);
     var bad = ys.filter(function (q) { return q.sig.k === 'care'; }).sort(function (a, b) { return metric === 'accident' ? b.v - a.v : a.v - b.v; }).slice(0, 3);
     return { years: ys, good: good, bad: bad };
