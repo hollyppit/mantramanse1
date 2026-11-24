@@ -83,6 +83,10 @@
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>십성 작용 분석</b> — 현재: <b style="color:' + (fl && fl.tenGodRoles ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.tenGodRoles ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leTG"' + (fl ? '' : ' disabled') + '>' + (fl && fl.tenGodRoles ? '십성 작용 분석 끄기' : '십성 작용 분석 켜기') + '</button><a class="btn" href="/?mantraFlags=tenGodRoles" target="_blank" rel="noopener">미리보기 주소</a></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 만세력 <b>오행·강약 탭</b>에 “십성 작용 분석” 카드(비겁·식상·재성·관성·인성 5종을 세력·역할·실제 작용으로 한눈에 비교, 누르면 상세)와 상호작용 구조 11종(식상생재·재생관·관인상생·살인상생·식신제살·상관견관·상관패인·재극인·도식·관살혼잡·비겁쟁재)의 성립/유불리가, <b>운세 흐름</b> 대운·세운·월운·일진 상세에 “원국과 운의 상호작용”(들어온 십성의 억부·조후·통합 역할, 구조의 신규 형성·강화·약화·해소, 감당 능력, 재물·커리어·인연)이 <b>약 1분 안에</b> 나타납니다. 설명용이라 강약·용신·흐름 점수·그래프는 바뀌지 않습니다.</p></div>';
+    // 특기·적성(2026-11-25, aptitude.js): 만세력 새 탭 — 특기 5영역·적성 6분야·운동·스포츠 상세·최종 추천, 표시 전용
+    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>특기·적성 분석</b> — 현재: <b style="color:' + (fl && fl.aptitude ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.aptitude ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leAPT"' + (fl ? '' : ' disabled') + '>' + (fl && fl.aptitude ? '특기·적성 끄기' : '특기·적성 켜기') + '</button><a class="btn" href="/?mantraFlags=aptitude" target="_blank" rel="noopener">미리보기 주소</a></div>' +
+      '<p class="muted" style="margin:8px 0 0">켜면 만세력에 <b>특기·적성</b> 탭이 생깁니다: 종합 특기·적성 → 특기 5영역(표현·창작/기술·숙련/신체 활동/분석·탐구/경쟁·전략) → 적성 6분야 → 운동·스포츠 상세(성향 6·활동 방식 5축·종목 6분야) → 최종 추천(활동 3~5개·장기 숙련·보완 성향). 엔진 결과를 읽기만 하는 표시 전용이며, 실력·건강을 판단하지 않습니다. 직업 적성과는 따로입니다.</p></div>';
     // 뚜렷한 신호 자동 알림(2026-11-18, luck-alerts.js): 만세력 상단(9분야)에만 — 운명의 타임라인 알림은 2026-11-20 제거
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>뚜렷한 신호 자동 알림</b> — 현재: <b style="color:' + (fl && fl.luckAlerts ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.luckAlerts ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leAL"' + (fl ? '' : ' disabled') + '>' + (fl && fl.luckAlerts ? '자동 알림 끄기' : '자동 알림 켜기') + '</button><a class="btn" href="/?mantraFlags=luckAlerts" target="_blank" rel="noopener">미리보기 주소</a></div>' +
@@ -200,6 +204,11 @@
       var v = !(S.flags && S.flags.macroEra);
       if (v && !confirm('만세력 운세 흐름 맨 위의 시대 흐름(삼원구운) 카드를 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
       putFlags({ flags: { macroEra: v } }, v ? '시대 흐름을 켰습니다(약 1분 안에 반영)' : '시대 흐름을 껐습니다(약 1분 안에 반영)');
+    };
+    $('#leAPT').onclick = function () {   // 특기·적성 탭 스위치(aptitude.js)
+      var v = !(S.flags && S.flags.aptitude);
+      if (v && !confirm('만세력의 특기·적성 탭을 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
+      putFlags({ flags: { aptitude: v } }, v ? '특기·적성을 켰습니다(약 1분 안에 반영)' : '특기·적성을 껐습니다(약 1분 안에 반영)');
     };
     $('#leTG').onclick = function () {   // 십성 작용 분석 스위치(ten-god-roles.js)
       var v = !(S.flags && S.flags.tenGodRoles);

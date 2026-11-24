@@ -1206,6 +1206,9 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="gyeokguk.js"></script>
 <script src="gyeok-structure.js"></script>
 <script src="natal-overview.js"></script>
+<script src="aptitude-data.js"></script>
+<script src="aptitude.js"></script>
+<script src="aptitude-view.js"></script>
 <script src="amhap.js"></script>
 <script src="ten-god-roles.js"></script>
 <script src="luck-env.js"></script>
@@ -5474,8 +5477,11 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     ${S.more ? `<div class="more-pop" role="menu">${rest.map(([k, l]) => `<button type="button" role="menuitem" class="${S.tab === k ? 'on' : ''}" data-tab="${k}">${l}</button>`).join('')}<a href="/report/" role="menuitem">무빙툰 ›</a></div>` : ''}
     <button type="button" class="to-top" data-act="to-top" aria-label="맨 위로">↑</button>`;
   }
+  // 특기·적성(2026-11-25, aptitude.js·aptitude-data.js·aptitude-view.js): 표시 전용 새 탭. 스위치 MANTRA_FLAGS.aptitude(기본 꺼짐, 관리자 /api/luck-flags aptitude)
+  const aptOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.aptitude === true && window.MantraAptitude && window.MantraAptitudeView);
+  function renderAptitude() { try { return window.MantraAptitudeView.html(M, S.ch, { esc, term: (k, l) => term(k, l) }); } catch (e) { return ''; } }
   function renderTop() {
-    const tabs = [['wonguk', '원국'], ['ohaeng', '오행·강약'], ['yong', '용신'], ['luck', '운세 흐름'], ...(spOn() ? [['space', '공간·명당']] : []), ['pair', '궁합'], ['tk', '택일'], ...(S.ch && S.ch.ziwei ? [['zw', '자미두수']] : []), ['face', '관상'], ...(spOn() ? [] : [['fs', '풍수']]), ['tarot', '타로'], ['iching', '주역'], ['gl', '용어']];
+    const tabs = [['wonguk', '원국'], ['ohaeng', '오행·강약'], ['yong', '용신'], ['luck', '운세 흐름'], ...(aptOn() ? [['apt', '특기·적성']] : []), ...(spOn() ? [['space', '공간·명당']] : []), ['pair', '궁합'], ['tk', '택일'], ...(S.ch && S.ch.ziwei ? [['zw', '자미두수']] : []), ['face', '관상'], ...(spOn() ? [] : [['fs', '풍수']]), ['tarot', '타로'], ['iching', '주역'], ['gl', '용어']];
     return `<header class="top"><div class="top-in">
       <div class="brand"><div class="seal" aria-hidden="true">萬<br>歲</div><h1>만트라 만세력</h1></div>
       <div class="who">${whoLine()}</div>
@@ -7832,8 +7838,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     // elementFlow(오행 흐름 상자)는 [모두 켜기]와 따로 관리자 스위치로 켠다(functions/api/luck-flags.js)
     // luckCycle(오행 사이클: 대운 30년·세운 2년 묶음)도 따로 켠다
     // gyeokAnalysis(오행·강약 탭 '사주 격국 분석' 카드, gyeok-structure.js)도 따로 켠다
-    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis && F.luckOverlay && F.tenGodRoles && F.macroEra && F.luckEnv && F.luckAlerts && F.mulsangArt && F.sajuHouse && window.MANTRA_OVERLAY_W)) return;   // 오행 겹쳐 보기 층 무게(overlayWeights)도 여기서 받는다
-    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle', 'luckOverlay', 'tenGodRoles', 'macroEra', 'luckEnv', 'luckAlerts', 'mulsangArt', 'sajuHouse'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (d.overlayWeights && typeof d.overlayWeights === 'object') { window.MANTRA_OVERLAY_W = d.overlayWeights; if (F.luckOverlay) ch = true; } if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
+    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis && F.luckOverlay && F.tenGodRoles && F.macroEra && F.luckEnv && F.luckAlerts && F.mulsangArt && F.sajuHouse && F.aptitude && window.MANTRA_OVERLAY_W)) return;   // 오행 겹쳐 보기 층 무게(overlayWeights)도 여기서 받는다
+    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle', 'luckOverlay', 'tenGodRoles', 'macroEra', 'luckEnv', 'luckAlerts', 'mulsangArt', 'sajuHouse'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (d.aptitude === true && !F.aptitude) { F.aptitude = true; ch = true; } if (d.overlayWeights && typeof d.overlayWeights === 'object') { window.MANTRA_OVERLAY_W = d.overlayWeights; if (F.luckOverlay) ch = true; } if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
   })();
   window.addEventListener('mantra:daycompat', () => { try { readForm(); render(); } catch (e) { } });   // 일주 적합도 2판(compat-day.js) 스위치가 늦게 켜지면 다시 그린다
   // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
@@ -11441,6 +11447,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     else if (S.tab === 'pair') body = renderPair();
     else if (S.tab === 'tk') body = renderTk();
     else if (S.tab === 'zw') body = S.ch.ziwei ? renderZiwei() : renderWonguk();
+    else if (S.tab === 'apt') body = aptOn() ? renderAptitude() : renderWonguk();
     else body = renderGl();
     root.innerHTML = renderTop() + `<main class="wrap" style="padding-top:16px">${renderAdminLogin()}${renderForm()}${S.ch && !['face', 'fs', 'space', 'tarot', 'iching'].includes(S.tab) ? alertBar() : ''}${body}${adminPw ? '' : '<div class="admin-link-row"><a class="admin-link" href="#admin" onclick="setTimeout(()=>scrollTo(0,0),0)">관리자</a></div>'}</main>`;
     enhanceFold();
