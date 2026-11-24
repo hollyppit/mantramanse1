@@ -3,11 +3,11 @@
    · 브라우저(만세력 원국 탭)와 서버(functions/api/mulsang-art.js)가 같은 파일을 쓴다. 서버는 받은 명세를 clean() 으로 다시 검사하고,
      프롬프트·검사 목록을 서버에서 다시 만든다(임의 프롬프트로 이미지를 만들 수 없게).
    · 명세에는 생년월일·이름이 없다(간지 번호·오행 비율·조후·용희기구신·합충 관계만).
-   · 화풍: 수묵 동양화 고정(STYLE_V 가 바뀌면 저장된 그림 키도 바뀐다).
+   · 화풍: 실사 사진(2026-11-24 수묵에서 바꿈). STYLE_V 가 바뀌면 저장된 그림 키도 바뀐다.
    · 사용: MantraMulsang.fromChart(M, ch) → spec · .scene(spec) · .caption(spec) · .prompt(spec) · .checklist(spec) · .judge(checks) · .sketchSVG(spec) · .key(spec) */
 (function (G) {
   'use strict';
-  var VERSION = 'mulsang-20261124-1', STYLE_V = 'ink1';
+  var VERSION = 'mulsang-20261124-1', STYLE_V = 'photo1';
   var POS = ['year', 'month', 'day', 'hour'], POS_KO = { year: '년주', month: '월주', day: '일주', hour: '시주' };
   var EL_KO = ['목', '화', '토', '금', '수'], EL_HJ = ['木', '火', '土', '金', '水'];
   var STEM_HJ = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'], STEM_KO = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계'];
@@ -136,21 +136,25 @@
   }
 
   // ── 4. 이미지 프롬프트(영어, 고정 틀) ──
-  var STYLE_EN = 'Traditional East Asian ink-wash painting (Korean sumukhwa / sumi-e) on aged hanji paper: expressive black ink brush strokes, layered grey ink washes, generous empty space, subtle paper texture. Mostly monochrome ink; use only faint, restrained color washes where the instructions mention light. Vertical 3:4 composition, a single unified landscape.';
+  // 2026-11-24 사용자 요청: 수묵 → 실사. 색은 오행 비율로(목 초록·화 빨강·토 황토·금 은백·수 남청), 빛은 용신(황금빛 햇살)·기신(차가운 그늘)
+  var STYLE_EN = 'Photorealistic landscape photograph, as if shot on a full-frame camera with a 35mm lens: natural light, high dynamic range, rich true-to-life color, crisp detail and texture, cinematic depth with a clear foreground, middle ground and background. Vertical 3:4 composition, one single real place. Not an illustration, painting, 3D render or fantasy art.';
+  var GI_EN = ['the trees and plants look dull and shaded', 'any fire or lantern light is dim and muted', 'the earth and hills lie in cool shadow', 'the rocks and metal lie in cool, blue-tinted shadow', 'the water looks dark, cold and still'];
+  var EL_COLOR = ['fresh, vivid greens', 'warm reds, oranges and glowing amber', 'warm ochre, sand and terracotta browns', 'cool silver, white and steel grey', 'deep blues and blue-black'];
   function prompt(spec) {
     var sc = scene(spec); if (!sc) return null;
     var L = [STYLE_EN, ''];
     L.push('SCENE: ' + sc.season[1] + (sc.time ? ', ' + sc.time[1] : '') + '.' + (sc.climate[1] ? ' The air is ' + sc.climate[1] + '.' : '') + (sc.humid[1] ? ' ' + sc.humid[1][0].toUpperCase() + sc.humid[1].slice(1) + '.' : ''));
-    L.push('', 'LAYOUT (follow exactly; the attached rough sketch shows the placement and relative sizes — keep them, but redraw everything as a finished ink painting):');
+    L.push('', 'LAYOUT (follow exactly; the attached rough sketch shows the placement and relative sizes — keep them, but turn everything into a real photograph):');
     sc.items.forEach(function (x) {
-      L.push('- ' + (x.obj.sky ? x.obj.en + ' in the sky ' + (x.pos === 'day' ? 'at the top center, as the main subject, the most striking element of the painting' : x.pos === 'year' ? 'toward the upper left, small and distant' : x.pos === 'hour' ? 'toward the upper right' : 'spanning the upper middle') : x.obj.en + ' ' + x.layout.en) + '; below it, the ground is ' + x.ground.en + '.');
+      L.push('- ' + (x.obj.sky ? x.obj.en + ' in the sky ' + (x.pos === 'day' ? 'at the top center, as the main subject, the most striking element of the photo' : x.pos === 'year' ? 'toward the upper left, small and distant' : x.pos === 'hour' ? 'toward the upper right' : 'spanning the upper middle') : x.obj.en + ' ' + x.layout.en) + '; below it, the ground is ' + x.ground.en + '.');
     });
     var cnt = Object.keys(sc.counts).map(Number).filter(function (st) { return STEM_OBJ[st].count; }).map(function (st) { var n = sc.counts[st]; return 'exactly ' + ['zero', 'one', 'two', 'three', 'four'][n] + ' ' + STEM_OBJ[st].noun + (n > 1 ? 's' : ''); });
     if (cnt.length) L.push('', 'COUNT: ' + cnt.join(', ') + '. Do not add more of these.');
     L.push('', 'PROPORTION (by five-element share): ' + [0, 1, 2, 3, 4].filter(function (e) { return sc.ratio[e] > 0; }).map(function (e) { return EL_FAMILY[e] + ' ' + SIZE_EN[sizeBand(sc.ratio[e])] + ' (~' + sc.ratio[e] + '% of the picture)'; }).join('; ') + '.');
+    L.push('COLOR: the overall palette follows the same shares — ' + [0, 1, 2, 3, 4].filter(function (e) { return sc.ratio[e] > 0; }).sort(function (a, b) { return sc.ratio[b] - sc.ratio[a]; }).map(function (e) { return EL_COLOR[e] + ' (' + SIZE_EN[sizeBand(sc.ratio[e])] + ')'; }).join(', ') + '.');
     if (sc.absent.length) L.push('ABSENT — must not appear anywhere: ' + sc.absent.map(function (e) { return EL_ABSENT[e]; }).join('; ') + '.');
     var yIn = sc.yong.filter(function (e) { return sc.absent.indexOf(e) < 0; });
-    if (yIn.length || sc.gi.length) L.push('', 'LIGHT: ' + (yIn.length ? 'a soft warm golden glow falls on the ' + yIn.map(function (e) { return EL_FAMILY[e]; }).join(' and ') + '.' : 'soft, even light.') + (sc.gi.length ? ' The ' + sc.gi.map(function (e) { return EL_FAMILY[e]; }).join(' and ') + ' sit partly in cool shadow.' : ''));
+    if (yIn.length || sc.gi.length) L.push('', 'LIGHT: ' + (yIn.length ? 'a warm golden beam of sunlight breaks through and spotlights the ' + yIn.map(function (e) { return EL_FAMILY[e]; }).join(' and ') + ', making them glow — the brightest, warmest area of the photo.' : 'soft, natural light.') + (sc.gi.length ? ' Meanwhile ' + sc.gi.map(function (e) { return GI_EN[e]; }).join(', and ') + '.' : ''));
     if (0) L.push('', 'LIGHT: a soft warm golden glow falls on the ' + sc.yong.map(function (e) { return EL_FAMILY[e]; }).join(' and ') + '.' + (sc.gi.length ? ' The ' + sc.gi.map(function (e) { return EL_FAMILY[e]; }).join(' and ') + ' sit partly in cool shadow.' : ''));
     var rl = [];
     sc.flows.slice(0, 2).forEach(function (f) { rl.push('a visible natural flow from the ' + f.from.obj.noun + ' toward the ' + f.to.obj.noun + ' (' + ['wood feeds fire', 'fire enriches the earth', 'earth bears metal', 'metal condenses water', 'water nourishes wood'][f.from.el] + ')'); });
@@ -171,7 +175,7 @@
     c.push({ id: 'season', q: 'Does the landscape look like ' + SEASON_EN[sc.seasonKey] + '?', critical: false });
     c.push({ id: 'notext', q: 'Is the image free of any written text, letters, numbers, calligraphy or red seals?', critical: true });
     c.push({ id: 'nopeople', q: 'Is the image free of people and animals?', critical: false });
-    c.push({ id: 'ink', q: 'Does it look like a traditional East Asian ink-wash painting?', critical: false });
+    c.push({ id: 'photo', q: 'Does it look like a realistic photograph rather than a painting or illustration?', critical: false });
     Object.keys(sc.counts).map(Number).filter(function (st) { return STEM_OBJ[st].count && sc.counts[st] >= 1; }).forEach(function (st) { c.push({ id: 'count-' + st, q: sc.counts[st] > 1 ? 'Are there exactly ' + ['zero', 'one', 'two', 'three', 'four'][sc.counts[st]] + ' separate ' + STEM_OBJ[st].noun + 's (not more)?' : 'Is there exactly one ' + STEM_OBJ[st].noun + ' (not more than one)?', critical: false }); });
     return c;
   }
@@ -182,7 +186,7 @@
     return { pass: critical.length === 0 && failed.length - critical.length <= 1, failed: failed.map(function (x) { return x.id; }), critical: critical.map(function (x) { return x.id; }) };
   }
 
-  // ── 6. 배치 밑그림(SVG, 글자 없음): 자리·크기만 정확하면 된다. 이미지 모델의 참고 그림이자, 검사 실패 때 보여 줄 수묵풍 대체 그림 ──
+  // ── 6. 배치 밑그림(SVG, 글자 없음): 자리·크기만 정확하면 된다. 이미지 모델의 참고 그림이자, 검사 실패 때 보여 줄 대체 배치도 ──
   var INK = '#2b2b2b';
   function glyph(st, cx, base, sz, sky) {
     var s = '', w = 90 * sz, h = 140 * sz;

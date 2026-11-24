@@ -89,6 +89,12 @@ const ELK = ['목', '화', '토', '금', '수'];
   ok(/Previous attempt missed/.test(lastPrompt), '다시 시도 때 보강 문장');
   r = await call({ spec: base, sketch: 'data:image/png;base64,AAAA' }); ok(r.s === 200, '잘못된 밑그림은 무시하고 진행');
 
+  console.log('4b. 실사 화풍(2026-11-24 수묵에서 바꿈)');
+  { const p = MS.prompt(base); ok(/^Photorealistic/.test(p) && /Not an illustration, painting/.test(p) && !/ink|sumi|hanji|brush/i.test(p), '실사 프롬프트');
+    ok(/^COLOR: /m.test(p) && /fresh, vivid greens \(dominant\)/.test(p), '오행 비율 색 줄');
+    ok(MS.key(base).startsWith('photo1|') && MS.checklist(base).some(c => c.id === 'photo'), '저장본 키·검사 항목이 실사 기준');
+    ok(!/수묵/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8').match(/function mulsangCard[\s\S]*?function renderOverview/)[0]), '카드 문구에 수묵 없음'); }
+
   console.log('5. 화면·스위치 연결');
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8'), lf = fs.readFileSync(path.join(root, 'functions/api/luck-flags.js'), 'utf8'), adm = fs.readFileSync(path.join(root, 'report/admin/v2-luckenv.js'), 'utf8');
   ok(html.includes('<script src="mulsang.js"></script>') && html.includes('${mulsangCard(ch)}') && html.indexOf('${renderOverview(ch)}') < html.indexOf('${mulsangCard(ch)}'), '원국 한눈에 보기 바로 아래 카드');
