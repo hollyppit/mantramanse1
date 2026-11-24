@@ -79,6 +79,7 @@ let fail = 0, n = 0; const ok = (c, m) => { n++; if (!c) { fail++; if (fail < 40
   ok(/'sajuHouse'\]\);/.test(lf) && adm.includes('id="leSH"') && adm.includes('sajuHouse: v') && /'mulsangArt', 'sajuHouse'\]\.forEach/.test(html), '스위치 연결');
   ok(html.includes("#saju-house [data-part]") && html.includes("data-act=\"hs-gen\""), '부분 누르기·실사 버튼');
 
+  ok(html.includes("const XP_ART = { 'wonguk-mulsang': () => MSG.st === 'done' && MSG.url, 'saju-house': () => HSG.st === 'done' && HSG.url };") && html.includes('if (XP_ART[el.id] && !XP_ART[el.id]()) return;') && html.includes("d.open = true; d.setAttribute('open', '');"), 'PDF: 그림을 생성했을 때만 카드 넣기·설명 펼침');
   console.log(fail ? `\n✗ ${fail}/${n} 실패` : `\n✓ 사주의 집 검증 ${n}항목 통과`);
   process.exit(fail ? 1 : 0);
 })().catch(e => { console.log('ERR', e); process.exit(1); });

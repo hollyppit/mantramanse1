@@ -10690,7 +10690,15 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     stage.appendChild(head);
     // PDF에서 통째로 빼는 카드(2026-11-21): 용신 탭 '용신 방향과 건물 풍수는 다릅니다'
     const XP_DROP_CARD = /건물 풍수는 다릅니다/;
-    (cards || xpCards()).forEach(el => { const h = el.querySelector('h2'); if (h && XP_DROP_CARD.test(h.textContent)) return; stage.appendChild(el.cloneNode(true)); });
+    // 2026-11-24 사용자 요청: AI 그림 카드(원국 탭 사주 물상 그림 · 오행·강약 탭 사주의 집)는 그림을 생성했을 때만 PDF에 넣는다 — 그때는 그림과 설명을 함께(설명 펼침), 버튼·관리자 칸은 뺀다
+    const XP_ART = { 'wonguk-mulsang': () => MSG.st === 'done' && MSG.url, 'saju-house': () => HSG.st === 'done' && HSG.url };
+    (cards || xpCards()).forEach(el => {
+      const h = el.querySelector('h2'); if (h && XP_DROP_CARD.test(h.textContent)) return;
+      if (XP_ART[el.id] && !XP_ART[el.id]()) return;
+      const c = el.cloneNode(true);
+      if (XP_ART[el.id]) { c.querySelectorAll('.frow, .ms-dbg, .sh-hint, .sh-info, .ms-wait').forEach(x => x.remove()); c.querySelectorAll('details.ms-fold').forEach(d => { d.open = true; d.setAttribute('open', ''); }); c.querySelectorAll('.sh-part.on').forEach(x => x.classList.remove('on')); }
+      stage.appendChild(c);
+    });
     document.body.appendChild(stage);
     stage.querySelectorAll('svg').forEach(svg => {
       if (+svg.getAttribute('width') > 660) { svg.style.width = '100%'; svg.style.height = 'auto'; }
