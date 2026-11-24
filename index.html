@@ -5199,6 +5199,11 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // 해외 출생지(world-places.js): 그 지역 시간대(IANA)·경도로 계산한다. 국내 출생은 tz 없이 그대로(한국 시간대 표).
   const WP = window.MantraWorldPlaces || null;
   const wpOf = name => (WP && name && WP.find(name)) || null;
+  /* 윤달: 그 해 윤달과 같은 달을 골랐을 때만 묻는다. 나머지는 평달로 자동 계산. */
+  const leapMonthOf = i => { if (!i || i.calendar !== 'lunar') return 0; try { return M.lunarLeapMonth(+i.year) || 0; } catch (e) { return 0; } };
+  const leapAsk = i => { const lm = leapMonthOf(i); return lm > 0 && +i.month === lm; };
+  const leapFix = i => { if (i && !leapAsk(i)) i.leap = false; };
+  const leapBox = (id, i) => leapAsk(i) ? `<label class="check"><input type="checkbox" id="${id}" ${i.leap ? 'checked' : ''}> 윤달이었나요? <span class="muted small">(${esc(i.year)}년엔 ${esc(i.month)}월 뒤에 윤${esc(i.month)}월이 있어요)</span></label>` : '';
   const birthTz = i => { const p = wpOf(i && i.city); return p ? p.tz : undefined; };
   const placeText = i => i.city === '직접 입력' ? '경도 ' + i.lon + '°' : wpOf(i.city) ? i.city + '(' + wpOf(i.city).countryName + ')' : i.city;
   const PLACE_NOTE = '해당 지역이 없으면 가까운 지역을 선택해 주세요.';
@@ -5435,7 +5440,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     try {
       S.ch = M.compute({
         year: +i.year, month: +i.month, day: +i.day, hour: i.hourUnknown ? null : +i.hour, minute: +i.minute || 0,
-        calendar: i.calendar, leap: i.leap, gender: i.gender, lon: +i.lon, tz: birthTz(i), timeMode: i.timeMode, jasi: i.jasi,
+        calendar: i.calendar, leap: leapAsk(i) && !!i.leap, gender: i.gender, lon: +i.lon, tz: birthTz(i), timeMode: i.timeMode, jasi: i.jasi,
         sinsalBase: i.sinsalBase, model: i.model, school: i.school, combinationMode:i.combinationMode, climatePalaceMode:i.climatePalaceMode,
       });
       S.err = null;
@@ -5490,7 +5495,6 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function renderForm() {
     if (!S.editing) return '';
     const i = S.inp;
-    const leapM = i.calendar === 'lunar' ? M.lunarLeapMonth(+i.year) : 0;
     return `<form class="card form" id="form" autocomplete="off">
       <div class="card-h"><h2>출생 정보</h2><span class="note">${M.MIN_Y}~${M.MAX_Y - 1}년 · 국내·해외 출생지</span></div>
       ${profChips()}
@@ -5498,7 +5502,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <label class="field"><span>이름 (선택)</span><input id="f-name" value="${esc(i.name)}" maxlength="20" placeholder="표시용"></label>
         <div class="field"><span>성별</span>${seg('gender', [['M', '남'], ['F', '여']], i.gender)}</div>
         <div class="field"><span>달력</span>${seg('calendar', [['solar', '양력'], ['lunar', '음력']], i.calendar)}</div>
-        ${i.calendar === 'lunar' ? `<label class="check"><input type="checkbox" id="f-leap" ${i.leap ? 'checked' : ''}> 윤달${leapM ? ` <span class="muted small">(${i.year}년 윤${leapM}월)</span>` : ' <span class="muted small">(이 해엔 윤달 없음)</span>'}</label>` : ''}
+        ${leapBox('f-leap', i)}
       </div>
       <div class="frow">
         <label class="field"><span>년</span><input id="f-y" type="number" inputmode="numeric" value="${esc(i.year)}"></label>
@@ -5537,6 +5541,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     i.hourUnknown = g('f-hu').checked;
     if (!i.hourUnknown) { i.hour = g('f-h').value; i.minute = g('f-mi').value; }
     if (g('f-leap')) i.leap = g('f-leap').checked;
+    leapFix(i);
     i.city = g('f-city').value;
     applyPlace(i, g('f-lon'));
     i.combinationMode=g('f-combination').value; i.climatePalaceMode=g('f-climate-palace').value;
@@ -11004,7 +11009,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const i = PR.inp, me = S.inp;
     PR.ch = M.compute({
       year: +i.year, month: +i.month, day: +i.day, hour: i.hourUnknown ? null : +i.hour, minute: +i.minute || 0,
-      calendar: i.calendar, leap: i.leap, gender: i.gender, lon: +i.lon, tz: birthTz(i), timeMode: me.timeMode, jasi: me.jasi,
+      calendar: i.calendar, leap: leapAsk(i) && !!i.leap, gender: i.gender, lon: +i.lon, tz: birthTz(i), timeMode: me.timeMode, jasi: me.jasi,
       sinsalBase: me.sinsalBase, model: me.model, school: me.school, combinationMode: me.combinationMode, climatePalaceMode: me.climatePalaceMode,
     });
     prEval();
@@ -11016,6 +11021,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     i.name = g('pf-name').value.trim(); i.year = g('pf-y').value; i.month = g('pf-m').value; i.day = g('pf-d').value;
     i.hourUnknown = g('pf-hu').checked; if (!i.hourUnknown) { i.hour = g('pf-h').value; i.minute = g('pf-mi').value; }
     if (g('pf-leap')) i.leap = g('pf-leap').checked;
+    leapFix(i);
     i.city = g('pf-city').value; applyPlace(i, null);
   }
   function prSubmit() {
@@ -11031,7 +11037,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     render(); if (!PR.err) scrollToContentTop();
   }
   function prForm() {
-    const i = PR.inp, leapM = i.calendar === 'lunar' ? M.lunarLeapMonth(+i.year) : 0;
+    const i = PR.inp;
     const recent = PR.list.length ? `<div class="pr-recent"><span class="muted small">최근 본 사람</span><div class="pr-chips">${PR.list.map((x, k) => `<span class="pr-chip"><button type="button" data-pact="load:${k}">${esc(x.name || `${x.year}.${x.month}.${x.day}`)}</button><button type="button" class="pr-x" data-pact="del:${k}" aria-label="삭제">×</button></span>`).join('')}</div></div>` : '';
     const sg = (name, opts, cur) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-ps="${name}:${v}" aria-pressed="${String(cur) === String(v)}">${l}</button>`).join('')}</div>`;
     return `<form class="card form" id="pair-form" autocomplete="off">
@@ -11042,7 +11048,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <label class="field"><span>이름 (선택)</span><input id="pf-name" value="${esc(i.name)}" maxlength="20" placeholder="예: 민수"></label>
         <div class="field"><span>성별</span>${sg('gender', [['M', '남'], ['F', '여']], i.gender)}</div>
         <div class="field"><span>달력</span>${sg('calendar', [['solar', '양력'], ['lunar', '음력']], i.calendar)}</div>
-        ${i.calendar === 'lunar' ? `<label class="check"><input type="checkbox" id="pf-leap" ${i.leap ? 'checked' : ''}> 윤달${leapM ? ` <span class="muted small">(${i.year}년 윤${leapM}월)</span>` : ''}</label>` : ''}
+        ${leapBox('pf-leap', i)}
       </div>
       <div class="frow">
         <label class="field"><span>년</span><input id="pf-y" type="number" inputmode="numeric" value="${esc(i.year)}"></label>
@@ -11654,6 +11660,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   document.addEventListener('change', ev => {
     const id = ev.target.id;
     if (id === 'f-hu' || id === 'f-city' || id === 'f-y') { readForm(); render(); }
+    if (id === 'f-m' || id === 'pf-y' || id === 'pf-m') { const me = id === 'f-m', i = me ? S.inp : PR.inp, had = !!document.getElementById(me ? 'f-leap' : 'pf-leap'); if (me) readForm(); else prRead(); if (leapAsk(i) !== had) render(); }
     if (id === 'f-city-q' || id === 'pf-city-q') { const nm = placeFromSearch(ev.target.value), sel = document.getElementById(id.slice(0, -2)); if (nm && sel) { sel.value = nm; if (id === 'f-city-q') { readForm(); render(); } else { prRead(); render(); } } }
     if (id.startsWith('tr-c-')) { const p = id.slice(5), v = ev.target.value; if (v) PK.tr.cards[p] = [v, PK.tr.cards[p] ? PK.tr.cards[p][1] : false]; else delete PK.tr.cards[p]; pkSave(); render(); }
     if (id === 'tk-start' && ev.target.value) { tkState().start = ev.target.value; render(); }

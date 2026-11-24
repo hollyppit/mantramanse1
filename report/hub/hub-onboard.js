@@ -290,6 +290,10 @@
   H.route('welcome', welcome);
 
   /* ═════════ 출생정보 슬라이드 툰 ═════════ */
+  /* 윤달: 그 해 윤달과 같은 달을 골랐을 때만 묻는다(나머지는 평달로 자동). 엔진이 아직 없으면 null. */
+  var leapMonth = function (d) { var M = root.Manse; if (!M || !M.lunarLeapMonth || d.calendar !== 'lunar' || !(+d.year > 0)) return M ? 0 : null; try { return M.lunarLeapMonth(+d.year) || 0; } catch (e) { return 0; } };
+  var leapAsk = function (d) { var lm = leapMonth(d); return lm > 0 && +d.month === lm; };
+  var leapText = function (d) { return '윤' + d.month + '월이었나요? (' + d.year + '년엔 ' + d.month + '월 뒤에 윤달이 있어요)'; };
   var blank = function () { return { name: '', calendar: 'solar', leap: false, year: '', month: '', day: '', hour: '', minute: '', hourUnknown: false, country: 'KR', place: '서울', wplace: '', gender: '' }; };
   function fromProfile(s) {
     return { name: s.name || '', calendar: s.calendar === 'lunar' ? 'lunar' : 'solar', leap: !!s.leap, year: s.year || '', month: s.month || '', day: s.day || '', hour: s.hourUnknown ? '' : s.hour, minute: s.hourUnknown ? '' : s.minute, hourUnknown: !!s.hourUnknown, country: O.worldFind(s.city) ? 'OT' : (s.country === 'OT' ? 'OT' : 'KR'), place: O.worldFind(s.city) ? '서울' : (s.city || '서울'), wplace: O.worldFind(s.city) ? s.city : '', gender: s.gender || '', combinationMode:s.combinationMode, climatePalaceMode:s.climatePalaceMode };
@@ -317,7 +321,7 @@
           var y = new Date().getFullYear();
           return '<div class="f seg" role="radiogroup" aria-label="달력"><span>달력</span><label><input type="radio" name="cal" value="solar"' + (d.calendar === 'solar' ? ' checked' : '') + '><i>양력</i></label><label><input type="radio" name="cal" value="lunar"' + (d.calendar === 'lunar' ? ' checked' : '') + '><i>음력</i></label></div>' +
             '<div class="f row3"><span>생년월일</span><select id="fY" aria-label="년">' + opt(1900, y, d.year, '년', '년', true) + '</select><select id="fM" aria-label="월">' + opt(1, 12, d.month, '월', '월') + '</select><select id="fD" aria-label="일">' + opt(1, 31, d.day, '일', '일') + '</select></div>' +
-            '<label class="chk ob-leap" id="fLeapW"' + (d.calendar === 'lunar' ? '' : ' hidden') + '><input type="checkbox" id="fLeap"' + (d.leap ? ' checked' : '') + '><i>윤달에 태어났어요</i></label>' +
+            '<label class="chk ob-leap" id="fLeapW"' + (leapAsk(d) ? '' : ' hidden') + '><input type="checkbox" id="fLeap"' + (d.leap ? ' checked' : '') + '><i id="fLeapT">' + esc(leapText(d)) + '</i></label>' +
             '<label class="f"><span>빠른 입력 (예: 19900315)</span><input type="text" id="fQuick" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="숫자 8자리"></label>';
         }
         if (s.field === 'time') return '<div class="f row2"><span>태어난 시각</span><select id="fH" aria-label="시"' + (d.hourUnknown ? ' disabled' : '') + '>' + opt(0, 23, d.hour, '시', '시') + '</select><span class="ob-min"><input type="number" id="fMin" min="0" max="59" inputmode="numeric" placeholder="분" aria-label="분" value="' + esc(d.minute) + '"' + (d.hourUnknown ? ' disabled' : '') + '><em aria-hidden="true">분</em></span></div>' +
@@ -401,13 +405,15 @@
         if (f === 'name') $('#fName', el).oninput = function () { d.name = this.value.trim().slice(0, 20); save(); };
         if (f === 'date') {
           var chk = function () { // 입력 즉시 안내
-            save(); var leapW = $('#fLeapW', el); if (leapW) leapW.hidden = d.calendar !== 'lunar';
+            var ask = leapAsk(d); if (!ask && leapMonth(d) !== null) d.leap = false; var lc = $('#fLeap', el); if (lc) lc.checked = !!d.leap;
+            save(); var leapW = $('#fLeapW', el); if (leapW) { leapW.hidden = !ask; var lt = $('#fLeapT', el); if (lt) lt.textContent = leapText(d); }
             if (d.year && d.month && d.day) { var M = root.Manse; var r = O.validateDate(M, d); msg(r.ok ? '' : (M || d.calendar !== 'lunar' ? r.msg : '')); }
             else msg('');
           };
           $$('input[name=cal]', el).forEach(function (r) { r.onchange = function () { d.calendar = this.value; if (d.calendar !== 'lunar') d.leap = false; chk(); }; });
           ['Y', 'M', 'D'].forEach(function (k) { $('#f' + k, el).onchange = function () { d[{ Y: 'year', M: 'month', D: 'day' }[k]] = this.value; chk(); }; });
           $('#fLeap', el).onchange = function () { d.leap = this.checked; chk(); };
+          H.engine().then(function () { chk(); }).catch(function () { });
           var quickInput=$('#fQuick',el); if(quickInput) quickInput.oninput = function () { var v = this.value.replace(/\D/g, ''); if (v.length === 8) { d.year = +v.slice(0, 4); d.month = +v.slice(4, 6); d.day = +v.slice(6); $('#fY', el).value = d.year; $('#fM', el).value = d.month; $('#fD', el).value = d.day; chk(); } };
         }
         if (f === 'time') {
