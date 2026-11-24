@@ -68,17 +68,25 @@
       var d; try { d = M.evaluateDomainLuck(ch, x, lv); } catch (e) { return null; }
       var o = d && d[key]; if (!o) return null;
       var v = Math.round(clamp(o.score, 0, 100)), label = scope === 'month' ? (new Date(x.startMs).getMonth() + 1) + '월' : x.year + '년';
-      return { i: i, v: v, s: sig(key, v), el: elOf(M, x), label: label, gz: M.gzNameK ? M.gzNameK(x) : '', age: scope === 'month' ? null : x.year - ch.solar.y, sum: o.summary || '', why: (o.reasons || [])[0] || '', loss: o.loss || null };
+      return { i: i, x: x, v: v, s: sig(key, v), el: elOf(M, x), label: label, gz: M.gzNameK ? M.gzNameK(x) : '', age: scope === 'month' ? null : x.year - ch.solar.y, sum: o.summary || '', why: (o.reasons || [])[0] || '', loss: o.loss || null };
     }).filter(Boolean);
     if (rows.length < 3) return null;
     var top = rows.slice().sort(function (a, b) { return b.v - a.v || a.i - b.i; }).slice(0, 3), low = rows.slice().sort(function (a, b) { return a.v - b.v || a.i - b.i; })[0];
-    var star = top.map(function (r) { return r.i; });
+    var star = top.map(function (r) { return r.i; }), unit = scope === 'month' ? '달' : '해';
     var body = '<div class="dp-bars">' + rows.map(function (r) { return bar((star.indexOf(r.i) >= 0 ? '★ ' : '') + r.label + (r.gz ? ' ' + r.gz : ''), r.v, { text: r.v + ' · ' + (r.el != null ? LT().EL_H[r.el] + ' · ' : '') + r.s.n, color: r.el != null ? EL_COL[r.el] : r.s.c }); }).join('') + '</div>';
     if (rows.some(function (r) { return r.el != null; })) body = elLegend(key) + body;
-    body += '<h4 class="td-h">' + esc(S.name) + '이 가장 살아나는 ' + (scope === 'month' ? '달' : '해') + ' TOP 3</h4><ol class="td-ol">' + top.map(function (r) {
-      return '<li><b>' + esc(r.label) + (r.age != null ? ' (' + r.age + '세)' : '') + '</b> ' + chip(r.s) + ' <span class="td-sc">' + r.v + '점</span><br>' + esc(r.sum) + (r.why ? '<br><small>근거: ' + esc(r.why) + '</small>' : '') + '</li>';
-    }).join('') + '</ol>';
-    body += '<p class="td-note"><b>가장 조심할 ' + (scope === 'month' ? '달' : '해') + '</b>: ' + esc(low.label) + ' ' + chip(low.s) + ' — ' + esc(low.sum) + '</p>';
+    // 지표 풀이(2026-11-25, 만세력·타임라인과 같은 기준): 등급별 한 줄(gradeLine) + 그 시기 오행을 이 지표 말로(readDomain) — 엔진 '무난' 요약이 등급과 엇갈리면 등급 한 줄만
+    var cnt = { good: 0, ok: 0, care: 0 }; rows.forEach(function (r) { cnt[r.s.k] = (cnt[r.s.k] || 0) + 1; });
+    var gl = function (r) { var T = LT(); return T && T.gradeLine ? T.gradeLine(key, r.s.k) : ''; };
+    var calm = function (r) { return /무난|뚜렷한 쏠림이 없/.test(r.sum) && r.s.k !== 'ok'; };
+    var rd = function (r) { var T = LT(); if (!T || !T.readDomain) return null; try { return T.readDomain(M, ch, r.x, lv, key, { score: r.v, name: S.name, grade: r.s.k }); } catch (e) { return null; } };
+    var said = function (r) { var g = gl(r), t = calm(r) || !r.sum ? '' : r.sum; return esc(g) + (g && t ? ' ' : '') + esc(t); };
+    var how = function (r) { var d = rd(r); return d ? '<br><small class="td-how">' + esc(d.hanja + ' ' + d.elName + ' 기운 · ' + d.area + ' 쪽: ' + d.words.join('·')) + ' — ' + esc(d.recommend[0] || '') + '</small>' : ''; };
+    body += '<p class="td-note">' + (scope === 'month' ? '앞으로 12개월' : '앞으로 10년') + ' 등급: <b>좋음 ' + cnt.good + unit + '</b> · 무난 ' + cnt.ok + unit + ' · <b>조심 ' + cnt.care + unit + '</b> <span class="td-mut">(이 사주의 평소 ' + esc(S.name) + '과 견준 등급)</span></p>';
+    body += '<h4 class="td-h">' + esc(S.name) + '이 가장 살아나는 ' + unit + ' TOP 3</h4><ol class="td-ol">' + top.map(function (r) {
+      return '<li><b>' + esc(r.label) + (r.age != null ? ' (' + r.age + '세)' : '') + '</b> ' + chip(r.s) + ' <span class="td-sc">' + r.v + '점</span><br>' + said(r) + how(r) + (r.why ? '<br><small>근거: ' + esc(r.why) + '</small>' : '') + '</li>';
+    }).join('') + '</ol>' + (top[0].s.k !== 'good' ? '<p class="td-mut">이 기간에는 ' + esc(S.name) + ' 좋음인 ' + (unit === '달' ? '달이' : '해가') + ' 없어, 상대적으로 높은 ' + (unit === '달' ? '달을' : '해를') + ' 골랐어요.</p>' : '');
+    body += '<p class="td-note"><b>' + (low.s.k === 'care' ? '가장 조심할 ' : '상대적으로 가장 약한 ') + unit + '</b>: ' + esc(low.label) + ' ' + chip(low.s) + ' <span class="td-sc">' + low.v + '점</span> — ' + said(low) + how(low) + '</p>';
     if (key === 'windfall') {
       var lossTop = rows.filter(function (r) { return r.loss; }).sort(function (a, b) { return b.loss.score - a.loss.score; }).slice(0, 2);
       if (lossTop.length) body += '<p class="td-note td-warn"><b>뜻밖의 재물 손실 위험이 큰 ' + (scope === 'month' ? '달' : '해') + '</b>: ' + lossTop.map(function (r) { return esc(r.label) + ' (손실 위험 ' + r.loss.score + '점 · ' + esc(r.loss.band) + ')'; }).join(', ') + '. 이 시기엔 보증·고위험 투자·큰 지출을 한 번 더 확인하세요.</p>';

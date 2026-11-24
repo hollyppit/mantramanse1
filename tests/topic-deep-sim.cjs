@@ -83,5 +83,25 @@ Object.keys(nullCount).forEach(k => ok(false, `그려지지 않은 블록 ${k} $
 // 10 reading-feature 연결: Deep 이 없으면 build 는 null(기존 동작), render 경로는 SPEC 에서 td: 조각만 처리
 ok(typeof RF.build === 'function', 'reading-feature build');
 
+// 지표 풀이(2026-11-25): 분야 그래프 풀이가 그 지표 말로 — 등급 분포 줄·등급별 한 줄(gradeLine)·오행을 지표 말로(readDomain)·가장 약한 때 이름이 등급과 맞음
+{ const LT = globalThis.MantraLuckTheme, LGm = globalThis.MantraLuckGrade, KEYS = ['windfall', 'business', 'job', 'move', 'career', 'marriage', 'family', 'child', 'social', 'noble', 'study', 'estate', 'wealth', 'love'];
+  let nAll = 0;
+  for (let i = 0; i < 6; i++) { const H = mk(1958 + i * 9, 1 + (i * 5) % 12, 2 + (i * 7) % 26, (i * 5) % 24, i % 2 ? 'M' : 'F');
+    for (const key of KEYS) for (const scope of ['year', 'month']) { const out = TD.render({ custom: 'td:sub', key, scope }, H, 'x'); if (!out) continue; nAll++;
+      const txt = out.replace(/<[^>]+>/g, ' ');
+      ok(/등급:/.test(txt) && / 쪽: /.test(txt), '등급 분포·지표 말 ' + key + ' ' + scope);
+      ok(!BAD.test(out), '깨진 값 ' + key);
+      const gl = ['good', 'ok', 'care'].map(g => LT.gradeLine(key, g)); ok(gl.some(t => txt.indexOf(t) >= 0), '등급별 한 줄 ' + key);
+      const hasCare = /가장 조심할 (해|달)/.test(txt), weak = /상대적으로 가장 약한 (해|달)/.test(txt); ok(hasCare !== weak, '가장 약한 때 이름 하나 ' + key);
+      const m = txt.match(/(가장 조심할|상대적으로 가장 약한) (해|달)\s*:\s*\S+\s+(좋음|무난|조심)/); ok(m && ((m[1] === '가장 조심할') === (m[3] === '조심')), '가장 약한 때 이름이 등급과 맞음 ' + key + ' ' + (m && m[0]));
+      ok(!/해가 없어, 상대적으로 높은 달|달이 없어, 상대적으로 높은 해/.test(txt), '조사·단위 ' + key);
+    } }
+  ok(nAll > 100, '지표 풀이 렌더 수 ' + nAll);
+  // reading-feature 재물·인연 순위: 이유 앞에 등급별 한 줄
+  const H = mk(1990, 3, 15, 14, 'F'), RFm = R.ReadingFeature;
+  for (const kind of ['wealth', 'love']) { const rows = RFm.rank(M, H.ch, now, kind, 'year'); ok(rows && rows.length >= 3, '순위 ' + kind);
+    (rows || []).slice(0, 3).forEach(r => { const g = ['good', 'ok', 'care'].map(k => LT.gradeLine(kind, k)); ok(g.some(t => r.why.indexOf(t) === 0), '순위 이유가 등급 한 줄로 시작 ' + kind + ' ' + r.why); }); }
+  ok(/LTm\.gradeLine\(kind,gk\)/.test(fs.readFileSync(path.join(root, 'report/v2/reading-feature.js'), 'utf8')), 'reading-feature 연결');
+  ok(/<script src="\/luck-grade\.js[^"]*"><\/script><script src="\/luck-element-theme\.js/.test(fs.readFileSync(path.join(root, 'report/v2/index.html'), 'utf8')), '상세풀이에 등급 모듈'); }
 if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log('  ' + f)); process.exit(1); }
 console.log(`모든 검증 통과 · 사주 ${N}명 × 블록 ${parts.length}개 · 꺼짐/켜짐 · 등급 구간 · 궁합 · 현공 · 직업 순위 · 결정론`);

@@ -68,7 +68,7 @@ function rowsOf(H,kind,scope){var D=R.Deep,M=H.M,ch=H.ch,sd=H.sd,Y=sd.nowYear,li
  if(scope==='month'){var all=M.wolun(ch,Y).concat(M.wolun(ch,Y+1)),now=H.now||Date.now(),ci=0;all.forEach(function(x,i){if(x.startMs<=now)ci=i;});list=all.slice(ci,ci+12);}else list=M.seunRange(ch,Y,Y+9);
  return list.map(function(x,i){var v,why='',d=null;
   if(kind==='career'){v=D.pct10(D.scoreOf(x));why=(D.TG_DO[x.stemTG]||'새 흐름을 맞는')+' 시기';if(R.AgeFit&&R.AgeFit.odd(why,R.AgeFit.band(H.sd)))why='새 흐름을 맞는 시기';}
-  else{try{d=M.evaluateDomainLuck(ch,x,lv);}catch(e){}var o=d&&d[kind];if(!o)return null;v=Math.max(0,Math.min(100,Math.round(o.score)));why=o.summary||o.band||'';}
+  else{try{d=M.evaluateDomainLuck(ch,x,lv);}catch(e){}var o=d&&d[kind];if(!o)return null;v=Math.max(0,Math.min(100,Math.round(o.score)));why=o.summary||o.band||'';try{var LGm=root.MantraLuckGrade,LTm=root.MantraLuckTheme;if(LGm&&LTm&&LTm.gradeLine){var gk=LGm.metric(kind,o.score).k,hk=LTm.gradeLine(kind,gk);if(hk)why=hk+((/무난|뚜렷한 쏠림이 없/.test(why)&&gk!=='ok')||!why?'':' '+why);}}catch(e){}}
   var label=scope==='month'?((new Date(x.startMs).getMonth()+1)+'월 · '+(x.termName||'')):(x.year+'년 '+M.gzNameK(x));
   var kd=new Date(x.startMs+9*3600e3);return {i:i,v:v,label:label,why:why,y:scope==='month'?kd.getUTCFullYear():x.year,m:scope==='month'?kd.getUTCMonth()+1:null,gz:M.gzNameK(x)};}).filter(Boolean);}
 // 서사 엔진(life-narrative.js)이 '좋은 해·달'을 고를 때 그래프·후킹과 같은 점수를 쓰게 한다. 높은 순.
