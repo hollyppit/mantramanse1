@@ -62,13 +62,14 @@ console.log('전체 흐름(세운) 단계 비율: ' + fsh.map(v => v.toFixed(0) 
 
 // 5. 화면 연결
 for (const [pat, msg] of [
-  [/const sg = sigFlow\(v\), col = sg\.c;/, '대운·월운 막대 색이 신호등이 아님'], [/const col = sigFlow\(v\)\.c;/, '연도별 막대 색이 신호등이 아님'],
+  [/const sg = sigFlow\(v\), col = it\.el != null \? elFill\(it\.el\) : sg\.c;/, '대운·월운 막대 색이 오행(없으면 등급)이 아님'], [/col = de != null \? elFill\(de\) : sigFlow\(v\)\.c;/, '연도별 막대 색이 오행(없으면 등급)이 아님'],
   [/s \+= flowZones\(y, L, W - R, RG\);/, '전체 흐름 그래프에 배경 띠가 없음'], [/s \+= metricZones\(k, y, L, W - R\);/, '지표 그래프에 배경 띠가 없음'],
-  [/\$\{sigLegend\(flowRule\(\)\)\}/, '전체 흐름 범례가 신호등이 아님'], [/\$\{sigLegend\(metricRule\(S\.metric\)\)\}/, '지표 범례가 신호등이 아님'],
+  [/sigLegend\('보조 표시 · '/, '전체 흐름 등급 범례가 보조 표시가 아님'], [/<script src="luck-element-theme\.js"><\/script>/, '오행 테마 모듈을 불러오지 않음'], [/\$\{themeBox\(x, kind\)\}/, '상세에 오행 테마 상자가 없음'], [/\$\{sigLegend\(metricRule\(S\.metric\)\)\}/, '지표 범례가 신호등이 아님'],
   [/style="background:\$\{sgSoft\(sg\)\}"/, '달력 칸 배경이 신호등이 아님'], [/class="sgw"/, '달력 칸에 단계 글자가 없음'], [/class="sgbar"/, '달력에 이달 분포 띠가 없음'],
   [/<span class="k">좋은 날<\/span>/, '좋은 날 목록이 없음'], [/<span class="k">조심할 날<\/span>/, '조심할 날 목록이 없음'],
   [/sgVars\(tileSig\(x\)\)/, '대운·세운·월운 타일에 신호등 띠가 없음']]) ok(pat.test(html), msg);
 ok(!/const col = it\.ph \? m6Col\(it\.ph\)/.test(html), '막대 색이 아직 주 흐름 색을 씀');
+ok((html.match(/\$\{elLegendBar\(\)\}<div class="chart" data-chart="(daeun|life|wolun)">/g) || []).length === 3, '대운·연도·월운 그래프 위에 오행 범례가 없음(2026-11-25)');
 ok(/--sg-good:/.test(html) && /--sg-ok:/.test(html) && /--sg-care:/.test(html), '등급 색 변수가 없음');
 ok(!/--sg-(best|warn|bad)\b/.test(html), '옛 5단계 색 변수가 남아 있음');
 ok(/<script src="luck-grade\.js"><\/script>/.test(html), 'index.html이 luck-grade.js를 불러오지 않음');

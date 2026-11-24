@@ -14,6 +14,7 @@
   --line: #E7EAF1; --accent: #2F5BFF; --accent-2: #7B61FF; --accent-soft: #ECF0FF; --seal: #FF5B4A;
   --wood: #2FA866; --fire: #E8402F; --earth: #F5B921; --metal: #D9DDE5; --water: #2B303C;
   --wood-ink: #17744B; --fire-ink: #C9331F; --earth-ink: #946B00; --metal-ink: #5F4E9E; --water-ink: #2A48A0;
+  --elc-wood: #2FA866; --elc-fire: #E8402F; --elc-earth: #E0A91C; --elc-metal: #A7AEBD; --elc-water: #2F55B8;   /* 운세 흐름 그래프 오행 색(2026-11-25) */
   --wood-on: #fff; --fire-on: #fff; --earth-on: #2A2100; --metal-on: #1D2230; --water-on: #fff;
   --d-atk: #1E9E57; --d-ext: #0E9AA7; --d-hrv: #8A5CF6; --d-acc: #2F6BFF; --d-chg: #E08A00; --d-def: #E5533D;
   --good: #1E9E57; --bad: #F0563F; --mid: #BAC1CE; --good-soft: #E3F5EA; --bad-soft: #FFEAE6;
@@ -403,6 +404,11 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 @media (max-width: 620px) { .now { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; } .now .nowc { padding: 8px 6px; border-radius: 12px; gap: 1px; } .now .nowc .gzb { font-size: 1.12rem; } .now .nowc .tgs { font-size: 0.66rem; } .now .nowc > span:last-child { font-size: 0.66rem; line-height: 1.3; } .now .nowc > span:last-child .muted { display: block; } .now .nowc > span:last-child > :not(.muted) { font-size: 0.6rem; padding: 0 4px; margin: 1px 1px 0 0; line-height: 1.5; } }
 .nowc { border: 0; box-shadow: inset 0 0 0 1px var(--line); border-radius: 16px; padding: 10px 12px; display: grid; gap: 2px; cursor: pointer; text-align: left; background: var(--surface); }
 .nowc:hover { box-shadow: inset 0 0 0 2px var(--accent); }
+.el-leg { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin: 6px 0 4px; font-size: 0.76rem; color: var(--ink-2); }
+.el-leg span { display: inline-flex; align-items: center; gap: 4px; } .el-leg i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; } .el-leg .el-leg-n { flex-basis: 100%; font-size: 0.7rem; color: var(--ink-3); }
+.el-theme { margin: 8px 0 10px; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--ec) 9%, var(--surface)); box-shadow: inset 3px 0 0 var(--ec), inset 0 0 0 1px color-mix(in srgb, var(--ec) 28%, transparent); }
+.el-theme .elt-h { margin: 0; font-size: 0.86rem; } .el-theme .elt-h b { color: var(--ei); font-family: var(--f-display); font-size: 1.02rem; margin-right: 4px; } .el-theme .elt-h span { color: var(--ink-2); font-weight: 700; margin-left: 4px; }
+.el-theme .elt-s { margin: 4px 0 6px; font-size: 0.84rem; font-weight: 700; } .el-theme .elt-g { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px 14px; } .el-theme .elt-g b { font-size: 0.78rem; color: var(--ei); } .el-theme ul { margin: 2px 0 0; padding-left: 1.1em; font-size: 0.8rem; line-height: 1.5; }
 .now-care { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 10px; padding: 9px 12px; border-radius: 12px; background: color-mix(in srgb, var(--sg-care) 8%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sg-care) 30%, transparent); }
 .now-care .k { font-size: 0.8rem; font-weight: 800; color: color-mix(in srgb, var(--sg-care) 75%, var(--ink)); }
 .now-care .k { flex-basis: 100%; } .now-care .nc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; flex-basis: 100%; } .now-care .nc-list li { display: flex; gap: 8px; align-items: baseline; font-size: 0.8rem; line-height: 1.45; } .now-care .nc-chip { flex: none; } .now-care .nc-w { color: var(--ink-2); } .now-care .nc-chip.strong { box-shadow: 0 0 0 2px color-mix(in srgb, var(--sg-care) 45%, transparent); } .now-care .nc-n { flex-basis: 100%; font-size: 0.72rem; }
@@ -447,6 +453,7 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
   --us-c8: #A88763; --us-k8: #573D24; --us-c9: #97A3C0; --us-k9: #3F4C69; --us-c10: #AA92E3; --us-k10: #573BA3; --us-c11: #C8A2E6; --us-k11: #723A9E;
 }
 :root[data-theme="dark"] {
+  --elc-wood: #46C27E; --elc-fire: #F2604F; --elc-earth: #EDBB3A; --elc-metal: #C9CED9; --elc-water: #6A8FEA;
   --us-c0: #4FA36E; --us-k0: #A6EBC0; --us-c1: #4BA3B0; --us-k1: #A3E6EF; --us-c2: #3E9A66; --us-k2: #9EE3BB; --us-c3: #2D8259; --us-k3: #94DDB6;
   --us-c4: #B98D25; --us-k4: #F4D58A; --us-c5: #C27636; --us-k5: #F8C496; --us-c6: #A57A55; --us-k6: #EBC6A6; --us-c7: #8A7D70; --us-k7: #DCCFC3;
   --us-c8: #86694B; --us-k8: #E1C8AB; --us-c9: #6F7A97; --us-k9: #C9D3EC; --us-c10: #8670C4; --us-k10: #D6C9FA; --us-c11: #9F7CC0; --us-k11: #E9D3FA;
@@ -1205,6 +1212,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="ten-god-luck.js"></script>
 <script src="luck-grade.js"></script>
 <script src="luck-care.js"></script>
+<script src="luck-element-theme.js"></script>
 <script src="luck-alerts.js"></script>
 <script src="signal-colors.js"></script>
 <script src="glossary-cases.js"></script>
@@ -5387,7 +5395,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const ovTag = k => `<span class="ovb ov-${k}">${OVL[k][0]}</span>`;
   const ovBtn = (k, e) => `<button type="button" class="term ovb ov-${k}" data-term="${OVL[k][2]}"${volAttr(e)}>${OVL[k][0]}</button>`;
   const ovTags = (e, btn) => ['volatility', 'defense'].filter(k => e.overlays[k].active).map(k => btn ? ovBtn(k, e) : ovTag(k)).join('');
-  const modeLegend = () => `${sigLegend(flowRule())}<div class="legend"><span>막대 높이 = 흐름 적합도 · 막대 아래 글자 = 그 운의 ${term('십성', '십신')}(천간 기준 · 누르면 지지 십신도)</span><span>${ovTag('volatility')}${ovTag('defense')} ${term('변화 신호')}·${term('부담 신호')} = 막대 테두리와 아래 글자(변·부)</span>${showGhost() ? `<span><i class="sw ghost"></i>흐린 막대·선 = ${term(schoolName(altSchool()))}만 따로 본 값</span>` : ''}</div>`;
+  const modeLegend = () => `${sigLegend('보조 표시 · ' + flowRule().replace('색 = ', '').replace('이 시기가 나에게 얼마나 유리한가', '점수 등급'))}<div class="legend"><span>막대 높이 = 흐름 적합도 · 막대 아래 글자 = 그 운의 ${term('십성', '십신')}(천간 기준 · 누르면 지지 십신도)</span><span>${ovTag('volatility')}${ovTag('defense')} ${term('변화 신호')}·${term('부담 신호')} = 막대 테두리와 아래 글자(변·부)</span>${showGhost() ? `<span><i class="sw ghost"></i>흐린 막대·선 = ${term(schoolName(altSchool()))}만 따로 본 값</span>` : ''}</div>`;
   // 시진 4단계 실행 등급. 목적마다 맞는 기운(십성 묶음 번호: 0 비겁 1 식상 2 재성 3 관성 4 인성)
   const PURPOSE = { gen: ['일반', null], deal: ['계약', [3, 4]], money: ['돈', [2, 1]], create: ['창작', [1, 4]] };
   const GRADE = { '실행': ['◎', 'g-go'], '활용': ['○', 'g-use'], '주의': ['△', 'g-warn'], '회피': ['×', 'g-avoid'] };
@@ -7376,6 +7384,19 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // 흐름 등급(지표와 상관없이 전체 흐름 기준) — 엔진의 4단계 상태 글자(순풍·보통·주의·부담) 대신 화면에 쓰는 3단계 이름
   const flowGrade = x => sigFlow(x.ev && x.ev.level === 'seun' && x.combined != null ? x.combined : luckV(x));
   const gradeChip = g => `<span class="sgchip" style="${sgVars(g)}">${g.n}</span>`;
+  // 운세 흐름 그래프 오행 색(2026-11-25): 막대 색 = 그 시기에 두드러지는 오행(luck-element-theme.js). 길흉이 아니며, 좋음·무난·조심은 점수 옆·상세에 보조로만
+  const LT = () => window.MantraLuckTheme, EL_VAR = ['wood', 'fire', 'earth', 'metal', 'water'];
+  const elOf = x => { try { const m = LT() && LT().mainEl(M, x); return m ? m.el : null; } catch (e) { return null; } };
+  const elFill = e => `var(--elc-${EL_VAR[e]})`, elInk = e => `var(--${EL_VAR[e]}-ink)`;
+  const elLegendBar = () => !LT() || isDomain() ? '' : `<div class="el-leg">${LT().LEGEND.map(g => `<span><i style="background:${elFill(g.el)}"></i><b style="color:${elInk(g.el)}">${g.hanja} ${g.name}</b> ${g.words.slice(0, 2).join('·')}</span>`).join('')}<span class="el-leg-n">막대 색 = 그 시기에 두드러지는 기운(길흉 아님) · 막대 높이 = 흐름 점수 · 막대를 누르면 이 기운을 어떻게 쓰면 좋을지 보여요</span></div>`;
+  function themeBox(x, kind) {
+    const T = LT(); if (!T || isDomain() || !x || !x.ev) return '';
+    let r; try { r = T.read(M, S.ch, x, kind); } catch (e) { return ''; } if (!r) return '';
+    const li = a => a.map(t => `<li>${esc(t)}</li>`).join('');
+    return `<div class="el-theme" style="--ec:${elFill(r.el)};--ei:${elInk(r.el)}"><p class="elt-h"><b>${r.hanja} ${r.elName}</b> 이 시기에 두드러지는 기운 <span>${r.words.join(' · ')}</span></p><p class="elt-s">${esc(r.summary)}</p>`
+      + `<div class="elt-g"><div><b>내 원국과의 작용</b><ul>${li(r.interact)}</ul></div><div><b>추천 활동·활용 방향</b><ul>${li(r.recommend)}</ul></div>${r.caution.length ? `<div><b>주의할 점</b><ul>${li(r.caution)}</ul></div>` : ''}</div>`
+      + `<p class="small muted">${esc(r.basis.join(' · '))}. 색은 그 시기에 두드러지는 기운이고 길흉이 아니에요. 좋음·무난·조심은 위 점수 옆의 보조 표시예요.</p></div>`;
+  }
   const sigStrong = (v, key) => !!(key ? LG.extreme(key, v) : LG.flowExtreme(v, M));
   // 그래프 배경 띠: 좋음 구간(초록)·조심 구간(주황)을 옅게 깔아 어느 높이가 좋은지 바로 보이게 한다
   const sgZone = (x0, x1, yA, yB, g) => `<rect x="${x0}" y="${Math.min(yA, yB)}" width="${x1 - x0}" height="${Math.abs(yB - yA)}" style="fill:${g.c};opacity:.1"/>`;
@@ -7447,7 +7468,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return `<section class="card"><div class="card-h"><h2>그래프 지표</h2><span class="note">아래 대운·연도·월운 그래프와 일진 달력에 적용됩니다</span></div>
       <div class="cp-filters" role="group" aria-label="그래프 지표">${METRICS.map(([k, l]) => `<button type="button" class="opt" data-act="metric:${k}" aria-pressed="${m === k}">${l}</button>`).join('')}</div>
       <div class="cp-filters" role="group" aria-label="직업·가족 세부 지표" style="margin-top:6px">${METRICS_SUB.map(([k, l]) => `<button type="button" class="opt" data-act="metric:${k}" aria-pressed="${m === k}">${l}운</button>`).join('')}</div>
-      <p class="small" style="color:var(--ink-2)">${m === 'flow' ? '전체 흐름: 원국의 불균형을 들어오는 운이 보완하는지 심화하는지를 나타내는 −100~+100의 상대 지표입니다. 막대 색은 좋고 나쁨(좋음·무난·조심)이고, 막대 아래 글자는 활성화되는 일입니다.' : `<b>${info.full}</b> — ${info.sub}. 0~100 눈금이며 ${m === 'accident' ? '높을수록 주의 신호가 많이 겹쳤다는 뜻입니다.' : '높을수록 그 지표의 값이 큽니다.'}`}</p>
+      <p class="small" style="color:var(--ink-2)">${m === 'flow' ? '전체 흐름: 원국의 불균형을 들어오는 운이 보완하는지 심화하는지를 나타내는 −100~+100의 상대 지표입니다. 막대 색은 그 시기에 두드러지는 오행(길흉 아님), 높이는 흐름 점수이고, 막대 아래 글자는 그 시기의 십신입니다. 좋음·무난·조심은 점수 옆·상세의 보조 표시입니다.' : `<b>${info.full}</b> — ${info.sub}. 0~100 눈금이며 ${m === 'accident' ? '높을수록 주의 신호가 많이 겹쳤다는 뜻입니다.' : '높을수록 그 지표의 값이 큽니다.'}`}</p>
       ${m === 'health' || m === 'accident' ? `<p class="cp-disc">${info.note}</p>` : m !== 'flow' ? `<p class="small muted">${info.note}</p>` : ''}
       ${m === 'wealth' ? wealthLossLine() : ''}
     </section>`;
@@ -8276,7 +8297,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         (deep.trim() ? `<details class="ib-more le-deep"><summary>더 깊이 보기 · 오행 흐름 · 십성 구조 · 뿌리 · 들어오는 오행</summary>${deep}</details>` : '');
       const s3 = hierBox(x, kind) + olBox(x, kind);
       const s4 = domainBox(x, kind, title);
-      return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${gradeChip(flowGrade(x))} <b class="num">${signed(luckV(x))}</b></span></div>
+      return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${gradeChip(flowGrade(x))} <b class="num">${signed(luckV(x))}</b></span></div>${themeBox(x, kind)}
       ${banner}
       ${quickBox(x, kind)}
       ${leSec(1, '① 외부 환경의 오행 흐름', '모두에게 같은 시간의 기운 · 좋고 나쁨 판단 없음', s1)}
@@ -8284,7 +8305,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${leSec(3, '③ 상위 운과 하위 운의 상호작용', kind === 'daeun' ? '대운은 가장 큰 층이라 원국 위에 쌓이는 모습만 봐요' : '큰 운이 배경, 작은 운이 구체화 · 위가 아래를 정하지는 않아요', s3)}
       ${leSec(4, '④ 영역별 영향', '재물·커리어·인연 등', s4)}${tail}</div>`;
     }
-    return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${gradeChip(flowGrade(x))} <b class="num">${signed(luckV(x))}</b></span></div>
+    return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${gradeChip(flowGrade(x))} <b class="num">${signed(luckV(x))}</b></span></div>${themeBox(x, kind)}
       ${banner}
       ${ib}
       ${kind === 'daeun' || kind === 'seun' ? efBox(x, kind) : ''}
@@ -8535,27 +8556,27 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     <section class="card">
       <div class="card-h"><h2>${term('대운')} 흐름 <span class="lvl">${LEVEL_ROLE.daeun}</span></h2><span class="note">${ch.daeun.forward ? term('순행') : term('역행')} · ${term('대운수')} ${ch.daeun.num} (정확히 ${ch.daeun.exact.toFixed(2)}년)</span></div>
       ${chartLegend()}
-      <div class="chart" data-chart="daeun"></div>
+      ${elLegendBar()}<div class="chart" data-chart="daeun"></div>
       <div class="lts">${ch.daeun.list.map((x, i) => luckTile(x, `${x.startAge}세 · ${x.startYear}`, 'daeun:' + i, sel.kind === 'daeun' && sel.i === i, du === x)).join('')}</div>
       ${lcDaeunHTML(ch)}
       ${foldBox('대운의 12운성 변화 보기 · 기운이 자라고 쉬는 순서', unDaeunHTML(ch, du))}
-      ${daeunDetail || '<p class="note">막대 높이는 흐름 적합도, 색은 좋고 나쁨(좋음·무난·조심), 막대 아래 글자는 그 대운 천간의 십신, 변화·부담 신호는 테두리와 아래 글자(변·부)입니다. 막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>'}
+      ${daeunDetail || '<p class="note">막대 높이는 흐름 적합도, 색은 그 시기에 두드러지는 오행(길흉 아님, 좋음·무난·조심은 보조 표시), 막대 아래 글자는 그 대운 천간의 십신, 변화·부담 신호는 테두리와 아래 글자(변·부)입니다. 막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>'}
     </section>
     <section class="card">
       <div class="card-h"><h2>연도별 흐름 · ${term('세운')} <span class="lvl">${LEVEL_ROLE.seun}</span></h2></div>
       ${chartLegend()}
       <div class="legend sj-leg" style="margin:4px 0 2px"><span><i class="sw sj-sw"></i><b style="color:var(--samjae)">빗금 띠·들/눌/날 = 삼재 3년</b> · 띠 기준 전통 참고 보조 지표(막대 색·점수와 별개)</span></div>
-      <div class="chart" data-chart="life"></div>
+      ${elLegendBar()}<div class="chart" data-chart="life"></div>
       ${samjaeBox(sel.kind === 'seun' ? sel.Y : curY)}
       ${yearSummary(curY)}
       ${lcSeunHTML(sel.kind === 'seun' ? sel.Y : curY)}
       ${foldBox('환경 변화 타임라인 보기 · 직업·재물·인연·이동·학습이 부각되는 해', envTimeline('seun'))}
-      ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60%를 섞은 흐름 점수, 색은 좋고 나쁨(좋음·무난·조심), 테두리·아래 글자는 변화·부담 신호입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
+      ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60%를 섞은 흐름 점수, 색은 그 시기에 두드러지는 오행(길흉 아님, 좋음·무난·조심은 보조 표시), 테두리·아래 글자는 변화·부담 신호입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
     </section>
     <section class="card">
       <div class="card-h"><h2>${Y}년 ${term('월운')} <span class="lvl">${LEVEL_ROLE.wolun}</span>${samjaeTag(samjaeOf(Y))}</h2><span class="seg"><button data-act="year:-1" aria-label="이전 해">‹</button><button data-act="year:1" aria-label="다음 해">›</button></span></div>
       ${chartLegend()}${tjLegend(Y)}
-      <div class="chart" data-chart="wolun"></div>
+      ${elLegendBar()}<div class="chart" data-chart="wolun"></div>
       ${envTimeline("wolun")}
       <div class="lts">${M.wolun(ch, Y).map((x, i, a) => luckTile(x, `${x.termName} · ${kstYMD(x.startMs)[1]}월`, 'wolun:' + i, sel.kind === 'wolun' && sel.i === i, NOW >= x.startMs && NOW < (a[i + 1] ? a[i + 1].startMs : Infinity))).join('')}</div>
       ${wolDetail ? wolDetail + (sel.kind === 'wolun' ? tjCompare(Y, sel.i) : '') : ''}${wolDetail ? '' : `<p class="note">입춘(${Y}.2.4 무렵)부터 다음 해 소한까지의 12개월입니다. 막대를 누르면 그 달의 ${term('일운')} 달력으로 이동합니다.</p>`}
@@ -10678,7 +10699,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       s += `<g data-act="lc:${sp.k}" style="cursor:pointer"><title>${esc(sp.tip)}</title><path d="M${x0},${SP + 6} V${SP} H${x1} V${SP + 6}" style="fill:none;stroke:${col};stroke-width:${sp.on ? 2.5 : 1.5}"/>`
         + `<rect x="${x0}" y="0" width="${x1 - x0}" height="${SP + 8}" style="fill:transparent"/><text x="${(x0 + x1) / 2}" y="${SP - 6}" text-anchor="middle" style="fill:${col};font-size:11px;font-weight:${sp.on ? 900 : 700}">${esc(sp.label)}</text></g>`;
     });
-    s += flowZones(y, L, W - R, RG);
+    const ELM = items.some(q => q.el != null);   // 오행 색 모드: 좋음·무난·조심 배경 띠는 걷는다(보조는 점수 옆·상세)
+    if (!ELM) s += flowZones(y, L, W - R, RG);
     for (const g of [60, 30, 0, -30, -60]) {
       s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:${g === 0 ? 'var(--ink-3)' : 'var(--line)'};stroke-width:1" ${g && Math.abs(g) !== RG ? 'stroke-dasharray="3 3"' : ''}/>`;
       s += `<text x="${L - 6}" y="${y(g) + 3.5}" text-anchor="end" style="fill:var(--ink-3);font-size:10px">${g > 0 ? '+' + g : g < 0 ? '−' + (-g) : '0'}</text>`;
@@ -10686,7 +10708,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     items.forEach((it, i) => {
       const cx = L + step * (i + 0.5), v = it.v ?? 0, y0 = y(0), y1 = y(v);
       const top = Math.min(y0, y1), h = Math.max(Math.abs(y1 - y0), 2);
-      const sg = sigFlow(v), col = sg.c;
+      const sg = sigFlow(v), col = it.el != null ? elFill(it.el) : sg.c;
       if (it.alt != null) { const ya = y(it.alt); s += `<rect x="${cx - bw / 2 - 4}" y="${Math.min(y0, ya)}" width="${bw + 8}" height="${Math.max(Math.abs(ya - y0), 2)}" rx="3" class="ghost"/>`; }
       const r = Math.min(4, h / 2), x0 = cx - bw / 2;
       const d = v >= 0 ? `M${x0},${y0} V${top + r} Q${x0},${top} ${x0 + r},${top} H${x0 + bw - r} Q${x0 + bw},${top} ${x0 + bw},${top + r} V${y0} Z`
@@ -10694,7 +10716,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const ovs = it.ov ? ovStroke(it.ov) : '';
       s += `<path d="${d}" style="fill:${col};${ovs}${it.sel ? ';stroke:var(--ink);stroke-width:2;stroke-dasharray:none' : ''}"/>`;
       if (it.ov && (it.ov.volatility.active || it.ov.defense.active)) s += `<text x="${cx}" y="${H - 4}" text-anchor="middle" style="fill:${it.ov.defense.active ? 'var(--d-def)' : 'var(--d-chg)'};font-size:9px;font-weight:800">${it.ov.volatility.active ? '변' : ''}${it.ov.defense.active ? '부' : ''}</text>`;
-      { const by = v >= 0 ? top - 16 : top + h + 4; s += `<rect x="${cx - 14}" y="${by}" width="28" height="12" rx="6" style="fill:${sg.c}"/><text x="${cx}" y="${by + 9}" text-anchor="middle" style="fill:${sg.t};font-size:9px;font-weight:800">${sg.n}</text>`; }
+      if (it.el != null) { const by = v >= 0 ? top - 6 : top + h + 14; s += `<text x="${cx}" y="${by}" text-anchor="middle" style="fill:${elInk(it.el)};font-size:12px;font-weight:900;font-family:var(--f-display)">${LT().EL_H[it.el]}</text>`; }
+      else { const by = v >= 0 ? top - 16 : top + h + 4; s += `<rect x="${cx - 14}" y="${by}" width="28" height="12" rx="6" style="fill:${sg.c}"/><text x="${cx}" y="${by + 9}" text-anchor="middle" style="fill:${sg.t};font-size:9px;font-weight:800">${sg.n}</text>`; }
       if (it.cur) s += `<circle cx="${cx}" cy="${T + 2}" r="3" style="fill:var(--seal)"/>`;
       s += `<text x="${cx}" y="${H - B + 18}" text-anchor="middle" style="fill:var(--ink);font-size:14px;font-weight:${it.sel ? 900 : 700};font-family:var(--f-display)">${it.label}</text>`;
       s += `<text x="${cx}" y="${H - B + 33}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${it.sub}</text>`;
@@ -10734,12 +10757,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (i % 2 === 0) s += `<rect x="${x(a)}" y="${T}" width="${x(b) - x(a)}" height="${H - T - B}" style="fill:var(--surface-2)"/>`;
       if (x(b) - x(a) > 28) s += `<text x="${(x(a) + x(b)) / 2}" y="${T - 9}" text-anchor="middle" style="fill:var(--ink-2);font-size:12px;font-weight:700;font-family:var(--f-display)">${M.gzName(d)}</text>`;
     });
-    s += flowZones(y, L, W - R, RG);
+    if (!LT()) s += flowZones(y, L, W - R, RG);   // 오행 색 모드에서는 등급 배경 띠를 걷는다
     const SJL = samjaeLayer({ x, y0, y1, T, H, B, stepX: (W - L - R) / (y1 - y0 + 1), badges: true }); s += SJL.back;
     for (const g of [30, 0, -30]) s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:${g === 0 ? 'var(--ink-3)' : 'var(--line)'}" ${g ? 'stroke-dasharray="3 3"' : ''}/><text x="${L - 6}" y="${y(g) + 3.5}" text-anchor="end" style="fill:var(--ink-3);font-size:10px">${g > 0 ? '+' + g : g < 0 ? '−' + (-g) : '0'}</text>`;
     for (let Y = Math.ceil(y0 / 10) * 10; Y <= y1; Y += 10) s += `<text x="${x(Y)}" y="${H - 8}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${Y}</text>`;
     const bw = Math.max(1.5, (W - L - R) / (y1 - y0 + 1) - 1.2);
-    data.forEach(d => { const v = d.combined, yy = y(v), z = y(0); const h = Math.max(1.5, Math.abs(yy - z)); const col = sigFlow(v).c; s += `<rect x="${(x(d.year) - bw / 2).toFixed(1)}" y="${Math.min(yy, z).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(2, bw / 2)}" style="fill:${col};${ovStroke(d.ev.overlays)}"/>`; });
+    data.forEach(d => { const v = d.combined, yy = y(v), z = y(0); const h = Math.max(1.5, Math.abs(yy - z)); const de = elOf(d), col = de != null ? elFill(de) : sigFlow(v).c; s += `<rect x="${(x(d.year) - bw / 2).toFixed(1)}" y="${Math.min(yy, z).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(2, bw / 2)}" style="fill:${col};${ovStroke(d.ev.overlays)}"/>`; });
     if (showGhost()) s += `<polyline class="ghost-line" points="${data.map(d => `${x(d.year).toFixed(1)},${y(altOf(d)).toFixed(1)}`).join(' ')}"/>`;
     const curY = M.yearPillarAt(NOW).sajuYear;
     if (curY >= y0 && curY <= y1) s += `<line x1="${x(curY)}" x2="${x(curY)}" y1="${T}" y2="${H - B}" style="stroke:var(--seal);stroke-width:1.5" stroke-dasharray="4 3"/><text x="${x(curY) + 4}" y="${T + 11}" style="fill:var(--seal);font-size:10px;font-weight:700">올해</text>`;
@@ -10773,10 +10796,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (isDomain()) { drawDomainChart(el, k); return; }
       if (k === 'daeun') {
         const cur = M.daeunAt(ch, curMs);
-        drawDiv(el, ch.daeun.list.map((d, i) => ({ v: luckV(d), cond: d.ev.condition, tg: tgOf(d).label, tgc: tgCol(d), ov: d.ev.overlays, alt: showGhost() ? altOf(d) : null, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: luckTip(`${d.startAge}세 대운 ${M.gzName(d)} (${d.stemTG}/${d.branchTG})`, d) })), lcChartSpans(ch));
+        drawDiv(el, ch.daeun.list.map((d, i) => ({ el: elOf(d), v: luckV(d), cond: d.ev.condition, tg: tgOf(d).label, tgc: tgCol(d), ov: d.ev.overlays, alt: showGhost() ? altOf(d) : null, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: luckTip(`${d.startAge}세 대운 ${M.gzName(d)} (${d.stemTG}/${d.branchTG})`, d) })), lcChartSpans(ch));
       } else if (k === 'wolun') {
         const ms = M.wolun(ch, S.selYear);
-        drawDiv(el, ms.map((m, i) => { const nx = ms[i + 1] ? ms[i + 1].startMs : Infinity; return { v: luckV(m), cond: m.ev.condition, tg: tgOf(m).label, tgc: tgCol(m), ov: m.ev.overlays, alt: showGhost() ? altOf(m) : null, label: M.gzName(m), sub: m.termName, pick: 'wolun:' + i, sel: S.sel && S.sel.kind === 'wolun' && S.sel.i === i, cur: curMs >= m.startMs && curMs < nx, tip: luckTip(`${m.termName}~ ${M.gzName(m)} (${m.stemTG}/${m.branchTG})`, m) }; }), { overlay: tjOverlay(ms) });
+        drawDiv(el, ms.map((m, i) => { const nx = ms[i + 1] ? ms[i + 1].startMs : Infinity; return { el: elOf(m), v: luckV(m), cond: m.ev.condition, tg: tgOf(m).label, tgc: tgCol(m), ov: m.ev.overlays, alt: showGhost() ? altOf(m) : null, label: M.gzName(m), sub: m.termName, pick: 'wolun:' + i, sel: S.sel && S.sel.kind === 'wolun' && S.sel.i === i, cur: curMs >= m.startMs && curMs < nx, tip: luckTip(`${m.termName}~ ${M.gzName(m)} (${m.stemTG}/${m.branchTG})`, m) }; }), { overlay: tjOverlay(ms) });
       } else if (k === 'life') drawLife(el);
     });
   }
