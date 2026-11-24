@@ -946,6 +946,24 @@ g.sj { cursor: pointer; text-decoration: none; }
 .sh-part.on > * { filter: drop-shadow(0 0 6px rgba(240,170,40,.9)); }
 .sh-info { margin: 10px 0 0; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); font-size: .84rem; line-height: 1.6; } .sh-info p { margin: 4px 0 0; } .sh-info ul { margin: 6px 0 0; padding-left: 18px; }
 .sh-hint { margin: 8px 0 0; text-align: center; }
+.sh-scene { margin: 12px 0 4px; padding: 10px 12px; border-left: 3px solid #D85A30; border-radius: 0; background: var(--surface-2); font-size: .9rem; line-height: 1.55; } .sh-scene span { display: block; font-size: .72rem; font-weight: 800; color: var(--ink-3); margin-bottom: 2px; }
+.sh-more > summary { font-weight: 700; }
+.ss-head { margin: 2px 0 4px; font-size: 1.12rem; font-weight: 800; line-height: 1.5; color: var(--ink); }
+.ss-sub { margin: 0 0 12px; }
+.ss-bars { display: grid; gap: 7px; } .ss-bar { display: grid; grid-template-columns: 9.5em 1fr 3em; align-items: center; gap: 8px; font-size: .86rem; }
+.ss-n { display: grid; line-height: 1.25; } .ss-n small { color: var(--ink-3); font-size: .72rem; }
+.ss-t { height: 12px; border-radius: 6px; background: var(--surface-2); overflow: hidden; } .ss-t i { display: block; height: 100%; border-radius: 6px; background: #9a9890; }
+.ss-bar b { text-align: right; } .ss-bar.over .ss-n, .ss-bar.over b { color: #c2492a; } .ss-bar.over .ss-t i { background: #D85A30; }
+.ss-bar.need .ss-n, .ss-bar.need b { color: #3B6D11; } .ss-bar.need .ss-t { box-shadow: inset 0 0 0 1.5px #639922; background: color-mix(in srgb, #639922 10%, var(--surface)); } .ss-bar.need .ss-t i { background: #639922; }
+.ss-leg { margin: 8px 0 0; display: flex; gap: 4px 14px; align-items: center; flex-wrap: wrap; } .ss-leg .nw { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; } .ss-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; } .ss-dot.over { background: #D85A30; } .ss-dot.need { background: #639922; }
+.ss-h3 { margin: 16px 0 6px; font-size: .95rem; }
+.ss-flow { max-width: 600px; margin: 0 auto; } .ss-flow svg { width: 100%; height: auto; display: block; }
+.ss-notes, .ss-scenes { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 6px; font-size: .86rem; line-height: 1.55; }
+.ss-notes li { padding-left: 14px; position: relative; } .ss-notes li::before { content: ''; position: absolute; left: 0; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: #7FA7C4; }
+.ss-notes .ss-cut::before { background: #B4B2A9; } .ss-notes .ss-leak::before { background: #D85A30; } .ss-notes .ss-good::before { background: #639922; }
+.ss-scenes li { padding: 8px 12px; border-radius: 0; border-left: 3px solid #888780; background: var(--surface-2); } .ss-scenes li span { display: block; font-size: .72rem; font-weight: 800; color: var(--ink-3); margin-bottom: 2px; }
+.ss-scenes .ss-sc-over { border-left-color: #D85A30; } .ss-scenes .ss-sc-got { border-left-color: #639922; }
+@media (max-width: 520px) { .ss-bar { grid-template-columns: 7.5em 1fr 2.6em; } }
 .ms-dbg pre { white-space: pre-wrap; font-size: .72rem; max-height: 260px; overflow: auto; background: var(--surface-2); padding: 8px; border-radius: 8px; }
 .sj-chip.sj-s { background: color-mix(in srgb, var(--samjae) 14%, var(--surface)); color: var(--samjae); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--samjae) 40%, transparent); }
 .sj-banner.sj-s { border-left-color: var(--samjae); background: color-mix(in srgb, var(--samjae) 6%, var(--surface-2)); }
@@ -5583,7 +5601,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (!MM || !S.ch || MSG.st === 'busy') return;
     const spec = MM.fromChart(M, S.ch), k = MM.key(spec);
     Object.assign(MSG, { key: k, st: 'busy', err: '', note: '그림 지시서를 만드는 중…', failed: [] }); render();
-    const sketch = await msSketchPng(MM.sketchSVG(spec));
+    const sk = MM.sketchSVG(spec), sketch = sk ? await msSketchPng(sk) : null;
     for (let attempt = 1; attempt <= 3; attempt++) {
       if (MSG.key !== k) return;   // 그사이 사주가 바뀌면 멈춘다
       MSG.note = attempt === 1 ? firstNote : `계산된 장면과 맞지 않아 다시 그리는 중… (${attempt}/3)`; render();
@@ -5599,22 +5617,34 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   //  단면도는 계산으로 그린다(늘 정확, 부분을 누르면 설명). '실사로 보기'는 같은 명세로 /api/mulsang-art kind=house. 스위치 sajuHouse 또는 관리자
   const HSG = { key: '', st: 'idle', url: '', note: '', err: '', debug: null, failed: [], sel: null };
   const hsOn = () => !!(window.MantraSajuHouse && ((window.MANTRA_FLAGS && window.MANTRA_FLAGS.sajuHouse) || adminPw));
+  // 사주의 집(2026-11-24, 한 카드로 줄임): 한 줄 진단 + 근거 한 줄 → 단면도 한 장(넘치는 부분·필요한 부분만 강조) → 장면 한 줄 → ▸ 자세히 보기(물길·장면 3컷·전체 읽기·실사)
+  //  모두 saju-house.js(엔진 값). 부분을 누르면 그 부분 설명이 단면도 바로 아래 열린다. 스위치 sajuHouse 또는 관리자
   function houseCard(ch) {
     if (!hsOn()) return '';
-    const HS = window.MantraSajuHouse; let spec, cap;
-    try { spec = HS.fromChart(M, ch); cap = HS.caption(spec); } catch (e) { return ''; }
-    if (!spec) return '';
+    const HS = window.MantraSajuHouse; let spec, cap, S;
+    try { spec = HS.fromChart(M, ch); cap = HS.caption(spec); S = HS.summary(spec); } catch (e) { return ''; }
+    if (!spec || !S) return '';
     const k = HS.key(spec); if (HSG.key !== k) Object.assign(HSG, { key: k, st: 'idle', url: '', note: '', err: '', debug: null, failed: [], sel: null });
     const busy = HSG.st === 'busy', info = HSG.sel != null ? HS.partInfo(spec, HSG.sel) : null;
-    const infoBox = info ? `<div class="sh-info"><b>${esc(info.title)}</b> <span class="muted small">${esc(info.role)}</span><p>${esc(info.line)}</p>${info.structures.length ? `<ul>${info.structures.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}</div>` : '<p class="small muted sh-hint">집의 부분(기둥·물길·물탱크·담장·지붕)을 누르면 이 사주에서 그 부분이 어떤지 열려요.</p>';
-    const photo = HSG.st === 'done' ? `<img class="ms-img" src="${esc(HSG.url)}" alt="이 사주의 십성 구조를 미니어처 집으로 표현한 실사 사진">` : busy ? `<div class="ms-img ms-wait"><span>${esc(HSG.note || '만드는 중…')}</span></div>` : HSG.st === 'fallback' ? '<p class="small muted">실사 사진이 계산된 구조와 맞지 않아 만들지 못했어요. 위 단면도가 정확한 그림이에요. 다시 시도할 수 있어요.</p>' : '';
-    const btn = busy ? '' : `<button type="button" class="btn${HSG.st === 'idle' ? ' primary' : ''}" data-act="hs-gen">${HSG.st === 'done' ? '실사 다시 만들기' : '실사로 보기'}</button>`;
+    const infoBox = info ? `<div class="sh-info"><b>${esc(info.title)}</b> <span class="muted small">${esc(info.role)}</span><p>${esc(info.line)}</p>${info.structures.length ? `<ul>${info.structures.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}</div>` : '';
+    const photo = HSG.st === 'done' ? `<img class="ms-img" src="${esc(HSG.url)}" alt="${esc(S.headline)} — 이 진단을 한 장면으로 담은 사진">` : busy ? `<div class="ms-img ms-wait"><span>${esc(HSG.note || '만드는 중…')}</span></div>` : HSG.st === 'fallback' ? '<p class="small muted">진단과 맞는 장면을 만들지 못했어요. 다시 시도할 수 있어요.</p>' : '';
+    const btn = busy ? '' : `<button type="button" class="btn" data-act="hs-gen">${HSG.st === 'done' ? '장면 다시 만들기' : '이 진단을 한 장면으로 보기'}</button>`;
     const dbg = adminPw && HSG.debug ? `<details class="ms-dbg"><summary>관리자: 명세·프롬프트·검사 <span class="admin-badge">관리자만 보임</span></summary><p class="small muted">명세 키 ${esc(HSG.debug.key)}${HSG.failed.length ? ' · 검사에서 아니오: ' + esc(HSG.failed.join(', ')) : ''}</p><pre>${esc(HSG.debug.prompt)}</pre></details>` : '';
-    return `<section class="card sh-card" id="saju-house"><div class="card-h"><h2>사주의 집</h2><span class="note">십성으로 보는 재물·일·보호의 구조</span></div>
-      <p class="small muted" style="margin:0 0 8px">물을 재물로 놓고 사주를 한 채의 집으로 그렸어요. 기둥 = 비겁(나의 힘), 물길·창 = 식상(벌어 오는 통로), 물탱크 = 재성(모인 재물), 담장·대문 = 관성(지키는 틀), 지붕 = 인성(보호·공부). 크기는 십성 비율, 재료 색은 그 십성의 오행, 햇살은 필요한 기운(용신·희신)이에요.</p>
-      <div class="sh-wrap">${HS.svg(spec, { sel: HSG.sel })}</div>${infoBox}
+    const note = n => `<li class="ss-${n.t}">${esc(n.s)}</li>`;
+    const scene = c => `<li class="ss-sc-${c.t}"><span>${c.t === 'over' ? '넘칠 때' : c.t === 'need' ? '비어 있을 때' : '채워졌을 때'}</span>${esc(c.s)}</li>`;
+    const s0 = S.scenes[0];
+    return `<section class="card sh-card" id="saju-house"><div class="card-h"><h2>사주의 집</h2><span class="note">물 = 재물로 보는 내 힘의 구조</span></div>
+      <p class="ss-head">${esc(S.headline)}</p><p class="small muted ss-sub">${esc(S.sub)}</p>
+      <div class="sh-wrap">${HS.svg(spec, { sel: HSG.sel, focus: [S.over, S.need] })}</div>
+      <p class="small muted ss-leg"><span class="nw"><span class="ss-dot over"></span>가장 넘치는 부분</span><span class="nw"><span class="ss-dot need"></span>이 사주에 필요한 부분</span><span class="nw">부분을 누르면 설명이 열려요</span></p>${infoBox}
+      <p class="sh-scene"><span>이런 적 있지 않나요?</span>${esc(s0.s)}</p>
       <div class="frow" style="gap:8px;margin:10px 0">${btn}${busy ? `<span class="small muted">${esc(HSG.note)}</span>` : ''}${HSG.err ? `<span class="small" style="color:var(--bad)">${esc(HSG.err)}</span>` : ''}</div>${photo}
-      <details class="ms-fold"><summary>이 집 전체 읽기</summary><ul class="ms-cap">${cap.map(c => `<li><b>${esc(c.k)}</b> ${esc(c.t)}</li>`).join('')}</ul></details>${dbg}</section>`;
+      <details class="ms-fold sh-more"><summary>자세히 보기 · 기운의 물길 · 장면 3컷 · 전체 읽기</summary>
+        <p class="small muted" style="margin:8px 0">기둥 = 비겁(내 힘), 물길·창 = 식상(퍼내는 힘), 물탱크 = 재성(모은 돈), 담장·대문 = 관성(지키는 틀), 지붕 = 인성(채워 주는 힘). 크기는 비율, 재료 색은 그 십성의 오행이에요.</p>
+        <h3 class="ss-h3">기운의 물길</h3><div class="ss-flow">${HS.flowSVG(spec)}</div><ul class="ss-notes">${S.notes.map(note).join('')}</ul>
+        <h3 class="ss-h3">이런 적 있지 않나요?</h3><ul class="ss-scenes">${S.scenes.map(scene).join('')}</ul>
+        <h3 class="ss-h3">이 집 전체 읽기</h3><ul class="ms-cap">${cap.map(c => `<li><b>${esc(c.k)}</b> ${esc(c.t)}</li>`).join('')}</ul>
+      </details>${dbg}</section>`;
   }
   function renderOverview(ch) {
     const O = window.MantraNatalOverview; if (!O) return '';
@@ -10691,12 +10721,13 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     // PDF에서 통째로 빼는 카드(2026-11-21): 용신 탭 '용신 방향과 건물 풍수는 다릅니다'
     const XP_DROP_CARD = /건물 풍수는 다릅니다/;
     // 2026-11-24 사용자 요청: AI 그림 카드(원국 탭 사주 물상 그림 · 오행·강약 탭 사주의 집)는 그림을 생성했을 때만 PDF에 넣는다 — 그때는 그림과 설명을 함께(설명 펼침), 버튼·관리자 칸은 뺀다
-    const XP_ART = { 'wonguk-mulsang': () => MSG.st === 'done' && MSG.url, 'saju-house': () => HSG.st === 'done' && HSG.url };
+    const XP_ART = { 'wonguk-mulsang': () => MSG.st === 'done' && MSG.url };   // 사주의 집은 2026-11-24 한 카드로 합치며 진단·단면도가 본문이 되어 늘 넣는다(아래 XP_HOUSE)
     (cards || xpCards()).forEach(el => {
       const h = el.querySelector('h2'); if (h && XP_DROP_CARD.test(h.textContent)) return;
       if (XP_ART[el.id] && !XP_ART[el.id]()) return;
       const c = el.cloneNode(true);
       if (XP_ART[el.id]) { c.querySelectorAll('.frow, .ms-dbg, .sh-hint, .sh-info, .ms-wait').forEach(x => x.remove()); c.querySelectorAll('details.ms-fold').forEach(d => { d.open = true; d.setAttribute('open', ''); }); c.querySelectorAll('.sh-part.on').forEach(x => x.classList.remove('on')); }
+      if (el.id === 'saju-house') { const done = HSG.st === 'done' && HSG.url; c.querySelectorAll('.frow, .ms-dbg, .sh-info, .ms-wait').forEach(x => x.remove()); c.querySelectorAll('.sh-part.on').forEach(x => x.classList.remove('on')); const ld = c.querySelector('.ss-leg'); if (ld) [...ld.querySelectorAll('.nw')].filter(x => /누르면/.test(x.textContent)).forEach(x => x.remove()); c.querySelectorAll('details.sh-more').forEach(d => { if (done) { d.open = true; d.setAttribute('open', ''); } else d.remove(); }); }   // 실사를 만들었을 때만 사진·자세한 설명을 넣는다
       stage.appendChild(c);
     });
     document.body.appendChild(stage);
@@ -11500,7 +11531,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (a.startsWith('ikd-dom:')) { IKD.dom = a.slice(8); render(); return; }
       if (a === 'ikd-ai') { ikdAll(); return; }
       if (a === 'ms-gen' || a === 'ms-redo') { msGenerate(a === 'ms-redo'); return; }
-      if (a === 'hs-gen') { artGenerate(HSG, window.MantraSajuHouse, 'house', HSG.st === 'done', '미니어처 집을 찍는 중… (30초~1분)'); return; }
+      if (a === 'hs-gen') { artGenerate(HSG, window.MantraSajuHouse, 'house', HSG.st === 'done', '장면을 찍는 중… (30초~1분)'); return; }
       if (a === 'ikd-plain') { ikdLoad(IKD.dom, 'plain'); return; }
       if (a.startsWith('pk-reset:')) { const k = a.slice(9); if (k === 'tr') PK.tr.cards = {}; else PK[k] = {}; pkSave(); render(); return; }
       if (a === 'tr-draw') { S.trSlot = null; trDraw(); return; }

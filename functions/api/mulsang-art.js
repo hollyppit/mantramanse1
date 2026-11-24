@@ -15,7 +15,7 @@ import { generate } from '../_panelart.js';
 import { aiFetch } from '../_ai-cost.js';
 
 // 그림 종류별 모듈·스위치·저장 이름
-const KINDS = { landscape: { mod: () => globalThis.MantraMulsang, flag: 'mulsangArt', pre: 'mulsang', off: '물상 그림 기능이 아직 꺼져 있습니다', what: 'painting' }, house: { mod: () => globalThis.MantraSajuHouse, flag: 'sajuHouse', pre: 'house', off: '사주의 집 기능이 아직 꺼져 있습니다', what: 'photo of a miniature house' } };
+const KINDS = { landscape: { mod: () => globalThis.MantraMulsang, flag: 'mulsangArt', pre: 'mulsang', off: '물상 그림 기능이 아직 꺼져 있습니다', what: 'painting' }, house: { mod: () => globalThis.MantraSajuHouse, flag: 'sajuHouse', pre: 'house', off: '사주의 집 기능이 아직 꺼져 있습니다', what: 'photo of one person in a scene' } };
 const MAX_SKETCH = 2 * 1024 * 1024;
 const enc = new TextEncoder();
 const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');

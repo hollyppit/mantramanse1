@@ -8,7 +8,7 @@
    · 사용: MantraSajuHouse.fromChart(M, ch) → spec · .clean · .key · .scene · .caption · .partInfo(spec, i) · .svg(spec, {labels}) · .prompt · .checklist · .judge */
 (function (G) {
   'use strict';
-  var VERSION = 'saju-house-20261124-1', STYLE_V = 'house1';
+  var VERSION = 'saju-house-20261124-2', STYLE_V = 'scene1';
   var GN = ['비겁', '식상', '재성', '관성', '인성'];
   var EL_KO = ['목', '화', '토', '금', '수'], EL_HJ = ['木', '火', '土', '金', '水'];
   var FORCE_K = ['없음', '약함', '보통', '강함', '과다'];
@@ -75,10 +75,11 @@
     for (var j = 0; j < ix.length; j++) { var o = ix[j]; if (!o || IX_KEYS.indexOf(o.k) < 0 || seen[o.k] || ['on', 'weak'].indexOf(o.s) < 0 || ['good', 'bad', 'mixed'].indexOf(o.t) < 0) return null; seen[o.k] = 1; }
     return { v: 1, dEl: x.dEl, help: x.help, g: x.g.map(function (q) { return { p: q.p, r: q.r }; }), ix: ix.map(function (o) { return { k: o.k, s: o.s, t: o.t }; }) };
   }
-  function key(spec) {
-    var s = clean(spec); if (!s) return null;
-    return STYLE_V + '|' + s.dEl + '|' + (s.help < 30 ? 'w' : s.help < 42 ? 'v' : s.help < 58 ? 'm' : 's') + '|' + s.g.map(function (q) { return forceOf(q.p) + q.r; }).join('') + '|' + s.ix.map(function (o) { return IX_KEYS.indexOf(o.k) + o.s[0] + o.t[0]; }).sort().join(',');
+  function key(spec) {   // 2026-11-24: 실사 한 장면은 유형(넘침 × 필요 × 필요한 칸이 비었는지)으로만 정한다 — 같은 유형은 저장본 공유
+    var S = summary(spec); if (!S) return null;
+    return STYLE_V + '|' + (S.over == null ? 'b' : S.over) + '|' + S.need + '|' + (scene(spec).parts[S.need].absent ? 'x' : 'w');
   }
+
 
   // ── 명세 → 장면 ──
   function scene(spec) {
@@ -120,6 +121,8 @@
   function svg(spec, opt) {
     var sc = scene(spec); if (!sc) return ''; opt = opt || {};
     var W = 640, H = 520, gy = 430, P = sc.parts, lab = opt.labels !== false, sel = opt.sel;
+    // focus: [넘치는 칸, 필요한 칸] — 이 두 부분만 진하게(빨강·초록 테두리 빛), 나머지는 흐리게(2026-11-24 한 카드로 줄이기)
+    var fo = opt.focus || null, fx = function (i) { return !fo ? '' : i === fo[0] ? 'filter:drop-shadow(0 0 5px #D85A30) drop-shadow(0 0 2px #D85A30)' : i === fo[1] ? 'filter:drop-shadow(0 0 5px #639922) drop-shadow(0 0 2px #639922)' : 'opacity:.28'; };
     var has = function (k) { return sc.ix.some(function (o) { return o.k === k; }); };
     var col = function (p) { return MAT_COL[p.el]; }, op = function (p) { return p.bad ? 0.55 : 1; };
     var stroke = function (p) { return p.absent ? 'stroke="#9aa0a6" stroke-dasharray="6 6" fill="none"' : 'stroke="#2f2f2f"'; };
@@ -128,7 +131,7 @@
     // 바깥 냇물(물의 근원)
     s += '<path d="M0 ' + (gy + 30) + ' C40 ' + (gy + 10) + ' 60 ' + (gy + 50) + ' 110 ' + (gy + 30) + ' L110 ' + H + ' L0 ' + H + ' Z" fill="#7fa7c4" opacity=".8"/>';
     var sun = function (p, cx, cy, r) { return p.good && !p.absent ? '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="#f5c84c" opacity=".35"/>' : ''; };
-    var g = function (i, inner) { return '<g data-part="' + i + '" class="sh-part' + (sel === i ? ' on' : '') + '" style="cursor:pointer">' + inner + '</g>'; };
+    var g = function (i, inner) { return '<g data-part="' + i + '" class="sh-part' + (sel === i ? ' on' : '') + '" style="cursor:pointer;' + fx(i) + '">' + inner + '</g>'; };
     var r4f = P[4].f, roofBase = 120 + [0, 50, 70, 85, 110][r4f] + 14 + (has('dosik') ? 18 : 0);
     s += '<rect x="190" y="' + roofBase + '" width="400" height="' + (gy - roofBase) + '" fill="#fbfaf6" stroke="#b9b4a8" stroke-width="2"/>';   // 집 몸체(벽)
     // 관성: 담장·대문
@@ -181,51 +184,120 @@
     s += g(1, pipe);
     if (lab) {
       var L = [[0, 360, gy - ph0 + 30, 'middle'], [1, 120, gy + 26, 'start'], [2, tx + tw / 2, ty - 10, 'middle'], [3, 630, gy - Math.max(wallH, 40) - 10, 'end'], [4, 370, top - 8, 'middle']];
-      L.forEach(function (q) { var p = P[q[0]]; s += '<text x="' + q[1] + '" y="' + q[2] + '" text-anchor="' + q[3] + '" font-size="15" font-weight="700" fill="#222" paint-order="stroke" stroke="#fff" stroke-width="4" data-part="' + q[0] + '" style="cursor:pointer">' + p.part.ko + ' · ' + p.gn + ' ' + p.p + '%</text>'; });
+      L.forEach(function (q) { var p = P[q[0]]; s += '<text x="' + q[1] + '" y="' + q[2] + '" text-anchor="' + q[3] + '" font-size="' + (fo && (q[0] === fo[0] || q[0] === fo[1]) ? 21 : fo ? 16 : 17) + '" font-weight="700" fill="' + (!fo ? '#222' : q[0] === fo[0] ? '#c2492a' : q[0] === fo[1] ? '#3B6D11' : '#9a9890') + '" paint-order="stroke" stroke="#fff" stroke-width="4" data-part="' + q[0] + '" style="cursor:pointer">' + p.part.ko + ' · ' + p.gn + ' ' + p.p + '%</text>'; });
       s += '<text x="55" y="' + (H - 12) + '" text-anchor="middle" font-size="13" fill="#24506f" paint-order="stroke" stroke="#fff" stroke-width="3">바깥 물(재물의 근원)</text>';
     }
     return s + '</svg>';
   }
 
-  // ── 실사 프롬프트(영어 고정 틀) ──
-  var STYLE_EN = 'Photorealistic photograph of a detailed handcrafted architectural miniature: a small traditional Korean house shown as a cutaway cross-section on a wooden table, so the inside is visible. Soft window light plus a warm key light, shallow depth of field, rich true-to-life color and real material textures. Vertical 3:4 composition. Not an illustration, painting or 3D render.';
+  // ── 실사 한 장면(2026-11-24 사용자 요청: 미니어처 집 대신 한 줄 진단을 그대로 담은 한 장면) ──
+  //  넘치는 힘은 '지나치게 하고 있는 모습', 필요한 힘은 '비어 있는 자리'(없음) 또는 '희미한 자리'(약함), 멀리 그 힘이 채워질 희망의 빛
+  var STYLE_EN = 'Cinematic, photorealistic photograph of one ordinary Korean adult in a real everyday setting, seen from the side or slightly from behind so the face is not the focus. Natural light, true-to-life color, shallow depth of field, quiet emotional storytelling like a film still. Vertical 3:4 composition. Not an illustration, painting or 3D render.';
+  var OVER_EN = [
+    'they insist on carrying a tall stack of heavy boxes all by themselves, shoulders squared, while helpful hands nearby are ignored',
+    'they keep pouring water from a large jug into many other people\'s cups, water splashing and spilling onto the ground around them',
+    'they are surrounded by too many overflowing buckets and sacks they try to hold all at once, visibly straining under the weight',
+    'they are hemmed in by tall walls and a heavy gate, a thick stack of duty folders pressing down on their shoulders',
+    'they sit buried among towering stacks of books and notes, lost in thought, while the door behind them stays closed'];
+  var CALM_EN = 'they stand calmly in an orderly, balanced space where nothing is too much';
+  var NEED_EN = [
+    ['there is no one beside them — an empty chair where a companion should be', 'only a faint figure of a friend far away'],
+    ['their own window is shut and their own tap is dry — nothing flows out from them', 'their own window is only slightly open'],
+    ['their own jar is completely empty and dry', 'their own jar holds only a little water'],
+    ['there are no fences, paths or markers around them — the ground has no boundaries', 'only a low, broken fence marks their path'],
+    ['there is no roof over them — rain falls straight on them and no one holds an umbrella', 'only a thin, small awning barely covers them from the rain']];
+  var HOPE_EN = ['a friend walking toward them', 'an open window with light pouring in', 'a full jar of clear water', 'a clear stone path', 'a sheltering roof'];
   function prompt(spec) {
-    var sc = scene(spec); if (!sc) return null;
-    var P = sc.parts, L = [STYLE_EN, ''];
-    L.push('METAPHOR: water stands for wealth. A small stream flows outside on the left; it is the only source of water.');
-    L.push('', 'PARTS (follow exactly; the attached diagram shows placement and relative size — keep them, but turn it into a real photographed miniature):');
-    var ord = [4, 0, 1, 2, 3];
-    ord.forEach(function (i) { var p = P[i]; L.push('- ' + p.part.noun.toUpperCase() + ': ' + p.look[0] + (p.absent ? '.' : ', made of ' + MAT_EN[p.el] + '.') + (p.absent ? '' : p.good ? ' It is in warm golden sunlight, fresh and well kept.' : p.bad ? ' It looks weathered, worn and partly in cool shadow.' : '')); });
-    L.push('- OVERALL FRAME: ' + sc.frame[0] + '.');
-    var st = sc.ix.map(function (o) { return (o.s === 'weak' ? 'faintly, ' : '') + IX_SCENE[o.k][0]; }).concat(sc.pats.map(function (k) { return PAT[k][0]; }));
-    if (!sc.ix.some(function (o) { return o.k === 'siksaengjae'; }) && !P[1].absent) st.push('the pipe does not reach the cistern; it stops short');
-    if (st.length) L.push('', 'SCENE DETAILS: ' + st.join('; ') + '.');
-    var absent = P.filter(function (p) { return p.absent; });
-    if (absent.length) L.push('ABSENT — must not appear: ' + absent.map(function (p) { return p.i === 4 ? 'any roof' : p.i === 3 ? 'any wall, fence or gate' : p.i === 2 ? 'any water inside the cistern' : p.i === 1 ? 'any pipe or window' : 'extra pillars'; }).join('; ') + '.');
-    L.push('', 'RULES: no text, letters, numbers, signs or labels. No people, no animals, no miniature figures. Keep it one single house.');
-    return L.join('\n');
+    var S = summary(spec); if (!S) return null;
+    var absent = scene(spec).parts[S.need].absent;
+    return [STYLE_EN, '',
+      'SCENE (one single moment): ' + (S.over == null ? CALM_EN : OVER_EN[S.over]) + '. At the same time, ' + NEED_EN[S.need][absent ? 0 : 1] + '.',
+      'HOPE: in the far background, a soft warm golden light falls on ' + HOPE_EN[S.need] + ', the thing they need most.',
+      'FOCUS: the excess and the missing piece must both be obvious at first glance; keep everything else simple and uncluttered.',
+      '', 'RULES: exactly one main person. No text, letters, numbers, signs, logos or watermarks. No fantasy elements.'].join('\n');
   }
+  var OVER_Q = ['Is the main person carrying a stack of heavy boxes by themselves?', 'Is the main person pouring water from a jug into other cups, with water spilling?', 'Is the main person surrounded by many overflowing buckets or sacks?', 'Is the main person surrounded by tall walls or carrying a heavy stack of folders?', 'Is the main person surrounded by tall stacks of books or papers?'];
+  var NEED_Q = [['Is there an empty seat or empty space beside the person, with no companion?', 'Is there at most a distant companion, not close by?'], ['Is a window shut or a tap dry near the person?', 'Is a window only slightly open near the person?'], ['Is there an empty or nearly empty jar near the person?', 'Is there a jar with only a little water near the person?'], ['Is the ground around the person without clear fences or paths?', 'Is there only a low or broken fence near the person?'], ['Is the person standing without a roof, in the rain?', 'Is the person under only a small awning, with rain around?']];
   function checklist(spec) {
-    var sc = scene(spec); if (!sc) return [];
-    var P = sc.parts, c = [{ id: 'house', q: 'Is there a single small house shown as a cutaway with its inside visible?', critical: true }];
-    c.push(P[4].absent ? { id: 'roof-no', q: 'Is the house without any roof?', critical: true } : { id: 'roof', q: 'Does the house have a roof?', critical: true });
-    c.push(P[3].absent ? { id: 'wall-no', q: 'Is there no outer wall, fence or gate around the house?', critical: true } : { id: 'wall', q: 'Is there an outer wall or fence with a gate?', critical: false });
-    c.push({ id: 'tank', q: 'Is there a water cistern or tank inside or next to the house?', critical: true });
-    c.push(P[1].absent ? { id: 'pipe-no', q: 'Is the house free of any water pipe and windows?', critical: false } : { id: 'pipe', q: 'Is there a water pipe or channel coming from outside?', critical: false });
-    if (sc.ix.some(function (o) { return o.k === 'siksaengjae' && o.s === 'on'; })) c.push({ id: 'flow', q: 'Does the pipe visibly carry water into the cistern?', critical: false });
-    c.push({ id: 'stream', q: 'Is there a small stream of water outside the house?', critical: false });
-    c.push({ id: 'notext', q: 'Is the image free of any written text, letters, numbers or labels?', critical: true });
-    c.push({ id: 'nopeople', q: 'Is the image free of people, figures and animals?', critical: false });
-    c.push({ id: 'photo', q: 'Does it look like a real photograph of a physical miniature model?', critical: false });
+    var S = summary(spec); if (!S) return [];
+    var absent = scene(spec).parts[S.need].absent;
+    var c = [{ id: 'person', q: 'Is there exactly one main person in the image?', critical: true }];
+    if (S.over != null) c.push({ id: 'over', q: OVER_Q[S.over], critical: true });
+    c.push({ id: 'need', q: NEED_Q[S.need][absent ? 0 : 1], critical: false });
+    c.push({ id: 'hope', q: 'Is there a warm golden light somewhere in the background?', critical: false });
+    c.push({ id: 'notext', q: 'Is the image free of any written text, letters, numbers or signs?', critical: true });
+    c.push({ id: 'photo', q: 'Does it look like a real photograph rather than an illustration?', critical: false });
     return c;
   }
   function judge(spec, answers) {
     var c = checklist(spec), failed = c.filter(function (x) { return answers[x.id] !== true; }), critical = failed.filter(function (x) { return x.critical; });
     return { pass: critical.length === 0 && failed.length - critical.length <= 1, failed: failed.map(function (x) { return x.id; }), critical: critical.map(function (x) { return x.id; }) };
   }
-  function sketchSVG(spec) { return svg(spec, { labels: false }); }   // AI 참고·대체 그림(글자 없음)
+  function sketchSVG() { return ''; }   // 한 장면은 배치 밑그림 없이 프롬프트만으로 그린다
 
-  var api = { VERSION: VERSION, STYLE_V: STYLE_V, PART: PART, GN: GN, IX_KO: IX_KO, fromChart: fromChart, clean: clean, key: key, scene: scene, caption: caption, partInfo: partInfo, svg: svg, sketchSVG: sketchSVG, prompt: prompt, checklist: checklist, judge: judge };
+  // ── 한눈 요약(2026-11-24 사용자 요청: A 한 줄 진단 → B 기운의 물길 → C 내 얘기 장면) ──
+  //  비유를 배우지 않아도 읽히게: 쉬운 이름 + 넘치는 것 하나·필요한 것 하나만 강조. 모두 명세(십성 비율·역할·구조)에서 만든다.
+  var EASY = ['내 힘', '퍼내는 힘', '모은 돈', '지키는 틀', '채워 주는 힘'];
+  var EASY_SUB = ['버티는 힘·자존심', '표현·기술·일하는 손', '재물·결과·현실 감각', '책임·직장·규칙', '공부·도움·쉼'];
+  var OVER_P = ['버티는 힘', '퍼내는 힘', '벌려 놓은 돈 일', '짊어진 책임', '생각과 걱정'];
+  var NEED_P = ['함께 버텨 줄 내 힘', '밖으로 꺼낼 통로', '손에 쥐는 결과', '나를 잡아 주는 틀', '받쳐 줄 지붕(도움·배움)'];
+  var SCENE = {
+    over: ['내 방식대로 밀어붙이다가 주변과 부딪쳐, 결국 혼자 다 떠안았던 적', '일을 벌이면 손이 빠르고 아이디어가 쏟아지는데, 끝나고 보면 남는 게 생각보다 적었던 적', '돈 될 일을 여러 개 벌여 놓고 몸이 따라가지 못해 지쳤던 시기', '맡은 책임이 많아 쉬는 날에도 머릿속에서 일이 떠나지 않던 때', '생각하고 준비만 하다가 정작 시작할 때를 놓쳤던 적'],
+    need: ['혼자 결정해야 할 때 내 편이 없다고 느껴 마음이 약해졌던 밤', '하고 싶은 말이 있었는데 꺼내지 못하고 삼켰던 순간', '열심히 했는데 통장에는 생각만큼 남지 않아 허탈했던 달', '정해진 틀이 없으니 오히려 하루가 흐트러졌던 시기', '남 챙기다 지쳐서, 정작 내가 기댈 사람은 없다고 느낀 밤'],
+    got: ['믿을 만한 동료가 생기자 같은 일도 훨씬 가볍게 해냈던 때', '배운 걸 밖으로 보여 주기 시작하자 기회가 따라왔던 시기', '작은 것이라도 결과를 손에 쥐자 자신감이 붙었던 때', '마감과 규칙이 생기자 오히려 실력이 늘었던 시기', '공부·자격증·멘토가 생겼을 때 갑자기 일이 술술 풀린 시기'] };
+  // 상생 물길 순서: 채워 주는 힘(인성) → 내 힘(비겁) → 퍼내는 힘(식상) → 모은 돈(재성) → 지키는 틀(관성) → 다시 인성
+  var FLOW = [4, 0, 1, 2, 3];
+  // 넘침(과다)의 뜻은 십성마다 다르다: 식상은 새고, 인성은 고이고, 관성은 누르고, 재성은 벅차고, 비겁은 부딪힌다
+  var OVER_NOTE = ['주변과 부딪치거나, 같은 몫을 여럿이 나눠 쓰기 쉬워요.', '들어온 만큼 흘러 나가기 쉬워요 — 버는 만큼 새는 자리예요.', '벌여 놓은 돈 일이 커서 내 힘이 감당하기 벅차요.', '책임과 압박에 눌리기 쉬워요.', '고여 버려서 생각만 많고 움직임이 막히기 쉬워요.'];
+  var LINK_IX = { gwanin: [3, 4], salin: [3, 4], siksaengjae: [1, 2], jaesaenggwan: [2, 3] };
+  function summary(spec) {
+    var sc = scene(spec); if (!sc) return null;
+    var P = sc.parts, byP = P.slice().sort(function (a, b) { return b.p - a.p || a.i - b.i; });
+    var over = byP[0].f >= 3 ? byP[0] : null;
+    var yong = P.filter(function (p) { return p.role === 'Y'; })[0], hee = P.filter(function (p) { return p.role === 'H'; })[0];
+    var need = yong && (!over || yong.i !== over.i) ? yong : hee && (!over || hee.i !== over.i) ? hee : P.slice().sort(function (a, b) { return a.p - b.p || a.i - b.i; }).filter(function (p) { return !over || p.i !== over.i; })[0];
+    var needWord = need.absent ? '없는' : need.f <= 1 ? '약한' : '아쉬운';
+    var headline = over ? OVER_P[over.i] + (ga(OVER_P[over.i]) ? '은' : '는') + ' 넘치는데, ' + NEED_P[need.i] + (ga(NEED_P[need.i]) ? '이' : '가') + ' ' + needWord + ' 사람'
+      : '다섯 힘이 고르게 나뉜 사람 — ' + NEED_P[need.i] + (ga(NEED_P[need.i]) ? '을' : '를') + ' 채우면 더 단단해져요';
+    var sub = (over ? EASY[over.i] + '(' + GN[over.i] + ')이 ' + over.p + '%로 가장 커요. ' : '') + EASY[need.i] + '(' + GN[need.i] + ')' + (need.absent ? '은 원국에 거의 없고, ' : '은 ' + need.p + '%이고, ') + (need.role === 'Y' || need.role === 'H' ? '이 사주에 필요한 기운(' + ROLE_KO[need.role] + ')이에요.' : '보태면 균형이 맞아요.');
+    var bars = P.map(function (p) { return { i: p.i, name: EASY[p.i], sub: EASY_SUB[p.i], gn: p.gn, p: p.p, mark: over && p.i === over.i ? 'over' : p.i === need.i ? 'need' : '' }; });
+    // 물길: 구간마다 폭(앞 칸 비율), 끊김(앞이나 뒤가 3% 미만), 샘(과다), 잘 이어짐(구조 성립·좋음)
+    var nodes = FLOW.map(function (i) { return { i: i, name: EASY[i], p: P[i].p, absent: P[i].absent, leak: P[i].f === 4 }; });
+    var good = sc.ix.filter(function (o) { return o.t === 'good' && LINK_IX[o.k]; }).map(function (o) { return LINK_IX[o.k]; });
+    var notes = [];
+    nodes.forEach(function (n, k) { var nx = nodes[(k + 1) % 5]; if (n.absent) notes.push({ t: 'cut', s: EASY[n.i] + (ga(EASY[n.i]) ? '이' : '가') + ' 끊겨 있어요 — ' + (k === 0 ? '밖에서 채워 주는 흐름 없이 내 힘으로만 버텨요.' : '이 자리에서 흐름이 멈춰요.') }); });
+    nodes.forEach(function (n) { if (n.leak && !n.absent) notes.push({ t: 'leak', s: EASY[n.i] + (ga(EASY[n.i]) ? '이' : '가') + ' 너무 커서(' + n.p + '%) ' + OVER_NOTE[n.i] }); });
+    good.forEach(function (pr) { notes.push({ t: 'good', s: EASY[pr[0]] + '에서 ' + EASY[pr[1]] + '(으)로 잘 이어져요.'.replace(/\(으\)로/, ga(EASY[pr[1]]) ? '으로' : '로') }); });
+    if (!notes.length) notes.push({ t: 'ok', s: '크게 막히거나 새는 곳 없이 흐름이 이어져요.' });
+    var scenes = [{ t: 'over', s: SCENE.over[(over || byP[0]).i] }, { t: 'need', s: SCENE.need[need.i] }, { t: 'got', s: SCENE.got[need.i] }];
+    return { headline: headline, sub: sub, over: over ? over.i : null, need: need.i, bars: bars, nodes: nodes, good: good, notes: notes, scenes: scenes };
+  }
+  // B 물길 SVG: 다섯 칸을 ㄷ자로 잇고, 물길 굵기 = 앞 칸 비율. 끊긴 칸은 점선, 새는 칸은 물방울, 잘 이어진 구간은 초록
+  function flowSVG(spec) {
+    var S = summary(spec); if (!S) return '';
+    var N = S.nodes, W = 600, H = 300, R = 50, pos = [[62, 70], [212, 70], [362, 70], [530, 70], [530, 228]], back = [360, 228];
+    var col = function (n) { return S.over === n.i ? '#D85A30' : S.need === n.i ? '#3B6D11' : '#5F5E5A'; };
+    var isGood = function (a, b) { return S.good.some(function (pr) { return pr[0] === a && pr[1] === b; }); };
+    var s = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" class="sf-svg" role="img"><title>기운의 물길</title>';
+    for (var k = 0; k < 4; k++) {
+      var a = N[k], b = N[k + 1], A = pos[k], B = pos[k + 1], w = Math.max(4, Math.min(30, a.p / 1.7)), cut = a.absent || b.absent;
+      var stroke = cut ? '#B4B2A9' : isGood(a.i, b.i) ? '#639922' : '#7FA7C4';
+      s += '<path d="' + (k === 3 ? 'M' + A[0] + ' ' + (A[1] + R) + ' L' + B[0] + ' ' + (B[1] - R) : 'M' + (A[0] + R) + ' ' + A[1] + ' L' + (B[0] - R) + ' ' + B[1]) + '" stroke="' + stroke + '" stroke-width="' + (cut ? 3 : w) + '"' + (cut ? ' stroke-dasharray="6 6"' : '') + ' fill="none" stroke-linecap="round"/>';
+    }
+    // 마지막 칸(지키는 틀) → 처음(채워 주는 힘)으로 돌아가는 물길
+    var L = N[4], F = N[0], cutB = L.absent || F.absent, wB = Math.max(4, Math.min(30, L.p / 1.7));
+    s += '<path d="M' + (530 - R) + ' 228 L62 228 L62 ' + (70 + R) + '" stroke="' + (cutB ? '#B4B2A9' : isGood(L.i, F.i) ? '#639922' : '#7FA7C4') + '" stroke-width="' + (cutB ? 3 : wB) + '"' + (cutB ? ' stroke-dasharray="6 6"' : '') + ' fill="none" stroke-linejoin="round" opacity=".85"/>';
+    N.forEach(function (n, k) {
+      var p = pos[k], c = col(n);
+      s += '<g data-part="' + n.i + '"><circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + R + '" fill="#fff" stroke="' + c + '" stroke-width="' + (S.over === n.i || S.need === n.i ? 3 : 1.5) + '"' + (n.absent ? ' stroke-dasharray="5 4"' : '') + '/>';
+      s += '<text x="' + p[0] + '" y="' + (p[1] - 4) + '" text-anchor="middle" font-size="' + (n.name.length > 4 ? 15 : 19) + '" font-weight="700" fill="' + c + '">' + n.name + '</text><text x="' + p[0] + '" y="' + (p[1] + 20) + '" text-anchor="middle" font-size="18" fill="' + c + '">' + n.p + '%</text></g>';
+      if (n.leak && !n.absent && n.i === 1) s += '<path d="M' + (p[0] + 30) + ' ' + (p[1] + 44) + ' q10 12 2 22 M' + (p[0] + 44) + ' ' + (p[1] + 36) + ' q10 10 2 20" stroke="#D85A30" stroke-width="2.5" fill="none"/>';
+    });
+    s += '<text x="296" y="160" text-anchor="middle" font-size="17" fill="#888780">굵기 = 힘의 크기 · 점선 = 끊긴 곳</text>';
+    return s + '</svg>';
+  }
+
+  var api = { VERSION: VERSION, summary: summary, flowSVG: flowSVG, EASY: EASY, STYLE_V: STYLE_V, PART: PART, GN: GN, IX_KO: IX_KO, fromChart: fromChart, clean: clean, key: key, scene: scene, caption: caption, partInfo: partInfo, svg: svg, sketchSVG: sketchSVG, prompt: prompt, checklist: checklist, judge: judge };
   G.MantraSajuHouse = api;
   if (typeof module === 'object' && module && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
