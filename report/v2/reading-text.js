@@ -145,7 +145,25 @@
   [/용신은 균형을 맞추는 쪽의 상징이고, 이 해석은 그 상징을 생활 습관으로 옮긴 것이에요\./g,'용신(가장 필요한 기운)은 균형을 맞추는 쪽의 상징이고, 이 풀이는 그걸 생활 습관으로 옮긴 거예요.'],
   [/같은 구조도 내 힘의 크기에 따라 행동으로 나타나는 모습이 달라서 나눠서 풀었어요\./g,'같은 구조라도 내 힘의 크기에 따라 행동으로 드러나는 모습이 달라서 나눠 풀었어요.']];
  var TG_PLAIN={비겁:'나와 같은 기운',식상:'표현의 기운',재성:'돈과 결과의 기운',관성:'책임의 기운',인성:'배움과 도움의 기운',정관:'바른 책임의 기운',편관:'강한 압박의 기운',정인:'따뜻한 도움의 기운',편인:'혼자 깊이 보는 기운',식신:'꾸준한 재주의 기운',상관:'솔직한 표현의 기운',정재:'꾸준히 쌓는 돈',편재:'크게 오가는 돈',비견:'나란한 동료의 기운',겁재:'경쟁하는 동료의 기운'};
- function plainBasis(t){var v=plainSay(t);PLAIN_WHY.forEach(function(p){v=v.replace(p[0],p[1]);});return v.replace(/\s{2,}/g,' ').trim();}
+ // 값 줄('함께 확인한 것: 관성 42% · 인성 24% · 정인격이 잘 짜인 사주.')은 용어 없이 생활 말로만 보여 준다(2026-11-24). 용어 뜻은 같은 칸의 풀이 문장과 각주에 있다.
+ var PATTERN_PLAIN={재다신약:'돈은 많은데 내 힘이 약한 구조',관살과다:'책임과 압박이 많은 구조',관살혼잡:'책임의 기운 두 갈래가 섞인 구조',군겁쟁재:'여럿이 돈을 나눠 갖는 구조',상관견관:'솔직한 표현이 책임과 부딪히는 구조','식상과다(설기)':'표현으로 힘이 많이 빠져나가는 구조',식상과다:'표현으로 힘이 많이 빠져나가는 구조',식신제살:'꾸준한 재주가 압박을 눌러 주는 구조',상관패인:'배움이 솔직한 표현을 다듬어 주는 구조',신약:'내 힘이 약한 편',신강:'내 힘이 센 편',중화:'내 힘이 균형 잡힌 편'};
+ var BAND_PLAIN={신약:'약한 편',신강:'센 편',중화:'균형'};
+ var TG_RE='비겁|식상|재성|관성|인성|정관|편관|정인|편인|식신|상관|정재|편재|비견|겁재';
+ var VAL_PLAIN={비겁:'나와 같은 힘',식상:'표현',재성:'돈과 결과',관성:'책임',인성:'배움과 도움',정관:'바른 책임',편관:'강한 압박',정인:'따뜻한 도움',편인:'혼자 깊이 보기',식신:'꾸준한 재주',상관:'솔직한 표현',정재:'꾸준히 쌓는 돈',편재:'크게 오가는 돈',비견:'나란한 동료',겁재:'경쟁하는 동료'};
+ function valueLine(body){var v=body;
+  v=v.replace(/가장 큰 묶음 /g,'가장 많은 것은 ');
+  Object.keys(PATTERN_PLAIN).sort(function(a,b){return b.length-a.length;}).forEach(function(k){v=v.split(k+' — ').join(PATTERN_PLAIN[k]+' — ');});
+  v=v.replace(/정관과 편관이 함께 있음/g,'바른 책임과 강한 압박이 함께 있음').replace(/상관과 정관이 함께 있음/g,'솔직한 표현과 바른 책임이 함께 있음');
+  v=v.replace(new RegExp('('+TG_RE+')격이 잘 짜인 사주','g'),function(m,g){return VAL_PLAIN[g]+'을 중심으로 잘 짜인 사주';}).replace(new RegExp('('+TG_RE+')격이 흐트러진 사주','g'),function(m,g){return VAL_PLAIN[g]+'을 중심으로 한 틀이 흐트러진 사주';});
+  v=v.replace(new RegExp('(^|[\\s·(,—/])('+TG_RE+') (\\d+(?:\\.\\d+)?%)','g'),function(m,a,g,n){return a+VAL_PLAIN[g]+' '+n;});
+  v=v.replace(new RegExp('(^|[\\s·(,—/])('+TG_RE+')(이|가) (\\d+(?:\\.\\d+)?%)','g'),function(m,a,g,j,n){return a+VAL_PLAIN[g]+(jo(VAL_PLAIN[g],'이','가'))+' '+n;});
+  v=v.replace(/나를 돕는 힘 (\d+(?:\.\d+)?%)\((신약|신강|중화)\)/g,function(m,n,b){return '나를 돕는 힘 '+n+'('+BAND_PLAIN[b]+')';});
+  v=v.replace(/(나를 돕는 힘 \d+(?:\.\d+)?%)(.*?) · \1(?:\([^)]*\))?/g,'$1$2');   // 같은 값 두 번
+  v=v.replace(/일지 ([가-힣])·([가-힣]) (원진|자형|충|형|파|해|합)/g,function(m,a,b,r){return '나와 배우자 자리의 '+a+'·'+b+' '+REL_K[r];});
+  v=v.replace(/(^|[\s·])([가-힣])·([가-힣]) (자형|원진)(?!\()/g,function(m,p,a,b,r){return p+a+'·'+b+' '+REL_K[r];});
+  v=v.replace(new RegExp('(일지|월지) ([子丑寅卯辰巳午未申酉戌亥])\\(('+TG_RE+')\\)','g'),function(m,seat,b,g){return SEAT_K[seat]+'의 '+hzK(b)+'('+VAL_PLAIN[g]+')';});
+  return v;}
+ function plainBasis(t){var v=plainSay(t);PLAIN_WHY.forEach(function(p){v=v.replace(p[0],p[1]);});v=v.replace(/(함께 확인한 것|내 사주에서 확인한 것): (.+?)(?=\.(?:\s|$)|$)/g,function(m,h,b){return h+': '+valueLine(b);});return v.replace(/\s{2,}/g,' ').trim();}
  function readingParagraphs(text,shorten){var blocks=[];String(text||'').split(/\n+/).filter(function(t){return t.trim();}).forEach(function(block){block=plainSay(block);if(!block)return;if(shorten)block=concise(block.trim());var group=[],size=0;sentences(block).forEach(function(sentence){var example=/^예를\s*들[어면]/.test(sentence);if(group.length&&(example||group.length>=2||size+sentence.length>110)){blocks.push(group.join(' '));group=[];size=0;}group.push(sentence);size+=sentence.length+1;});if(group.length)blocks.push(group.join(' '));});return blocks;}
  function withPart(part,html){return part&&R.ReadingPlus?html+R.ReadingPlus.feedback(part):html;}
  function readingParagraphHtml(text,role,shorten){return readingParagraphs(text,shorten).map(function(t){var part=R.ReadingPlus&&R.ReadingPlus.partFor?R.ReadingPlus.partFor(t):'';return '<p class="lead'+(/^예를\s*들[어면]/.test(t)?' reading-example':'')+'" data-reading-role="'+esc(role)+'">'+esc(t)+'</p>';}).join('');}
