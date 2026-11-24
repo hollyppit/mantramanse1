@@ -934,9 +934,11 @@
       if (scs.length > 9) { var mid = scs.slice(Math.floor(scs.length / 2)).filter(host)[0]; if (mid && mid !== first) place(mid, th); }
     });
   }
+  // 패널 그림은 리포트 전체에서 한 번씩만(2026-11-24): 장마다 따로 고르면 같은 장면 그림이 수십 장에 반복됐다. 패널 목록·장 목록이 바뀌면 다시 배정한다.
+  function mediaPlan(){if(!R.ReadingMedia||!R.ReadingMedia.planReport||!S.rep||!S.sd)return null;var pool=panelPool(),chs=S.rep.chapters||[],key=pool.length+'|'+pool.map(function(m){return m.id;}).join(',')+'|'+chs.map(function(c){return c.id;}).join(',')+'|'+(S.sealPresentations||[]).length;if(S.mediaPlanKey===key&&S.mediaPlanMap)return S.mediaPlanMap;S.mediaPlanMap=R.ReadingMedia.planReport(pool,chs,S.sd,3,function(c,used){var keep=c.sealPresentation;c.sealPresentation=(S.sealPresentations||[]).find(function(m){return m.chapterId===(c.editorialContractId||c.id);})||null;var r=R.SealReader?R.SealReader.media(pool,c,S.sd,used):R.ReadingMedia.pick(pool,c,S.sd,3,used);c.sealPresentation=keep;return r;});S.mediaPlanKey=key;return S.mediaPlanMap;}
   function prepareSeal(c){
     c.sealPresentation=(S.sealPresentations||[]).find(function(m){return m.chapterId===(c.editorialContractId||c.id);})||null;
-    c.readingMedia=R.SealReader?R.SealReader.media(panelPool(),c,S.sd):R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,3):[];c.readingMediaAudit=R.ReadingMedia&&R.ReadingMedia.explain?R.ReadingMedia.explain(panelPool(),c,S.sd,c.readingMedia):[];
+    var mp=mediaPlan();c.readingMedia=mp&&mp[c.id]?mp[c.id]:R.SealReader?R.SealReader.media(panelPool(),c,S.sd):R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,3):[];c.readingMediaAudit=R.ReadingMedia&&R.ReadingMedia.explain?R.ReadingMedia.explain(panelPool(),c,S.sd,c.readingMedia):[];
   }
   function sealIdentity(){return {input:S.ch&&S.ch.input,birth:S.sd.birth,gender:S.sd.gender,pillars:S.sd.pillars,adjustments:S.sd.elementAdjustments};}
   function sealIndexes(c){var wid=c&&S.wmap&&S.wmap.idx[S.rep.chapters.indexOf(c)]||S.readerWorld;return wid&&S.wmap?S.wmap.by[wid]||[]:S.rep.chapters.map(function(c,i){return i;});}
