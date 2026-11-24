@@ -97,6 +97,14 @@
     _profile.set(ch, res); return res;
   }
 
+  // 연도 목록을 두 문장으로: '해는 2027·2034·2035년이에요. 자세히는 2027년(배우자 자리와 합), 2034·2035년(배우자 기운이 들어옴)이에요.'(2026-11-24, 한 문장이 90자를 넘지 않게)
+  function yearList(lead, list) {
+    var ys = list.map(function (x) { return x.y; }), groups = [];
+    list.forEach(function (x) { var g = groups.filter(function (q) { return q.why === x.why; })[0]; if (g) g.ys.push(x.y); else groups.push({ why: x.why, ys: [x.y] }); });
+    var first = lead + ys.join('·') + '년이에요.';
+    if (list.length <= 1) return lead + list.map(function (x) { return x.y + '년(' + x.why + ')'; }).join('') + '이에요.';
+    return first + ' 자세히는 ' + groups.map(function (g) { return g.ys.join('·') + '년(' + g.why + ')'; }).join(', ') + '이에요.';
+  }
   // ───────── 대운 서사 ─────────
   function pullOf(M, ch, p) {
     var dEl = M.stemEl(ch.pillars.day.s), g = [0, 0, 0, 0, 0];
@@ -272,8 +280,8 @@
           return { y: x.year, gz: M.gzNameK(x), why: why, indep: (top === 0 || top === 1) && x.ev.fitScore >= 0, s: (mclash ? 2 : 0) + (top === 3 ? 1.5 : 0) + (mhap ? 1 : 0) + x.ev.fitScore / 100, fit: x.ev.fitScore };
         });
         var mv2 = vrows.filter(function (x) { return x.why; }).sort(function (a, b) { return b.s - a.s; }).slice(0, 3).sort(function (a, b) { return a.y - b.y; });
-        if (spec.senior) out.push(mv2.length ? josa('앞으로 10년 중 일의 형태가 바뀌기 쉬운 해는 ' + mv2.map(function (x) { return x.y + '년(' + x.why + ')'; }).join(', '), '이에요/예요') + '.' : '앞으로 10년 안에는 하던 일을 크게 흔드는 해가 뚜렷하지 않아요. 일을 줄이거나 넘기는 때는 스스로 정한 기준으로 고르세요.');
-        else out.push(mv2.length ? josa('앞으로 10년 중 이직·자리 이동이 움직이기 쉬운 해는 ' + mv2.map(function (x) { return x.y + '년(' + x.why + ')'; }).join(', '), '이에요/예요') + '.' : '앞으로 10년 안에는 일터를 크게 흔드는 해가 뚜렷하지 않아요. 떠밀려 옮길 일이 적은 만큼, 옮길지는 스스로 정한 기준으로 판단하세요.');
+        if (spec.senior) out.push(mv2.length ? yearList('앞으로 10년 중 일의 형태가 바뀌기 쉬운 해는 ', mv2) : '앞으로 10년 안에는 하던 일을 크게 흔드는 해가 뚜렷하지 않아요. 일을 줄이거나 넘기는 때는 스스로 정한 기준으로 고르세요.');
+        else out.push(mv2.length ? yearList('앞으로 10년 중 이직·자리 이동이 움직이기 쉬운 해는 ', mv2) : '앞으로 10년 안에는 일터를 크게 흔드는 해가 뚜렷하지 않아요. 떠밀려 옮길 일이 적은 만큼, 옮길지는 스스로 정한 기준으로 판단하세요.');
         var heavyMv = mv2.filter(function (x) { return x.fit <= -12; }).map(function (x) { return x.y + '년'; });
         if (heavyMv.length) out.push('다만 ' + heavyMv.join('·') + '은 전체 흐름이 무거운 해라, 움직일 일이 생겨도 조건을 확인한 뒤 천천히 정하세요.');
         var ind = vrows.filter(function (x) { return x.indep &&!mv2.some(function (m) { return m.y === x.y; }); }).sort(function (a, b) { return b.fit - a.fit; }).slice(0, 2).sort(function (a, b) { return a.y - b.y; });
@@ -316,7 +324,7 @@
           return { y: x.year, gz: M.gzNameK(x), why: sp && hap ? '배우자 기운과 배우자 자리의 합이 겹침' : sp ? '배우자 기운이 들어옴' : hap ? '배우자 자리와 합' : '', s: (sp ? 2 : 0) + (hap ? 1.5 : 0) + x.ev.fitScore / 100, fit: x.ev.fitScore, clash: clash };
         });
         var good = mrows.filter(function (x) { return x.why; }).sort(function (a, b) { return b.s - a.s; }).slice(0, 4).sort(function (a, b) { return a.y - b.y; });
-        out.push(good.length ? josa('앞으로 10년 중 결혼 이야기가 움직이기 쉬운 해는 ' + good.map(function (x) { return x.y + '년(' + x.why + ')'; }).join(', '), '이에요/예요') + '.' : '앞으로 10년 안에는 결혼을 끌어당기는 해가 뚜렷하지 않아요. 날을 기다리기보다 관계의 준비가 된 해에 스스로 정하는 쪽이 맞아요.');
+        out.push(good.length ? yearList('앞으로 10년 중 결혼 이야기가 움직이기 쉬운 해는 ', good) : '앞으로 10년 안에는 결혼을 끌어당기는 해가 뚜렷하지 않아요. 날을 기다리기보다 관계의 준비가 된 해에 스스로 정하는 쪽이 맞아요.');
         var heavyM = good.filter(function (x) { return x.fit <= -12; }).map(function (x) { return x.y + '년'; });
         if (heavyM.length) out.push(heavyM.join('·') + '은 인연의 기운은 들어오지만 전체 흐름은 무거운 해라, 이야기가 오가도 결정은 서두르지 마세요.');
         var cl = mrows.filter(function (x) { return x.clash; }).map(function (x) { return x.y + '년'; }).slice(0, 2);
@@ -471,7 +479,7 @@
     if (cur || fut.length) rows.push({ stage: 'luck', label: '지금과 앞으로 — 준비하기', text: [cur ? '지금 · ' + line(cur, ps[cur.i - 1 - ps[0].i]) : ''].concat(fut.slice(0, 3).map(function (p) { return line(p, ps[p.i - 1 - ps[0].i]); })).filter(Boolean).join('\n\n') });
     rows.push({ stage: 'advice', label: '흐름을 내 편으로 쓰는 법', text: A.tip + ' 앞으로 남은 시기 중에는 ' + (best ? josa(ageTxt(best) + '(' + best.gz + ' 대운)', '이/가') + ' 가장 힘이 실리는 구간이니 큰 움직임은 그 구간에 맞추세요.' : '가장 좋았던 구간이 이미 지나갔으니, 그때 만든 것을 지키고 다듬는 쪽이 남은 시기의 핵심이에요.') });
     rows.forEach(function (r) { r.text = dedupe(st, r.text); });
-    var evd = evidenceRows(P, null, D0, ['대운은 ' + (ch.daeun.forward ? '순행' : '역행') + '이며, 첫 대운은 실제로 만 ' + (ps[0].age0).toFixed(1) + '세에 시작해요(대운수 ' + ch.daeun.num + '). 나이 구간은 대운이 바뀌는 실제 시각으로 계산했어요.', '인생의 모양은 대운마다의 흐름 점수(통합 용신·관계·구조)를 이어 분류했어요: ' + ps.filter(function (p) { return p.age0 < 80; }).map(function (p) { return Math.floor(p.age0) + '세 ' + Math.round(p.fit); }).join(' · ') + '.', TIME_NOTE]);
+    var evd = evidenceRows(P, null, D0, ['대운은 ' + (ch.daeun.forward ? '순행' : '역행') + '이며, 첫 대운은 실제로 만 ' + (ps[0].age0).toFixed(1) + '세에 시작해요(대운수 ' + ch.daeun.num + '). 나이 구간은 대운이 바뀌는 실제 시각으로 계산했어요.', '인생의 모양은 10년 운마다의 흐름 점수를 이어서 나눴어요. 나이별 점수: ' + ps.filter(function (p) { return p.age0 < 80; }).map(function (p) { return Math.floor(p.age0) + '세 ' + Math.round(p.fit); }).join(' · ') + '.', TIME_NOTE]);
     return { card: cardItems.length >= 2 ? { items: cardItems, cross: '' } : null, chapterId: 'timeline_self_20', lens: 'life', rule: 'arc:' + arc, arc: arc, hook: hookS[0], rows: rows.filter(function (r) { return r.text; }), evidence: evd, trace: [], version: VERSION };
   }
 
