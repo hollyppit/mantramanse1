@@ -3,6 +3,8 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const acorn=require('internal/deps/acorn/acorn/dist/acorn');
 const INFORMAL=/(?<!니)[가-힣]+(?<!니)다(?:[.!?。…](?=\s|$|["'”’<])|(?=\s*$|["'”’<]))|(?:해라|해봐|해줄게|짚어줄게|할 수 있어|거야|일까|을까|는가|인가)[.!?。…]?(?=\s|$|["'”’<])/;
+// 2026-11-24: 따옴표 안 대사("…한다", 「…」)와 '…할까 봐'는 말투 판정에서 뺀다(인물의 말·걱정 표현이지 안내 문구의 말투가 아니다)
+function dequote(s){return s.replace(/"[^"]*"|“[^”]*”|‘[^’]*’|「[^」]*」|『[^』]*』/g,' ').replace(/[가-힣]까 ?봐/g,' ');}
 const FLAGS=/직설적인 반말|무례하지 않은 반말|소설체\(~다\)|반드시.{0,15}(성공|부자|결혼)|사기꾼입니다|범죄자입니다/;
 function files(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()&&!['admin','img','video','node_modules'].includes(e.name)?files(path.join(dir,e.name)):e.isFile()&&/\.(js|html)$/.test(e.name)?[path.join(dir,e.name).replace(/\\/g,'/')]:[]);}
 function literals(file){
@@ -22,7 +24,7 @@ function literals(file){
 }
 function inventory(){
  const all=files('report'),result=[];
- for(const file of all){const records=literals(file);for(const p of records){if(p.parseError){result.push({file,...p});continue;}const text=p.text,plain=text.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ');result.push({file,...p,id:crypto.createHash('sha256').update(file+'|'+p.start+'|'+text).digest('hex').slice(0,16),informal:INFORMAL.test(plain),flag:FLAGS.test(plain),fragment:plain.length<12,technical:/관성|재성|인성|식상|비겁|신강|신약|용신|통근/.test(plain)});}}
+ for(const file of all){const records=literals(file);for(const p of records){if(p.parseError){result.push({file,...p});continue;}const text=p.text,plain=text.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ');result.push({file,...p,id:crypto.createHash('sha256').update(file+'|'+p.start+'|'+text).digest('hex').slice(0,16),informal:INFORMAL.test(dequote(plain)),flag:FLAGS.test(plain),fragment:plain.length<12,technical:/관성|재성|인성|식상|비겁|신강|신약|용신|통근/.test(plain)});}}
  return {version:1,files:all.length,literals:result.length,parseErrors:result.filter(x=>x.parseError),candidates:result.filter(x=>x.informal||x.flag),records:result};
 }
 module.exports={inventory,literals,INFORMAL};

@@ -19,7 +19,7 @@ const context = {
   R: {},
   S: { rep: { chapters }, wmap: { idx: chapters.map((_, i) => 'w' + (i + 1)) } },
   $: () => chapter, planPanels() {}, sceneHtml: (c, s) => s.text,
-  secWrap: html => html, esc: s => s, chapterTags() {}, linkBasisReferences() {}, emphasize() {}, moDetail() {}
+  secWrap: html => html, esc: s => s, chapterTags() {}, linkBasisReferences() {}, emphasize() {}, moDetail() {}, swWatch() {}   // 2026-11-24: buildDoc 가 신호 색 감시(swWatch)도 부른다
 };
 const buildDoc = source.slice(source.indexOf('  function buildDoc()'), source.indexOf('  function openDoc('));
 vm.runInNewContext(buildDoc, context);

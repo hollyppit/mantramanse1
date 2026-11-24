@@ -108,9 +108,9 @@ ok(JSON.stringify(a1.daeun.list.map(x => [x.ev.fitScore, x.score.total, x.unseon
 
 // 5. 화면 연결: 옛 곡선·세기 점수·강중약 제거, 새 카드 연결
 for (const [pat, msg] of [
-  [/<script src="engine\.js"><\/script>\n<script src="unseong-cycle\.js"><\/script>/, '공통 모듈 스크립트가 엔진 바로 뒤에 없음'],
+  [/<script src="engine\.js"><\/script>\n(?:<script src="[\w-]+\.js"><\/script>\n){0,4}<script src="unseong-cycle\.js"><\/script>/, '공통 모듈 스크립트가 엔진 바로 뒤에 없음'],   // 2026-11-24: 사이에 삼재 문안·일주 적합도 모듈이 들어왔다(엔진 뒤·해석 모듈 앞이면 된다)
   [/<h2>내 사주의 12운성<\/h2>[\s\S]{0,200}\$\{unNatalHTML\(ch\)\}/, '원국 탭에 내 사주의 12운성 카드가 없음'],
-  [/\$\{renderEasy\(\)\}[\s\S]*<h2>사주 원국<\/h2>[\s\S]*\$\{table\}\s*<\/section>\s*<section class="card">\s*<div class="card-h"><h2>내 사주의 12운성/, '내 사주의 12운성이 원국 표 바로 아래가 아님'],
+  [/\$\{renderEasy\(\)\}[\s\S]*<h2>사주 원국<\/h2>[\s\S]*\$\{table\}\s*<\/section>\s*(?:\$\{\w+\(ch\)\}\s*){0,3}<section class="card">\s*<div class="card-h"><h2>내 사주의 12운성/, '내 사주의 12운성이 원국 표 바로 아래가 아님'],   // 2026-11-24: 원국 표 아래 한눈에 보기·물상 카드가 먼저 온다
   [/unDaeunHTML\(ch, du\)/, '대운 카드에 12운성 변화가 없음'],   // 2026-11-18: 접는 상자(foldBox) 안으로 옮김
   [/a\.startsWith\('us-p:'\)[^\n]*usSwap\('natal'/, '원국 카드 선택 처리 없음'], [/a\.startsWith\('us-du:'\)[^\n]*usSwap\('daeun'/, '대운 선택 처리 없음'], [/a\.startsWith\('un:'\)[^\n]*usSwap\('natal'/, '봉법·좌법 전환이 카드 전체를 다시 그리지 않음'],
   [/unSheetHTML\(key\) : ''\}\s*\n\s*\$\{body\}/, '용어 팝업 연결 없음'], [/\.us-tl \{/, '타임라인 CSS 없음'], [/@media \(max-width: 560px\) \{\s*\n\s*\.us-cards \{ grid-template-columns: repeat\(2/, '모바일 2열 CSS 없음'],

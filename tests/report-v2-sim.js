@@ -122,7 +122,7 @@ const pg = R.Pdf.pages(rep, sd, { name: '테스트' });
 ok(pg.length === 24, 'PDF 페이지 수 ' + pg.length);
 ok(pg.every(p => p.startsWith('<div class="pg"') && p.endsWith('</div>')), '페이지 HTML 형식');
 ok(/테스트님의/.test(pg[0]) && /경진일주/.test(pg[0]), '표지에 이름·일주');
-ok(!pg.join('').includes('<script') && R.Pdf.pages(rep, sd, { name: '<img src=x onerror=1>' })[0].indexOf('<img') < 0, 'PDF HTML 이스케이프');
+ok(!pg.join('').includes('<script') && !R.Pdf.pages(rep, sd, { name: '<img src=x onerror=1>' })[0].includes('<img src=x'), 'PDF HTML 이스케이프(이름 속 태그 · 로고 img 는 제외)');
 const sc = R.ShareCard.content(rep, sd, null), scJson = JSON.stringify(sc);
 ok(sc.keywords.length === 3 && sc.pillar === '경진일주' && !/1990|0515|1430|M/.test(scJson), '공유 카드 내용에 생년월일·성별 없음: ' + scJson.slice(0, 120));
 let bad = 0; for (let i = 0; i < 60; i++) { const c = mk(1950 + rnd(60), 1 + rnd(12), 1 + rnd(28), rnd(2) ? rnd(24) : null, rnd(2) ? 'M' : 'F'), s2 = R.SajuData.build(c, { now }), r2 = R.Compose.build(s2, lib, cfg); try { R.Pdf.pages(r2, s2, {}); R.ShareCard.content(r2, s2, null); } catch (e) { bad++; } }

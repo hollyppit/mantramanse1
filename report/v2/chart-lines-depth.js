@@ -103,8 +103,9 @@ function relMembers(name,sd){
 var PLACE={year:'어린 시절·가족 자리',month:'사회생활·직장 자리',day:'나와 배우자 자리',hour:'자녀·말년 자리'};
 function depthParts(kind,name,sd){
  var row=(D[kind]||{})[name];if(!row)return null;var place='';
- if(kind==='star'||kind==='s12'){var p=where(kind,name,sd||{});if(p)place='이 별은 내 사주의 '+PLACE[p]+'에 있어요. '+row[IDX[p]];}
- else if(kind==='rel'){var ms=relMembers(name,sd||{});place=ms.length?'이 관계는 내 사주의 '+ms.map(function(m){return PLACE[m];}).join('와 ')+'를 잇고 있어요. '+row[1]:row[1];}
+ var nm=name==='연살'?'도화살':name;   /* 2026-11-24: 한 장에 별이 여럿이면 '이 별은 …' 문장이 똑같이 반복돼 이름을 넣는다 */
+ if(kind==='star'||kind==='s12'){var p=where(kind,name,sd||{});if(p)place=nm+josa(nm,'은','는')+' 내 사주의 '+PLACE[p]+'에 있어요. '+row[IDX[p]];}
+ else if(kind==='rel'){var ms=relMembers(name,sd||{});place=ms.length?nm+josa(nm,'은','는')+' 내 사주의 '+ms.map(function(m){return PLACE[m];}).join('와 ')+'를 잇고 있어요. '+row[1]:row[1];}
  else if(kind==='tg'){var v=Number(((sd||{}).tenGods||{})[name]);if(isFinite(v)&&v>0)place='내 사주에서 이 힘은 전체의 약 '+Math.round(v)+'%예요.';}
  return {def:row[0],place:place};}
 function depth(kind,name,sd){

@@ -26,7 +26,8 @@
   };
   // 엔진 기준(engine.js LUCK_CFG.condition 과 같은 값 — M 이 있으면 엔진 값을 읽는다)
   var FLOW = { tailwind: 18, caution: -12, burden: -35 };
-  var SIG_CUTS = {"love":[45,49,58,66],"wealth":[39,44,51,56],"health":[56,63,73,78],"accident":[16,23,37,50],"job":[45,50,57,63],"move":[47,51,59,67],"career":[41,49,60,66],"business":[44,50,58,64],"child":[42,46,58,67],"marriage":[39,47,62,72],"noble":[40,49,60,68],"study":[43,49,58,65],"windfall":[35,41,52,64],"windfallLoss":[17,24,39,54],"estate":[45,51,60,66],"social":[45,51,58,63],"family":[44,49,59,66]};   // 지표별 [하위10%, 하위30%, 상위30%, 상위10%] 점수
+  // 지표별 [하위10%, 하위30%, 상위30%, 상위10%] 점수. 2026-11-24: 점수 엔진 변경(통합 용신·십성 역할)으로 분포가 밀린 직업(job)·사업(business)만 지금 분포로 다시 맞춤(직업 조심 38%→약 30%)
+  var SIG_CUTS = {"love":[45,49,58,66],"wealth":[39,44,51,56],"health":[56,63,73,78],"accident":[16,23,37,50],"job":[43,49,57,64],"move":[47,51,59,67],"career":[41,49,60,66],"business":[41,48,57,63],"child":[42,46,58,67],"marriage":[39,47,62,72],"noble":[40,49,60,68],"study":[43,49,58,65],"windfall":[35,41,52,64],"windfallLoss":[17,24,39,54],"estate":[45,51,60,66],"social":[45,51,58,63],"family":[44,49,59,66]};   // 지표별 [하위10%, 하위30%, 상위30%, 상위10%] 점수
   var INVERSE = { accident: 1, windfallLoss: 1 };
 
   function cond(M) { var c = M && M.LUCK_CFG && M.LUCK_CFG.condition; return c && Number.isFinite(c.tailwind) && Number.isFinite(c.caution) ? c : FLOW; }

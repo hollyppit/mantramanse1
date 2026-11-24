@@ -24,11 +24,11 @@ const ok = (c, m) => { if (c) passes++; else { fails++; console.log('FAIL', m); 
     const idx = await call('GET', '/');
     ok(idx.status === 200 && /content-security-policy/i.test(JSON.stringify(idx.headers)), 'static index with CSP');
     const meta = (await call('GET', '/api/meta')).json;
-    ok(meta.chapters === 84 && meta.entries === 925, `meta counts ${meta.chapters}/${meta.entries}`);
-    ok(meta.counts.draft === 925, 'all start as draft');
+    ok(meta.chapters >= 84 && meta.entries >= 925, `meta counts ${meta.chapters}/${meta.entries}`);   // 2026-11-24: 장·문안이 늘어(107장) 고정 숫자 대신 최소값과 서로의 일치를 본다
+    ok(meta.counts.draft === meta.entries, 'all start as draft');
 
     const chs = (await call('GET', '/api/chapters')).json;
-    ok(chs.length === 84, '84 chapters listed');
+    ok(chs.length === meta.chapters, 'all chapters listed');
     const list = (await call('GET', '/api/entries?chapter=timeline_self_01&limit=300')).json;
     ok(list.total > 0 && list.items.every(e => e.chapter === 'timeline_self_01'), 'chapter filter');
     const s = (await call('GET', '/api/entries?q=' + encodeURIComponent('월급') + '&limit=5')).json;
@@ -84,7 +84,7 @@ const ok = (c, m) => { if (c) passes++; else { fails++; console.log('FAIL', m); 
 
     // checks / duplicates / conflicts
     const ck = (await call('GET', '/api/checks?only=fail&limit=50')).json;
-    ok(ck.total === 925 && ck.averageScores && ck.codes, 'checks shape');
+    ok(ck.total === meta.entries && ck.averageScores && ck.codes, 'checks shape');
     const du = (await call('GET', '/api/duplicates?threshold=0.8')).json;
     ok(Array.isArray(du.pairs) && typeof du.count === 'number', 'duplicates shape');
     const cf = (await call('GET', '/api/conflicts')).json;
@@ -93,7 +93,7 @@ const ok = (c, m) => { if (c) passes++; else { fails++; console.log('FAIL', m); 
     // simulate
     const body = { birth: { year: 1990, month: 5, day: 17, hour: 10, minute: 0, gender: 'M', calendar: 'solar' }, asOf: '2026-10-22', mode: 'preview', label: '시험', by: 't' };
     const sim = await call('POST', '/api/simulate', body);
-    ok(sim.status === 200 && sim.json.report.chapters.length === 84, 'simulate 84 chapters ' + sim.text.slice(0, 120));
+    ok(sim.status === 200 && sim.json.report.chapters.length === meta.chapters, 'simulate all chapters ' + sim.text.slice(0, 120));
     ok(sim.json.report.providerCalls === 0, 'no AI calls');
     const matched = sim.json.report.chapters.filter(c => c.picks.length).length;
     ok(matched > 60, 'matched chapters ' + matched);
@@ -103,7 +103,7 @@ const ok = (c, m) => { if (c) passes++; else { fails++; console.log('FAIL', m); 
     const trs = (await call('GET', '/api/traces')).json;
     ok(trs.length >= 2, 'traces saved');
     const tr = (await call('GET', '/api/trace/' + trs[0].id)).json;
-    ok(tr.chapters.length === 84 && !tr.birth, 'trace detail without raw birth');
+    ok(tr.chapters.length === meta.chapters && !tr.birth, 'trace detail without raw birth');
     const rawTrace = fs.readFileSync(path.join(tmp, 'data', 'traces.jsonl'), 'utf8');
     ok(!/"year":1990/.test(rawTrace), 'trace file has no birth data');
     const badBirth = await call('POST', '/api/simulate', { ...body, birth: { ...body.birth, month: 13 } });

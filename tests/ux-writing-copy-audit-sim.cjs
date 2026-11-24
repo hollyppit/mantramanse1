@@ -1,3 +1,5 @@
+// 2026-11-24: 문구 목록 도구(tools/ux-writing-inventory.cjs)는 Node 내부 acorn 을 쓰므로 --expose-internals 가 필요하다. 없으면 그 옵션을 붙여 자신을 다시 실행한다
+if(!process.execArgv.includes('--expose-internals')){const r=require('node:child_process').spawnSync(process.execPath,['--expose-internals',__filename],{stdio:'inherit'});process.exit(r.status==null?1:r.status);}
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),{inventory}=require('../tools/ux-writing-inventory.cjs');
 (async()=>{const archive='docs/ux-writing-review/',a=inventory();assert.equal(a.parseErrors.length,0);const approved=JSON.parse(fs.readFileSync(archive+'copy-exemptions.json'));const key=p=>p.file+'|'+p.text;const allowed=new Set(approved.entries.map(key));assert.deepEqual(a.candidates.filter(p=>!allowed.has(key(p))).map(key),[],'unreviewed casual candidate');
 for(const p of a.records)assert(!/직설적인 반말|무례하지 않은 반말|소설체\(~다\)/.test(p.text),'old reader tone instruction '+p.file);

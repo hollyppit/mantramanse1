@@ -30,7 +30,7 @@
   // ── 스위치 ──
   var on = false, ready = false, rev = 0, waiters = [];
   function flagLocal() { try { var f = root.MANTRA_FLAGS; if (f && f.topicDeep === true) return true; var h = root.location && root.location.hostname || ''; if (/^(localhost|127\.0\.0\.1)$/.test(h) || /^[a-z0-9][a-z0-9-]*\.mantramanse\.pages\.dev$/i.test(h)) return /[?&]mantraFlags=[A-Za-z,]*\btopicDeep\b/.test(root.location.search || ''); } catch (e) { } return false; }
-  var DEPS = ['/luck-grade.js?v=20261120-g3', '/compat-pair.js', '/fengshui-data.js', '/fengshui-engine.js', '/wealth-career-data.js', '/wealth-career-data-2.js', '/wealth-career-data-3.js', '/wealth-career-jobs.js', '/wealth-career.js', '/region-data.js', '/region-reading-data.js', '/region-reading.js', '/wish-spots.js'];
+  var DEPS = ['/luck-grade.js?v=20261124-sig', '/compat-pair.js', '/fengshui-data.js', '/fengshui-engine.js', '/wealth-career-data.js', '/wealth-career-data-2.js', '/wealth-career-data-3.js', '/wealth-career-jobs.js', '/wealth-career.js', '/region-data.js', '/region-reading-data.js', '/region-reading.js', '/wish-spots.js'];
   var spots = null;
   function loadScripts() {
     return DEPS.reduce(function (p, src) { return p.then(function () { return new Promise(function (ok) { var s = DOC.createElement('script'); s.src = src; s.async = false; s.onload = ok; s.onerror = ok; DOC.head.appendChild(s); }); }); }, Promise.resolve());
