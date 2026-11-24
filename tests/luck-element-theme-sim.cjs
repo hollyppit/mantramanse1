@@ -125,6 +125,18 @@ let nf = 0;
   const ht = fs.readFileSync(path.join(root, 'report/hub/hub-timeline.js'), 'utf8');
   assert.ok(/E = useEl\(vv\) \? vv\.el : null/.test(ht) && /useEl\(q\) \? elC\(q\.el\) : q\.sig\.c/.test(ht) && /head \+ themeHtml\(it, lvl\)/.test(ht) && /elLegend\(\)/.test(ht), '타임라인 막대·인생·카드·범례 연결');
   assert.ok(ht.includes("return (metric() === 'flow' || domEl()) && v && v.el != null") && ht.includes('LTm().legendFor(metric())') && ht.includes('T.readDomain(M, ch, r0.p, lvl, metric()'), '타임라인 분야 지표 막대·범례·카드 연결');
+  // 타임라인 지표 풀이(카드 맨 위): 등급별 한 줄·이유(숫자 숨김)·전체 흐름 등급은 이름만
+  assert.ok(ht.includes('function domFocus(it, lvl)') && ht.includes('T.gradeLine(m, sg.k)') && ht.includes("(metric() !== 'flow' ? '전체 흐름 등급 ' : '등급 ')") && ht.includes("'<div class=\"tq-dc' + (metric() === k ? ' on' : '')"), '타임라인 지표 풀이 연결');
+  { const src = ht.match(/function plainReason\(t\) \{[^\n]*\}/)[0], pr = new Function(src + '; return plainReason;')();
+    assert.equal(pr('재성·관성 기운이 46%·54% 들어와 이성·관계 활동이 활성화됩니다'), '재성·관성 기운이 들어와 이성·관계 활동이 활성화됩니다');
+    assert.equal(pr('원국 적합도(흐름 점수 -37) — 통합 용신 기준 부담'), '원국 적합도 — 통합 용신 기준 부담');
+    const ch2 = M.compute({ year: 1990, month: 3, day: 15, hour: 14, minute: 30, calendar: 'solar', gender: 'F' });
+    assert.equal(pr('관계 변동성 54 — 관계 환경이 움직이기 쉽습니다'), '관계 변동성 — 관계 환경이 움직이기 쉽습니다');
+    assert.equal(pr('월지(일·재정 환경) 월지·시지 亥卯未 삼합木국 — 재정 환경이 움직입니다'), '월지·시지 亥卯未 삼합木국 — 재정 환경이 움직입니다', '각주가 괄호를 접어도 같은 낱말이 두 번 안 보이게');
+    assert.ok(ht.includes("return t && !/\\d/.test(t) && a.indexOf(t) === i;"), '숫자가 남은 이유는 거름');
+    let kept = 0, all = 0;
+    for (const mk of ['love', 'wealth', 'career', 'health']) for (const d of ch2.daeun.list) M.evaluateDomainLuck(ch2, d, 'daeun')[mk].reasons.forEach(t => { all++; if (!/\d/.test(pr(t))) kept++; });
+    assert.ok(kept / all > 0.85, '대부분의 이유는 숫자만 지우고 남음 ' + kept + '/' + all); }
   const hi = fs.readFileSync(path.join(root, 'report/hub/index.html'), 'utf8'), st = fs.readFileSync(path.join(root, 'report/story/story.js'), 'utf8');
   assert.ok(/\/luck-element-theme\.js\?v=/.test(hi) && /'\/luck-element-theme\.js' \+ HV/.test(st), '허브·/report/ 둘 다 모듈을 불러옴'); }
 // 5) 상세풀이 타이밍 그래프(reading-text.js): 막대 색 = 같은 주요 오행, 범례는 오행, 페이지가 모듈을 불러옴(2026-11-25)
