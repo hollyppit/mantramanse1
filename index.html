@@ -424,6 +424,8 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 @media (max-width: 620px) { .now { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; } .now .nowc { padding: 8px 6px; border-radius: 12px; gap: 1px; } .now .nowc .gzb { font-size: 1.12rem; } .now .nowc .tgs { font-size: 0.66rem; } .now .nowc > span:last-child { font-size: 0.66rem; line-height: 1.3; } .now .nowc > span:last-child .muted { display: block; } .now .nowc > span:last-child > :not(.muted) { font-size: 0.6rem; padding: 0 4px; margin: 1px 1px 0 0; line-height: 1.5; } }
 .nowc { border: 0; box-shadow: inset 0 0 0 1px var(--line); border-radius: 16px; padding: 10px 12px; display: grid; gap: 2px; cursor: pointer; text-align: left; background: var(--surface); }
 .nowc:hover { box-shadow: inset 0 0 0 2px var(--accent); }
+.cal button .ce { font-family: var(--f-display); font-weight: 900; font-size: 0.72rem; margin-left: auto; margin-right: 2px; }
+.cal button.el-day { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ec) 35%, transparent); }
 .el-leg { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin: 6px 0 4px; font-size: 0.76rem; color: var(--ink-2); }
 .el-leg span { display: inline-flex; align-items: center; gap: 4px; } .el-leg i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; } .el-leg .el-leg-n { flex-basis: 100%; font-size: 0.7rem; color: var(--ink-3); }
 .el-theme { margin: 8px 0 10px; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--ec) 9%, var(--surface)); box-shadow: inset 3px 0 0 var(--ec), inset 0 0 0 1px color-mix(in srgb, var(--ec) 28%, transparent); }
@@ -8392,7 +8394,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="note">◎ 실행 = 목적과 잘 맞아 결과가 생기는 행동(전화·제출·서명·공개)을 두기 좋은 시간, ○ 활용 = 안정적이라 회의·업무·제작에 무난, △ 주의 = 충·형 같은 불안 요소가 있어 중요한 결정은 옮기기, × 회피 = 그날과 충돌이 강해 중요한 일은 피하기. 목적을 바꾸면 ◎ 시간이 달라집니다. 시각은 ${shift ? `출생지 경도 보정(${shift}분)을 적용한 표준시입니다` : '한국 표준시 그대로입니다'}. 자시는 전날 밤부터 시작합니다${ch.jasi === 'ya' ? ' (야자시 설정: 밤 11시~자정은 다음 날 기준 천간을 씁니다)' : ''}.</p></div>`;
   }
   function renderCalendar(cy, cm, cal, firstDow, sel, ilDetail) {
-    // 칸 색 = 그날이 나에게 얼마나 유리한가(신호등), 칸 안 글자 = 단계 · 점수 · 주 흐름. 지표를 고르면 그 지표 기준으로 바뀐다
+    // 칸 배경 = 그날 일진의 주요 오행(2026-11-25, 운세 흐름 그래프와 같은 luck-element-theme.js — 길흉 아님). 칸 안 글자 = 등급(보조)·점수·십신. 지표를 고르면 등급·점수가 그 지표 기준으로 바뀐다
     const metric = isDomain() ? S.metric : null;
     const scored = cal.map((x, i) => {
       const v = luckV(x), mv = metric ? domOf(x, 'ilun')[metric] : null, sg = mv ? sigMetric(metric, mv.score) : sigFlow(v);
@@ -8406,9 +8408,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const tg = tgOf(x), top = x.ev.topOverlay;
       const isT = cy === TODAY[0] && cm === TODAY[1] && d === TODAY[2];
       const son = M.sonOf(x.lunar.d) === '없음';
-      const strong = mv ? sigStrong(mv.score, metric) : sigStrong(v);
-      return `<button data-pick="ilun:${d}" class="${isT ? 'today' : ''}${sel.kind === 'ilun' && sel.d === d ? ' sel' : ''}" style="background:${sgSoft(sg)}" data-tip="${cy}.${pad(cm)}.${pad(d)} ${M.gzName(x)} · 음 ${x.lunar.m}.${x.lunar.d}${son ? ' · 손 없는 날' : ''} · ${sg.n} · ${tg.line}${ovWords(x.ev)} · 흐름 ${signed(v)}${mv ? ' · ' + DOM_INFO[S.metric].full + ' ' + mv.score : ''}">
-        <span class="ctop"><span class="dn">${d}</span>${son ? '<span class="son" title="손 없는 날">손</span>' : ''}</span>
+      const strong = mv ? sigStrong(mv.score, metric) : sigStrong(v), ce = elOf(x);
+      return `<button data-pick="ilun:${d}" class="${isT ? 'today' : ''}${sel.kind === 'ilun' && sel.d === d ? ' sel' : ''}${ce != null ? ' el-day' : ''}" style="background:${ce != null ? `color-mix(in srgb, ${elFill(ce)} 20%, var(--surface))` : sgSoft(sg)}${ce != null ? `;--ec:${elFill(ce)}` : ''}" data-tip="${cy}.${pad(cm)}.${pad(d)} ${M.gzName(x)} · 음 ${x.lunar.m}.${x.lunar.d}${son ? ' · 손 없는 날' : ''}${ce != null ? ' · ' + LT().EL_K[ce] + ' 기운' : ''} · ${sg.n} · ${tg.line}${ovWords(x.ev)} · 흐름 ${signed(v)}${mv ? ' · ' + DOM_INFO[S.metric].full + ' ' + mv.score : ''}">
+        <span class="ctop"><span class="dn">${d}</span>${ce != null ? `<span class="ce" style="color:${elInk(ce)}" title="${LT().EL_K[ce]} 기운">${LT().EL_H[ce]}</span>` : ''}${son ? '<span class="son" title="손 없는 날">손</span>' : ''}</span>
         <span class="dg">${M.gzName(x)}</span>
         <span class="sgw" style="${sgVars(sg)}">${sg.n}</span>
         <span class="sc${strong ? ' strong' : ''}">${mv ? mv.score : signed(v)}</span>
@@ -8418,10 +8420,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const total = scored.length || 1;
     return `<section class="card">
       <div class="card-h"><h2>${cy}년 ${cm}월 ${term('일운', '일진')} 달력 <span class="lvl">${LEVEL_ROLE.ilun}</span></h2><span class="seg"><button data-act="ym:-1" aria-label="이전 달">‹</button><button data-act="ym:1" aria-label="다음 달">›</button></span></div>
-      ${sigLegend(metric ? metricRule(metric) : flowRule())}
-      <div class="sgbar" role="img" aria-label="이달 신호등 분포">${SIG.map((g, i) => counts[i] ? `<i style="${sgVars(g)};flex:${counts[i]} 1 0">${counts[i] >= 3 ? g.n + ' ' + counts[i] : counts[i]}</i>` : '').join('')}</div>
+      ${elLegendBar()}${sigLegend('보조 표시(칸 안 글자) · ' + (metric ? metricRule(metric) : flowRule()).replace('색 = ', ''))}
+      <div class="sgbar" role="img" aria-label="이달 등급 분포(보조)">${SIG.map((g, i) => counts[i] ? `<i style="${sgVars(g)};flex:${counts[i]} 1 0">${counts[i] >= 3 ? g.n + ' ' + counts[i] : counts[i]}</i>` : '').join('')}</div>
       <div class="sgsum">${SIG.map((g, i) => `<span>${g.n} <b>${counts[i]}일</b></span>`).join('')}<span>(${total}일 중)</span></div>
-      <div class="legend"><span>칸 글자 = 신호등 단계 · 점수 · 그날의 ${term('십성', '십신')}(일진 천간 기준)</span><span>${ovTag('volatility')}${ovTag('defense')} 칸 아래 +변화·+부담 = 가장 중요한 상태 하나</span><span><span class="son">손</span> ${term('손 없는 날')}</span><span>칸 아래 숫자 = 음력 일</span></div>
+      <div class="legend"><span>칸 배경·오른쪽 위 한자 = 그날 두드러지는 오행(길흉 아님) · 칸 글자 = 등급(보조) · 점수 · 그날의 ${term('십성', '십신')}(일진 천간 기준)</span><span>${ovTag('volatility')}${ovTag('defense')} 칸 아래 +변화·+부담 = 가장 중요한 상태 하나</span><span><span class="son">손</span> ${term('손 없는 날')}</span><span>칸 아래 숫자 = 음력 일</span></div>
       <div class="cal">${['일', '월', '화', '수', '목', '금', '토'].map(d => `<span class="dow">${d}</span>`).join('')}${'<span></span>'.repeat(firstDow)}${cells}</div>
       <div class="list">
         <div class="li"><span class="k">좋은 날</span><span class="v">${good.length ? good.map(dayBtn).join('') : '<span class="muted small">이달에는 뚜렷하게 좋은 날이 없습니다</span>'}</span><span></span></div>
