@@ -74,7 +74,7 @@ function daewoonCard(sd){
  var list=sd.daewoon||[],idx=-1;for(var i=0;i<list.length;i++)if(list[i]&&list[i].startYear===dw.startYear)idx=i;var nx=idx>=0?list[idx+1]:null,ng=dwGroup(nx);
  var task=dg?(dw.pull.tg&&TG_TASK[dw.pull.tg]||DW_GROUP[dg][2]):dw.stemTG&&TG_TASK[dw.stemTG];
  var lines=[dg?DW_GROUP[dg][1]:DAEWOON[dw.season]];if(task)lines.push(task);
- if(nx&&nx.startYear&&(ng||nx.season&&SEASON_KO[nx.season]))lines.push('다음 대운은 '+nx.startYear+'년부터 '+(nx.ganzhi?nx.ganzhi+' 대운, ':'')+(ng?(ng===dg?'같은 흐름이 한 번 더 이어지는 '+DW_GROUP[ng][0]+'이에요.':DW_GROUP[ng][0]+'으로 넘어가요.'):SEASON_KO[nx.season]+' 흐름으로 이어져요.')+(sd.nowYear&&nx.startYear>sd.nowYear?' 앞으로 '+(nx.startYear-sd.nowYear)+'년 동안 지금의 과제를 정리해 두면 전환이 편해요.':''));
+ if(nx&&nx.startYear&&(ng||nx.season&&SEASON_KO[nx.season]))lines.push('다음 10년 운(대운)은 '+nx.startYear+'년부터 '+(nx.ganzhi?nx.ganzhi+' 대운, ':'')+(ng?(ng===dg?'같은 흐름이 한 번 더 이어지는 '+DW_GROUP[ng][0]+'이에요.':DW_GROUP[ng][0]+'으로 넘어가요.'):SEASON_KO[nx.season]+' 흐름으로 이어져요.')+(sd.nowYear&&nx.startYear>sd.nowYear?' 앞으로 '+(nx.startYear-sd.nowYear)+'년 동안 지금의 과제를 정리해 두면 전환이 편해요.':''));
  return '<div class="plus-card plus-daewoon"><h3>이번 대운 10년의 과제</h3><p class="plus-lead">'+esc((dw.ganzhi||'')+' 대운 · '+(dw.startYear||'')+'~'+(dw.endYear||'')+' · '+(dg?DW_GROUP[dg][0]:SEASON_KO[dw.season]||''))+'</p>'+lines.map(function(t){return '<p>'+esc(t)+'</p>';}).join('')+'<p class="plus-note">'+esc(TIMING_NOTE)+'</p>'+feedback('lens:daewoon')+'</div>';
 }
 function calendarCard(sd){
