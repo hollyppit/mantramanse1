@@ -22,12 +22,17 @@ const ELK = ['목', '화', '토', '금', '수'];
     ['year', 'month', 'day', 'hour'].forEach(k => { const p = ch.pillars[k]; ok(p ? sp.pillars[k].s === p.s && sp.pillars[k].b === p.b : sp.pillars[k] === null, '간지 불일치 ' + k + ' ' + i); });
     ok(sp.ratio.every((v, e) => v === Math.round(ch.weights.pct[e] || 0)), '오행 비율 불일치 ' + i);
     keys.add(MS.key(sp));
-    const sc = MS.scene(sp), cap = MS.caption(sp), pr = MS.prompt(sp), cl = MS.checklist(sp), svg = MS.sketchSVG(sp);
+    const sc = MS.scene(sp), cap = MS.caption(sp), pr = MS.prompt(sp), cl = MS.checklist(sp), svg = MS.layoutSVG(sp), S = MS.summary(sp);
     const capT = cap.map(c => c.t).join('\n');
     ok(cap.length >= 5 && !/undefined|NaN|null|\[object/.test(capT), '설명 빈 값 ' + i);
     ok(capT.includes('일간 ' + '甲乙丙丁戊己庚辛壬癸'[ch.pillars.day.s]), '설명에 일간 없음 ' + i);
     ok(!/[가-힣]/.test(pr) && !/undefined|NaN|null/.test(pr), '프롬프트에 한글·빈 값 ' + i);
-    sc.items.forEach(x => ok(pr.includes(x.obj.en) && pr.includes(x.ground.en), '프롬프트에 물상 빠짐 ' + x.pos + ' ' + i));
+    ok(pr.includes('SUBJECT (one clear main subject, large and centered): ' + sc.main.obj.en) && pr.includes(MS.BR_OBJ[sp.pillars.month.b].en), '한 장면: 일간 물상·월지 땅 ' + i);
+    ok(MS.sketchSVG(sp) === '', '한 장면은 밑그림 없음 ' + i);
+    ok(S && S.headline.length > 6 && S.lines.length >= 2 && !/undefined|NaN|null/.test(S.headline + S.lines.map(l => l.t).join('')), '한 줄 진단·세 줄 ' + i);
+    ok(S.need == null || S.headline.includes(S.needAbsent ? '없어 기다리는 사주' : '필요한 사주'), '진단에 필요한 기운 ' + i);
+    ok(S.need == null || !S.needAbsent || (/NEED: there is none of the/.test(pr) && !/golden beam of sunlight falls on/.test(pr)), '없는 용신은 지평선 금빛만 ' + i);
+    { const T = S.lines.map(l => l.t).join(' '); ok(!/(이이|가가|은은|는는)[ .]|undefined/.test(T), '세 줄 조사 ' + i + ': ' + T); }
     sc.absent.forEach(e => { ok(sp.ratio[e] === 0, '없는 오행 판단 오류 ' + i); ok(/ABSENT/.test(pr) && cl.some(c => c.id === 'absent-' + e && c.critical), '없는 오행 금지·검사 빠짐 ' + ELK[e] + ' ' + i); ok(capT.includes(ELK[e] + '('), '설명에 없는 오행 안내 빠짐 ' + i); });
     const yIn = sc.yong.filter(e => sc.absent.indexOf(e) < 0);
     ok(!/golden glow falls on/.test(pr) || yIn.length > 0, '없는 용신에 빛을 비춤 ' + i);
@@ -37,7 +42,7 @@ const ELK = ['목', '화', '토', '금', '수'];
     if (!ch.pillars.hour) ok(cap.some(c => /시를 몰라/.test(c.t)) && !/right foreground/.test(pr), '시 모름 처리 ' + i);
     ok(!/(이이|가가|은은|는는|을을|를를|와와|과과)[ .]|[가-힣]이가 |[가-힣]가이 |undefined/.test(capT), '조사 오류 ' + i + ': ' + (capT.match(/.{6}(이이|가가|은은|는는)[ .].{4}/) || [''])[0]);
   }
-  ok(keys.size > 250, '명세 키가 너무 겹침 ' + keys.size);
+  ok(keys.size >= 60, '장면 키 다양성(같은 조합은 그림 공유) ' + keys.size);
 
   console.log('2. clean: 잘못된 명세 거르기');
   const ch0 = M.compute({ year: 1987, month: 3, day: 15, hour: 14, minute: 30, gender: 'F', calendar: 'solar', school: 'eokbu' }), base = MS.fromChart(M, ch0);
@@ -91,8 +96,8 @@ const ELK = ['목', '화', '토', '금', '수'];
 
   console.log('4b. 실사 화풍(2026-11-24 수묵에서 바꿈)');
   { const p = MS.prompt(base); ok(/^Photorealistic/.test(p) && /Not an illustration, painting/.test(p) && !/ink|sumi|hanji|brush/i.test(p), '실사 프롬프트');
-    ok(/^COLOR: /m.test(p) && /fresh, vivid greens \(dominant\)/.test(p), '오행 비율 색 줄');
-    ok(MS.key(base).startsWith('photo1|') && MS.checklist(base).some(c => c.id === 'photo'), '저장본 키·검사 항목이 실사 기준');
+    ok(/^ATMOSPHERE: /m.test(p) && /fresh, vivid greens/.test(p), '가장 많은 오행이 분위기·색');
+    ok(MS.key(base).startsWith('scene1|') && MS.checklist(base).some(c => c.id === 'photo'), '저장본 키·검사 항목이 실사 기준');
     ok(!/수묵/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8').match(/function mulsangCard[\s\S]*?function renderOverview/)[0]), '카드 문구에 수묵 없음'); }
 
   console.log('5. 화면·스위치 연결');

@@ -5574,28 +5574,27 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   //  공개 스위치 mulsangArt(관리자 화면) 또는 관리자 로그인일 때만 보인다. 횟수 제한 없음. 같은 원국 구조는 서버 저장본을 다시 쓴다.
   const MSG = { key: '', st: 'idle', url: '', note: '', err: '', debug: null, failed: [] };
   const msOn = () => !!(window.MantraMulsang && ((window.MANTRA_FLAGS && window.MANTRA_FLAGS.mulsangArt) || adminPw));
-  function mulsangCard(ch) {
+  function mulsangCard(ch) {   // 2026-11-24 한 장면: 한 줄 진단(나·계절·필요한 기운) + 세 줄 → 그림 한 장 → ▸ 자세히 보기(여덟 글자 풀이)
     if (!msOn()) return '';
-    const MM = window.MantraMulsang; let spec, cap;
-    try { spec = MM.fromChart(M, ch); cap = MM.caption(spec); } catch (e) { return ''; }
-    if (!spec) return '';
+    const MM = window.MantraMulsang; let spec, cap, S;
+    try { spec = MM.fromChart(M, ch); cap = MM.caption(spec); S = MM.summary(spec); } catch (e) { return ''; }
+    if (!spec || !S) return '';
     const k = MM.key(spec); if (MSG.key !== k) Object.assign(MSG, { key: k, st: 'idle', url: '', note: '', err: '', debug: null, failed: [] });
     const busy = MSG.st === 'busy';
-    const pic = MSG.st === 'done' ? `<img class="ms-img" src="${esc(MSG.url)}" alt="이 사주의 오행을 실제 풍경 사진처럼 물상으로 표현한 그림">` : MSG.st === 'fallback' ? `<div class="ms-img ms-sk">${MM.sketchSVG(spec)}</div>` : busy ? `<div class="ms-img ms-wait"><span>${esc(MSG.note || '그리는 중…')}</span></div>` : '';
-    const btn = busy ? '' : MSG.st === 'idle' ? `<button type="button" class="btn primary" data-act="ms-gen">AI로 물상 표현하기</button>` : `<button type="button" class="btn" data-act="ms-redo">다시 그리기</button>`;
-    const list = `<ul class="ms-cap">${cap.map(c => `<li><b>${esc(c.k)}</b> ${esc(c.t)}</li>`).join('')}</ul>`;
+    const pic = MSG.st === 'done' ? `<img class="ms-img" src="${esc(MSG.url)}" alt="${esc(S.headline)} — 이 사주를 한 장면으로 담은 사진">` : busy ? `<div class="ms-img ms-wait"><span>${esc(MSG.note || '그리는 중…')}</span></div>` : MSG.st === 'fallback' ? '<p class="small muted">진단과 맞는 장면을 만들지 못했어요. 다시 그리기를 누르면 새로 시도해요.</p>' : '';
+    const btn = busy ? '' : MSG.st === 'idle' ? `<button type="button" class="btn primary" data-act="ms-gen">이 사주를 한 장면으로 보기</button>` : `<button type="button" class="btn" data-act="ms-redo">다시 그리기</button>`;
     const dbg = adminPw && MSG.debug ? `<details class="ms-dbg"><summary>관리자: 명세·프롬프트·검사 <span class="admin-badge">관리자만 보임</span></summary><p class="small muted">명세 키 ${esc(MSG.debug.key)}${MSG.failed.length ? ' · 검사에서 아니오: ' + esc(MSG.failed.join(', ')) : ''}</p><pre>${esc(MSG.debug.prompt)}</pre><ol class="small">${MSG.debug.checklist.map(c => `<li>${c.critical ? '<b>[중요]</b> ' : ''}${esc(c.q)}</li>`).join('')}</ol></details>` : '';
-    return `<section class="card ms-card" id="wonguk-mulsang"><div class="card-h"><h2>사주 물상 그림</h2><span class="note">실제 풍경으로 보는 오행 흐름</span></div>
-      <p class="small muted" style="margin:0 0 8px">원국의 여덟 글자를 실제 자연 풍경(물상)으로 옮긴 그림이에요. 색은 오행 비율(목 초록·화 빨강·토 황토·금 은백·수 남청), 황금빛 햇살은 필요한 기운(용신), 차가운 그늘은 부담되는 기운(기신)이에요. 무엇을 어디에 얼마나 크게 그릴지는 만세력 계산으로 먼저 정하고, AI는 그 지시대로 그리기만 해요.</p>
-      ${pic}${MSG.st === 'fallback' ? '<p class="small muted">AI 그림이 계산된 장면과 맞지 않아, 계산대로 그린 배치도를 보여 드려요. 다시 그리기를 누르면 새로 시도해요.</p>' : ''}${MSG.err ? `<p class="small" style="color:var(--bad)">${esc(MSG.err)}</p>` : ''}
-      <div class="frow" style="gap:8px;margin:10px 0">${btn}${busy ? `<span class="small muted">${esc(MSG.note)}</span>` : ''}</div>
-      <details class="ms-fold"${MSG.st === 'done' || MSG.st === 'fallback' ? ' open' : ''}><summary>그림 읽는 법 · 이 사주에서 그려지는 것</summary>${list}</details>${dbg}</section>`;
+    return `<section class="card ms-card" id="wonguk-mulsang"><div class="card-h"><h2>사주 물상 그림</h2><span class="note">실제 풍경으로 보는 나</span></div>
+      <p class="ss-head">${esc(S.headline)}</p>
+      <ul class="ms-cap ms-lines">${S.lines.map(c => `<li><b>${esc(c.k)}</b> ${esc(c.t)}</li>`).join('')}</ul>
+      <div class="frow" style="gap:8px;margin:10px 0">${btn}${busy ? `<span class="small muted">${esc(MSG.note)}</span>` : ''}${MSG.err ? `<span class="small" style="color:var(--bad)">${esc(MSG.err)}</span>` : ''}</div>${pic}
+      <details class="ms-fold"><summary>자세히 보기 · 여덟 글자 물상 풀이</summary><ul class="ms-cap">${cap.map(c => `<li><b>${esc(c.k)}</b> ${esc(c.t)}</li>`).join('')}</ul></details>${dbg}</section>`;
   }
   // 명세 밑그림(SVG) → PNG data URL(이미지 모델 참고 그림)
   function msSketchPng(svg) {
     return new Promise(ok => { try { const im = new Image(); im.onload = () => { try { const c = document.createElement('canvas'); c.width = 768; c.height = 1024; const x = c.getContext('2d'), r = Math.min(768 / (im.width || 768), 1024 / (im.height || 1024)), w = (im.width || 768) * r, h = (im.height || 1024) * r; x.fillStyle = '#eef1f2'; x.fillRect(0, 0, 768, 1024); x.drawImage(im, (768 - w) / 2, (1024 - h) / 2, w, h); ok(c.toDataURL('image/png')); } catch (e) { ok(null); } }; im.onerror = () => ok(null); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); } catch (e) { ok(null); } });
   }
-  async function msGenerate(force) { return artGenerate(MSG, window.MantraMulsang, 'landscape', force, '풍경을 만드는 중… (30초~1분)'); }
+  async function msGenerate(force) { return artGenerate(MSG, window.MantraMulsang, 'landscape', force, '장면을 그리는 중… (30초~1분)'); }
   // 그림 생성 공용 흐름(물상 풍경·사주의 집): 명세 → 밑그림 PNG → /api/mulsang-art 최대 3번 → 실패하면 밑그림
   async function artGenerate(MSG, MM, kind, force, firstNote) {
     if (!MM || !S.ch || MSG.st === 'busy') return;

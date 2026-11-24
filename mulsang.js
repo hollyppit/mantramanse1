@@ -7,7 +7,7 @@
    · 사용: MantraMulsang.fromChart(M, ch) → spec · .scene(spec) · .caption(spec) · .prompt(spec) · .checklist(spec) · .judge(checks) · .sketchSVG(spec) · .key(spec) */
 (function (G) {
   'use strict';
-  var VERSION = 'mulsang-20261124-1', STYLE_V = 'photo1';
+  var VERSION = 'mulsang-20261124-2', STYLE_V = 'scene1';
   var POS = ['year', 'month', 'day', 'hour'], POS_KO = { year: '년주', month: '월주', day: '일주', hour: '시주' };
   var EL_KO = ['목', '화', '토', '금', '수'], EL_HJ = ['木', '火', '土', '金', '水'];
   var STEM_HJ = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'], STEM_KO = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계'];
@@ -76,10 +76,11 @@
     for (var j = 0; j < rels.length; j++) { var r = rels[j]; if (!r || ['clash', 'bond', 'strain'].indexOf(r.t) < 0 || ['stem', 'branch'].indexOf(r.k) < 0 || !Array.isArray(r.m) || r.m.length < 2 || r.m.length > 3 || !r.m.every(function (m) { return POS.indexOf(m) >= 0 && (m !== 'hour' || pil.hour); }) || !(r.el === null || r.el === undefined || isInt(r.el, 0, 4))) return null; }
     return { v: 1, pillars: pil, ratio: x.ratio.slice(), temp: r2(clampN(x.temp, -1.5, 1.5)), hum: r2(clampN(x.hum, -1.5, 1.5)), roles: x.roles.slice(), rels: rels.map(function (r) { return { t: r.t, k: r.k, m: r.m.slice(), el: r.el == null ? null : r.el }; }) };
   }
-  function key(spec) {   // 같은 명세 = 같은 그림. 해시는 서버에서(sha-256) 이 문자열로 만든다
-    var s = clean(spec); if (!s) return null;
-    return STYLE_V + '|' + POS.map(function (k) { return s.pillars[k] ? s.pillars[k].s + '.' + s.pillars[k].b : '-'; }).join(',') + '|' + s.ratio.map(sizeBand).join('') + '|' + tempBand(s.temp) + humBand(s.hum) + '|' + s.roles.join('') + '|' + s.rels.map(function (r) { return r.t[0] + r.k[0] + r.m.map(function (m) { return m[0]; }).join('') + (r.el == null ? '' : r.el); }).join(',');
+  function key(spec) {   // 2026-11-24: 한 장면 = 일간 × 계절 × 가장 많은 오행 × 용신(있음/없음) × 없는 오행 — 같은 조합은 저장본 공유
+    var sc = scene(spec); if (!sc) return null; var H = headOf(sc);
+    return STYLE_V + '|' + sc.main.stem + '|' + sc.seasonKey + '|' + H.top + '|' + (H.need == null ? '-' : H.need + (H.needAbsent ? 'x' : 'w')) + '|' + sc.absent.join('');
   }
+
 
   // ── 2. 명세 → 장면(그림 요소·자리·크기·빛) ──
   function sizeBand(v) { return v >= 35 ? 4 : v >= 20 ? 3 : v >= 8 ? 2 : v > 0 ? 1 : 0; }
@@ -105,6 +106,26 @@
     var rels = s.rels.map(function (r) { return { t: r.t, k: r.k, el: r.el, its: r.m.map(function (m) { return items.filter(function (x) { return x.pos === m; })[0]; }).filter(Boolean) }; }).filter(function (r) { return r.its.length >= 2; });
     return { spec: s, items: items, main: items.filter(function (x) { return x.pos === 'day'; })[0], counts: counts, absent: absent, yong: yong, hee: hee, gi: gi, flows: flows, rels: rels,
       season: SEASON[mB], seasonKey: SEASON_KEY(mB), time: hr ? TIME[hr.b] : null, climate: CLIMATE[tempBand(s.temp)], humid: HUMID[humBand(s.hum)], dEl: dEl, ratio: s.ratio };
+  }
+
+  // ── 2b. 한 줄 진단(2026-11-24 한 장면): 나(일간 물상) · 놓인 계절 · 가장 많은 기운 · 필요한 기운(용신) ──
+  var NEED_KO = ['자라날 새싹과 나무', '따뜻한 햇살', '발 디딜 단단한 땅', '단단한 바위와 쇠', '시원한 물'];
+  var NEED_EN = ['a young green sapling', 'warm sunlight breaking through', 'a patch of solid, firm earth', 'a solid grey boulder', 'a clear spring of water'];
+  var SEASON_KO = ['봄', '여름', '가을', '겨울'];
+  function headOf(sc) {
+    var top = [0, 1, 2, 3, 4].sort(function (a, b) { return sc.ratio[b] - sc.ratio[a] || a - b; })[0];
+    var need = sc.yong.length ? sc.yong[0] : null, needAbsent = need != null && sc.absent.indexOf(need) >= 0;
+    var mo = sc.main.obj.short, place = SEASON_KO[sc.seasonKey] + (sc.main.obj.sky ? ' 하늘의 ' : '의 ');
+    var headline = place + mo + (need == null ? '' : ' — ' + NEED_KO[need] + (ga(NEED_KO[need]) ? '이' : '가') + (needAbsent ? ' 없어 기다리는 사주' : ' 필요한 사주'));
+    return { top: top, need: need, needAbsent: needAbsent, headline: headline };
+  }
+  function summary(spec) {
+    var sc = scene(spec); if (!sc) return null; var H = headOf(sc), m = sc.main;
+    var lines = [
+      { k: '나', t: '일간 ' + STEM_HJ[m.stem] + '(' + EL_KO[m.el] + ')' + (ga(EL_KO[m.el]) ? '은 ' : '는 ') + J.예요(m.obj.ko) + '. 태어난 달(' + BR_HJ[sc.spec.pillars.month.b] + ')이 ' + SEASON_KO[sc.seasonKey] + '이라 ' + J.과(BR_OBJ[sc.spec.pillars.month.b].ko) + ' 함께 있어요.' },
+      { k: '가득한 것', t: EL_FAMILY_KO[H.top] + '(' + EL_KO[H.top] + ' ' + sc.ratio[H.top] + '%)' + (ga(EL_FAMILY_KO[H.top]) ? '이' : '가') + ' 풍경을 가장 많이 채워요.' },
+      H.need == null ? null : { k: '필요한 것', t: NEED_KO[H.need] + '(용신 ' + EL_KO[H.need] + ') — ' + (H.needAbsent ? '원국에 없어서 그림에는 먼 지평선의 금빛으로만 남겨 두었어요. 살면서 밖에서 채워 갈 기운이에요.' : '그림에서 금빛 햇살을 받는 곳이에요.') }].filter(Boolean);
+    return { headline: H.headline, lines: lines, top: H.top, need: H.need, needAbsent: H.needAbsent };
   }
 
   // ── 3. 설명(한국어): 그림이 아니라 명세에서 쓴다 ──
@@ -140,46 +161,30 @@
   var STYLE_EN = 'Photorealistic landscape photograph, as if shot on a full-frame camera with a 35mm lens: natural light, high dynamic range, rich true-to-life color, crisp detail and texture, cinematic depth with a clear foreground, middle ground and background. Vertical 3:4 composition, one single real place. Not an illustration, painting, 3D render or fantasy art.';
   var GI_EN = ['the trees and plants look dull and shaded', 'any fire or lantern light is dim and muted', 'the earth and hills lie in cool shadow', 'the rocks and metal lie in cool, blue-tinted shadow', 'the water looks dark, cold and still'];
   var EL_COLOR = ['fresh, vivid greens', 'warm reds, oranges and glowing amber', 'warm ochre, sand and terracotta browns', 'cool silver, white and steel grey', 'deep blues and blue-black'];
-  function prompt(spec) {
-    var sc = scene(spec); if (!sc) return null;
+  function prompt(spec) {   // 2026-11-24 한 장면: 주인공(일간 물상) 하나 + 계절 땅 + 가장 많은 기운이 채운 분위기 + 필요한 기운에 금빛
+    var sc = scene(spec); if (!sc) return null; var H = headOf(sc), m = sc.main, mb = sc.spec.pillars.month.b;
     var L = [STYLE_EN, ''];
-    L.push('SCENE: ' + sc.season[1] + (sc.time ? ', ' + sc.time[1] : '') + '.' + (sc.climate[1] ? ' The air is ' + sc.climate[1] + '.' : '') + (sc.humid[1] ? ' ' + sc.humid[1][0].toUpperCase() + sc.humid[1].slice(1) + '.' : ''));
-    L.push('', 'LAYOUT (follow exactly; the attached rough sketch shows the placement and relative sizes — keep them, but turn everything into a real photograph):');
-    sc.items.forEach(function (x) {
-      L.push('- ' + (x.obj.sky ? x.obj.en + ' in the sky ' + (x.pos === 'day' ? 'at the top center, as the main subject, the most striking element of the photo' : x.pos === 'year' ? 'toward the upper left, small and distant' : x.pos === 'hour' ? 'toward the upper right' : 'spanning the upper middle') : x.obj.en + ' ' + x.layout.en) + '; below it, the ground is ' + x.ground.en + '.');
-    });
-    var cnt = Object.keys(sc.counts).map(Number).filter(function (st) { return STEM_OBJ[st].count; }).map(function (st) { var n = sc.counts[st]; return 'exactly ' + ['zero', 'one', 'two', 'three', 'four'][n] + ' ' + STEM_OBJ[st].noun + (n > 1 ? 's' : ''); });
-    if (cnt.length) L.push('', 'COUNT: ' + cnt.join(', ') + '. Do not add more of these.');
-    L.push('', 'PROPORTION (by five-element share): ' + [0, 1, 2, 3, 4].filter(function (e) { return sc.ratio[e] > 0; }).map(function (e) { return EL_FAMILY[e] + ' ' + SIZE_EN[sizeBand(sc.ratio[e])] + ' (~' + sc.ratio[e] + '% of the picture)'; }).join('; ') + '.');
-    L.push('COLOR: the overall palette follows the same shares — ' + [0, 1, 2, 3, 4].filter(function (e) { return sc.ratio[e] > 0; }).sort(function (a, b) { return sc.ratio[b] - sc.ratio[a]; }).map(function (e) { return EL_COLOR[e] + ' (' + SIZE_EN[sizeBand(sc.ratio[e])] + ')'; }).join(', ') + '.');
+    L.push('SUBJECT (one clear main subject, large and centered): ' + m.obj.en + '.');
+    L.push('SETTING: ' + SEASON[mb][1] + (sc.time ? ', ' + sc.time[1] : '') + '; the ground is ' + BR_OBJ[mb].en + '.' + (sc.climate[1] ? ' The air is ' + sc.climate[1] + '.' : '') + (sc.humid[1] ? ' ' + sc.humid[1][0].toUpperCase() + sc.humid[1].slice(1) + '.' : ''));
+    L.push('ATMOSPHERE: ' + EL_FAMILY[H.top] + ' fill most of the scene around the subject (about ' + sc.ratio[H.top] + '% of the picture), in ' + EL_COLOR[H.top] + '.');
+    if (H.need != null) L.push(H.needAbsent ? 'NEED: there is none of the ' + EL_FAMILY[H.need] + ' anywhere — only a soft warm golden glow on the far horizon, as if waiting for it.' : 'NEED: a warm golden beam of sunlight falls on ' + NEED_EN[H.need] + ' near the subject — the brightest, warmest spot of the photo.');
     if (sc.absent.length) L.push('ABSENT — must not appear anywhere: ' + sc.absent.map(function (e) { return EL_ABSENT[e]; }).join('; ') + '.');
-    var yIn = sc.yong.filter(function (e) { return sc.absent.indexOf(e) < 0; });
-    if (yIn.length || sc.gi.length) L.push('', 'LIGHT: ' + (yIn.length ? 'a warm golden beam of sunlight breaks through and spotlights the ' + yIn.map(function (e) { return EL_FAMILY[e]; }).join(' and ') + ', making them glow — the brightest, warmest area of the photo.' : 'soft, natural light.') + (sc.gi.length ? ' Meanwhile ' + sc.gi.map(function (e) { return GI_EN[e]; }).join(', and ') + '.' : ''));
-    if (0) L.push('', 'LIGHT: a soft warm golden glow falls on the ' + sc.yong.map(function (e) { return EL_FAMILY[e]; }).join(' and ') + '.' + (sc.gi.length ? ' The ' + sc.gi.map(function (e) { return EL_FAMILY[e]; }).join(' and ') + ' sit partly in cool shadow.' : ''));
-    var rl = [];
-    sc.flows.slice(0, 2).forEach(function (f) { rl.push('a visible natural flow from the ' + f.from.obj.noun + ' toward the ' + f.to.obj.noun + ' (' + ['wood feeds fire', 'fire enriches the earth', 'earth bears metal', 'metal condenses water', 'water nourishes wood'][f.from.el] + ')'); });
-    sc.rels.slice(0, 3).forEach(function (r) { var n = r.its.map(function (x) { return 'the ' + (r.k === 'branch' ? x.ground.noun : x.obj.noun); }).join(' and '); rl.push(r.t === 'clash' ? n + ' face each other in tense opposition' : r.t === 'bond' ? n + ' are gently intertwined and connected' : n + ' press against each other with strain'); });
-    rl = rl.filter(function (t, i) { return rl.indexOf(t) === i; });
-    if (rl.length) L.push('RELATIONSHIPS: ' + rl.join('; ') + '.');
-    L.push('', 'RULES: no text, letters, numbers, calligraphy, seals, signatures or watermarks. No people, no animals, no buildings. Do not add major objects beyond those listed. Keep the day-pillar object clearly the focal point.');
+    L.push('', 'RULES: keep it one simple, uncluttered scene. No text, letters, numbers, signs or watermarks. No people, no animals, no buildings.');
     return L.join('\n');
   }
-
-  // ── 5. 검사 목록(비전 모델에 예/아니오로 묻는다) · 판정 ──
   var an = function (w) { return (/^[aeiou]/i.test(w) ? 'an ' : 'a ') + w; };
   function checklist(spec) {
-    var sc = scene(spec); if (!sc) return [];
+    var sc = scene(spec); if (!sc) return []; var H = headOf(sc);
     var c = [{ id: 'main', q: 'Is there ' + an('clearly visible ' + sc.main.obj.noun) + ' as the main, most prominent subject?', critical: true }];
-    sc.items.filter(function (x) { return x.pos !== 'day'; }).forEach(function (x) { c.push({ id: 'obj-' + x.pos, q: 'Is there ' + an(x.obj.noun) + ' somewhere in the image?', critical: false }); });
-    sc.absent.forEach(function (e) { c.push({ id: 'absent-' + e, q: 'Is the image completely free of ' + EL_ABSENT[e] + '?', critical: true }); });
+    c.push({ id: 'top', q: 'Do ' + EL_FAMILY[H.top] + ' fill a large part of the scene?', critical: false });
     c.push({ id: 'season', q: 'Does the landscape look like ' + SEASON_EN[sc.seasonKey] + '?', critical: false });
+    if (H.need != null && !H.needAbsent) c.push({ id: 'need', q: 'Is there a warm golden light falling on ' + NEED_EN[H.need].replace(/^a /, 'a ').replace(/^an? /, 'some ') + '?', critical: false });
+    sc.absent.forEach(function (e) { c.push({ id: 'absent-' + e, q: 'Is the image completely free of ' + EL_ABSENT[e] + '?', critical: true }); });
     c.push({ id: 'notext', q: 'Is the image free of any written text, letters, numbers, calligraphy or red seals?', critical: true });
     c.push({ id: 'nopeople', q: 'Is the image free of people and animals?', critical: false });
     c.push({ id: 'photo', q: 'Does it look like a realistic photograph rather than a painting or illustration?', critical: false });
-    Object.keys(sc.counts).map(Number).filter(function (st) { return STEM_OBJ[st].count && sc.counts[st] >= 1; }).forEach(function (st) { c.push({ id: 'count-' + st, q: sc.counts[st] > 1 ? 'Are there exactly ' + ['zero', 'one', 'two', 'three', 'four'][sc.counts[st]] + ' separate ' + STEM_OBJ[st].noun + 's (not more)?' : 'Is there exactly one ' + STEM_OBJ[st].noun + ' (not more than one)?', critical: false }); });
     return c;
   }
-  // answers: { id: true|false } → 통과: 중요 항목 모두 예 + 그 밖의 아니오는 1개까지
   function judge(spec, answers) {
     var c = checklist(spec), failed = c.filter(function (x) { return answers[x.id] !== true; });
     var critical = failed.filter(function (x) { return x.critical; });
@@ -205,7 +210,8 @@
     return s;
   }
   var GROUND_TINT = ['#c9d3c2', '#d9cfb0', '#d6c8ad', '#d5dbe0'];
-  function sketchSVG(spec) {
+  function sketchSVG() { return ''; }   // 2026-11-24 한 장면은 밑그림 없이 프롬프트만으로 그린다
+  function layoutSVG(spec) {   // 여덟 글자 배치도(예전 밑그림) — 지금은 쓰지 않지만 검사·관리용으로 남김
     var sc = scene(spec); if (!sc) return '';
     var W = 768, H = 1024, hz = 470, s = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '">';
     s += '<rect width="' + W + '" height="' + H + '" fill="#f3efe4"/><rect y="' + hz + '" width="' + W + '" height="' + (H - hz) + '" fill="' + GROUND_TINT[sc.seasonKey] + '" opacity=".55"/>';
@@ -225,7 +231,7 @@
     return s + '</svg>';
   }
 
-  var api = { VERSION: VERSION, STYLE_V: STYLE_V, STEM_OBJ: STEM_OBJ, BR_OBJ: BR_OBJ, fromChart: fromChart, clean: clean, key: key, scene: scene, caption: caption, prompt: prompt, checklist: checklist, judge: judge, sketchSVG: sketchSVG };
+  var api = { VERSION: VERSION, STYLE_V: STYLE_V, STEM_OBJ: STEM_OBJ, BR_OBJ: BR_OBJ, fromChart: fromChart, summary: summary, layoutSVG: layoutSVG, clean: clean, key: key, scene: scene, caption: caption, prompt: prompt, checklist: checklist, judge: judge, sketchSVG: sketchSVG };
   G.MantraMulsang = api;
   if (typeof module === 'object' && module && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
