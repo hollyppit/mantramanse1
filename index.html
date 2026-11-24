@@ -52,6 +52,26 @@ button { font: inherit; color: inherit; }
 .xs-head { display: grid; gap: 2px; padding: 4px 2px 8px; border-bottom: 2px solid var(--ink); }
 .xs-head b { font-family: var(--f-head); font-size: 1.25rem; }
 .xs-head span { font-size: 0.82rem; color: var(--ink-2); }
+.xs .xs-tab { font-family: var(--f-head); font-size: 0.78rem; font-weight: 700; color: var(--accent); letter-spacing: 0.04em; border-bottom: 1px solid var(--line); padding-bottom: 4px; margin-bottom: 2px; }
+/* PDF 섹션 고르기 창 */
+.sheet.xpp { max-height: min(88vh, 760px); overflow: hidden; grid-template-rows: auto auto auto minmax(0, 1fr) auto; gap: 8px; }
+.xpp-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.xpp-h h3 { font-size: 1.15rem; margin: 0; }
+.sheet .xpp-d { font-size: 0.84rem; line-height: 1.55; margin: 0; }
+.xpp-tools { display: flex; flex-wrap: wrap; gap: 6px; }
+.xpp-list { overflow-y: auto; overscroll-behavior: contain; display: grid; gap: 6px; align-content: start; padding: 2px; margin: 0 -2px; }
+.xpp-g { border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+.xpp-g.open { background: var(--surface); }
+.xpp-gh { display: flex; align-items: center; gap: 8px; padding: 6px 8px 6px 10px; }
+.xpp-gh label { flex: 1; display: flex; align-items: center; gap: 8px; min-height: 36px; cursor: pointer; }
+.xpp-n { font-size: 0.78rem; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.xpp-t { border: 0; background: transparent; color: var(--ink-2); font: inherit; font-size: 0.8rem; padding: 8px 6px; cursor: pointer; }
+.xpp-items { display: grid; padding: 0 10px 8px 32px; }
+.xpp-items label { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; border-top: 1px dashed var(--line); font-size: 0.9rem; line-height: 1.4; cursor: pointer; }
+.xpp-items input, .xpp-gh input { width: 18px; height: 18px; flex: none; margin: 0; accent-color: var(--accent); }
+.xpp-items input { margin-top: 1px; }
+.xpp-f .btn[disabled] { opacity: .45; cursor: not-allowed; box-shadow: none; }
+.xpp-f { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid var(--line); padding-top: 10px; font-size: 0.88rem; }
 
 /* 공유용 사주 카드 */
 .xc { width: 1080px; box-sizing: border-box; padding: 64px; background: linear-gradient(160deg, #fff 55%, #eef2ff); color: var(--ink); font-size: 28px; display: grid; gap: 28px; }
@@ -11007,18 +11027,131 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       return pages;
     } finally { stage.remove(); }
   }
-  async function xpExport(kind, btn) {
+  // ── PDF 섹션 골라 내보내기(2026-11-25 사용자 요청: 탭 통째로는 너무 길다 → 필요한 섹션만, 여러 탭에서 여러 개) ──
+  //  섹션 = 각 탭의 카드(section.card, 제목 h2). 제목 없는 안내 문구(p.note 등)는 바로 앞 섹션에 붙인다.
+  //  창을 열 때 사주 탭을 하나씩 그려(운세 흐름은 xpLuckCards 로 현재 대운·세운·월운·일진 상세까지) 복제본을 모아 두고, 끝나면 원래 탭으로 되돌린다.
+  //  고른 섹션은 탭 순서 → 화면 순서대로 이어 붙여 한 PDF로 만든다(쪽 나눔·details 펼침 규칙은 xpStage·xpRender 그대로).
+  const XP_PICK_SKIP = ['face', 'fs', 'tarot', 'iching', 'gl'];   // 사주와 무관하거나 입력형인 탭
+  const XP_PICK_DROP = /건물 풍수는 다릅니다/;   // xpStage 에서도 빼는 카드
+  function xpTitle(el) {
+    const h = el.querySelector('h2'); if (!h) return '';
+    const c = h.cloneNode(true); c.querySelectorAll('.fold-chev,button:not(.term),.tip,[aria-hidden="true"]').forEach(x => x.remove());   // 제목 속 span·용어 버튼(.term)에 본문 글자(명궁·용신 등)가 든 카드가 있어 지우지 않는다
+    const t = (c.textContent || '').replace(/\s+/g, ' ').trim();
+    return t.length > 40 ? t.slice(0, 39) + '…' : t;
+  }
+  function xpCollectTab(k) {
+    S.tab = k;
+    let cards = k === 'luck' ? xpLuckCards() : null;
+    if (!cards) { render(); cards = xpCards().map(el => el.cloneNode(true)); }
+    const out = [], seen = {};
+    cards.forEach(c => {
+      if (c.querySelector('.err') && !c.querySelector('h2')) return;
+      if (c.classList.contains('al-bar') && k !== 'luck') return;   // 눈여겨볼 신호 줄은 탭마다 같으므로 운세 흐름에만
+      const t = xpTitle(c);
+      if (t && XP_PICK_DROP.test(t)) return;
+      if (!t && out.length) { out[out.length - 1].nodes.push(c); return; }
+      const title = t || (c.classList.contains('al-bar') ? '눈여겨볼 신호' : (c.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 24) || '안내');
+      seen[title] = (seen[title] || 0) + 1;
+      out.push({ key: `${k}|${title}|${seen[title]}`, title, nodes: [c] });
+    });
+    return out;
+  }
+  function xpCollectAll() {
+    const keep = S.tab, sx = window.scrollX, sy = window.scrollY, groups = [];
+    try {
+      tabList().filter(([k]) => !XP_PICK_SKIP.includes(k)).forEach(([k, l]) => {
+        let secs = []; try { secs = xpCollectTab(k); } catch (e) { secs = []; }
+        if (secs.length) groups.push({ tab: k, label: l, secs });
+      });
+    } finally { S.tab = keep; render(); window.scrollTo(sx, sy); }
+    return groups;
+  }
+  function xpPicker(btn) {
     if (XP.busy) return;
+    XP.busy = true; const old = btn.textContent; btn.textContent = '목록 만드는 중…'; btn.disabled = true;
+    setTimeout(() => {
+      let groups = [];
+      try { groups = xpCollectAll(); } catch (e) { groups = []; }
+      finally { XP.busy = false; document.querySelectorAll('[data-export]').forEach(b => { b.disabled = false; }); const nb = document.querySelector('[data-export="pdf"]'); if (nb) nb.textContent = old; }
+      if (!groups.length) { alert('내보낼 섹션이 없습니다. 사주를 먼저 입력하세요.'); return; }
+      xpPickSheet(groups);
+    }, 30);
+  }
+  function xpPickSheet(groups) {
+    const all = groups.flatMap(g => g.secs.map(s => s.key));
+    let pick = XP.pick ? new Set([...XP.pick].filter(k => all.includes(k))) : null;
+    const curG = groups.find(g => g.tab === S.tab) || groups[0];
+    if (!pick || !pick.size) pick = new Set(curG.secs.map(s => s.key));   // 처음에는 지금 보고 있는 탭 전체(예전 PDF와 같은 결과)
+    const openG = new Set(groups.filter(g => g === curG || g.secs.some(s => pick.has(s.key))).map(g => g.tab));
+    const bg = document.createElement('div'); bg.className = 'sheet-bg';
+    const sh = document.createElement('div'); sh.className = 'sheet xpp'; sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-modal', 'true'); sh.setAttribute('aria-label', 'PDF로 내보낼 섹션 고르기'); bg.appendChild(sh);
+    const close = () => { bg.remove(); document.removeEventListener('keydown', onKey); };
+    const onKey = ev => { if (ev.key === 'Escape') close(); };
+    const paint = () => {
+      const n = pick.size;
+      sh.innerHTML = `<div class="xpp-h"><h3>PDF로 낼 섹션 고르기</h3><button type="button" class="btn x" data-xpp="close">닫기</button></div>
+        <p class="xpp-d">필요한 섹션만 골라 한 PDF로 묶어요. 여러 탭에서 골라도 되고, 탭 순서대로 이어 붙여요.</p>
+        <div class="xpp-tools"><button type="button" class="btn sm" data-xpp="all">전체 선택</button><button type="button" class="btn sm" data-xpp="none">전체 해제</button><button type="button" class="btn sm" data-xpp="cur">지금 탭만</button></div>
+        <div class="xpp-list">${groups.map(g => {
+          const c = g.secs.filter(s => pick.has(s.key)).length, op = openG.has(g.tab);
+          return `<div class="xpp-g${op ? ' open' : ''}"><div class="xpp-gh"><label><input type="checkbox" data-xpg="${g.tab}"${c === g.secs.length ? ' checked' : ''}${c && c < g.secs.length ? ' data-mixed="1"' : ''}><b>${esc(g.label)}</b></label><span class="xpp-n">${c}/${g.secs.length}</span><button type="button" class="xpp-t" data-xpt="${g.tab}" aria-expanded="${op}" aria-label="${esc(g.label)} 섹션 ${op ? '접기' : '펼치기'}">${op ? '접기' : '펼치기'}</button></div>
+            ${op ? `<div class="xpp-items">${g.secs.map(s => `<label><input type="checkbox" data-xpk="${esc(s.key)}"${pick.has(s.key) ? ' checked' : ''}><span>${esc(s.title)}</span></label>`).join('')}</div>` : ''}</div>`;
+        }).join('')}</div>
+        <div class="xpp-f"><span>${n ? `<b>${n}</b>개 섹션 선택` : '섹션을 하나 이상 고르세요'}</span><button type="button" class="btn primary" data-xpp="go"${n ? '' : ' disabled'}>PDF 만들기</button></div>`;
+      sh.querySelectorAll('input[data-mixed]').forEach(i => { i.indeterminate = true; });
+    };
+    const keepScroll = fn => { const l = sh.querySelector('.xpp-list'), t = l ? l.scrollTop : 0; fn(); paint(); const l2 = sh.querySelector('.xpp-list'); if (l2) l2.scrollTop = t; };
+    sh.addEventListener('change', ev => {
+      const i = ev.target; if (!i || i.type !== 'checkbox') return;
+      keepScroll(() => {
+        if (i.dataset.xpk) { if (i.checked) pick.add(i.dataset.xpk); else pick.delete(i.dataset.xpk); }
+        else if (i.dataset.xpg) { const g = groups.find(x => x.tab === i.dataset.xpg); g.secs.forEach(s => { if (i.checked) pick.add(s.key); else pick.delete(s.key); }); }
+      });
+    });
+    sh.addEventListener('click', ev => {
+      const t = ev.target.closest('[data-xpt]');
+      if (t) { keepScroll(() => { const k = t.dataset.xpt; if (openG.has(k)) openG.delete(k); else openG.add(k); }); return; }
+      const b = ev.target.closest('[data-xpp]'); if (!b) return;
+      const a = b.dataset.xpp;
+      if (a === 'close') return close();
+      if (a === 'all') return keepScroll(() => { all.forEach(k => pick.add(k)); });
+      if (a === 'none') return keepScroll(() => { pick.clear(); });
+      if (a === 'cur') return keepScroll(() => { pick.clear(); curG.secs.forEach(s => pick.add(s.key)); openG.add(curG.tab); });
+      if (a === 'go') {
+        if (!pick.size) return;
+        XP.pick = new Set(pick);
+        const used = groups.map(g => ({ g, secs: g.secs.filter(s => pick.has(s.key)) })).filter(x => x.secs.length);
+        const multi = used.length > 1, cards = [];
+        used.forEach(({ g, secs }) => secs.forEach((s, i) => s.nodes.forEach((nd, j) => {
+          const c = nd.cloneNode(true);
+          if (multi && i === 0 && j === 0) { const d = document.createElement('div'); d.className = 'xs-tab'; d.textContent = g.label; c.prepend(d); }   // 탭이 바뀌는 첫 섹션 위에 탭 이름(카드 안에 넣어 다음 쪽으로 떨어지지 않게)
+          cards.push(c);
+        })));
+        const labels = used.map(x => x.g.label);
+        const label = !multi ? labels[0] : labels.length <= 3 ? labels.join(' · ') : `${labels.slice(0, 2).join(' · ')} 외 ${labels.length - 2}개 탭`;
+        close();
+        const pb = document.querySelector('[data-export="pdf"]');
+        xpExport('pdf', pb || b, { cards, label, file: multi ? '섹션모음' : labels[0] });
+      }
+    });
+    bg.addEventListener('click', ev => { if (ev.target === bg) close(); });
+    document.addEventListener('keydown', onKey);
+    paint(); document.body.appendChild(bg);
+    const go = sh.querySelector('[data-xpp="go"]'); if (go && !XP_MOBILE) go.focus();
+  }
+  async function xpExport(kind, btn, pick) {
+    if (XP.busy) return;
+    if (kind === 'pdf' && !pick) return xpPicker(btn);
     XP.busy = true;
     const btns = document.querySelectorAll('[data-export]'), old = btn.textContent;
     btns.forEach(b => b.disabled = true); btn.textContent = '만드는 중…';
     try {
       const sel = document.querySelector('.tab[aria-selected="true"]');
-      const label = kind === 'card' ? '사주카드' : sel ? sel.textContent.trim() : '만세력';
+      const label = kind === 'card' ? '사주카드' : pick ? pick.label : sel ? sel.textContent.trim() : '만세력';
       await xpLibs(kind === 'pdf');
-      const pages = kind === 'card' ? [await xpCardRender()] : await xpRender(label);
+      const pages = kind === 'card' ? [await xpCardRender()] : await xpRender(label, pick && pick.cards);
       const who = (S.inp && S.inp.name ? S.inp.name : '') || new Date().toISOString().slice(0, 10);
-      const base = `만세력_${label}_${who}`.replace(/[\\/:*?"<>|\s]+/g, '_');
+      const base = `만세력_${pick ? pick.file : label}_${who}`.replace(/[\\/:*?"<>|\s]+/g, '_');
       if (kind === 'pdf') {
         const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
         pages.forEach((pc, i) => { if (i) pdf.addPage('a4', 'portrait'); pdf.addImage(pc.toDataURL('image/jpeg', XP_MOBILE ? 0.85 : 0.92), 'JPEG', 0, 0, 210, 297); });
