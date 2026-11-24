@@ -108,3 +108,7 @@
 - 검사 도구(tools/reading-plain-audit.cjs)가 30일 체크리스트(fieldset·legend·label)와 시그니처 카드(strong·span·small) 항목을 한 문장으로 이어 붙여 '긴 문장'으로 잘못 세던 것을 고쳤어요. 이제 항목마다 따로 세요.
 - 실제 화면 문장: 대운 과제 카드의 '다음 대운은' → '다음 10년 운(대운)은'(reading-plus.js, 캐시 20261124-chk).
 - 결과: 긴 문장 13 → 1(91자 DB 문장 하나), 전체 문제 문장 201개(1.3%).
+
+## 추가: 남은 91자 DB 문장 (2026-11-24, 사용자 승인 "고치고 재게시해")
+- health_01 h01-wood-over-earth 근거를 손으로 나눴어요(longsplit MANUAL): '목은 많고 토는 적은 조합이에요. 전통에서는 목을 근육의 긴장이나 눈의 피로와, 토를 식사 리듬과 연결해 읽어요. 그래서 …'
+- 화면 기준 90자 넘는 DB 문장 0. 운영 재게시: 관찰 107행 → timeline_health_01 준비(검증 0·조건 누락 0) → 드라이런 ok → 게시 v20 → 해시 일치 1/1 · 나머지 106장 그대로(`output/rebuild-publication-20261124-long91/verify-after.txt`).
