@@ -5481,13 +5481,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const aptOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.aptitude === true && window.MantraAptitude && window.MantraAptitudeView);
   // 직업·활동 적성(renderCareer, wealth-career.js)은 2026-11-25 오행·강약 탭에서 이 탭 끝으로 옮겼다 — 화면 위치만 옮기고 계산은 섞지 않는다
   function renderAptitude() { let a = ''; try { a = window.MantraAptitudeView.html(M, S.ch, { esc, term: (k, l) => term(k, l) }); } catch (e) { a = ''; } let c = ''; try { c = renderCareer(S.ch); } catch (e) { c = ''; } return a + (c ? `<div id="aptCareer" style="scroll-margin-top:110px">${c}</div>` : ''); }
+  const tabList = () => [['wonguk', '원국'], ['ohaeng', '오행·강약'], ['yong', '용신'], ['luck', '운세 흐름'], ...(aptOn() ? [['apt', '특기·적성']] : []), ...(spOn() ? [['space', '공간·명당']] : []), ['pair', '궁합'], ['tk', '택일'], ...(S.ch && S.ch.ziwei ? [['zw', '자미두수']] : []), ['face', '관상'], ...(spOn() ? [] : [['fs', '풍수']]), ['tarot', '타로'], ['iching', '주역'], ['gl', '용어']];
   function renderTop() {
-    const tabs = [['wonguk', '원국'], ['ohaeng', '오행·강약'], ['yong', '용신'], ['luck', '운세 흐름'], ...(aptOn() ? [['apt', '특기·적성']] : []), ...(spOn() ? [['space', '공간·명당']] : []), ['pair', '궁합'], ['tk', '택일'], ...(S.ch && S.ch.ziwei ? [['zw', '자미두수']] : []), ['face', '관상'], ...(spOn() ? [] : [['fs', '풍수']]), ['tarot', '타로'], ['iching', '주역'], ['gl', '용어']];
+    const tabs = tabList();
     return `<header class="top"><div class="top-in">
       <div class="brand"><div class="seal" aria-hidden="true">萬<br>歲</div><h1>만트라 만세력</h1></div>
       <div class="who">${whoLine()}</div>
       ${adminPw ? `<span class="admin-badge">관리자</span><button class="btn" data-act="admin-out">로그아웃</button>` : ''}
-      <span class="seg xp" role="group" aria-label="내보내기"><button type="button" data-export="pdf" title="현재 탭을 A4 PDF로 저장">PDF</button><button type="button" data-export="png" title="현재 탭을 A4 이미지(PNG)로 저장">이미지</button><button type="button" data-export="card" title="공유용 사주 카드 이미지로 저장">카드</button></span>
+      <span class="seg xp" role="group" aria-label="내보내기"><button type="button" data-export="pdf" title="필요한 섹션만 골라 A4 PDF로 저장">PDF</button><button type="button" data-export="png" title="현재 탭을 A4 이미지(PNG)로 저장">이미지</button><button type="button" data-export="card" title="공유용 사주 카드 이미지로 저장">카드</button></span>
       <a class="btn mt-cta" href="/report/">무빙툰 보기 ›</a>
       <button class="btn${S.editing ? '' : ' primary'}" data-act="edit">${S.editing ? '입력 닫기' : '사주 입력'}</button>
     </div>
@@ -10212,7 +10213,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const MD = window.MantraMansionsData, DD = window.MantraMansionDayData, ok = r0.status === 'ok', om = ok ? r0.omens : null;
     const ev = ok ? om.events : DD.EVENTS.map(e => ({ label: e[1], text: '미확정', evidence: null }));
     const next = ok ? list.slice(0, 7).map(r => { const x = tkMansion(r.jdn); return x && x.status === 'ok' ? `<span class="chip${x.fuduan && x.fuduan.is ? ' warn' : ''}">${r.m}.${r.d} ${esc(x.mansion.label)}${x.fuduan && x.fuduan.is ? ' · 복단일' : ''}</span>` : ''; }).join(' ') : '';
-    const fd = ok ? r0.fuduan : null, fdOk = fd && fd.status === 'ok';
+    const fd = ok ? r0.fuduan : null, fdOk = fd && fd.status === 'ok', mi = ok ? r0.miri : null;
     const anc = ok ? MD.MANSIONS.find(m => m.id === r0.profile.anchor.mansionId) : null;
     const two = ok ? (r0.omensAll || [om]).filter(o => o.profile).slice().sort((a, b) => a.profile.order - b.profile.order) : [];
     const vc = v => v === '길' ? 'good' : v === '흉' ? 'bad' : '';
@@ -10224,6 +10225,11 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="small"><b>근거</b> — 子虛·丑斗·寅室·卯女·辰箕·巳房·午角·未張·申鬼·酉觜·戌胃·亥壁. ${esc(fd.profile.note)}</p>
       <div class="list">${fd.profile.uses.map(u => `<div class="li"><span class="k">${esc(u.label)}</span><span class="v small">${esc(u.text)}<br><span class="muted" lang="zh-Hant">원문: ${esc(u.quote)}</span></span><span></span></div>`).join('')}</div>
       <p class="small muted"><b>한계</b> — 행사별로 꺼리는지는 문헌마다 달라 판정하지 않고 원문만 보여 드립니다. 추천 날짜 점수에도 넣지 않았습니다.</p>` : ''}
+      ${mi ? `<h3>밀일(密日)</h3><div class="sumbox"><b>결과</b> — ${list[0].m}.${list[0].d}은 ${esc(r0.mansion.hanja)}수라 ${mi.is ? '<b>밀일입니다.</b>' : '밀일이 아닙니다.'} 꺼리는 날인지는 판정하지 않습니다.</div>
+      <p class="small"><b>쉬운 설명</b> — 그날 수가 房·虛·星·昴(칠요가 해인 네 수)이면 밀일이라 합니다. 문헌마다 정반대로 보아, 판정 없이 원문만 보여 드립니다.</p>
+      <div class="list">${mi.profile.uses.map(u => `<div class="li"><span class="k">${esc(u.label)}</span><span class="v small">${esc(u.text)}<br><span class="muted" lang="zh-Hant">원문: ${esc(u.quote)}</span></span><span></span></div>`).join('')}</div>
+      <p class="small"><b>근거</b> — ${mi.profile.sources.map(x => `${esc(x.title)} <a href="${esc(x.url)}" target="_blank" rel="noopener">원문 보기</a>`).join(' / ')}</p>
+      <p class="small muted"><b>한계</b> — ${esc(mi.profile.note)} 추천 날짜 점수에는 넣지 않았습니다.</p>` : ''}
       ${two.length ? `<h3>옥갑기 두 판본 나란히</h3>
       <div class="sumbox"><b>결과</b> — ${esc(r0.mansion.hanja)}수를 ${two.map(o => `${esc(o.profile.shortName)}은 <span class="chip ${vc(o.headVerdict)}">${esc(o.head ? o.head.split(' ').pop() : '—')}</span>`).join(', ')}으로 적었습니다.${two.length > 1 && two[0].headVerdict !== two[1].headVerdict ? ' <b>두 판본의 길흉이 반대입니다.</b>' : ''} 어느 쪽을 따를지 정하지 않아 판정은 하지 않습니다.</div>
       <p class="small"><b>쉬운 설명</b> — 같은 '옥갑기'라는 이름 아래 날마다의 28수 길흉을 노래한 전통이 둘 있습니다. 현존 가장 오래된 수록본(1607)과 후대에 널리 퍼진 노래가 28수 중 15수에서 길흉이 반대라, 두 판본을 함께 보여 드립니다.</p>
@@ -10966,9 +10972,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     } catch (e) { return null; }
     finally { S.sel = keep.sel; S.selYear = keep.selYear; S.selYM = keep.selYM; render(); window.scrollTo(sx, sy); }
   }
-  async function xpRender(tabLabel) {
+  async function xpRender(tabLabel, cards) {
     const PW = 794, PH = 1123, MX = 40, MT = 36, MB = 44, GAP = 12, SC = XP_MOBILE ? 1.5 : 2, UH = PH - MT - MB;
-    const stage = xpStage(tabLabel, xpLuckCards());
+    const stage = xpStage(tabLabel, cards || xpLuckCards());
     try {
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
       // 2026-11-21: 자연스럽게 이어 읽히도록 — 카드를 통째로 다음 쪽으로 넘겨 빈 쪽을 만들지 않고, 남은 자리까지 채운 뒤
