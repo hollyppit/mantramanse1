@@ -119,6 +119,17 @@ ok(d1.omens.status === 'edition-unconfirmed' && d1.omens.events.every(e => e.ver
 eq(d1.omens.events.filter(e => ['move', 'open', 'contract'].includes(e.id)).map(e => e.text), ['미확정 — 원문에 이 행사 언급 없음', '미확정 — 원문에 이 행사 언급 없음', '미확정 — 원문에 이 행사 언급 없음'], '이사·개업·계약은 원문 언급 없음');
 ok(d1.omens.events.find(e => e.id === 'build').reference === '흉' && /원문 참고/.test(d1.omens.events.find(e => e.id === 'build').text), '女수 건축: 원문 참고 흉(판정은 미확정)');
 E.status = 'verified'; ok(X.omens('jiao').events.find(e => e.id === 'wedding').verdict === '길' && X.omens('jiao').events.find(e => e.id === 'funeral').verdict === '흉', '검증 프로필이면 원문 읽기대로 판정'); E.status = 'edition-unconfirmed';
+// 伏斷日: 승인 프로필, 12쌍(卯女 포함), 84일에 12번, 판정은 '이 날이 伏斷인가'만
+{ const FP = DD.FUDUAN_PROFILES[0], AP = DD.ASSIGN_PROFILES[0];
+  ok(FP.status === 'approved' && Object.keys(FP.pairs).length === 12 && FP.pairs['卯'] === 'nu' && AP.fuduan['卯'] === 'nu' && AP.approval.status === 'approved', '伏斷·배속 승인 기록, 卯女 포함 12쌍');
+  ok(JSON.stringify(FP.pairs) === JSON.stringify(AP.fuduan), '伏斷 판정 짝 = 배속 점검 짝');
+  ok(X.checkAssign(AP).ok, '12쌍으로도 기준일 점검 통과');
+  let n = 0; const seen = {};
+  for (let j = AP.anchor.jdn; j < AP.anchor.jdn + 84; j++) { const d = X.day(j); if (d.fuduan.status === 'ok' && d.fuduan.is) { n++; seen[d.fuduan.branch] = d.mansion.id; } }
+  ok(n === 12 && Object.keys(seen).every(b => FP.pairs[b] === seen[b]) && Object.keys(seen).length === 12, '84일 주기에 伏斷일 12번, 짝마다 한 번');
+  const d0 = X.day(AP.anchor.jdn); ok(d0.fuduan.branch === '亥' && d0.mansion.id === 'nu' && d0.fuduan.is === false, '기준일 2026-11-21(亥日·女)은 伏斷 아님');
+  ok(FP.uses.every(u => !('verdict' in u)) && d0.fuduan.profile.uses.length === 3, '행사별 쓰임은 원문만, 판정 없음');
+  const keep = FP.status; FP.status = 'text_verified'; ok(X.day(AP.anchor.jdn).fuduan.is === null, '승인 전이면 伏斷 판정 안 함'); FP.status = keep; }
 ok(!/dayMansion|DAY_CYCLE|EVENT_RULES/.test(fs.readFileSync(path.join(root, 'mansions-engine.js'), 'utf8')), '천문방위 엔진과 날짜 모듈 분리');
 
 // ── 6. 화면 연결
@@ -128,6 +139,7 @@ ok(order.every(i => i > 0) && order.every((v, i) => !i || v > order[i - 1]), '�
 ok(/body \+= spMansionSection\(kind, i, an\);/.test(html) && /28수 천문방위 분석/.test(html) && /통합 공간 해석/.test(html), '28수·통합 카드 연결');
 ok(html.indexOf('body += an ? spResult(kind, i, an)') < html.indexOf('body += spMansionSection(kind, i, an)'), 'B(현공) 다음 C·D 순서');
 ok(/\$\{tkMansionCard\(list\)\}/.test(html) && /tkMansionCell\(r\.jdn\)/.test(html), '택일 28수 연결');
+ok(/<h3>복단일\(伏斷日\)<\/h3>/.test(html) && /r\.fuduan && r\.fuduan\.is \? ' <span class="chip warn">복단일<\/span>'/.test(html) && /\.chip\.warn \{/.test(html), '택일 화면 복단일 표시(카드·표·칩)');
 ok(/return F\.analyze\(\{ ch: S\.ch, facingDeg: \+c\.facing,/.test(html), '현공 호출(spRun)은 기존 그대로');
 ok(!/Mansion|28수|宿/.test(fs.readFileSync(path.join(root, 'engine.js'), 'utf8')), '택일 점수(engine.js pickDays)에 28수를 더하지 않음');
 ok((html.match(/\$\{MS_SRC_WARN\}/g) || []).length === 2 && /다른 판본과의 교차 확인과 택일 길흉 노래\(옥갑기\)의 판본 확인은 아직 끝나지 않았습니다/.test(html), '28수·택일 카드에 출처 경고(교차 확인·옥갑기 판본 미완) 표시');

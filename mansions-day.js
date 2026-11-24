@@ -7,7 +7,7 @@
   'use strict';
   var D = G.MantraMansionsData, DD = G.MantraMansionDayData;
   if (!D || !DD) throw new Error('mansions-data.js · mansions-day-data.js 를 먼저 불러오세요');
-  var VERSION = 'mansions-day-20261121-1';
+  var VERSION = 'mansions-day-20261125-1';
   var mod = function (a, n) { return ((a % n) + n) % n; };
   var BR = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
   var LUM_TO_DOW = [3, 4, 5, 6, 0, 1, 2];   // 칠요 순번(목금토일월화수) → JDN 요일(0=월)
@@ -54,8 +54,16 @@
         return { id: ev[0], label: ev[1], term: ev[2], verdict: ok ? r.verdict : null, reference: r.verdict, evidence: r.evidence, text: ok ? r.verdict : '미확정 — 판본 미확인(원문 참고: ' + r.verdict + ')' };
       }) };
   }
-  function day(jdn, o) { o = o || {}; var a = mansionOf(jdn, o.assign); if (a.status !== 'ok') return a; return Object.assign(a, { omens: omens(a.mansion.id, o.omen) }); }
+  // 伏斷日 판정: 승인(approved)된 프로필에서만 판정한다. 행사별 쓰임은 문헌별 원문(uses)만 돌려주고 판정하지 않는다.
+  function fuduanProfile(id) { var list = DD.FUDUAN_PROFILES || []; return id ? list.find(function (p) { return p.id === id; }) : list.find(function (p) { return p.isDefault; }); }
+  function fuduanOf(jdn, mansionId, profileId) {
+    var p = fuduanProfile(profileId);
+    if (!p || p.status !== 'approved' || !p.pairs || Object.keys(p.pairs).length !== 12) return { status: 'pending', is: null, text: '미확정 — 伏斷 자료가 승인되지 않았습니다.' };
+    var b = BR[branchOfJdn(jdn)], want = p.pairs[b];
+    return { status: 'ok', is: want === mansionId, branch: b, pairMansion: byId(want), profile: { id: p.id, title: p.title, sources: p.sources, note: p.note, uses: p.uses, approval: p.approval } };
+  }
+  function day(jdn, o) { o = o || {}; var a = mansionOf(jdn, o.assign); if (a.status !== 'ok') return a; return Object.assign(a, { omens: omens(a.mansion.id, o.omen), fuduan: fuduanOf(jdn, a.mansion.id, o.fuduan) }); }
 
-  G.MantraMansionDay = { VERSION: VERSION, branchOfJdn: branchOfJdn, checkAssign: checkAssign, weekdayOk: weekdayOk, assignProfile: assignProfile, omenProfile: omenProfile, mansionOf: mansionOf, omens: omens, day: day };
+  G.MantraMansionDay = { VERSION: VERSION, branchOfJdn: branchOfJdn, checkAssign: checkAssign, weekdayOk: weekdayOk, assignProfile: assignProfile, omenProfile: omenProfile, fuduanProfile: fuduanProfile, fuduanOf: fuduanOf, mansionOf: mansionOf, omens: omens, day: day };
   if (typeof module !== 'undefined' && module.exports) module.exports = G.MantraMansionDay;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -6,7 +6,7 @@
    · 기존 택일 점수(engine.js pickDays)에는 더하거나 빼지 않는다. */
 (function (G) {
   'use strict';
-  var VERSION = 'mansions-day-data-20261121-1';
+  var VERSION = 'mansions-day-data-20261125-1';
 
   // ───────────── 날짜 배속 프로필 ─────────────
   // 28일마다 도는 값일수(值宿). 각 수는 칠요(七曜) 요일이 고정(각=목요일 …).
@@ -18,10 +18,30 @@
         { role: '값일수 관행과 일지·수 조합(원전)', title: '《흠정협기변방서》(사고전서본) 권36 伏斷日 조', url: 'https://zh.wikisource.org/wiki/%E6%AC%BD%E5%AE%9A%E5%8D%94%E7%B4%80%E8%BE%A8%E6%96%B9%E6%9B%B8_(%E5%9B%9B%E5%BA%AB%E5%85%A8%E6%9B%B8%E6%9C%AC)/%E5%8D%B736', quote: '伏斷日…皆以值宿起算…二十八宿選擇之法來自西域…以子日起虚丑值斗亥值壁…戌值胃酉值觜申值鬼未值張午值角已值房辰值箕…寅值室' },
         { role: '기준일(현대 역서)', title: '중국 노황력 2026-11-21 · 2026-11-22', url: 'https://wannianli.tianqi.com/laohuangli/2026-11-21.html', quote: '北方女土蝠 值日星宿 / 北方虚日鼠' },
         { role: '기준일(현대 계산 라이브러리)', title: 'lunar-javascript(6tail) getXiu', url: 'https://github.com/6tail/lunar-javascript', quote: 'LunarUtil.XIU[일지+요일]' } ],
-      // 원전 대조: 협기변방서 伏斷 조합(일지 → 수). 卯는 전사본이 '夘值斗'인데 일지·수 주기상 丑과 같은 수가 될 수 없어 전사 오류로 보고 대조에서 뺀다.
-      fuduan: { '子': 'xu', '丑': 'dou', '寅': 'shi', '辰': 'ji', '巳': 'fang', '午': 'jiao', '未': 'zhang', '申': 'gui', '酉': 'zi', '戌': 'wei_stomach', '亥': 'bi_wall' },
+      // 원전 대조: 협기변방서 伏斷 조합(일지 → 수) 12쌍.
+      // 卯는 본문 '夘值斗'(四庫 원본 葉39a에도 있음)가 아니라 같은 권 伏斷時立成 표와 본문 '寅夘日在後三宮'을 따라 女(2026-11-22 판본 대조).
+      fuduan: { '子': 'xu', '丑': 'dou', '寅': 'shi', '卯': 'nu', '辰': 'ji', '巳': 'fang', '午': 'jiao', '未': 'zhang', '申': 'gui', '酉': 'zi', '戌': 'wei_stomach', '亥': 'bi_wall' },
       status: 'verified',
-      statusText: '값일수 관행과 일지·수 조합은 원전(《협기변방서》)으로, 기준일은 현대 역서 두 곳으로 확인했습니다. 원전에는 날짜 기준일 자체가 적혀 있지 않습니다.' } ];
+      // 七元 규칙(甲子日 起 虛·奎·畢·鬼·翼·氐·箕)과 칠요 배속은 《협기변방서》 卷1 葉27a·28a 원본 면으로 확인했고, 기준일 결과와 같다.
+      approval: { status: 'approved', date: '2026-11-25', by: '사용자', basis: '《협기변방서》 卷1·卷36 사고전서 원본 면 대조(edition_verified, 2026-11-22) + 엔진 결과 일치 + 테스트' },
+      statusText: '값일수 관행과 七元·칠요 규칙, 일지·수 조합은 원전(《협기변방서》 사고전서본 원본 면)으로, 기준일은 현대 역서 두 곳으로 확인했습니다. 원전에는 날짜 기준일 자체가 적혀 있지 않습니다.' } ];
+
+  // ───────────── 伏斷日 프로필 ─────────────
+  // 그날 일지와 그날 수가 정해진 짝이면 伏斷日. 판정(이 날이 伏斷日인가)만 승인 자료로 하고,
+  // 행사별 금기는 문헌마다 달라(협기변방서는 혼례 금기를 배척) 판정·점수에 쓰지 않고 문헌별로 그대로 보여 준다.
+  var FUDUAN_PROFILES = [
+    { id: 'xieji-fuduan', isDefault: true, title: '伏斷日(복단일)',
+      pairs: { '子': 'xu', '丑': 'dou', '寅': 'shi', '卯': 'nu', '辰': 'ji', '巳': 'fang', '午': 'jiao', '未': 'zhang', '申': 'gui', '酉': 'zi', '戌': 'wei_stomach', '亥': 'bi_wall' },
+      status: 'approved', approval: { date: '2026-11-25', by: '사용자', basis: '《협기변방서》 卷36 사고전서 원본 면(葉39a·伏斷時立成 표) edition_verified + 다른 문헌 4종 전산 일치' },
+      sources: [
+        { role: '원전(판본 확인)', title: '《흠정협기변방서》 卷36 辨譌 伏斷日 조·伏斷時立成 표 — 사고전서 영인본 원본 면(IA 06056527.cn n75·n80)', url: 'https://archive.org/details/06056527.cn', quote: '伏斷日…皆以值宿起算…以子日起虚丑值斗亥值壁…寅值室其值日之宿皆在日支後二宮…然寅夘日在後三宮' },
+        { role: '교차(전산)', title: '《선택기요》 上編', url: 'https://zh.wikisource.org/wiki/%E9%81%B8%E6%93%87%E7%B4%80%E8%A6%81/%E4%B8%8A%E7%B7%A8', quote: '子虛丑斗寅嫌室。卯女辰箕巳怕房。午角未張申値鬼。酉觜戌胃亥壁當。' } ],
+      note: '卯日은 본문에 「夘值斗」로 적혀 있으나, 같은 권의 표와 본문 설명이 女를 가리키고 다른 문헌 4종도 女라서 女로 봅니다.',
+      // 행사별 쓰임: 문헌 원문 그대로(판정 아님)
+      uses: [
+        { label: '혼례', text: '《구선주후경》·《선택요략》은 꺼린다고 했지만, 《협기변방서》(卷10)는 옛 속설이라며 따르지 않았습니다.', quote: '結婚姻、嫁娶…忌…伏斷 / 嫁娶舊止宜不將日又忌章光無翹伏斷…今按章光無翹等皆俗説' },
+        { label: '건축·입택', text: '《구선주후경》은 기둥 세우기·상량에, 《선택요략》은 수리·입택에 꺼린다고 했습니다.', quote: '豎柱…上梁…忌…伏斷 / 伏斷忌修造，入宅，上官，出行，嫁娶，百事凶' },
+        { label: '장례', text: '《선택요략》은 장례에는 꺼리지 않는다고 했습니다.', quote: '葬埋不忌' } ] } ];
 
   // ───────────── 행사 목록 ─────────────
   // key, 화면 이름, 원문 용어(없으면 null = 원문 언급 없음 → 늘 미확정)
@@ -67,6 +87,6 @@
     "zhen": {"head":"軫水蚓 劉直 吉","headVerdict":"길","original":["軫星臨水造龍宮，代代為官受敕封；富貴榮華增福壽，庫滿倉盈自昌隆。","埋葬文星來照助，宅合安寧不見凶；更有為官沽帝寵，婚姻龍子出龍宮。"],"plain":"집 짓기·장례·혼인 모두 좋게 봅니다.","readings":{"build":{"verdict":"길","evidence":"軫星臨水造龍宮"},"funeral":{"verdict":"길","evidence":"埋葬文星來照助"},"wedding":{"verdict":"길","evidence":"婚姻龍子出龍宮"}}}
       } } ];
 
-  G.MantraMansionDayData = { VERSION: VERSION, ASSIGN_PROFILES: ASSIGN_PROFILES, EVENTS: EVENTS, OMEN_PROFILES: OMEN_PROFILES };
+  G.MantraMansionDayData = { VERSION: VERSION, ASSIGN_PROFILES: ASSIGN_PROFILES, FUDUAN_PROFILES: FUDUAN_PROFILES, EVENTS: EVENTS, OMEN_PROFILES: OMEN_PROFILES };
   if (typeof module !== 'undefined' && module.exports) module.exports = G.MantraMansionDayData;
 })(typeof window !== 'undefined' ? window : globalThis);
