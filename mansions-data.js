@@ -7,7 +7,7 @@
    mansionStart·mansionEnd·angularExtent 는 프로필마다 다르므로 각 수에는 null 로 두고, 엔진이 고른 프로필에서 계산한다. */
 (function (G) {
   'use strict';
-  var VERSION = 'mansions-data-20261122-1';
+  var VERSION = 'mansions-data-20261125-1';
   // 이름·사신 배속 출전: 사신(四神)과 동·북·서·남 4방 7수씩의 배속은 《史記·天官書》 이래 전통 천문 분류.
   // 순서는 각(角)에서 시작해 동→북→서→남 방(적경이 커지는 방향).
   var BASE_SOURCE = '사신 배속·순서: 《사기(史記)·천관서(天官書)》 이래 동양 전통 천문 분류';
@@ -113,7 +113,31 @@
   // 형식: { id, school, title, edition, sourceUrl, quote, status:'verified', table: { 子:['虛',…], … }(24산 한자 → 걸치는 수 한자들) }
   // 2026-11-21 조사: 열람 가능한 원문에서 24산 단위 대응표를 찾지 못했다(《나경투해》·《나경정문침》 원문 미확보).
   //   참고로 《유문숭리절충감여완효록》 '星辰定位之圖'에 12지 경계(예: 卯는 氐 3도에서 시작)를 노래한 구절이 있으나 24산 표가 아니고 전사가 불완전해 넣지 않았다.
+  // ───────────── 12궁(12지·12次) 묶음 (2026-11-25 사용자 결정으로 표시) ─────────────
+  // 원전이 인정하는 범위: 28수를 12지 궁 단위로 묶는다. 24산 하나에 수 하나를 고정하는 방식은 원전(《나경정문침》 十四辨)이 부정한다.
+  // 궁의 방위는 12지 방위(子=정북 0°, 30°씩). 수의 실제 도수 경계와는 다를 수 있다(원전도 卯宮에 氐·房·心·尾 일부가 함께 든다고 함).
+  var PALACE12 = {
+    status: 'cross_checked',
+    rows: [
+      { branch: '子', ci: '玄枵', mansions: ['nu', 'xu', 'wei_roof'] },
+      { branch: '丑', ci: '星紀', mansions: ['dou', 'niu'] },
+      { branch: '寅', ci: '析木', mansions: ['wei_tail', 'ji'] },
+      { branch: '卯', ci: '大火', mansions: ['di', 'fang', 'xin'] },
+      { branch: '辰', ci: '壽星', mansions: ['jiao', 'kang'] },
+      { branch: '巳', ci: '鶉尾', mansions: ['yi', 'zhen'] },
+      { branch: '午', ci: '鶉火', mansions: ['liu', 'xing', 'zhang'] },
+      { branch: '未', ci: '鶉首', mansions: ['jing', 'gui'] },
+      { branch: '申', ci: '實沈', mansions: ['zi', 'shen'] },
+      { branch: '酉', ci: '大梁', mansions: ['wei_stomach', 'mao', 'bi_net'] },
+      { branch: '戌', ci: '降婁', mansions: ['kui', 'lou'] },
+      { branch: '亥', ci: '娵訾', mansions: ['shi', 'bi_wall'] } ],
+    anchors: { '子': 'xu', '卯': 'fang', '午': 'xing', '酉': 'mao' },
+    sources: [
+      { role: '12궁 묶음·4정 기준점(판본 확인)', title: '《나경정문침(羅經頂門針)》 明 徐之鏌, 天啓 金陵書林 唐鯉耀刊本 卷上 葉27b–29a 「十四辨 星宿占山之是非」', url: 'https://archive.org/details/20260509_20260509_1020', quote: '虛日正當子中昴日正當酉中星日正當午中房日正當卯中…女虛危爲玄枵之次爲寶瓶宮屬子…每欲以一宮限定一宿果是乎非乎' },
+      { role: '12궁 묶음(교차)', title: '《흠정협기변방서》 卷1 本原 — 사고전서 영인본 원본 면 葉25b(IA 06056502.cn n144)', url: 'https://zh.wikisource.org/wiki/%E6%AC%BD%E5%AE%9A%E5%8D%94%E7%B4%80%E8%BE%A8%E6%96%B9%E6%9B%B8_(%E5%9B%9B%E5%BA%AB%E5%85%A8%E6%9B%B8%E6%9C%AC)/%E5%8D%B701', quote: '十二辰以子午卯酉為四中宮故一宮各筦三象子宮女虛危虛星居中…卯宮氐房心房星居中…午宮柳星張星居中' } ],
+    note: '원전은 28수를 24산에 하나씩 고정하는 방식을 「옛 현인의 이름을 빌린 꾸밈」(《玉髓經》 張子微 인용)이라며 부정하고, 12지 궁 단위의 묶음만 인정합니다.' };
+
   var LUOPAN_PROFILES = [];
-  G.MantraMansionsData = { VERSION: VERSION, GUARD: GUARD, MANSIONS: MANSIONS, SEVEN: SEVEN, BASE_SOURCE: BASE_SOURCE, DEGREE_PROFILES: DEGREE_PROFILES, LUOPAN_PROFILES: LUOPAN_PROFILES };
+  G.MantraMansionsData = { VERSION: VERSION, GUARD: GUARD, MANSIONS: MANSIONS, SEVEN: SEVEN, BASE_SOURCE: BASE_SOURCE, DEGREE_PROFILES: DEGREE_PROFILES, LUOPAN_PROFILES: LUOPAN_PROFILES, PALACE12: PALACE12 };
   if (typeof module !== 'undefined' && module.exports) module.exports = G.MantraMansionsData;
 })(typeof window !== 'undefined' ? window : globalThis);

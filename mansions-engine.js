@@ -9,7 +9,7 @@
 (function (G) {
   'use strict';
   var D = G.MantraMansionsData; if (!D || !D.MANSIONS) throw new Error('mansions-data.js 를 먼저 불러오세요');
-  var VERSION = 'mansions-engine-20261121-2';
+  var VERSION = 'mansions-engine-20261125-1';
   var mod = function (a, n) { return ((a % n) + n) % n; };
   var GROUPS = ['east', 'north', 'west', 'south'];
   var REQUIRED = ['id', 'title', 'work', 'era', 'edition', 'sourceUrl', 'quote', 'coordinateSystem', 'circumference', 'unit', 'referencePoint', 'extents'];
@@ -80,21 +80,32 @@
   function azimuthToMansions(azimuth) {
     var B = G.MantraBearing; if (!B) return { ok: false, reason: 'bearing.js 가 없습니다' };
     var mt = B.mountain24(azimuth); if (!mt) return { ok: false, reason: '향 각도가 없습니다' };
-    var ls = luopanProfiles(); if (!ls.length) return { ok: false, mountain: mt, reason: '출전이 확인된 나경 28수환↔24산 대응표가 없어 이 방위가 어느 수인지 판정하지 않습니다.' };
+    var ls = luopanProfiles(); if (!ls.length) return { ok: false, mountain: mt, reason: '원전(《나경정문침》 十四辨)이 24산 하나에 수 하나를 정하는 방식을 부정하고, 출전이 확인된 대응표도 없어 이 방위가 어느 한 수인지 판정하지 않습니다. 원전이 인정하는 12궁 묶음은 아래에 보여 드립니다.' };
     return { ok: true, mountain: mt, results: ls.map(function (l) { return { profileId: l.id, school: l.school, title: l.title, source: l.edition, mansions: l.table[mt.hanja].map(function (h) { return D.MANSIONS.find(function (m) { return m.hanja === h; }); }) }; }) };
   }
 
+  // 12궁 묶음: 방위각이 속한 12지 궁(子=0°, 30°씩)과 그 궁의 수 묶음. 24산 하나에 수 하나를 정하지 않는다(원전이 부정).
+  var BR12 = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+  function palace12(az) {
+    var P = D.PALACE12; if (!P || az == null || !isFinite(az)) return null;
+    var a = ((az % 360) + 360) % 360, i = Math.floor((a + 15) / 30) % 12, off = a - i * 30; if (off > 180) off -= 360;
+    var row = P.rows[i], edge = Math.abs(Math.abs(off) - 15) < 3.75;
+    var nb = edge ? P.rows[(i + (off > 0 ? 1 : 11)) % 12] : null;
+    var pick = function (r) { return { branch: r.branch, ci: r.ci, mansions: r.mansions.map(function (id) { return D.MANSIONS.find(function (m) { return m.id === id; }); }), anchor: P.anchors[r.branch] || null }; };
+    return { status: P.status, azimuth: a, palace: pick(row), edge: edge, neighbor: nb ? pick(nb) : null, sources: P.sources, note: P.note };
+  }
   // 공간 분석: 상태 'determined'(나경 대응표로 판정) 또는 'unconfirmed'(판정 안 함). 도수 프로필은 원형 배치에만 쓴다.
   function analyze(o) {
     o = o || {}; var b = o.bearing || null, az = b && b.azimuth != null ? b.azimuth : null;
     var dp = defaultProfile(), B = G.MantraBearing;
     var out = { version: VERSION, dataVersion: D.VERSION, status: 'unconfirmed', baseErrors: checkBase(), bearing: b, mountain: az != null && B ? B.mountain24(az) : null,
       groups: GROUPS.map(function (g) { var G0 = D.GUARD[g]; return { group: g, dir: G0.dir, guardian: G0.guardian, season: G0.season, mansions: D.MANSIONS.filter(function (m) { return m.group === g; }) }; }),
-      degreeProfile: dp, ring: dp ? ringLayout(dp) : null, profiles: profiles(), links: linkInfo(), luopan: null, results: [], undetermined: [], limits: [] };
+      degreeProfile: dp, ring: dp ? ringLayout(dp) : null, profiles: profiles(), links: linkInfo(), luopan: null, results: [], undetermined: [], limits: [], palace: null, palaceSitting: null };
     if (out.baseErrors.length) out.undetermined.push('28수 기본 데이터 점검 실패: ' + out.baseErrors.join(', '));
     if (!dp) out.undetermined.push('기본 기준(적도 365¼도)을 만족하는 검증된 도수 프로필이 없어 원형도를 분류형으로 그립니다.');
     if (az == null) out.undetermined.push('향 각도가 없어 건물 방위를 표시하지 않았습니다.');
     else {
+      out.palace = palace12(az); out.palaceSitting = palace12((az + 180) % 360);
       var r = azimuthToMansions(az); out.luopan = r;
       if (r.ok) { out.results = r.results; out.status = 'determined'; }
       else out.undetermined.push(r.reason);
@@ -104,8 +115,8 @@
     out.limits.push('28수 결과는 현공비성 결과를 바꾸거나 보정하지 않습니다.');
     return out;
   }
-  function linkInfo() { var ok = luopanProfiles(); return { available: ok.length > 0, profiles: ok, text: ok.length ? ok.length + '개 나경 대응 프로필(유파·문헌별 분리)' : '출전이 확인된 나경 28수환↔24산 대응표가 없어 24산과 28수를 독립적으로 표시합니다.' }; }
+  function linkInfo() { var ok = luopanProfiles(); return { available: ok.length > 0, profiles: ok, text: ok.length ? ok.length + '개 나경 대응 프로필(유파·문헌별 분리)' : '원전(《나경정문침》)이 24산↔28수 일대일 대응을 부정하므로 24산과 28수를 독립적으로 표시하고, 12지 궁 단위 묶음만 함께 보여 줍니다.' }; }
 
-  G.MantraMansions = { VERSION: VERSION, GROUPS: GROUPS, checkBase: checkBase, validateProfile: validateProfile, isBaseStandard: isBaseStandard, profiles: profiles, defaultProfile: defaultProfile, layout: layout, mansionAtDegree: mansionAtDegree, guToRingDeg: guToRingDeg, ringLayout: ringLayout, validateLuopan: validateLuopan, luopanProfiles: luopanProfiles, azimuthToMansions: azimuthToMansions, analyze: analyze, linkInfo: linkInfo };
+  G.MantraMansions = { VERSION: VERSION, GROUPS: GROUPS, checkBase: checkBase, validateProfile: validateProfile, isBaseStandard: isBaseStandard, profiles: profiles, defaultProfile: defaultProfile, layout: layout, mansionAtDegree: mansionAtDegree, guToRingDeg: guToRingDeg, ringLayout: ringLayout, validateLuopan: validateLuopan, luopanProfiles: luopanProfiles, azimuthToMansions: azimuthToMansions, analyze: analyze, linkInfo: linkInfo, palace12: palace12 };
   if (typeof module !== 'undefined' && module.exports) module.exports = G.MantraMansions;
 })(typeof window !== 'undefined' ? window : globalThis);

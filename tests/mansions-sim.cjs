@@ -119,6 +119,14 @@ ok(d1.omens.status === 'edition-unconfirmed' && d1.omens.events.every(e => e.ver
 eq(d1.omens.events.filter(e => ['move', 'open', 'contract'].includes(e.id)).map(e => e.text), ['미확정 — 원문에 이 행사 언급 없음', '미확정 — 원문에 이 행사 언급 없음', '미확정 — 원문에 이 행사 언급 없음'], '이사·개업·계약은 원문 언급 없음');
 ok(d1.omens.events.find(e => e.id === 'build').reference === '흉' && /원문 참고/.test(d1.omens.events.find(e => e.id === 'build').text), '女수 건축: 원문 참고 흉(판정은 미확정)');
 E.status = 'verified'; ok(X.omens('jiao').events.find(e => e.id === 'wedding').verdict === '길' && X.omens('jiao').events.find(e => e.id === 'funeral').verdict === '흉', '검증 프로필이면 원문 읽기대로 판정'); E.status = 'edition-unconfirmed';
+// 12궁 묶음: 28수 전부 한 번씩, 4정 가운데 수, 방위각→궁, 24산 일대일 아님
+{ const P = MD.PALACE12, ids = P.rows.flatMap(r => r.mansions);
+  ok(ids.length === 28 && new Set(ids).size === 28 && MD.MANSIONS.every(m => ids.includes(m.id)), '12궁 묶음에 28수가 한 번씩');
+  ok(['子', '卯', '午', '酉'].every(b => P.rows.find(r => r.branch === b).mansions.length === 3) && P.anchors['子'] === 'xu' && P.anchors['卯'] === 'fang' && P.anchors['午'] === 'xing' && P.anchors['酉'] === 'mao', '子午卯酉 세 수씩, 가운데 虛·房·星·昴');
+  ok(P.sources.length === 2 && P.sources.every(s => s.url && s.quote), '12궁 묶음 출전 2종');
+  const p = MS.palace12; ok(p(0).palace.branch === '子' && p(90).palace.branch === '卯' && p(180).palace.branch === '午' && p(270).palace.branch === '酉' && p(200).palace.branch === '未' && p(359.9).palace.branch === '子', '방위각→12지 궁');
+  ok(p(15).edge === true && p(14).neighbor.branch === '丑' && p(45).edge === true && p(30).edge === false && p(60).edge === false, '궁 경계 표시(癸·艮 같은 사이 산은 경계)');
+  const a1 = MS.analyze({ bearing: { azimuth: 180 } }); ok(a1.palace.palace.branch === '午' && a1.palaceSitting.palace.branch === '子' && a1.status !== 'determined', '향 午궁·좌 子궁, 방위 판정(일대일)은 여전히 안 함'); }
 // 옥갑기 두 판본: 道藏본(판본 확인) 28수 원문·근거 구절, 판정은 둘 다 미확정, 머리줄 길흉 13수만 일치
 { const P = DD.OMEN_PROFILES, Z = P.find(p => p.id === 'yuxiaji-daozang'), W = P.find(p => p.id === 'yuxiaji-wikisource');
   ok(Z && Z.status === 'edition-verified' && MD.MANSIONS.every(m => Z.entries[m.id] && Z.entries[m.id].original.length === 2), '道藏본 28수 모두 원문');
@@ -148,6 +156,7 @@ ok(order.every(i => i > 0) && order.every((v, i) => !i || v > order[i - 1]), '�
 ok(/body \+= spMansionSection\(kind, i, an\);/.test(html) && /28수 천문방위 분석/.test(html) && /통합 공간 해석/.test(html), '28수·통합 카드 연결');
 ok(html.indexOf('body += an ? spResult(kind, i, an)') < html.indexOf('body += spMansionSection(kind, i, an)'), 'B(현공) 다음 C·D 순서');
 ok(/\$\{tkMansionCard\(list\)\}/.test(html) && /tkMansionCell\(r\.jdn\)/.test(html), '택일 28수 연결');
+ok(/\$\{spMansionPalace\(ms\)\}/.test(html) && /<h3>12궁 묶음\(원전이 인정하는 범위\)<\/h3>/.test(html), '28수 카드 12궁 묶음 연결');
 ok(/<h3>옥갑기 두 판본 나란히<\/h3>/.test(html) && /r0\.omensAll/.test(html) && /\.ms-two\{/.test(html), '택일 화면 옥갑기 두 판본 나란히');
 ok(/<h3>복단일\(伏斷日\)<\/h3>/.test(html) && /r\.fuduan && r\.fuduan\.is \? ' <span class="chip warn">복단일<\/span>'/.test(html) && /\.chip\.warn \{/.test(html), '택일 화면 복단일 표시(카드·표·칩)');
 ok(/return F\.analyze\(\{ ch: S\.ch, facingDeg: \+c\.facing,/.test(html), '현공 호출(spRun)은 기존 그대로');
