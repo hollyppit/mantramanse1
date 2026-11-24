@@ -6,7 +6,7 @@
    · 기존 택일 점수(engine.js pickDays)에는 더하거나 빼지 않는다. */
 (function (G) {
   'use strict';
-  var VERSION = 'mansions-day-data-20261125-1';
+  var VERSION = 'mansions-day-data-20261125-2';
 
   // ───────────── 날짜 배속 프로필 ─────────────
   // 28일마다 도는 값일수(值宿). 각 수는 칠요(七曜) 요일이 고정(각=목요일 …).
@@ -52,7 +52,7 @@
   var OMEN_PROFILES = [
     { id: 'yuxiaji-wikisource', isDefault: true, title: '《옥갑기(玉匣記)》 理論吉凶日篇 二十八宿值日吉凶歌',
       edition: '판본 미상 — 위키문헌 전사본(머리말: 東晉 許真人 저작으로 전함, 후대 증보로 여러 판본 존재)', sourceUrl: 'https://zh.wikisource.org/wiki/%E7%8E%89%E5%8C%A3%E8%A8%98', retrievedAt: '2026-11-21',
-      transcriptionNotes: ['원문 전사의 鬥은 斗, 房日免의 免은 兔, 鬼井羊은 鬼金羊의 오기로 보인다(원문은 그대로 둠).', '전사본은 箕를 尾보다 먼저 싣는다.'],
+      transcriptionNotes: ['현존 최고본인 《續道藏》(1607) 《諸神聖誕日玉匣記等集》의 「二十八宿吉凶日」(도장 三家本 36책 332–335쪽, 원본 면 확인)은 이 노래와 다른 노래이며, 28수 중 15수의 길흉이 반대입니다. 그래서 어느 판본을 따를지 정하기 전까지 판정하지 않습니다.', '원문 전사의 鬥은 斗, 房日免의 免은 兔, 鬼井羊은 鬼金羊의 오기로 보인다(원문은 그대로 둠).', '전사본은 箕를 尾보다 먼저 싣는다.'],
       status: 'edition-unconfirmed',
       statusText: '원문은 확인했지만 판본(간행처·연대)이 확인되지 않아, 행사별 판정은 미확정으로 두고 원문만 참고로 보여 드립니다.',
       readingStatus: '행사별 읽기는 원문 구절에서 뽑은 것이며 전문가 검수 전입니다.',
