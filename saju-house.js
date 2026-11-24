@@ -184,8 +184,8 @@
     s += g(1, pipe);
     if (lab) {
       var L = [[0, 360, gy - ph0 + 30, 'middle'], [1, 120, gy + 26, 'start'], [2, tx + tw / 2, ty - 10, 'middle'], [3, 630, gy - Math.max(wallH, 40) - 10, 'end'], [4, 370, top - 8, 'middle']];
-      L.forEach(function (q) { var p = P[q[0]]; s += '<text x="' + q[1] + '" y="' + q[2] + '" text-anchor="' + q[3] + '" font-size="' + (fo && (q[0] === fo[0] || q[0] === fo[1]) ? 21 : fo ? 16 : 17) + '" font-weight="700" fill="' + (!fo ? '#222' : q[0] === fo[0] ? '#c2492a' : q[0] === fo[1] ? '#3B6D11' : '#9a9890') + '" paint-order="stroke" stroke="#fff" stroke-width="4" data-part="' + q[0] + '" style="cursor:pointer">' + p.part.ko + ' · ' + p.gn + ' ' + p.p + '%</text>'; });
-      s += '<text x="55" y="' + (H - 12) + '" text-anchor="middle" font-size="13" fill="#24506f" paint-order="stroke" stroke="#fff" stroke-width="3">바깥 물(재물의 근원)</text>';
+      L.forEach(function (q) { var p = P[q[0]]; s += '<text x="' + q[1] + '" y="' + q[2] + '" text-anchor="' + q[3] + '" font-size="' + (fo && (q[0] === fo[0] || q[0] === fo[1]) ? 25 : fo ? 19 : 21) + '" font-weight="700" fill="' + (!fo ? '#222' : q[0] === fo[0] ? '#c2492a' : q[0] === fo[1] ? '#3B6D11' : '#9a9890') + '" paint-order="stroke" stroke="#fff" stroke-width="4" data-part="' + q[0] + '" style="cursor:pointer">' + p.part.ko + ' · ' + p.gn + ' ' + p.p + '%</text>'; });
+      s += '<text x="55" y="' + (H - 12) + '" text-anchor="middle" font-size="16" fill="#24506f" paint-order="stroke" stroke="#fff" stroke-width="3">바깥 물(재물의 근원)</text>';
     }
     return s + '</svg>';
   }

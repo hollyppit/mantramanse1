@@ -68,7 +68,7 @@ let fail = 0, n = 0; const ok = (c, m) => { n++; if (!c) { fail++; if (fail < 40
     const c0 = html0.slice(html0.indexOf('function houseCard('), html0.indexOf('function renderOverview('));
     const at = k => c0.indexOf(k);
     ok(at('ss-head') > 0 && at('ss-head') < at('sh-wrap') && at('sh-wrap') < at('sh-scene') && at('sh-scene') < at('sh-more'), '진단 → 단면도 → 장면 한 줄 → 자세히 보기 순서');
-    ok(c0.indexOf('focus: [S.over, S.need]') > 0 && at('ss-flow') > at('sh-more') && at('ss-scenes') > at('sh-more') && at('$' + '{btn}') > at('sh-scene') && at('$' + '{btn}') < at('sh-more'), '물길·장면 3컷은 자세히 보기 안, 한 장면 버튼은 장면 한 줄 바로 아래');
+    ok(c0.indexOf('focus: [S.over, S.need]') > 0 && at('ss-flow') > at('sh-more') && at('ss-scenes') > at('sh-more') && !c0.includes('data-act="hs-gen"'), '물길·장면 3컷은 자세히 보기 안, 실사 버튼 없음(2026-11-24 도형만)');
     { const sp0 = H.fromChart(M, M.compute({ year: 1987, month: 3, day: 15, hour: 14, minute: 30, gender: 'F', calendar: 'solar', school: 'eokbu' })), S0 = H.summary(sp0), sv = H.svg(sp0, { focus: [S0.over, S0.need] });
       ok((sv.match(/opacity:\.28/g) || []).length === 5 - [S0.over, S0.need].filter(x => x != null).length && /drop-shadow\(0 0 5px #D85A30\)/.test(sv) && /drop-shadow\(0 0 5px #639922\)/.test(sv), '단면도: 넘침·필요 두 부분만 강조'); } }
 
@@ -102,12 +102,12 @@ let fail = 0, n = 0; const ok = (c, m) => { n++; if (!c) { fail++; if (fail < 40
 
   console.log('4. 화면·스위치');
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8'), lf = fs.readFileSync(path.join(root, 'functions/api/luck-flags.js'), 'utf8'), adm = fs.readFileSync(path.join(root, 'report/admin/v2-luckenv.js'), 'utf8');
-  ok(html.includes('<script src="saju-house.js"></script>') && html.indexOf('${houseCard(ch)}') > html.indexOf('function renderOhaeng()') && html.indexOf('${houseCard(ch)}') < html.indexOf('${renderGyeokAnalysis(ch)}'), '오행·강약 탭 십성 분포 아래 카드');
+  ok(!html.includes('<script src="saju-house.js"></script>') && !html.includes('${houseCard(ch)}'), '2026-11-24 사용자 요청: 만세력에서 사주의 집 카드 뺌(모듈은 남김)');
   ok(/'sajuHouse'\]\);/.test(lf) && adm.includes('id="leSH"') && adm.includes('sajuHouse: v') && /'mulsangArt', 'sajuHouse'\]\.forEach/.test(html), '스위치 연결');
-  ok(html.includes("#saju-house [data-part]") && html.includes("data-act=\"hs-gen\""), '부분 누르기·실사 버튼');
+  ok(html.includes("#saju-house [data-part]") && !html.includes("data-act=\"hs-gen\"") && !html.includes("a === 'hs-gen'"), '부분 누르기, 실사 버튼 없음');
 
-  ok(html.includes("const XP_ART = { 'wonguk-mulsang': () => MSG.st === 'done' && MSG.url };") && html.includes('if (XP_ART[el.id] && !XP_ART[el.id]()) return;') && html.includes("d.open = true; d.setAttribute('open', '');"), 'PDF: 물상 그림은 생성했을 때만 카드 넣기·설명 펼침');
-  ok(html.includes("if (el.id === 'saju-house') { const done = HSG.st === 'done' && HSG.url;") && html.includes("c.querySelectorAll('details.sh-more').forEach(d => { if (done) { d.open = true; d.setAttribute('open', ''); } else d.remove(); });"), 'PDF: 사주의 집은 진단·단면도 늘, 실사를 만들었을 때만 자세히 보기 펼침');
+  ok(html.includes("const XP_ART = { 'wonguk-mulsang': () => true };") && html.includes("d.open = true; d.setAttribute('open', '');"), 'PDF: 물상 도형은 늘 넣고 설명 펼침');
+  ok(html.includes("if (el.id === 'saju-house') { const done = false;") && html.includes("c.querySelectorAll('details.sh-more').forEach(d => { if (done) { d.open = true; d.setAttribute('open', ''); } else d.remove(); });"), 'PDF: 사주의 집은 진단·단면도만(자세히 보기 뺌)');
   console.log(fail ? `\n✗ ${fail}/${n} 실패` : `\n✓ 사주의 집 검증 ${n}항목 통과`);
   process.exit(fail ? 1 : 0);
 })().catch(e => { console.log('ERR', e); process.exit(1); });

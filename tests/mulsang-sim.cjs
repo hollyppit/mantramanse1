@@ -22,7 +22,7 @@ const ELK = ['목', '화', '토', '금', '수'];
     ['year', 'month', 'day', 'hour'].forEach(k => { const p = ch.pillars[k]; ok(p ? sp.pillars[k].s === p.s && sp.pillars[k].b === p.b : sp.pillars[k] === null, '간지 불일치 ' + k + ' ' + i); });
     ok(sp.ratio.every((v, e) => v === Math.round(ch.weights.pct[e] || 0)), '오행 비율 불일치 ' + i);
     keys.add(MS.key(sp));
-    const sc = MS.scene(sp), cap = MS.caption(sp), pr = MS.prompt(sp), cl = MS.checklist(sp), svg = MS.layoutSVG(sp), S = MS.summary(sp);
+    const A = MS.action(sp), sc = MS.scene(sp), cap = MS.caption(sp), pr = MS.prompt(sp), cl = MS.checklist(sp), svg = MS.layoutSVG(sp), S = MS.summary(sp);
     const capT = cap.map(c => c.t).join('\n');
     ok(cap.length >= 5 && !/undefined|NaN|null|\[object/.test(capT), '설명 빈 값 ' + i);
     ok(capT.includes('일간 ' + '甲乙丙丁戊己庚辛壬癸'[ch.pillars.day.s]), '설명에 일간 없음 ' + i);
@@ -33,10 +33,25 @@ const ELK = ['목', '화', '토', '금', '수'];
     ok(S.need == null || S.headline.includes(S.needAbsent ? '없어 기다리는 사주' : '필요한 사주'), '진단에 필요한 기운 ' + i);
     ok(S.need == null || !S.needAbsent || (/NEED: there is none of the/.test(pr) && !/golden beam of sunlight falls on/.test(pr)), '없는 용신은 지평선 금빛만 ' + i);
     { const T = S.lines.map(l => l.t).join(' '); ok(!/(이이|가가|은은|는는)[ .]|undefined/.test(T), '세 줄 조사 ' + i + ': ' + T); }
-    sc.absent.forEach(e => { ok(sp.ratio[e] === 0, '없는 오행 판단 오류 ' + i); ok(/ABSENT/.test(pr) && cl.some(c => c.id === 'absent-' + e && c.critical), '없는 오행 금지·검사 빠짐 ' + ELK[e] + ' ' + i); ok(capT.includes(ELK[e] + '('), '설명에 없는 오행 안내 빠짐 ' + i); });
+    sc.absent.forEach(e => { ok(sp.ratio[e] === 0, '없는 오행 판단 오류 ' + i); ok(/ABSENT/.test(pr) && cl.some(c => c.id === 'absent-' + e && c.critical), '없는 오행 금지·검사 빠짐 ' + ELK[e] + ' ' + i); ok(A.parts.some(p => p.e === e && p.absent && p.short === '빈자리' && /원국에 없어요/.test(p.text)), '작용도에 없는 오행 안내 빠짐 ' + i); });
     const yIn = sc.yong.filter(e => sc.absent.indexOf(e) < 0);
     ok(!/golden glow falls on/.test(pr) || yIn.length > 0, '없는 용신에 빛을 비춤 ' + i);
-    sc.yong.filter(e => sc.absent.indexOf(e) >= 0).forEach(() => ok(cap.some(c => c.k === '빈 자리'), '없는 용신 안내 빠짐 ' + i));
+    sc.yong.filter(e => sc.absent.indexOf(e) >= 0).forEach(() => ok(/원국에 없어 살면서 밖에서 채워/.test(A.sub), '없는 용신 안내 빠짐 ' + i));
+    // 2026-11-24 도형(작용도): 다섯 관계 · 한 줄 진단 · 필요한 기운 · 그림 형식 · 조사
+    { const T = A.headline + ' ' + A.sub + ' ' + A.season + ' ' + A.parts.map(p => p.text).join(' '), dia = MS.diagramSVG(sp);
+      ok(A.parts.length === 5 && A.parts.map(p => p.rel).join() === '비겁,식상,재성,관성,인성' && A.headline.includes(sc.main.obj.short) && / 사주$/.test(A.headline), '작용도 다섯 관계·진단 ' + i + ': ' + A.headline);
+      // 2026-11-24 흐름도: 비율 없이 '어떻게 움직이는지' — 상생 사슬(나를 지나감)·끊긴 곳·센 기운의 극, 번호 순서
+      { const F = MS.flow(sp), fs2 = MS.flowSVG(sp), FT = F.steps.map(x => x.text + ' ' + x.tail).join(' ') + ' ' + F.end, d = sc.dEl;
+        ok(F.steps.length >= 2 && F.steps.every((x, j) => x.n === j + 1 && x.text && /요\.$/.test(x.text)), '흐름 단계·번호 ' + i);
+        ok(F.steps.some(x => x.a === d || x.b === d), '흐름이 나를 지나감 ' + i);
+        ok(F.steps.filter(x => x.kind === 'cut').every(x => sc.absent.indexOf(x.b) >= 0) && F.steps.filter(x => x.kind === 'gen').every(x => x.b === (x.a + 1) % 5 && sc.absent.indexOf(x.b) < 0), '상생 사슬·끊김 규칙 ' + i);
+        ok(F.steps.filter(x => x.kind === 'ke').every(x => x.b === (x.a + 2) % 5 && sp.ratio[x.a] >= 25), '극은 센 기운만 ' + i);
+        ok(!/%/.test(FT) && !/(이이|가가|은은|는는|을을|를를|와와|과과)[ .]|undefined|NaN|null/.test(FT), '흐름 문장에 비율·조사 오류 없음 ' + i + ': ' + FT.slice(0, 90));
+        ok(/^<svg[\s\S]*<\/svg>$/.test(fs2) && !/NaN|undefined|null|%/.test(fs2.replace(/<style>[\s\S]*?<\/style>/, '')) && (fs2.match(/class="m[fk]"/g) || []).length === F.steps.filter(x => x.kind !== 'cut').length, '흐름도 형식·움직이는 화살표 수 ' + i); }
+      ok(!sc.yong.length || / 필요해요/.test(A.sub), '필요한 기운 문장 ' + i);
+      ok(/^<svg[\s\S]*<\/svg>$/.test(dia) && !/NaN|undefined|null/.test(dia) && (dia.match(/<circle/g) || []).length >= 7, '작용도 그림 형식 ' + i);
+      ok(!/(이이|가가|은은|는는|을을|를를|와와|과과)[ .]|[가-힣]이가 |undefined|NaN|null/.test(T), '작용도 조사·빈 값 ' + i + ': ' + T.slice(0, 80));
+      ok(!/그림|그렸|화면|왼쪽|오른쪽/.test(capT), '설명에 그림 위치 말 없음 ' + i); }
     ok(cl.filter(c => c.critical).map(c => c.id).includes('main') && cl.some(c => c.id === 'notext' && c.critical), '중요 검사 항목 빠짐 ' + i);
     ok(/^<svg[\s\S]*<\/svg>$/.test(svg) && !/<text/.test(svg) && !/NaN|undefined/.test(svg), '밑그림 형식 ' + i);
     if (!ch.pillars.hour) ok(cap.some(c => /시를 몰라/.test(c.t)) && !/right foreground/.test(pr), '시 모름 처리 ' + i);
@@ -102,8 +117,9 @@ const ELK = ['목', '화', '토', '금', '수'];
 
   console.log('5. 화면·스위치 연결');
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8'), lf = fs.readFileSync(path.join(root, 'functions/api/luck-flags.js'), 'utf8'), adm = fs.readFileSync(path.join(root, 'report/admin/v2-luckenv.js'), 'utf8');
-  ok(html.includes('<script src="mulsang.js"></script>') && html.includes('${mulsangCard(ch)}') && html.indexOf('${renderOverview(ch)}') < html.indexOf('${mulsangCard(ch)}'), '원국 한눈에 보기 바로 아래 카드');
+  ok(!html.includes('<script src="mulsang.js"></script>') && !html.includes('${mulsangCard(ch)}'), '2026-11-24 사용자 요청: 만세력에서 물상 카드 뺌(모듈은 남김)');
   ok(/'luckAlerts', 'mulsangArt'[,\]]/.test(html), '공개 스위치 받기');
+  ok(html.includes('MM.flowSVG(spec)') && html.includes('ms-steps') && !html.includes('data-act="ms-gen"') && !html.includes("a === 'ms-gen'") && html.includes("const XP_ART = { 'wonguk-mulsang': () => true };"), '원국 물상은 도형(AI 그림 버튼 없음·PDF 늘 넣기)');
   ok(/'mulsangArt'[,\]]/.test(lf), 'luck-flags 스위치 이름');
   ok(adm.includes("id=\"leMS\"") && adm.includes('mulsangArt: v'), '관리자 스위치 버튼');
   ok(!/하루 \d회|daily|quota/i.test(fs.readFileSync(path.join(root, 'functions/api/mulsang-art.js'), 'utf8').replace(/횟수 제한 없음/g, '')), '횟수 제한 없음');

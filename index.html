@@ -948,6 +948,12 @@ g.sj { cursor: pointer; text-decoration: none; }
 .sh-hint { margin: 8px 0 0; text-align: center; }
 .sh-scene { margin: 12px 0 4px; padding: 10px 12px; border-left: 3px solid #D85A30; border-radius: 0; background: var(--surface-2); font-size: .9rem; line-height: 1.55; } .sh-scene span { display: block; font-size: .72rem; font-weight: 800; color: var(--ink-3); margin-bottom: 2px; }
 .sh-more > summary { font-weight: 700; }
+.ms-dwrap { width: 100%; max-width: 560px; margin: 6px auto 0; } .ms-dwrap svg { width: 100%; height: auto; display: block; }
+.ms-parts li { padding-left: 2px; }
+.ms-steps { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; } .ms-st { display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; border-radius: 12px; background: var(--surface-2); font-size: .92rem; line-height: 1.55; } .ms-st b { color: var(--ink-2); font-weight: 700; } .ms-n { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #fff; background: #3d7a4f; font-size: .9rem; } .ms-st.ke .ms-n { background: #c9412d; } .ms-st.cut .ms-n { background: #9a948a; }
+.ms-end { margin: 10px 0 2px; padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--line, #e3ded3); font-weight: 700; line-height: 1.6; }
+.ms-lg { display: inline-block; width: 22px; height: 0; border-top: 4px dashed #3d7a4f; } .ms-lg.ke { border-top-color: #c9412d; }
+.ms-keys { list-style: none; margin: 12px 0 4px; padding: 0; display: grid; gap: 8px; } .ms-keys li { padding: 10px 12px; border-radius: 12px; background: var(--surface-2); border-left: 4px solid #b7b2a8; font-size: .9rem; line-height: 1.6; } .ms-keys li b { display: block; font-size: .76rem; color: var(--ink-3); margin-bottom: 2px; } .ms-keys li.good { border-left-color: #178a4a; } .ms-keys li.bad { border-left-color: #c9412d; } .ms-tag { display: inline-block; padding: 0 8px; border-radius: 999px; font-size: .72rem; font-weight: 800; color: #fff; background: #888; } .ms-tag.good { background: #178a4a; } .ms-tag.bad { background: #c9412d; }
 .ss-head { margin: 2px 0 4px; font-size: 1.12rem; font-weight: 800; line-height: 1.5; color: var(--ink); }
 .ss-sub { margin: 0 0 12px; }
 .ss-bars { display: grid; gap: 7px; } .ss-bar { display: grid; grid-template-columns: 9.5em 1fr 3em; align-items: center; gap: 8px; font-size: .86rem; }
@@ -1186,8 +1192,6 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="gyeokguk.js"></script>
 <script src="gyeok-structure.js"></script>
 <script src="natal-overview.js"></script>
-<script src="mulsang.js"></script>
-<script src="saju-house.js"></script>
 <script src="amhap.js"></script>
 <script src="ten-god-roles.js"></script>
 <script src="luck-env.js"></script>
@@ -5574,21 +5578,21 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   //  공개 스위치 mulsangArt(관리자 화면) 또는 관리자 로그인일 때만 보인다. 횟수 제한 없음. 같은 원국 구조는 서버 저장본을 다시 쓴다.
   const MSG = { key: '', st: 'idle', url: '', note: '', err: '', debug: null, failed: [] };
   const msOn = () => !!(window.MantraMulsang && ((window.MANTRA_FLAGS && window.MANTRA_FLAGS.mulsangArt) || adminPw));
-  function mulsangCard(ch) {   // 2026-11-24 한 장면: 한 줄 진단(나·계절·필요한 기운) + 세 줄 → 그림 한 장 → ▸ 자세히 보기(여덟 글자 풀이)
+  function mulsangCard(ch) {   // 2026-11-24 사용자 요청: 비율이 아니라 '어떻게 움직이고 작용하는지' — 한 줄 진단 → 움직이는 흐름도(①②③) → 순서대로 읽는 흐름 → ▸ 자세히 보기
     if (!msOn()) return '';
-    const MM = window.MantraMulsang; let spec, cap, S;
-    try { spec = MM.fromChart(M, ch); cap = MM.caption(spec); S = MM.summary(spec); } catch (e) { return ''; }
-    if (!spec || !S) return '';
-    const k = MM.key(spec); if (MSG.key !== k) Object.assign(MSG, { key: k, st: 'idle', url: '', note: '', err: '', debug: null, failed: [] });
-    const busy = MSG.st === 'busy';
-    const pic = MSG.st === 'done' ? `<img class="ms-img" src="${esc(MSG.url)}" alt="${esc(S.headline)} — 이 사주를 한 장면으로 담은 사진">` : busy ? `<div class="ms-img ms-wait"><span>${esc(MSG.note || '그리는 중…')}</span></div>` : MSG.st === 'fallback' ? '<p class="small muted">진단과 맞는 장면을 만들지 못했어요. 다시 그리기를 누르면 새로 시도해요.</p>' : '';
-    const btn = busy ? '' : MSG.st === 'idle' ? `<button type="button" class="btn primary" data-act="ms-gen">이 사주를 한 장면으로 보기</button>` : `<button type="button" class="btn" data-act="ms-redo">다시 그리기</button>`;
-    const dbg = adminPw && MSG.debug ? `<details class="ms-dbg"><summary>관리자: 명세·프롬프트·검사 <span class="admin-badge">관리자만 보임</span></summary><p class="small muted">명세 키 ${esc(MSG.debug.key)}${MSG.failed.length ? ' · 검사에서 아니오: ' + esc(MSG.failed.join(', ')) : ''}</p><pre>${esc(MSG.debug.prompt)}</pre><ol class="small">${MSG.debug.checklist.map(c => `<li>${c.critical ? '<b>[중요]</b> ' : ''}${esc(c.q)}</li>`).join('')}</ol></details>` : '';
-    return `<section class="card ms-card" id="wonguk-mulsang"><div class="card-h"><h2>사주 물상 그림</h2><span class="note">실제 풍경으로 보는 나</span></div>
-      <p class="ss-head">${esc(S.headline)}</p>
-      <ul class="ms-cap ms-lines">${S.lines.map(c => `<li><b>${esc(c.k)}</b> ${esc(c.t)}</li>`).join('')}</ul>
-      <div class="frow" style="gap:8px;margin:10px 0">${btn}${busy ? `<span class="small muted">${esc(MSG.note)}</span>` : ''}${MSG.err ? `<span class="small" style="color:var(--bad)">${esc(MSG.err)}</span>` : ''}</div>${pic}
-      <details class="ms-fold"><summary>자세히 보기 · 여덟 글자 물상 풀이</summary><ul class="ms-cap">${cap.map(c => `<li><b>${esc(c.k)}</b> ${esc(c.t)}</li>`).join('')}</ul></details>${dbg}</section>`;
+    const MM = window.MantraMulsang; let spec, cap, F, svg;
+    try { spec = MM.fromChart(M, ch); cap = MM.caption(spec); F = MM.flow(spec); svg = MM.flowSVG(spec); } catch (e) { return ''; }
+    if (!spec || !F || !svg) return '';
+    const A = F.A, CIRC = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧'];
+    const step = x => `<li class="ms-st ${x.kind}"><span class="ms-n">${x.kind === 'cut' ? '✕' : CIRC[x.n - 1]}</span><span>${esc(x.text)}${x.tail ? ` <b>→ ${esc(x.tail)}</b>` : ''}</span></li>`;
+    const line = p => `<li class="ms-p${p.tag[1] ? ' ' + p.tag[1] : ''}"><b>${esc(p.easy)}</b> ${esc(p.text)}${p.tag[0] ? ` <span class="ms-tag ${p.tag[1]}">${esc(p.tag[0])}</span>` : ''}</li>`;
+    return `<section class="card ms-card" id="wonguk-mulsang"><div class="card-h"><h2>사주 물상</h2><span class="note">기운이 어떻게 움직이는지</span></div>
+      <p class="ss-head">${esc(A.headline)}</p><p class="small muted ss-sub">${esc(A.season)}.</p>
+      <div class="ms-dwrap">${svg}</div>
+      <p class="small muted ss-leg"><span class="nw"><span class="ms-lg gen"></span>흘러가며 키워 줌</span><span class="nw"><span class="ms-lg ke"></span>누르고 다룸</span><span class="nw">✕ 흐름이 끊긴 곳</span><span class="nw">원 크기 = 기운의 양</span></p>
+      <ol class="ms-steps">${F.steps.map(step).join('')}</ol>
+      <p class="ms-end">${esc(F.end)}</p>
+      <details class="ms-fold"><summary>자세히 보기 · 다섯 기운이 하는 일 · 여덟 글자 물상</summary><ul class="ms-cap ms-parts">${A.parts.map(line).join('')}</ul><h3 class="ss-h3">여덟 글자 물상</h3><ul class="ms-cap">${cap.map(c => `<li><b>${esc(c.k)}</b> ${esc(c.t)}</li>`).join('')}</ul></details></section>`;
   }
   // 명세 밑그림(SVG) → PNG data URL(이미지 모델 참고 그림)
   function msSketchPng(svg) {
@@ -5626,9 +5630,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const k = HS.key(spec); if (HSG.key !== k) Object.assign(HSG, { key: k, st: 'idle', url: '', note: '', err: '', debug: null, failed: [], sel: null });
     const busy = HSG.st === 'busy', info = HSG.sel != null ? HS.partInfo(spec, HSG.sel) : null;
     const infoBox = info ? `<div class="sh-info"><b>${esc(info.title)}</b> <span class="muted small">${esc(info.role)}</span><p>${esc(info.line)}</p>${info.structures.length ? `<ul>${info.structures.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}</div>` : '';
-    const photo = HSG.st === 'done' ? `<img class="ms-img" src="${esc(HSG.url)}" alt="${esc(S.headline)} — 이 진단을 한 장면으로 담은 사진">` : busy ? `<div class="ms-img ms-wait"><span>${esc(HSG.note || '만드는 중…')}</span></div>` : HSG.st === 'fallback' ? '<p class="small muted">진단과 맞는 장면을 만들지 못했어요. 다시 시도할 수 있어요.</p>' : '';
-    const btn = busy ? '' : `<button type="button" class="btn" data-act="hs-gen">${HSG.st === 'done' ? '장면 다시 만들기' : '이 진단을 한 장면으로 보기'}</button>`;
-    const dbg = adminPw && HSG.debug ? `<details class="ms-dbg"><summary>관리자: 명세·프롬프트·검사 <span class="admin-badge">관리자만 보임</span></summary><p class="small muted">명세 키 ${esc(HSG.debug.key)}${HSG.failed.length ? ' · 검사에서 아니오: ' + esc(HSG.failed.join(', ')) : ''}</p><pre>${esc(HSG.debug.prompt)}</pre></details>` : '';
+    /* 2026-11-24: 실사 사진 생성은 뺐다(도형만) */ const photo = '' && HSG.st === 'done' ? `<img class="ms-img" src="${esc(HSG.url)}" alt="${esc(S.headline)} — 이 진단을 한 장면으로 담은 사진">` : busy ? `<div class="ms-img ms-wait"><span>${esc(HSG.note || '만드는 중…')}</span></div>` : HSG.st === 'fallback' ? '<p class="small muted">진단과 맞는 장면을 만들지 못했어요. 다시 시도할 수 있어요.</p>' : '';
+    const dbg = '' && HSG.debug ? `<details class="ms-dbg"><summary>관리자: 명세·프롬프트·검사 <span class="admin-badge">관리자만 보임</span></summary><p class="small muted">명세 키 ${esc(HSG.debug.key)}${HSG.failed.length ? ' · 검사에서 아니오: ' + esc(HSG.failed.join(', ')) : ''}</p><pre>${esc(HSG.debug.prompt)}</pre></details>` : '';
     const note = n => `<li class="ss-${n.t}">${esc(n.s)}</li>`;
     const scene = c => `<li class="ss-sc-${c.t}"><span>${c.t === 'over' ? '넘칠 때' : c.t === 'need' ? '비어 있을 때' : '채워졌을 때'}</span>${esc(c.s)}</li>`;
     const s0 = S.scenes[0];
@@ -5637,7 +5640,6 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="sh-wrap">${HS.svg(spec, { sel: HSG.sel, focus: [S.over, S.need] })}</div>
       <p class="small muted ss-leg"><span class="nw"><span class="ss-dot over"></span>가장 넘치는 부분</span><span class="nw"><span class="ss-dot need"></span>이 사주에 필요한 부분</span><span class="nw">부분을 누르면 설명이 열려요</span></p>${infoBox}
       <p class="sh-scene"><span>이런 적 있지 않나요?</span>${esc(s0.s)}</p>
-      <div class="frow" style="gap:8px;margin:10px 0">${btn}${busy ? `<span class="small muted">${esc(HSG.note)}</span>` : ''}${HSG.err ? `<span class="small" style="color:var(--bad)">${esc(HSG.err)}</span>` : ''}</div>${photo}
       <details class="ms-fold sh-more"><summary>자세히 보기 · 기운의 물길 · 장면 3컷 · 전체 읽기</summary>
         <p class="small muted" style="margin:8px 0">기둥 = 비겁(내 힘), 물길·창 = 식상(퍼내는 힘), 물탱크 = 재성(모은 돈), 담장·대문 = 관성(지키는 틀), 지붕 = 인성(채워 주는 힘). 크기는 비율, 재료 색은 그 십성의 오행이에요.</p>
         <h3 class="ss-h3">기운의 물길</h3><div class="ss-flow">${HS.flowSVG(spec)}</div><ul class="ss-notes">${S.notes.map(note).join('')}</ul>
@@ -5694,7 +5696,6 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${table}
     </section>
     ${renderOverview(ch)}
-    ${mulsangCard(ch)}
     <section class="card">
       <div class="card-h"><h2>내 사주의 12운성</h2><span class="note">네 지지에서 기운이 생명주기의 어디쯤 있는지</span></div>
       ${unNatalHTML(ch)}
@@ -6928,7 +6929,6 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="note">득령·득지·득세는 전통적인 세 가지 점검입니다. 비율과 방향이 다르면 판단이 애매한 사주입니다.</p>
     </section>
     </div>
-    ${houseCard(ch)}
     ${renderGyeokAnalysis(ch)}
     ${renderTenGodRoles(ch)}
     ${renderCompat(ch)}
@@ -10720,13 +10720,13 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     // PDF에서 통째로 빼는 카드(2026-11-21): 용신 탭 '용신 방향과 건물 풍수는 다릅니다'
     const XP_DROP_CARD = /건물 풍수는 다릅니다/;
     // 2026-11-24 사용자 요청: AI 그림 카드(원국 탭 사주 물상 그림 · 오행·강약 탭 사주의 집)는 그림을 생성했을 때만 PDF에 넣는다 — 그때는 그림과 설명을 함께(설명 펼침), 버튼·관리자 칸은 뺀다
-    const XP_ART = { 'wonguk-mulsang': () => MSG.st === 'done' && MSG.url };   // 사주의 집은 2026-11-24 한 카드로 합치며 진단·단면도가 본문이 되어 늘 넣는다(아래 XP_HOUSE)
+    const XP_ART = { 'wonguk-mulsang': () => true };   // 2026-11-24 AI 그림을 빼고 도형으로 바꿔 늘 넣는다(설명 펼침)   // 사주의 집은 2026-11-24 한 카드로 합치며 진단·단면도가 본문이 되어 늘 넣는다(아래 XP_HOUSE)
     (cards || xpCards()).forEach(el => {
       const h = el.querySelector('h2'); if (h && XP_DROP_CARD.test(h.textContent)) return;
       if (XP_ART[el.id] && !XP_ART[el.id]()) return;
       const c = el.cloneNode(true);
       if (XP_ART[el.id]) { c.querySelectorAll('.frow, .ms-dbg, .sh-hint, .sh-info, .ms-wait').forEach(x => x.remove()); c.querySelectorAll('details.ms-fold').forEach(d => { d.open = true; d.setAttribute('open', ''); }); c.querySelectorAll('.sh-part.on').forEach(x => x.classList.remove('on')); }
-      if (el.id === 'saju-house') { const done = HSG.st === 'done' && HSG.url; c.querySelectorAll('.frow, .ms-dbg, .sh-info, .ms-wait').forEach(x => x.remove()); c.querySelectorAll('.sh-part.on').forEach(x => x.classList.remove('on')); const ld = c.querySelector('.ss-leg'); if (ld) [...ld.querySelectorAll('.nw')].filter(x => /누르면/.test(x.textContent)).forEach(x => x.remove()); c.querySelectorAll('details.sh-more').forEach(d => { if (done) { d.open = true; d.setAttribute('open', ''); } else d.remove(); }); }   // 실사를 만들었을 때만 사진·자세한 설명을 넣는다
+      if (el.id === 'saju-house') { const done = false; c.querySelectorAll('.frow, .ms-dbg, .sh-info, .ms-wait').forEach(x => x.remove()); c.querySelectorAll('.sh-part.on').forEach(x => x.classList.remove('on')); const ld = c.querySelector('.ss-leg'); if (ld) [...ld.querySelectorAll('.nw')].filter(x => /누르면/.test(x.textContent)).forEach(x => x.remove()); c.querySelectorAll('details.sh-more').forEach(d => { if (done) { d.open = true; d.setAttribute('open', ''); } else d.remove(); }); }   // 실사를 만들었을 때만 사진·자세한 설명을 넣는다
       stage.appendChild(c);
     });
     document.body.appendChild(stage);
@@ -11529,8 +11529,6 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (a === 'admin-out') { adminLogout(''); return; }
       if (a.startsWith('ikd-dom:')) { IKD.dom = a.slice(8); render(); return; }
       if (a === 'ikd-ai') { ikdAll(); return; }
-      if (a === 'ms-gen' || a === 'ms-redo') { msGenerate(a === 'ms-redo'); return; }
-      if (a === 'hs-gen') { artGenerate(HSG, window.MantraSajuHouse, 'house', HSG.st === 'done', '장면을 찍는 중… (30초~1분)'); return; }
       if (a === 'ikd-plain') { ikdLoad(IKD.dom, 'plain'); return; }
       if (a.startsWith('pk-reset:')) { const k = a.slice(9); if (k === 'tr') PK.tr.cards = {}; else PK[k] = {}; pkSave(); render(); return; }
       if (a === 'tr-draw') { S.trSlot = null; trDraw(); return; }
