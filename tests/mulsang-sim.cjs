@@ -98,8 +98,8 @@ const ELK = ['목', '화', '토', '금', '수'];
   console.log('5. 화면·스위치 연결');
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8'), lf = fs.readFileSync(path.join(root, 'functions/api/luck-flags.js'), 'utf8'), adm = fs.readFileSync(path.join(root, 'report/admin/v2-luckenv.js'), 'utf8');
   ok(html.includes('<script src="mulsang.js"></script>') && html.includes('${mulsangCard(ch)}') && html.indexOf('${renderOverview(ch)}') < html.indexOf('${mulsangCard(ch)}'), '원국 한눈에 보기 바로 아래 카드');
-  ok(/'mulsangArt'\]\.forEach|'luckAlerts', 'mulsangArt'\]/.test(html), '공개 스위치 받기');
-  ok(/'mulsangArt'\]\);/.test(lf), 'luck-flags 스위치 이름');
+  ok(/'luckAlerts', 'mulsangArt'[,\]]/.test(html), '공개 스위치 받기');
+  ok(/'mulsangArt'[,\]]/.test(lf), 'luck-flags 스위치 이름');
   ok(adm.includes("id=\"leMS\"") && adm.includes('mulsangArt: v'), '관리자 스위치 버튼');
   ok(!/하루 \d회|daily|quota/i.test(fs.readFileSync(path.join(root, 'functions/api/mulsang-art.js'), 'utf8').replace(/횟수 제한 없음/g, '')), '횟수 제한 없음');
 

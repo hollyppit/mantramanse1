@@ -942,6 +942,10 @@ g.sj { cursor: pointer; text-decoration: none; }
 .ms-wait { display: grid; place-items: center; color: var(--ink-3); font-size: .86rem; background: repeating-linear-gradient(135deg, #f3efe4 0 14px, #ece6d6 14px 28px); animation: msPulse 1.6s ease-in-out infinite; }
 @keyframes msPulse { 50% { opacity: .6; } }
 .ms-cap { margin: 8px 0 0; padding-left: 0; list-style: none; display: grid; gap: 6px; font-size: .84rem; line-height: 1.6; } .ms-cap b { display: inline-block; min-width: 4.5em; color: var(--ink-2); }
+.sh-wrap { max-width: 640px; margin: 0 auto; } .sh-wrap svg { width: 100%; height: auto; display: block; border-radius: 12px; }
+.sh-part.on > * { filter: drop-shadow(0 0 6px rgba(240,170,40,.9)); }
+.sh-info { margin: 10px 0 0; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); font-size: .84rem; line-height: 1.6; } .sh-info p { margin: 4px 0 0; } .sh-info ul { margin: 6px 0 0; padding-left: 18px; }
+.sh-hint { margin: 8px 0 0; text-align: center; }
 .ms-dbg pre { white-space: pre-wrap; font-size: .72rem; max-height: 260px; overflow: auto; background: var(--surface-2); padding: 8px; border-radius: 8px; }
 .sj-chip.sj-s { background: color-mix(in srgb, var(--samjae) 14%, var(--surface)); color: var(--samjae); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--samjae) 40%, transparent); }
 .sj-banner.sj-s { border-left-color: var(--samjae); background: color-mix(in srgb, var(--samjae) 6%, var(--surface-2)); }
@@ -1165,6 +1169,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="gyeok-structure.js"></script>
 <script src="natal-overview.js"></script>
 <script src="mulsang.js"></script>
+<script src="saju-house.js"></script>
 <script src="amhap.js"></script>
 <script src="ten-god-roles.js"></script>
 <script src="luck-env.js"></script>
@@ -5570,23 +5575,46 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   // 명세 밑그림(SVG) → PNG data URL(이미지 모델 참고 그림)
   function msSketchPng(svg) {
-    return new Promise(ok => { try { const im = new Image(); im.onload = () => { try { const c = document.createElement('canvas'); c.width = 768; c.height = 1024; c.getContext('2d').drawImage(im, 0, 0, 768, 1024); ok(c.toDataURL('image/png')); } catch (e) { ok(null); } }; im.onerror = () => ok(null); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); } catch (e) { ok(null); } });
+    return new Promise(ok => { try { const im = new Image(); im.onload = () => { try { const c = document.createElement('canvas'); c.width = 768; c.height = 1024; const x = c.getContext('2d'), r = Math.min(768 / (im.width || 768), 1024 / (im.height || 1024)), w = (im.width || 768) * r, h = (im.height || 1024) * r; x.fillStyle = '#eef1f2'; x.fillRect(0, 0, 768, 1024); x.drawImage(im, (768 - w) / 2, (1024 - h) / 2, w, h); ok(c.toDataURL('image/png')); } catch (e) { ok(null); } }; im.onerror = () => ok(null); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); } catch (e) { ok(null); } });
   }
-  async function msGenerate(force) {
-    const MM = window.MantraMulsang; if (!MM || !S.ch || MSG.st === 'busy') return;
+  async function msGenerate(force) { return artGenerate(MSG, window.MantraMulsang, 'landscape', force, '풍경을 만드는 중… (30초~1분)'); }
+  // 그림 생성 공용 흐름(물상 풍경·사주의 집): 명세 → 밑그림 PNG → /api/mulsang-art 최대 3번 → 실패하면 밑그림
+  async function artGenerate(MSG, MM, kind, force, firstNote) {
+    if (!MM || !S.ch || MSG.st === 'busy') return;
     const spec = MM.fromChart(M, S.ch), k = MM.key(spec);
     Object.assign(MSG, { key: k, st: 'busy', err: '', note: '그림 지시서를 만드는 중…', failed: [] }); render();
     const sketch = await msSketchPng(MM.sketchSVG(spec));
     for (let attempt = 1; attempt <= 3; attempt++) {
       if (MSG.key !== k) return;   // 그사이 사주가 바뀌면 멈춘다
-      MSG.note = attempt === 1 ? '풍경을 만드는 중… (30초~1분)' : `계산된 장면과 맞지 않아 다시 그리는 중… (${attempt}/3)`; render();
-      let r; try { r = await api('/api/mulsang-art', { method: 'POST', body: JSON.stringify({ spec, sketch, attempt, force: !!force }) }); }
+      MSG.note = attempt === 1 ? firstNote : `계산된 장면과 맞지 않아 다시 그리는 중… (${attempt}/3)`; render();
+      let r; try { r = await api('/api/mulsang-art', { method: 'POST', body: JSON.stringify({ kind, spec, sketch, attempt, force: !!force }) }); }
       catch (e) { if (MSG.key === k) { Object.assign(MSG, { st: MSG.url ? 'done' : 'idle', err: e.message || '그림을 만들지 못했어요', note: '' }); render(); } return; }
       if (MSG.key !== k) return;
       MSG.debug = r.debug || MSG.debug; MSG.failed = r.failed || [];
       if (r.pass && r.url) { Object.assign(MSG, { st: 'done', url: r.url, note: '' }); render(); return; }
     }
     Object.assign(MSG, { st: 'fallback', note: '' }); render();
+  }
+  // ───────────── 사주의 집(2026-11-24, saju-house.js): 십성을 한 채의 집으로 — 기둥(비겁)·물길(식상)·물탱크(재성)·담장(관성)·지붕(인성), 물 = 재물 ─────────────
+  //  단면도는 계산으로 그린다(늘 정확, 부분을 누르면 설명). '실사로 보기'는 같은 명세로 /api/mulsang-art kind=house. 스위치 sajuHouse 또는 관리자
+  const HSG = { key: '', st: 'idle', url: '', note: '', err: '', debug: null, failed: [], sel: null };
+  const hsOn = () => !!(window.MantraSajuHouse && ((window.MANTRA_FLAGS && window.MANTRA_FLAGS.sajuHouse) || adminPw));
+  function houseCard(ch) {
+    if (!hsOn()) return '';
+    const HS = window.MantraSajuHouse; let spec, cap;
+    try { spec = HS.fromChart(M, ch); cap = HS.caption(spec); } catch (e) { return ''; }
+    if (!spec) return '';
+    const k = HS.key(spec); if (HSG.key !== k) Object.assign(HSG, { key: k, st: 'idle', url: '', note: '', err: '', debug: null, failed: [], sel: null });
+    const busy = HSG.st === 'busy', info = HSG.sel != null ? HS.partInfo(spec, HSG.sel) : null;
+    const infoBox = info ? `<div class="sh-info"><b>${esc(info.title)}</b> <span class="muted small">${esc(info.role)}</span><p>${esc(info.line)}</p>${info.structures.length ? `<ul>${info.structures.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}</div>` : '<p class="small muted sh-hint">집의 부분(기둥·물길·물탱크·담장·지붕)을 누르면 이 사주에서 그 부분이 어떤지 열려요.</p>';
+    const photo = HSG.st === 'done' ? `<img class="ms-img" src="${esc(HSG.url)}" alt="이 사주의 십성 구조를 미니어처 집으로 표현한 실사 사진">` : busy ? `<div class="ms-img ms-wait"><span>${esc(HSG.note || '만드는 중…')}</span></div>` : HSG.st === 'fallback' ? '<p class="small muted">실사 사진이 계산된 구조와 맞지 않아 만들지 못했어요. 위 단면도가 정확한 그림이에요. 다시 시도할 수 있어요.</p>' : '';
+    const btn = busy ? '' : `<button type="button" class="btn${HSG.st === 'idle' ? ' primary' : ''}" data-act="hs-gen">${HSG.st === 'done' ? '실사 다시 만들기' : '실사로 보기'}</button>`;
+    const dbg = adminPw && HSG.debug ? `<details class="ms-dbg"><summary>관리자: 명세·프롬프트·검사 <span class="admin-badge">관리자만 보임</span></summary><p class="small muted">명세 키 ${esc(HSG.debug.key)}${HSG.failed.length ? ' · 검사에서 아니오: ' + esc(HSG.failed.join(', ')) : ''}</p><pre>${esc(HSG.debug.prompt)}</pre></details>` : '';
+    return `<section class="card sh-card" id="saju-house"><div class="card-h"><h2>사주의 집</h2><span class="note">십성으로 보는 재물·일·보호의 구조</span></div>
+      <p class="small muted" style="margin:0 0 8px">물을 재물로 놓고 사주를 한 채의 집으로 그렸어요. 기둥 = 비겁(나의 힘), 물길·창 = 식상(벌어 오는 통로), 물탱크 = 재성(모인 재물), 담장·대문 = 관성(지키는 틀), 지붕 = 인성(보호·공부). 크기는 십성 비율, 재료 색은 그 십성의 오행, 햇살은 필요한 기운(용신·희신)이에요.</p>
+      <div class="sh-wrap">${HS.svg(spec, { sel: HSG.sel })}</div>${infoBox}
+      <div class="frow" style="gap:8px;margin:10px 0">${btn}${busy ? `<span class="small muted">${esc(HSG.note)}</span>` : ''}${HSG.err ? `<span class="small" style="color:var(--bad)">${esc(HSG.err)}</span>` : ''}</div>${photo}
+      <details class="ms-fold"><summary>이 집 전체 읽기</summary><ul class="ms-cap">${cap.map(c => `<li><b>${esc(c.k)}</b> ${esc(c.t)}</li>`).join('')}</ul></details>${dbg}</section>`;
   }
   function renderOverview(ch) {
     const O = window.MantraNatalOverview; if (!O) return '';
@@ -6871,6 +6899,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="note">득령·득지·득세는 전통적인 세 가지 점검입니다. 비율과 방향이 다르면 판단이 애매한 사주입니다.</p>
     </section>
     </div>
+    ${houseCard(ch)}
     ${renderGyeokAnalysis(ch)}
     ${renderTenGodRoles(ch)}
     ${renderCompat(ch)}
@@ -7711,8 +7740,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     // elementFlow(오행 흐름 상자)는 [모두 켜기]와 따로 관리자 스위치로 켠다(functions/api/luck-flags.js)
     // luckCycle(오행 사이클: 대운 30년·세운 2년 묶음)도 따로 켠다
     // gyeokAnalysis(오행·강약 탭 '사주 격국 분석' 카드, gyeok-structure.js)도 따로 켠다
-    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis && F.luckOverlay && F.tenGodRoles && F.macroEra && F.luckEnv && F.luckAlerts && F.mulsangArt && window.MANTRA_OVERLAY_W)) return;   // 오행 겹쳐 보기 층 무게(overlayWeights)도 여기서 받는다
-    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle', 'luckOverlay', 'tenGodRoles', 'macroEra', 'luckEnv', 'luckAlerts', 'mulsangArt'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (d.overlayWeights && typeof d.overlayWeights === 'object') { window.MANTRA_OVERLAY_W = d.overlayWeights; if (F.luckOverlay) ch = true; } if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
+    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis && F.luckOverlay && F.tenGodRoles && F.macroEra && F.luckEnv && F.luckAlerts && F.mulsangArt && F.sajuHouse && window.MANTRA_OVERLAY_W)) return;   // 오행 겹쳐 보기 층 무게(overlayWeights)도 여기서 받는다
+    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle', 'luckOverlay', 'tenGodRoles', 'macroEra', 'luckEnv', 'luckAlerts', 'mulsangArt', 'sajuHouse'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (d.overlayWeights && typeof d.overlayWeights === 'object') { window.MANTRA_OVERLAY_W = d.overlayWeights; if (F.luckOverlay) ch = true; } if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
   })();
   window.addEventListener('mantra:daycompat', () => { try { readForm(); render(); } catch (e) { } });   // 일주 적합도 2판(compat-day.js) 스위치가 늦게 켜지면 다시 그린다
   // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
@@ -11442,6 +11471,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (crb) { S.crSheet = { key: crb.dataset.cr.split(':')[1] }; S.cpSheet = null; S.domSheet = null; S.sheet = null; renderSheet(); return; }
     const tm = t.closest('.term');
     if (tm) { ev.preventDefault(); S.sheet = tm.dataset.term; S.sheetPos = tm.dataset.pos || null; S.sheetVol = tm.dataset.vol ? VOL_CTX[tm.dataset.vol] || null : null; renderSheet(); return; }
+    const hsp = t.closest('#saju-house [data-part]');
+    if (hsp) { const i = +hsp.getAttribute('data-part'); HSG.sel = HSG.sel === i ? null : i; render(); return; }
     const act = t.closest('[data-act]');
     if (act) {
       const a = act.dataset.act;
@@ -11461,6 +11492,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (a.startsWith('ikd-dom:')) { IKD.dom = a.slice(8); render(); return; }
       if (a === 'ikd-ai') { ikdAll(); return; }
       if (a === 'ms-gen' || a === 'ms-redo') { msGenerate(a === 'ms-redo'); return; }
+      if (a === 'hs-gen') { artGenerate(HSG, window.MantraSajuHouse, 'house', HSG.st === 'done', '미니어처 집을 찍는 중… (30초~1분)'); return; }
       if (a === 'ikd-plain') { ikdLoad(IKD.dom, 'plain'); return; }
       if (a.startsWith('pk-reset:')) { const k = a.slice(9); if (k === 'tr') PK.tr.cards = {}; else PK[k] = {}; pkSave(); render(); return; }
       if (a === 'tr-draw') { S.trSlot = null; trDraw(); return; }
