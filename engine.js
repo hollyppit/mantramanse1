@@ -84,10 +84,29 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   ];
   function tzOffset(utc) { let o = TZ[0][1]; for (const [t, off] of TZ) { if (utc >= t) o = off; else break; } return o; }
   function standardOffset(utc) { const o = tzOffset(utc); return (o === 600 || o === 570) ? o - 60 : o; }
-  function wallToUtc(y, m, d, h, mi) {
-    const wall = Date.UTC(y, m - 1, d, h, mi);
-    let utc = wall - 540 * 60000;
-    for (let k = 0; k < 3; k++) utc = wall - tzOffset(utc) * 60000;
+  // 해외 출생: IANA 시간대 이름(예 America/New_York)으로 그 지역의 과거 표준시·서머타임을 Intl(tzdb)에서 읽는다.
+  // tz 가 없거나 Asia/Seoul 이면 null → 위 한국 시간대 표를 그대로 쓴다(국내 계산 불변).
+  const ZONES = {};
+  function zoneOf(tz) {
+    if (tz == null || tz === '' || tz === 'Asia/Seoul') return null;
+    if (typeof tz !== 'string' || !/^[A-Za-z_]+(\/[A-Za-z0-9_+\-]+){1,2}$/.test(tz)) throw new Error('지원하지 않는 시간대입니다');
+    if (ZONES[tz]) return ZONES[tz];
+    let fmt;
+    try { fmt = new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', era: 'short' }); }
+    catch (e) { throw new Error('이 기기에서 출생지 시간대(' + tz + ')를 계산할 수 없습니다. 가까운 다른 지역을 선택해 주세요'); }
+    const off = utc => { // 그 순간의 UTC 오프셋(분)
+      const t = Math.floor(utc / 1000) * 1000, p = {};
+      for (const x of fmt.formatToParts(new Date(t))) p[x.type] = x.value;
+      let y = +p.year; if (/^B/.test(p.era || '')) y = 1 - y;
+      return Math.round((Date.UTC(y, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second) - t) / 60000 * 100) / 100;
+    };
+    const std = utc => { const y = new Date(utc).getUTCFullYear(); return Math.min(off(Date.UTC(y, 0, 1)), off(Date.UTC(y, 6, 1)), off(utc)); };
+    return (ZONES[tz] = { tz, off, std });
+  }
+  function wallToUtc(y, m, d, h, mi, zone) {
+    const wall = Date.UTC(y, m - 1, d, h, mi), offAt = zone ? zone.off : tzOffset;
+    let utc = wall - (zone ? zone.off(wall) : 540) * 60000;
+    for (let k = 0; k < 3; k++) utc = wall - offAt(utc) * 60000;
     return utc;
   }
   // 균시차(분) — NOAA 근사식
@@ -105,9 +124,9 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     ast: '진태양시 (경도+균시차)',
   };
   // 보정된 지방시를 '가짜 UTC' ms로 반환 (getUTC*로 읽음)
-  function localSolar(utc, lon, mode) {
-    if (mode === 'wall') return utc + tzOffset(utc) * 60000;
-    if (mode === 'std') return utc + standardOffset(utc) * 60000;
+  function localSolar(utc, lon, mode, zone) {
+    if (mode === 'wall') return utc + (zone ? zone.off(utc) : tzOffset(utc)) * 60000;
+    if (mode === 'std') return utc + (zone ? zone.std(utc) : standardOffset(utc)) * 60000;
     const lmt = utc + lon * 4 * 60000;
     if (mode === 'lmt') return lmt;
     return lmt + equationOfTime(utc) * 60000;
@@ -194,9 +213,9 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   const POS = ['year', 'month', 'day', 'hour'];
   const POS_K = { year: '년', month: '월', day: '일', hour: '시' };
 
-  function pillarsFor(utc, lon, timeMode, jasi, hourKnown) {
+  function pillarsFor(utc, lon, timeMode, jasi, hourKnown, zone) {
     const yp = yearPillarAt(utc), mp = monthPillarAt(utc);
-    const ls = localSolar(utc, lon, timeMode);
+    const ls = localSolar(utc, lon, timeMode, zone);
     const t = new Date(ls);
     const hh = t.getUTCHours() + t.getUTCMinutes() / 60;
     let J = jdnFromYMD(t.getUTCFullYear(), t.getUTCMonth() + 1, t.getUTCDate());
@@ -1328,23 +1347,27 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     const hourKnown = inp.hour != null && inp.hour !== '';
     const h = hourKnown ? +inp.hour : 12, mi = hourKnown ? +(inp.minute == null || inp.minute === '' ? 0 : inp.minute) : 0;
     if (!Number.isInteger(h) || h < 0 || h > 23 || !Number.isInteger(mi) || mi < 0 || mi > 59) throw new Error('출생 시간은 0~23시, 분은 0~59분으로 입력하세요');
-    const utc = wallToUtc(year, month, day, h, mi);
-    const lon = inp.lon ?? 126.98;
+    // 해외 출생지: tz(IANA) 우선, 없으면 해외 도시 이름(world-places.js)으로 찾는다
+    const wp = !inp.tz && inp.city && G.MantraWorldPlaces ? G.MantraWorldPlaces.find(inp.city) : null;
+    const zone = zoneOf(inp.tz || (wp && wp.tz) || null);
+    const utc = wallToUtc(year, month, day, h, mi, zone);
+    const lon = inp.lon ?? (wp ? wp.lon : 126.98);
     if (!Number.isFinite(lon) || lon < -180 || lon > 180) throw new Error('경도는 -180~180 범위의 숫자로 입력하세요');
     const timeMode = inp.timeMode || 'lmt';
     const jasi = inp.jasi || 'jeong';
-    const P = pillarsFor(utc, lon, timeMode, jasi, hourKnown);
+    const P = pillarsFor(utc, lon, timeMode, jasi, hourKnown, zone);
     const ch = { input: inp, gender: inp.gender || 'M', utc, lon, timeMode, jasi, hourKnown, solar: { y: year, m: month, d: day, h, mi }, lunar };
+    if (zone) ch.tz = zone.tz;
     ch.pillars = { year: P.year, month: P.month, day: P.day, hour: P.hour };
     ch.localSolarMs = P.localSolarMs;
-    ch.tzOffset = tzOffset(utc);
-    ch.dst = tzOffset(utc) !== standardOffset(utc);
+    ch.tzOffset = zone ? zone.off(utc) : tzOffset(utc);
+    ch.dst = zone ? zone.off(utc) !== zone.std(utc) : tzOffset(utc) !== standardOffset(utc);
     // 시간 기준별 비교(불확실성)
     ch.alternatives = Object.keys(TIME_MODES).map(m => {
-      const q = pillarsFor(utc, lon, m, jasi, hourKnown);
+      const q = pillarsFor(utc, lon, m, jasi, hourKnown, zone);
       return { mode: m, label: TIME_MODES[m], local: q.localSolarMs, day: gzName(q.day), hour: q.hour ? gzName(q.hour) : null };
     });
-    ch.alternativesJasi = hourKnown && P.lateJasi ? ['jeong', 'ya'].map(j => { const q = pillarsFor(utc, lon, timeMode, j, true); return { jasi: j, day: gzName(q.day), hour: gzName(q.hour) }; }) : null;
+    ch.alternativesJasi = hourKnown && P.lateJasi ? ['jeong', 'ya'].map(j => { const q = pillarsFor(utc, lon, timeMode, j, true, zone); return { jasi: j, day: gzName(q.day), hour: gzName(q.hour) }; }) : null;
     // 경계 근접 경고
     ch.warnings = [];
     const { prev, next } = surroundingJie(utc);
@@ -3811,7 +3834,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   G.Manse = {
     pickDays, TAEK_PURPOSE, JIAN12, gongmangFxOf, groupPull,
     compute, elementFlow, ELEMENT_FLOW_CFG, natalFlow, NATAL_FLOW_CFG, luckStructures, integrateYongsin, unifiedLuckFit, unifiedSupport, gyeokCore, jongCore, chainLink, UNIFIED_CFG, josa, evaluateLuckFlow, composeFlowState, flowLabel, flowSummary, flowName, migrateLegacyPhase, FLOW_CONFIG, LEVEL_WEIGHTS, ROOT_RULES, ROOT_CONFIG, ROOT_LEVEL_WEIGHTS, getRootRelation, rootRuleTable, validateRootHiddenData, analyzeNatalRoot, analyzeLuckRootSupport, evaluateCurrentRootState, rootFitEffect, rootSummary, rootLevelLabel, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, samjaeCycle, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, SUB_DOMAIN_KEYS, SUB_CONFIG, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, gyoungi, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
-    solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, currentTerm, termsOf, surroundingJie,
+    solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, zoneOf, currentTerm, termsOf, surroundingJie,
     yearPillarAt, monthPillarAt, dayPillarOfJdn, jdnFromYMD, pillarsFor, relationsAmong, tenGod, unseong, sinsal12, gongmangOf,
     STEM, STEM_K, BR, BR_K, EL, EL_K, TG, TG_GROUP, stemEl, BR_EL, HIDDEN, JIJANGGAN, WOLRYUL, hiddenLabels, mainHidden, yang, gzName, gzNameK,
     SEASONAL_CFG, SEASON_EL, monthCommand, wangsangOf, elementWeights,

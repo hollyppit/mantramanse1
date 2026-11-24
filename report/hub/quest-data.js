@@ -210,7 +210,7 @@
 
   /* ── 입력 초안(이탈 복원) ── */
   Q.DRAFT_KEY = 'mt_quest_draft';
-  Q.blank = function () { return { name: '', gender: '', calendar: '', leap: false, leapAsked: false, year: '', month: '', day: '', hour: '', minute: '', hourUnknown: false, country: 'KR', place: '서울' }; };
+  Q.blank = function () { return { name: '', gender: '', calendar: '', leap: false, leapAsked: false, year: '', month: '', day: '', hour: '', minute: '', hourUnknown: false, country: 'KR', place: '서울', wplace: '' }; };
   // 저장 형태 검사: 모양이 이상하면 버린다(옛 값·변조 방어)
   Q.cleanDraft = function (x, ids) {
     if (!x || x.v !== 2 || !x.d || typeof x.d !== 'object') return null;

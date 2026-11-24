@@ -29,7 +29,7 @@
   var S = { me: null, name: '', gender: 'M', chapter: null, status: null, statusP: null, inp: null, res: null, rel: 'lover', editing: true, busy: false, err: '', locked: null, list: [] };
   function meOf(ch) {
     var i = (ch && ch.input) || {}, o = {};
-    ['year', 'month', 'day', 'hour', 'minute', 'calendar', 'leap', 'gender', 'lon', 'timeMode', 'jasi', 'sinsalBase', 'model', 'school', 'combinationMode', 'climatePalaceMode'].forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; });
+    ['year', 'month', 'day', 'hour', 'minute', 'calendar', 'leap', 'gender', 'lon', 'tz', 'timeMode', 'jasi', 'sinsalBase', 'model', 'school', 'combinationMode', 'climatePalaceMode'].forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; });
     if (!o.gender && ch) o.gender = ch.gender === 'F' ? 'F' : 'M';
     if (o.hour == null) o.hourUnknown = true;
     return o;

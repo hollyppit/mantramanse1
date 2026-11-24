@@ -93,6 +93,8 @@
 #hub .ob-places{ display: flex; flex-wrap: wrap; gap: 8px; max-height: 190px; overflow: auto; }
 #hub .ob-places button{ min-height: 44px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(14, 17, 27, .9); color: var(--ink-2); cursor: pointer; }
 #hub .ob-places button.on{ border-color: var(--gold); background: rgba(205, 178, 122, .16); color: var(--gold-l); }
+#hub .ob-places button small{ opacity: .65; font-size: .82em; margin-left: 2px; }
+#hub .ob-place-note{ margin-top: 8px; }
 #hub .ob-warn{ padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(216, 130, 111, .4); color: var(--ink-2); font-size: .88rem; }
 #hub .ob-gender{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 #hub .ob-gender button{ min-height: 72px; font-family: var(--f-serif); font-size: 1.3rem; border-radius: 14px; border: 1px solid var(--line); background: rgba(14, 17, 27, .9); color: var(--ink-2); cursor: pointer; }

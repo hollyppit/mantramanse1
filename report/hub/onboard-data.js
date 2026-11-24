@@ -348,13 +348,22 @@
   function toProfile(d, place) {
     var unknown = !!d.hourUnknown || d.hour === '' || d.hour == null;
     return { name: String(d.name || '').trim().slice(0, 20), gender: d.gender, calendar: d.calendar === 'lunar' ? 'lunar' : 'solar', leap: d.calendar === 'lunar' && !!d.leap, year: +d.year, month: +d.month, day: +d.day,
-      hour: unknown ? 12 : +d.hour, minute: unknown ? 0 : (+d.minute || 0), hourUnknown: unknown, city: place ? place.name : '서울', lon: place ? +place.lon : 126.98, country: d.country || 'KR', timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'auto', combinationMode:d.combinationMode==='off'?'off':'auto', climatePalaceMode:d.climatePalaceMode==='off'?'off':'auto' };
+      hour: unknown ? 12 : +d.hour, minute: unknown ? 0 : (+d.minute || 0), hourUnknown: unknown, city: place ? place.name : '서울', lon: place ? +place.lon : 126.98, tz: place && place.tz ? place.tz : undefined, country: place && place.tz ? 'OT' : (d.country || 'KR'), timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'auto', combinationMode:d.combinationMode==='off'?'off':'auto', climatePalaceMode:d.climatePalaceMode==='off'?'off':'auto' };
   }
 
   // 한국 지역(시·도 대표 도시) — 기존 입력 화면과 같은 경도 값. 엔진은 한국 표준시 기준이라 국내 출생을 기본으로 한다.
   var PLACES = [['서울', 126.98], ['부산', 129.08], ['대구', 128.60], ['인천', 126.70], ['광주', 126.85], ['대전', 127.38], ['울산', 129.31], ['세종', 127.29], ['수원', 127.03], ['고양', 126.83], ['성남', 127.14], ['용인', 127.18], ['청주', 127.49], ['천안', 127.15], ['전주', 127.15], ['목포', 126.39], ['여수', 127.66], ['포항', 129.36], ['경주', 129.22], ['안동', 128.73], ['창원', 128.68], ['진주', 128.11], ['춘천', 127.73], ['강릉', 128.90], ['제주', 126.53]].map(function (p) { return { name: p[0], lon: p[1] }; });
 
-  root.Onboard = { cleanStyle: cleanStyle, cleanStyleMap: cleanStyleMap, STY_ROLES: STY_ROLES, FONT_KEYS: FONT_KEYS, WEIGHTS: WEIGHTS, TERMS: TERMS, DEFAULTS: DEFAULTS, CASES: CASES, INTRO: INTRO, INTRO_LAST: INTRO_LAST, INTRO_NOTICE: INTRO_NOTICE, SCENES: SCENES, REVEAL_LINES: REVEAL_LINES, FACES: FACES, PLACES: PLACES, REQUIRED_FIELDS: REQUIRED_FIELDS, FORBIDDEN_TITLES: FORBIDDEN_TITLES,
+  // 해외 출생지(/world-places.js): 고른 도시의 시간대(IANA)·경도로 계산한다. 목록에 없으면 가까운 도시를 고르도록 안내한다.
+  var WORLD = function () { return root.MantraWorldPlaces || null; };
+  function worldFind(name) { var W = WORLD(); return (W && name && W.find(name)) || null; }
+  function worldSearch(q) { var W = WORLD(); return W ? W.search(q) : []; }
+  // 입력 상태 d → 계산에 쓸 출생지(국내: PLACES 항목, 해외: 해외 도시 항목, 못 고름: null)
+  function placeOf(d) { if (d && d.country === 'OT') return worldFind(d.wplace); return PLACES.filter(function (p) { return p.name === (d && d.place); })[0] || null; }
+  function placeLabel(d) { if (d && d.country === 'OT') { var w = worldFind(d.wplace); return w ? w.name + ' (' + w.countryName + ')' : '해외 (도시를 골라 주세요)'; } return d ? d.place : ''; }
+  var PLACE_NOTE = '해당 지역이 없으면 가까운 지역을 선택해 주세요.';
+  var WORLD_NOTE = '해외 출생은 그 지역의 당시 시각(서머타임 포함)과 경도로 계산해요. 태어난 곳의 시계 시각을 그대로 입력하세요.';
+  root.Onboard = { worldFind: worldFind, worldSearch: worldSearch, placeOf: placeOf, placeLabel: placeLabel, PLACE_NOTE: PLACE_NOTE, WORLD_NOTE: WORLD_NOTE, cleanStyle: cleanStyle, cleanStyleMap: cleanStyleMap, STY_ROLES: STY_ROLES, FONT_KEYS: FONT_KEYS, WEIGHTS: WEIGHTS, TERMS: TERMS, DEFAULTS: DEFAULTS, CASES: CASES, INTRO: INTRO, INTRO_LAST: INTRO_LAST, INTRO_NOTICE: INTRO_NOTICE, SCENES: SCENES, REVEAL_LINES: REVEAL_LINES, FACES: FACES, PLACES: PLACES, REQUIRED_FIELDS: REQUIRED_FIELDS, FORBIDDEN_TITLES: FORBIDDEN_TITLES,
     honorific: honorific, addr: addr, fill: fill, merge: merge, publicCases: publicCases, birthCards: birthCards, normalizeCase: normalizeCase, KINDS: KINDS, VSTATE: VSTATE, RELATION: RELATION, DESIGNS: DESIGNS, EFFECTS: EFFECTS, NATURE: NATURE, SECTIONS: SECTIONS, SERVICES: SERVICES, TOPICS: TOPICS, SECTION_TYPES: SECTION_TYPES, pickCase: pickCase, validateDate: validateDate, validateTime: validateTime, toProfile: toProfile, adjustmentFields:adjustmentFields, bindAdjustments:bindAdjustments };
   if (typeof module !== 'undefined' && module.exports) module.exports = root.Onboard;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -91,6 +91,7 @@
 #qs .qs-places{ display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-top: 12px; max-height: 190px; overflow: auto; }
 #qs .qs-places button{ padding: 9px 14px; border: 1px solid #ffffff32; background: #101921dd; color: #fff; font-size: 13px; min-height: 40px; }
 #qs .qs-places button.sel, #qs .qs-places button:hover{ background: #b7a181; color: #111; }
+#qs .qs-places button small{ opacity: .7; font-size: .85em; margin-left: 2px; }
 #qs .qs-seg{ display: flex; justify-content: center; gap: 8px; margin: 0 0 12px; }
 #qs .qs-seg button{ padding: 9px 16px; border: 1px solid #ffffff32; background: #101921dd; color: #fff; font-size: 13px; min-height: 40px; }
 #qs .qs-seg button.sel{ background: #8f1d1d; color: #fff; border-color: #d9534f; }

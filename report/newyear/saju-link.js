@@ -22,7 +22,7 @@
     var inp = { year: birth.year, month: birth.month, day: birth.day, calendar: birth.calendar === 'lunar' ? 'lunar' : 'solar', leap: !!birth.leap };
     if (Number.isInteger(birth.hour)) { inp.hour = birth.hour; inp.minute = Number.isInteger(birth.minute) ? birth.minute : 0; }
     if (birth.gender === 'M' || birth.gender === 'F') inp.gender = birth.gender;
-    ['timeMode', 'jasi', 'lon', 'school'].forEach(function (k) { if (birth[k] != null) inp[k] = birth[k]; });
+    ['timeMode', 'jasi', 'lon', 'tz', 'school'].forEach(function (k) { if (birth[k] != null) inp[k] = birth[k]; });
     return M.compute(inp);
   }
   function relsOf(M, ch, p) {

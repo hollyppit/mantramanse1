@@ -191,6 +191,7 @@ export function cleanBirth(b) {
   if (b.jasi === 'jeong' || b.jasi === 'ya') out.jasi = b.jasi;
   if (typeof b.timeMode === 'string' && /^[a-z_]{1,20}$/i.test(b.timeMode)) out.timeMode = b.timeMode;
   if (typeof b.lon === 'number' && isFinite(b.lon) && Math.abs(b.lon) <= 180) out.lon = b.lon;
+  if (typeof b.tz === 'string' && b.tz !== 'Asia/Seoul' && /^[A-Za-z_]+(\/[A-Za-z0-9_+\-]+){1,2}$/.test(b.tz)) out.tz = b.tz;   // 해외 출생지 시간대(IANA)
   if (b.hour === null) out.hour = null;   // 태어난 시각 모름
   return out;
 }

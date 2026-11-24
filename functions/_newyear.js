@@ -65,7 +65,7 @@ export function entryOf(cfg, productOf) {
 export async function sajuKeyOfBirth(Manse, birth) {
   const inp = { year: birth.year, month: birth.month, day: birth.day, calendar: birth.calendar === 'lunar' ? 'lunar' : 'solar', leap: !!birth.leap };
   if (Number.isInteger(birth.hour)) { inp.hour = birth.hour; inp.minute = Number.isInteger(birth.minute) ? birth.minute : 0; }
-  ['jasi', 'timeMode', 'lon'].forEach(k => { if (birth[k] != null) inp[k] = birth[k]; });
+  ['jasi', 'timeMode', 'lon', 'tz'].forEach(k => { if (birth[k] != null) inp[k] = birth[k]; });
   const ch = Manse.compute(inp);
   const P = ch.pillars, h = p => (p ? { hanja: Manse.gzName(p) } : null);
   return sajuKey({ pillars: { year: h(P.year), month: h(P.month), day: h(P.day), hour: ch.hourKnown ? h(P.hour) : null }, gender: birth.gender });

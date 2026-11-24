@@ -93,6 +93,7 @@ async function newyearInputs(request, env, b) {
   const live = applyContent(deps, await loadContent(env), 'public'), entry = live.TojeongModern[tj.gua];
   if (!entry || entry.status !== 'reviewed') return { status: 409, error: 'newyear-text-not-reviewed', detail: admin ? tj.gua + '괘 현대어 풀이가 아직 검수 전입니다(관리자 › 신년운세에서 승인)' : undefined };
   const inp = { year: birth.year, month: birth.month, day: birth.day, calendar: birth.calendar || 'solar', leap: !!birth.leap, gender: birth.gender, city: '서울' };
+  if (birth.tz) { inp.tz = birth.tz; if (birth.lon != null) inp.lon = birth.lon; }   // 해외 출생: 그 지역 시간대·경도(국내는 기존 그대로)
   if (Number.isInteger(birth.hour)) { inp.hour = birth.hour; inp.minute = birth.minute || 0; }
   let sd; try { sd = globalThis.ReportV2.SajuData.build(deps.Manse.compute(inp), { now: Date.now() }); } catch { return { status: 400, error: 'invalid-birth' }; }
   const x = L.inputsOf(sd, 'newyear', { year, gua: tj.gua, entry }); if (!x) return { status: 400, error: 'bad-saju' };

@@ -36,14 +36,15 @@ export function cleanBirth(b, { needGender = true } = {}) {
   if (!hourUnknown && (hour == null || minute == null)) return { error: 'bad-time' };
   const gender = b.gender === 'F' || b.gender === 'M' ? b.gender : null;
   if (needGender && !gender) return { error: 'bad-gender' };
-  const lon = Number.isFinite(+b.lon) && +b.lon >= 120 && +b.lon <= 135 ? +b.lon : 126.98;
-  return { year, month, day, hour, minute, hourUnknown, calendar: pick(b.calendar, ['solar', 'lunar'], 'solar'), leap: b.leap === true, gender, lon };
+  const tz = typeof b.tz === 'string' && b.tz !== 'Asia/Seoul' && /^[A-Za-z_]+(\/[A-Za-z0-9_+\-]+){1,2}$/.test(b.tz) ? b.tz : undefined;   // 해외 출생지 시간대(IANA)
+  const lon = tz ? (Number.isFinite(+b.lon) && Math.abs(+b.lon) <= 180 ? +b.lon : 126.98) : (Number.isFinite(+b.lon) && +b.lon >= 120 && +b.lon <= 135 ? +b.lon : 126.98);
+  return { year, month, day, hour, minute, hourUnknown, calendar: pick(b.calendar, ['solar', 'lunar'], 'solar'), leap: b.leap === true, gender, lon, tz };
 }
 const SETTING_KEYS = ['timeMode', 'jasi', 'sinsalBase', 'model', 'school', 'combinationMode', 'climatePalaceMode'];
 export function settingsOf(me) { const o = {}; SETTING_KEYS.forEach(k => { const v = opt(me && me[k]); if (v !== undefined) o[k] = v; }); return o; }
 export function chartOf(b, settings) {
   const { M } = engines();
-  return M.compute(Object.assign({ year: b.year, month: b.month, day: b.day, hour: b.hourUnknown ? null : b.hour, minute: b.minute || 0, calendar: b.calendar, leap: b.leap, gender: b.gender, lon: b.lon }, settings || {}));
+  return M.compute(Object.assign({ year: b.year, month: b.month, day: b.day, hour: b.hourUnknown ? null : b.hour, minute: b.minute || 0, calendar: b.calendar, leap: b.leap, gender: b.gender, lon: b.lon, tz: b.tz }, settings || {}));
 }
 // 결제 확인용 사주 정보(_commerce.js sajuKey 와 같은 모양: 네 기둥 한자 + 성별). 브라우저 sd 대신 서버가 계산한 원국으로 만든다
 export function sdOf(ch) {

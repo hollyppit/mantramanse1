@@ -290,9 +290,9 @@
   H.route('welcome', welcome);
 
   /* ═════════ 출생정보 슬라이드 툰 ═════════ */
-  var blank = function () { return { name: '', calendar: 'solar', leap: false, year: '', month: '', day: '', hour: '', minute: '', hourUnknown: false, country: 'KR', place: '서울', gender: '' }; };
+  var blank = function () { return { name: '', calendar: 'solar', leap: false, year: '', month: '', day: '', hour: '', minute: '', hourUnknown: false, country: 'KR', place: '서울', wplace: '', gender: '' }; };
   function fromProfile(s) {
-    return { name: s.name || '', calendar: s.calendar === 'lunar' ? 'lunar' : 'solar', leap: !!s.leap, year: s.year || '', month: s.month || '', day: s.day || '', hour: s.hourUnknown ? '' : s.hour, minute: s.hourUnknown ? '' : s.minute, hourUnknown: !!s.hourUnknown, country: s.country || 'KR', place: s.city || '서울', gender: s.gender || '', combinationMode:s.combinationMode, climatePalaceMode:s.climatePalaceMode };
+    return { name: s.name || '', calendar: s.calendar === 'lunar' ? 'lunar' : 'solar', leap: !!s.leap, year: s.year || '', month: s.month || '', day: s.day || '', hour: s.hourUnknown ? '' : s.hour, minute: s.hourUnknown ? '' : s.minute, hourUnknown: !!s.hourUnknown, country: O.worldFind(s.city) ? 'OT' : (s.country === 'OT' ? 'OT' : 'KR'), place: O.worldFind(s.city) ? '서울' : (s.city || '서울'), wplace: O.worldFind(s.city) ? s.city : '', gender: s.gender || '', combinationMode:s.combinationMode, climatePalaceMode:s.climatePalaceMode };
   }
   Ob.classicBegin = function (q, ctx) {
     if (P.has() && !q.edit && !PREVIEW) return H.replace('#/'); // 이미 프로필이 있으면 입력을 건너뛴다
@@ -307,7 +307,7 @@
       if(q.compact && !q.edit && root.Quest){var prior=lget(root.Quest.DRAFT_KEY);if(prior&&prior.d)d=Object.assign(d,prior.d);}
       var started = !!(dr && dr.d);
       var save = function () { lset(DRAFT, { v: 1, step: step, d: d }); };
-      function summary() { return '<dl class="ob-sum">' + [['이름', d.name ? esc(d.name) : '입력 안 함', 'name'], ['생년월일', dateText(), 'date'], ['태어난 시각', d.hourUnknown || d.hour === '' ? '모름' : d.hour + '시 ' + (+d.minute || 0) + '분', 'time'], ['태어난 곳', d.country === 'KR' ? esc(d.place) : '해외·기타 (한국 표준시 기준)', 'place'], ['성별', d.gender === 'M' ? '남' : d.gender === 'F' ? '여' : '-', 'gender']].map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd><button type="button" class="lnk" data-jump="' + r[2] + '">수정</button></div>'; }).join('') + '</dl>'; }
+      function summary() { return '<dl class="ob-sum">' + [['이름', d.name ? esc(d.name) : '입력 안 함', 'name'], ['생년월일', dateText(), 'date'], ['태어난 시각', d.hourUnknown || d.hour === '' ? '모름' : d.hour + '시 ' + (+d.minute || 0) + '분', 'time'], ['태어난 곳', esc(O.placeLabel(d)), 'place'], ['성별', d.gender === 'M' ? '남' : d.gender === 'F' ? '여' : '-', 'gender']].map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd><button type="button" class="lnk" data-jump="' + r[2] + '">수정</button></div>'; }).join('') + '</dl>'; }
       function dateText() { return d.year ? d.year + '년 ' + d.month + '월 ' + d.day + '일 · ' + (d.calendar === 'lunar' ? '음력' + (d.leap ? ' 윤달' : '') : '양력') : '-'; }
       var opt = function (a, b, sel, suf, ph, desc) { var h = '<option value="">' + ph + '</option>', i; if (desc) for (i = b; i >= a; i--) h += '<option value="' + i + '"' + (String(sel) === String(i) ? ' selected' : '') + '>' + i + suf + '</option>'; else for (i = a; i <= b; i++) h += '<option value="' + i + '"' + (String(sel) === String(i) ? ' selected' : '') + '>' + i + suf + '</option>'; return h; };
 
@@ -324,12 +324,14 @@
           '<label class="chk"><input type="checkbox" id="fUnk"' + (d.hourUnknown ? ' checked' : '') + '><i>시각을 몰라요</i></label>';
         if (s.field === 'place') return '<div class="f seg" role="radiogroup" aria-label="출생 국가"><span>국가</span><label><input type="radio" name="cty" value="KR"' + (d.country === 'KR' ? ' checked' : '') + '><i>대한민국</i></label><label><input type="radio" name="cty" value="OT"' + (d.country === 'KR' ? '' : ' checked') + '><i>해외·기타</i></label></div>' +
           '<div id="fPlaceKR"' + (d.country === 'KR' ? '' : ' hidden') + '><label class="f"><span>지역 검색</span><input type="text" id="fPS" autocomplete="off" placeholder="예: 부산"></label><div class="ob-places" id="fPL" role="listbox" aria-label="지역">' + placeChips('') + '</div></div>' +
-          '<p class="ob-warn" id="fPlaceOT"' + (d.country === 'KR' ? ' hidden' : '') + '>현재 계산은 한국 표준시를 기준으로 합니다. 해외에서 태어났다면 한국 시각으로 환산한 시각을 입력해야 정확합니다. 시각이 불확실하면 이전 단계에서 "시각을 몰라요"를 선택하세요.</p>';
+          '<div id="fPlaceOT"' + (d.country === 'KR' ? ' hidden' : '') + '><label class="f"><span>도시·나라 검색</span><input type="text" id="fWS" autocomplete="off" placeholder="예: 뉴욕, 도쿄, 미국"></label><div class="ob-places ob-world" id="fWL" role="listbox" aria-label="해외 도시">' + worldChips('') + '</div><p class="note">' + esc(O.WORLD_NOTE) + '</p></div>' +
+          '<p class="note ob-place-note">' + esc(O.PLACE_NOTE) + '</p>';
         if (s.field === 'gender') return '<div class="ob-gender" role="radiogroup" aria-label="성별"><button type="button" role="radio" aria-checked="' + (d.gender === 'F') + '" data-g="F" class="' + (d.gender === 'F' ? 'on' : '') + '">여</button><button type="button" role="radio" aria-checked="' + (d.gender === 'M') + '" data-g="M" class="' + (d.gender === 'M' ? 'on' : '') + '">남</button></div>';
         if (s.field === 'confirm') return summary()+O.adjustmentFields(d);
         return '';
       }
-      function placeChips(f) { f = String(f || '').trim(); return O.PLACES.filter(function (p) { return !f || p.name.indexOf(f) >= 0; }).map(function (p) { return '<button type="button" role="option" aria-selected="' + (p.name === d.place) + '" class="' + (p.name === d.place ? 'on' : '') + '" data-p="' + esc(p.name) + '">' + esc(p.name) + '</button>'; }).join('') || '<p class="note">검색 결과가 없습니다. "해외·기타"를 선택해 주세요.</p>'; }
+      function placeChips(f) { f = String(f || '').trim(); return O.PLACES.filter(function (p) { return !f || p.name.indexOf(f) >= 0; }).map(function (p) { return '<button type="button" role="option" aria-selected="' + (p.name === d.place) + '" class="' + (p.name === d.place ? 'on' : '') + '" data-p="' + esc(p.name) + '">' + esc(p.name) + '</button>'; }).join('') || '<p class="note">검색 결과가 없습니다. 해외에서 태어났다면 "해외·기타"를 선택해 주세요.</p>'; }
+      function worldChips(f) { return O.worldSearch(f).map(function (p) { var on = p.name === d.wplace; return '<button type="button" role="option" aria-selected="' + on + '" class="' + (on ? 'on' : '') + '" data-w="' + esc(p.name) + '">' + esc(p.name) + ' <small>' + esc(p.countryName) + '</small></button>'; }).join('') || '<p class="note">검색 결과가 없습니다. 가까운 지역을 선택해 주세요.</p>'; }
 
       /* 한 장짜리 입력 폼 뒤에 관리자 '입력 공통 루프 영상'을 무음 반복 재생한다.
          PC(1024px 이상): 왼쪽 영상 · 오른쪽 폼 / 모바일: 위쪽 영상 · 아래 폼이 겹쳐 올라옴. 영상이 없거나 실패하면 예전 화면 그대로. */
@@ -417,6 +419,8 @@
           $$('input[name=cty]', el).forEach(function (r) { r.onchange = function () { d.country = this.value === 'KR' ? 'KR' : 'OT'; $('#fPlaceKR', el).hidden = d.country !== 'KR'; $('#fPlaceOT', el).hidden = d.country === 'KR'; save(); }; });
           var pl = $('#fPL', el), pickP = function () { $$('button', pl).forEach(function (b) { b.onclick = function () { d.place = b.dataset.p; $$('button', pl).forEach(function (x) { var on = x === b; x.className = on ? 'on' : ''; x.setAttribute('aria-selected', on); }); save(); }; }); };
           pickP(); $('#fPS', el).oninput = function () { pl.innerHTML = placeChips(this.value); pickP(); };
+          var wl = $('#fWL', el), pickW = function () { $$('button', wl).forEach(function (b) { b.onclick = function () { d.wplace = b.dataset.w; $$('button', wl).forEach(function (x) { var on = x === b; x.className = on ? 'on' : ''; x.setAttribute('aria-selected', on); }); msg(''); save(); }; }); };
+          pickW(); $('#fWS', el).oninput = function () { wl.innerHTML = worldChips(this.value); pickW(); };
         }
         if (f === 'gender') $$('[data-g]', el).forEach(function (b) { b.onclick = function () { d.gender = b.dataset.g; $$('[data-g]', el).forEach(function (x) { var on = x === b; x.className = on ? 'on' : ''; x.setAttribute('aria-checked', on); }); msg(''); save(); }; });
         if (f === 'confirm') $$('[data-jump]', el).forEach(function (b) { b.onclick = function () { var i = scenes.map(function (x) { return x.field; }).indexOf(b.dataset.jump); if (i >= 0) { step = i; render(); } }; });
@@ -442,7 +446,9 @@
       }
       function calc() {
         var btn = $('#obOk'); if (btn) { btn.disabled = true; btn.textContent = '천기를 펼치는 중…'; }
-        var place = O.PLACES.filter(function (p) { return p.name === d.place; })[0], saved = O.toProfile(d, d.country === 'KR' ? place : null);
+        var place = O.placeOf(d);
+        if (d.country === 'OT' && !place) { msg('해외 출생지를 골라 주세요. ' + O.PLACE_NOTE); var mo = $('details.obx-more'); if (mo) mo.open = true; if (btn) { btn.disabled = false; btn.textContent = q.edit ? '수정한 정보로 보기' : '내 사주 보기'; } return; }
+        var saved = O.toProfile(d, place);
         H.engine().then(function (M) {
           var ch; try { ch = M.compute(P.toInput(saved)); } catch (err) { Ob.track('calculation_failure', { reason: 'compute' }); msg((err && err.message) || '입력을 확인해 주세요.'); if (btn) { btn.disabled = false; btn.textContent = '나의 사주 확인하기'; } return; }
           if (!ch || !ch.pillars || !ch.pillars.day) { Ob.track('calculation_failure', { reason: 'empty' }); msg('계산 결과를 만들지 못했습니다. 입력을 확인해 주세요.'); if (btn) { btn.disabled = false; btn.textContent = '나의 사주 확인하기'; } return; }
