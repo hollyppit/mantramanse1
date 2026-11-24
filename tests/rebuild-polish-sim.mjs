@@ -18,7 +18,10 @@ const GONE = [/엔진이 계산한/, /고정된 순서로 한 가지 줄기만/,
 for (const re of GONE) { const left = E.filter(e => F.some(f => re.test(String(e[f] || '')))).length; ok(left === 0, `남은 내부 설명 ${re}: ${left}곳`); }
 // 3 원문 대비 과도한 삭제 없음 + notice 보존: polish 를 한 번 더 적용해도 같아야(멱등) 하고, notice 는 polish 대상이 아님
 const again = P.applyPolish(E);
-E.forEach((e, i) => { F.forEach(f => ok(again[i][f] === e[f], `${e.id}.${f} 두 번 적용하면 달라짐`)); ok(again[i].notice === e.notice, `${e.id} notice 변경됨`); });
+// 2026-11-24: 긴 근거 문장 나누기(longsplit)는 polish 뒤 맨 끝 단계라, 나눈 문장에는 polish를 다시 걸지 않는다 — 그 필드는 멱등 검사에서 뺀다
+const LS = await imp('editorial/rebuild-20261022/longsplit-20261124.mjs'), SPLIT_OUT = LS.LONG_SPLITS.map(x => x[1]);
+const wasSplit = t => SPLIT_OUT.some(o => String(t || '').includes(o));
+E.forEach((e, i) => { F.forEach(f => ok(wasSplit(e[f]) || again[i][f] === e[f], `${e.id}.${f} 두 번 적용하면 달라짐`)); ok(again[i].notice === e.notice, `${e.id} notice 변경됨`); });
 // 4 규칙 단위
 const cases = [['멈춰서 준비하는 쪽으로 읽어요.', '멈춰서 준비하는 쪽이에요.'], ['더 어려운 구조로 읽어요.', '더 어려운 구조예요.'], ['이 힘을 강점으로 풀었어요.', '이 힘을 강점으로 풀었어요.'],
   ['[편재가 높고 일간의 힘이 약함] 조합으로 계산됐고, 파트너와 나누는 쪽으로 읽어요.', '편재가 높고 일간의 힘이 약함 조합이라 파트너와 나누는 쪽이에요.'], ['올해는 엔진이 방어기로 분류한 해예요.', '올해는 방어기에 해당하는 해예요.']];

@@ -8,7 +8,8 @@ const P = process.cwd() + '/editorial/rebuild-20261022/';
 const { CONCRETE_ALL } = await import(pathToFileURL(P + 'concrete-20261107.mjs').href);
 const { bundles } = await import(pathToFileURL(P + 'index.mjs').href);
 const { applyConsistency } = await import(pathToFileURL(P + 'consistency-20261124.mjs').href);   // 2026-11-24: 사람 검토 정리가 장면 문장 몇 개를 다시 다듬으므로, 기대값도 같은 정리를 거친다
-const after = t => applyConsistency([{ x: t }])[0].x;
+const { applyLongSplit } = await import(pathToFileURL(P + 'longsplit-20261124.mjs').href);   // 2026-11-24: 긴 문장 나누기도 조립 맨 끝에 붙는다
+const after = t => applyLongSplit(applyConsistency([{ x: t }]))[0].x;
 const LIFE = eval(fs.readFileSync('tools/rebuild-audit.mjs', 'utf8').match(/const LIFE = (\/.*\/);/)[1]);
 const E = Object.values(bundles).flat();
 let fields = 0;
