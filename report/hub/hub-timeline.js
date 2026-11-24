@@ -157,8 +157,8 @@
       var head = cp
         ? '<h3>' + esc(cp.hook) + '<small>' + esc(tg.label) + ' · ' + esc(tg.meaning) + '</small></h3>' + qk + '<p class="tq-copy">' + esc(cp.body) + '</p>' + (qk ? '' : '<ul class="tq-copy-l"><li><b>해 볼 것</b>' + esc(cp.do) + '</li><li><b>조심할 것</b>' + esc(cp.trap) + '</li></ul>')
         : '<h3>' + esc(tg.label) + '<small>' + esc(tg.meaning || '') + '</small></h3>' + qk;
-      return '<article class="tq-card u-' + lvl + ' ' + KEYC(it) + (cp ? ' has-copy' : '') + '"><p class="tq-ct">' + esc(title) + '</p>' + head + themeHtml(it, lvl) + '<p class="tq-rule"><b>십신</b> ' + esc(tg.line || '') + '</p>' + ov + (TG && it._ref ? domHtml(it, lvl) : fieldBars(it)) +
-        (root.MantraLuckGrade && it.scores.fit != null ? '<p class="tq-sc">등급 ' + root.MantraLuckGrade.flow(it.scores.fit).n + '</p>' : it.condition ? '<p class="tq-sc">상태 ' + esc(it.condition) + '</p>' : '')   /* 2026-11-24: 흐름 점수·운의 세기·변화 신호 숫자는 타임라인에서 숨김(계산 근거 보호) */ + ovFig(it, lvl) + lvHtml(it, lvl, (TG && it._ref ? structHtml(it, lvl) : '') + (lvl === 'seun' && LV ? pairHtml(it.year) : '')) +
+      return '<article class="tq-card u-' + lvl + ' ' + KEYC(it) + (cp ? ' has-copy' : '') + '"><p class="tq-ct">' + esc(title) + '</p>' + (domFocus(it, lvl) ? domFocus(it, lvl) + themeHtml(it, lvl) + '<p class="tq-whole">이 시기 전체 풀이 · ' + esc(mName()) + josaWa(mName()) + ' 상관없이</p>' + head : head + themeHtml(it, lvl)) + '<p class="tq-rule"><b>십신</b> ' + esc(tg.line || '') + '</p>' + ov + (TG && it._ref ? domHtml(it, lvl) : fieldBars(it)) +
+        (root.MantraLuckGrade && it.scores.fit != null ? '<p class="tq-sc">' + (metric() !== 'flow' ? '전체 흐름 등급 ' : '등급 ') + root.MantraLuckGrade.flow(it.scores.fit).n + '</p>' : it.condition ? '<p class="tq-sc">상태 ' + esc(it.condition) + '</p>' : '')   /* 2026-11-24: 흐름 점수·운의 세기·변화 신호 숫자는 타임라인에서 숨김(계산 근거 보호) */ + ovFig(it, lvl) + lvHtml(it, lvl, (TG && it._ref ? structHtml(it, lvl) : '') + (lvl === 'seun' && LV ? pairHtml(it.year) : '')) +
         '<div class="tq-card-acts"><button type="button" class="tq-lnk" data-ev="' + lvl + '" aria-expanded="' + open + '">' + (open ? '근거 닫기' : '자세한 근거 보기') + '</button><a class="tq-lnk" href="#/go?to=future" data-track="timeline_topic_click" data-p="detail_' + lvl + '">이 시기 상세 풀이 →</a></div>' +
         (open ? '<div class="tq-evbox">' + TL.evidenceHtml(TL.evidence(M, ch, it), { secret: true }) + '</div>' : '') + '</article>';
     }
@@ -372,11 +372,31 @@
           '<details class="tq-fold"><summary>자세히 보기 · 2년 전체 풀이와 판단 근거</summary>' + lcSteps(r) + '</details></div>'; } catch (e) { return ''; }
     }
     // 상세 카드 보강: 고른 지표 점수·신호, 분야별 지수, 운+원국 구조·오행 흐름
+    // ── 지표 풀이(2026-11-25, 만세력 운세 흐름 탭과 같은 기준): 지표(인연·재물·직업·건강)를 고른 채 시기를 누르면 카드 맨 위에 그 지표 풀이.
+    //    점수·등급은 엔진 값 그대로(timeline-graph domainOf·sigMetric), 등급별 한 줄은 luck-element-theme.js gradeLine.
+    //    타임라인은 계산 근거를 숨긴다(2026-11-24): 성분 점수는 빼고, 이유 문장 안의 숫자(흐름 점수·비율)도 지운다.
+    function josaWa(w) { var c = String(w).charCodeAt(String(w).length - 1) - 0xAC00; return c >= 0 && c <= 11171 && c % 28 ? '과' : '와'; }
+    function plainReason(t) { return String(t || '').replace(/(\S+?)\([^)]*\)\s+\1(?=[\s·])/g, '$1').replace(/\s*\([^)]*\d[^)]*\)/g, '').replace(/\s*-?\d+(\.\d+)?%(·-?\d+(\.\d+)?%)*/g, '').replace(/\s+-?\d+(\.\d+)?(?=\s*—)/g, '').replace(/\s*—\s*/g, ' — ').replace(/\s{2,}/g, ' ').replace(/(^|\s)(\S+) \2(?=\s)/g, '$1$2').trim(); }
+    function unitW(lvl) { return { daeun: '이 10년', seun: '이 해', wolun: '이 달' }[lvl] || ''; }
+    function domFocus(it, lvl) {
+      var m = metric(); if (!TG || m === 'flow' || !it || !it._ref) return '';
+      var r; try { r = TG.domainOf(M, ch, it._ref.p, lvl)[m]; } catch (e) { r = null; } if (!r) return '';
+      var sg = TG.sigMetric(m, r.score), T = LTm(), hook = T && T.gradeLine ? T.gradeLine(m, sg.k) : '';
+      var calm = /무난|뚜렷한 쏠림이 없/.test(r.summary || '') && sg.k !== 'ok';   // 엔진 요약(절대 기준)이 '무난'인데 등급(이 사주 평소 대비)이 좋음·조심이면 요약은 뺀다
+      var rs = (r.reasons || []).map(plainReason).filter(function (t, i, a) { return t && !/\d/.test(t) && a.indexOf(t) === i; }).slice(0, 3);   // 숫자가 남은 문장은 뺀다(계산 근거 숨김)
+      var fl = root.MantraLuckGrade && it.scores && it.scores.fit != null ? root.MantraLuckGrade.flow(it.scores.fit).n : '';
+      var html = '<div class="tq-dfocus" style="--c:' + sg.c + '"><p class="tq-df-h"><b>' + esc(mName()) + '운 풀이</b><small>' + unitW(lvl) + ' 기준</small><span class="tq-df-s"><b>' + Math.round(r.score) + '</b>' + sgChip(sg) + '</span></p>' +
+        (hook ? '<p class="tq-df-hook">' + esc(hook) + '</p>' : '') +
+        (!calm && r.summary ? '<p class="tq-sub">' + esc(r.summary) + '</p>' : '') +
+        (rs.length ? '<ul class="tq-df-r">' + rs.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' : '') +
+        '<p class="tq-sub">' + (fl ? '이 시기 전체 흐름은 ' + esc(fl) + '이에요.' + (fl !== sg.n ? ' ' + esc(mName()) + ' 지표와는 따로 계산해서 다를 수 있어요.' : '') : '') + ' 예측이 아니라 흐름을 읽는 참고예요.</p></div>';
+      return html;
+    }
     function domHtml(it, lvl) {
       if (!TG || !it._ref) return '';
       var r; try { r = TG.domainOf(M, ch, it._ref.p, lvl); } catch (e) { return ''; }
-      var cell = function (k, label) { var x = r[k]; if (!x) return ''; var sg = TG.sigMetric(k, x.score); return '<div class="tq-dc"><span>' + label + '</span><b>' + Math.round(x.score) + '</b>' + sgChip(sg) + '</div>'; };
-      var m = metric(), sel = m !== 'flow' && r[m] ? r[m] : null;
+      var cell = function (k, label) { var x = r[k]; if (!x) return ''; var sg = TG.sigMetric(k, x.score); return '<div class="tq-dc' + (metric() === k ? ' on' : '') + '"><span>' + label + '</span><b>' + Math.round(x.score) + '</b>' + sgChip(sg) + '</div>'; };
+      var m = metric(), sel = m !== 'flow' && r[m] && !domFocus(it, lvl) ? r[m] : null;
       var top = sel ? '<p class="tq-dsel"><b>' + esc(mName()) + ' ' + Math.round(sel.score) + '</b> ' + sgChip(TG.sigMetric(m, sel.score)) + (sel.tags && sel.tags.length ? ' <span>' + esc(sel.tags.join(' · ')) + '</span>' : '') + '</p>' + (sel.summary ? '<p class="tq-sub">' + esc(sel.summary) + '</p>' : '') : '';
       var loss = (m === 'wealth' || m === 'windfall') && r.windfall && r.windfall.loss ? '<p class="tq-sub">뜻밖의 재물손실 위험 <b>' + Math.round(r.windfall.loss.score) + '</b> ' + sgChip(TG.sigMetric('windfallLoss', r.windfall.loss.score)) + ' (낮을수록 좋음)</p>' : '';
       return '<div class="tq-dom">' + top + loss + '<div class="tq-dg">' + cell('love', '인연') + cell('wealth', '재물') + cell('career', '직업') + cell('health', '건강') + '</div></div>';
