@@ -41,6 +41,44 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 assert.ok(/<script src="luck-element-theme\.js"><\/script>/.test(html), '스크립트');
 assert.ok(/el: elOf\(d\), v: luckV\(d\)/.test(html) && /el: elOf\(m\), v: luckV\(m\)/.test(html), '대운·월운 막대에 오행');
 assert.ok(/samjaeLayer\(/.test(html) && /tjOverlay\(/.test(html), '삼재·토정 보조 지표 유지');
+// 3-2) 분야 지표 그래프(만세력): 같은 주요 오행·같은 색, 말만 그 지표에 맞게
+let nd = 0;
+{ const keys = [...html.match(/const DOM_ORDER = \[([^\]]+)\]/)[1].matchAll(/'(\w+)'/g), ...html.match(/const DOM_SUB = \[([^\]]+)\]/)[1].matchAll(/'(\w+)'/g)].map(m => m[1]);
+  assert.equal(keys.length, 16, '분야 지표 16개');
+  assert.deepEqual(Object.keys(T.DOMAIN).sort(), keys.slice().sort(), '모든 분야 지표에 오행별 말이 있음');
+  for (const k of keys) { const D = T.DOMAIN[k]; assert.ok(D.area && D.e.length === 5, k);
+    assert.equal(new Set(D.e.map(e => e.words.join())).size, 5, k + ' 오행마다 다른 핵심어');
+    D.e.forEach((e, i) => { assert.ok(e.words.length >= 1 && /일$/.test(e.use) && e.acts.length === 2, k + i + ' 칸 형식'); [...e.words, e.use, ...e.acts].forEach(t => assert.ok(t && !BAN.test(t), k + ' 금지 표현 ' + t)); });
+    const L = T.legendFor(k); assert.equal(L.length, 5); L.forEach((g, e) => { assert.equal(g.el, e); assert.deepEqual(g.words, D.e[e].words); }); }
+  for (let i = 0; i < 12; i++) {
+    const ch = M.compute({ year: 1960 + i * 4, month: 1 + (i * 7) % 12, day: 2 + (i * 5) % 26, hour: (i * 5) % 24, minute: 0, gender: i % 2 ? 'M' : 'F', calendar: 'solar' });
+    const snap = J(ch.daeun.list.map(x => x.ev.fitScore));
+    const items = [...ch.daeun.list.map(x => [x, 'daeun']), ...M.seunRange(ch, 2025, 2027).map(x => [x, 'seun']), ...M.wolun(ch, 2026).slice(0, 4).map(x => [x, 'wolun'])];
+    for (const [x, kind] of items) {
+      const base = T.read(M, ch, x, kind), sums = new Set();
+      for (const k of keys) {
+        let sc; try { sc = M.evaluateDomainLuck(ch, x, kind)[k].score; } catch (e) { sc = undefined; }
+        const r = T.readDomain(M, ch, x, kind, k, { score: sc, name: k }); nd++;
+        assert.equal(J(r), J(T.readDomain(M, ch, x, kind, k, { score: sc, name: k })), '분야 결정론');
+        assert.equal(r.el, base.el, '분야가 달라도 주요 오행(막대 색)은 같음'); assert.equal(r.role, base.role); assert.equal(r.state, base.state);
+        assert.deepEqual(r.words, T.DOMAIN[k].e[r.el].words, '핵심어는 그 분야 말'); assert.equal(r.area, T.DOMAIN[k].area);
+        assert.ok(r.summary.includes(r.area) && r.recommend[0].includes(r.area), '요약·추천이 그 분야 말로');
+        if (typeof sc === 'number') assert.ok(r.basis.some(t => t.includes(sc + '점')), '분야 점수는 엔진 값 그대로');
+        assert.ok(!r.basis.some(t => /^흐름 점수.*막대 높이/.test(t)), '분야 그래프에서 막대 높이는 분야 점수');
+        [r.summary, ...r.interact, ...r.recommend, ...r.caution, ...r.basis].forEach(t => assert.ok(!BAN.test(t) && !/을을|를를|이이 |가가 /.test(t), '금지 표현·조사 ' + t));
+        sums.add(r.summary);
+      }
+      assert.equal(sums.size, keys.length, '같은 시기라도 지표마다 다른 말');
+    }
+    assert.equal(J(ch.daeun.list.map(x => x.ev.fitScore)), snap, '엔진 결과 불변(분야)');
+  }
+  assert.equal(T.readDomain(M, null, ch0(), 'daeun', 'love'), null, '사주 없음');
+  assert.ok(/el: elDomOn\(\) \? elOf\(d\) : null, v: r\[m\]\.score/.test(html) && /el: elDomOn\(\) \? elOf\(x\) : null, v: r\[m\]\.score/.test(html), '분야 대운·월운 막대에 오행');
+  assert.ok(/ELM && d\.el != null \? elFill\(d\.el\) : domCol\(k, v\)/.test(html), '분야 연도별 막대에 오행');
+  assert.ok(/isDomain\(\) \? elLegendDomain\(\)/.test(html) && /LT\(\)\.legendFor\(k\)/.test(html), '분야 범례가 그 분야 말');
+  assert.ok(/T\.readDomain\(M, S\.ch, x, kind, dk/.test(html), '선택 카드가 그 분야 말');
+  assert.ok(html.includes('sigMetric(k, it.v), by = top - (it.el != null ? 25 : 22)'), '분야 등급 칩은 보조로 유지'); }
+function ch0() { return { s: 0, b: 0 }; }
 // 4) 운명의 타임라인: 전체 흐름 값에 같은 주요 오행, 막대·인생 그래프·10년 칩·카드 연결
 { const TG = require(path.join(root, 'report/hub/timeline-graph.js')), ch = M.compute({ year: 1992, month: 6, day: 23, hour: 1, minute: 45, calendar: 'solar', gender: 'M' });
   for (const d of ch.daeun.list) { const v = TG.value(M, ch, d, 'daeun', 'flow'); assert.equal(v.el, T.mainEl(M, d).el, '타임라인 흐름 값의 오행'); assert.ok(v.sig && v.sig.n, '등급은 보조로 그대로'); }
@@ -50,4 +88,4 @@ assert.ok(/samjaeLayer\(/.test(html) && /tjOverlay\(/.test(html), '삼재·토�
   assert.ok(/E = useEl\(vv\) \? vv\.el : null/.test(ht) && /useEl\(q\) \? elC\(q\.el\) : q\.sig\.c/.test(ht) && /head \+ themeHtml\(it, lvl\)/.test(ht) && /elLegend\(\)/.test(ht), '타임라인 막대·인생·카드·범례 연결');
   const hi = fs.readFileSync(path.join(root, 'report/hub/index.html'), 'utf8'), st = fs.readFileSync(path.join(root, 'report/story/story.js'), 'utf8');
   assert.ok(/\/luck-element-theme\.js\?v=/.test(hi) && /'\/luck-element-theme\.js' \+ HV/.test(st), '허브·/report/ 둘 다 모듈을 불러옴'); }
-console.log(`luck-element-theme-sim ok · 해석 ${n}건 · 상태 ${J(states)} · 오행별 서로 다른 해석 ${Object.keys(byEl).map(e => T.EL_K[e] + byEl[e].size).join(' ')}`);
+console.log(`luck-element-theme-sim ok · 해석 ${n}건 · 분야 해석 ${nd}건 · 상태 ${J(states)} · 오행별 서로 다른 해석 ${Object.keys(byEl).map(e => T.EL_K[e] + byEl[e].size).join(' ')}`);
