@@ -33,7 +33,7 @@
     var H = M.HIDDEN[b], lab = M.hiddenLabels ? M.hiddenLabels(b) : (H.length === 2 ? ['여기', '정기'] : ['여기', '중기', '정기']), same = [], hap = [];   // 子·卯·酉는 정기 하나
     var cells = H.map(function (h, k) {
       var hs = h[0]; if (nat.indexOf(hs) >= 0) same.push(M.STEM[hs]); if (nat.indexOf((hs + 5) % 10) >= 0) hap.push(M.STEM[hs] + M.STEM[(hs + 5) % 10]);
-      return '<i class="lv-el e' + stemEl(hs) + (k === H.length - 1 ? ' m' : '') + '" title="' + E(lab[k] + ' ' + Math.round(h[1] / 30 * 100) + '%') + '">' + E(M.STEM[hs]) + '<small>' + lab[k] + '</small></i>';
+      return '<i class="lv-el e' + stemEl(hs) + (k === H.length - 1 ? ' m' : '') + '" title="' + E(lab[k]) + '">' + E(M.STEM[hs]) + '<small>' + lab[k] + '</small></i>';
     }).join('');
     var note = (same.length ? '원국 천간과 같은 글자 ' + same.join('·') : '') + (hap.length ? (same.length ? ' · ' : '') + '원국 천간과 합 ' + hap.join('·') : '');
     return '<p class="lv-hid"><b>지지 ' + E(M.BR[b]) + ' 속 지장간</b> ' + cells + (note ? '<span>' + E(note) + '</span>' : '') + '</p>';
@@ -49,7 +49,8 @@
   var EL_COL = ['#5fae6e', '#e0705a', '#d9b25c', '#b9bec7', '#5a7fbf'], EL_INK = ['#2f6b3b', '#9b3422', '#8a6a1c', '#5d636e', '#2d4f8f'];
   var LV_COL = { daeun: '#3D7BD9', seun: '#E0832F', wolun: '#8E5BD6', ilun: '#2E9E8F' };
   var GOOD = function (r) { return r === '용신' || r === '희신'; }, BAD = function (r) { return r === '기신' || r === '구신'; };
-  function olVisual(oc, E) {
+  // secret(2026-11-24, 타임라인): 세력 계산 공식·충형 배수·소수점 변화량은 숨기고 월령·충형합해 이름·비율만 남긴다
+  function olVisual(oc, E, secret) {
     E = E || esc0;
     var L = oc.layers || [], fin = L.length ? L[L.length - 1].pct : oc.natal.pct, roles = oc.roles || {};
     // 계절 재분석 방식(2026-11-20): 운 때문에 원국 글자의 뿌리·충형파해·월령이 바뀐 몫을 원국 막대에 반영
@@ -74,7 +75,7 @@
       var segs = '<i style="width:' + (NP[e] * hwF / tot * 100).toFixed(2) + '%;background:' + EL_COL[e] + ';opacity:.55"></i>' + (hwP > 0.005 ? '<i title="합화로 옮겨 온 몫" style="width:' + (hwP * hwF / tot * 100).toFixed(2) + '%;background:repeating-linear-gradient(135deg,' + EL_COL[e] + ' 0 3px,transparent 3px 6px);outline:1px solid ' + EL_COL[e] + '"></i>' : '') + L.map(function (l) { return l.add[e] > 0.005 ? '<i style="width:' + (l.add[e] * hwF / tot * 100).toFixed(2) + '%;background:' + LV_COL[l.level] + '"></i>' : ''; }).join('');
       var d = Math.round((fin[e] - oc.natal.pct[e]) * 10) / 10, role = roles[e] || (e === oc.dayEl ? '나' : ''), rc = GOOD(roles[e]) ? 'good' : BAD(roles[e]) ? 'bad' : '';
       var dc = d > 0.4 ? (GOOD(roles[e]) ? 'good' : BAD(roles[e]) ? 'bad' : '') : d < -0.4 ? (BAD(roles[e]) ? 'good' : GOOD(roles[e]) ? 'bad' : '') : '';
-      return '<p class="lv-brow"><span class="lv-bk"><b class="lv-el e' + e + ' m">' + EL_S[e] + '</b>' + (role ? '<small class="lv-r ' + rc + '">' + E(role) + '</small>' : '') + '</span><span class="lv-bar">' + segs + '</span><span class="lv-bv">' + Math.round(oc.natal.pct[e]) + '→<b>' + Math.round(fin[e]) + '</b>%' + (L.length && Math.abs(d) >= 0.5 ? ' <small class="lv-d ' + dc + '">' + (d > 0 ? '+' : '') + d + '</small>' : '') + '</span></p>';
+      return '<p class="lv-brow"><span class="lv-bk"><b class="lv-el e' + e + ' m">' + EL_S[e] + '</b>' + (role ? '<small class="lv-r ' + rc + '">' + E(role) + '</small>' : '') + '</span><span class="lv-bar">' + segs + '</span><span class="lv-bv">' + Math.round(oc.natal.pct[e]) + '→<b>' + Math.round(fin[e]) + '</b>%' + (!secret && L.length && Math.abs(d) >= 0.5 ? ' <small class="lv-d ' + dc + '">' + (d > 0 ? '+' : '') + d + '</small>' : '') + '</span></p>';
     }).join('');
     var hwList = []; L.forEach(function (l) { (l.hwa || []).forEach(function (h) { if (h.ok) hwList.push(l.levelK + ' ' + h.name); }); });
     var legend = '<p class="lv-leg">' + L.map(function (l) { return '<span><i style="background:' + LV_COL[l.level] + '"></i>' + E(l.levelK + ' ' + (l.label || '')) + '</span>'; }).join('') + '<span><i style="background:#999;opacity:.55"></i>원국</span>' + (hwList.length ? '<span><i style="background:repeating-linear-gradient(135deg,#999 0 3px,transparent 3px 6px);outline:1px solid #999"></i>합화로 옮겨 온 몫(' + E(hwList.join(' · ')) + ')</span>' : '') + '</p>';
@@ -83,9 +84,9 @@
     var why = oc.mode === 'seasonal' ? '<ul class="lv-why">' + L.map(function (l) {
       var s = l.season || {}, bits = ['월령 ' + (s.elK || '') + (s.why ? '(' + s.why + ')' : '')];
       if (l.rootGain && l.rootGain.length) bits.push('원국 ' + l.rootGain.join('·') + '에 뿌리가 생김');
-      var hits = (l.relHits || []).filter(function (h) { return h.id === l.level; }); if (hits.length) bits.push(hits[0].why.join('·') + ' → ' + PK[l.level] + ' 몫 ×' + hits[0].f);
+      var hits = (l.relHits || []).filter(function (h) { return h.id === l.level; }); if (hits.length) bits.push(hits[0].why.join('·') + (secret ? '' : ' → ' + PK[l.level] + ' 몫 ×' + hits[0].f));
       return '<li><b>' + E(l.levelK) + '</b> ' + E(bits.join(' · ')) + '</li>';
-    }).join('') + '</ul><p class="lv-sm">' + E('세력 계산: ' + (oc.rule || '')) + '</p>' : '';
+    }).join('') + '</ul>' + (secret ? '' : '<p class="lv-sm">' + E('세력 계산: ' + (oc.rule || '')) + '</p>') : '';
     return '<div class="lv-olv">' + svg + '<div class="lv-bars">' + bars + legend + why + '</div></div>';
   }
 
@@ -188,7 +189,7 @@
     if (oc && ex) {
       try {
         var yg = oc.yong;
-        try { out.olv = olVisual(oc, E); } catch (e2) { out.olv = ''; }
+        try { out.olv = olVisual(oc, E, opt.secret); } catch (e2) { out.olv = ''; }
         out.ol = (opt.noFigure ? '' : out.olv || '') + '<ol class="lv-ol">' + ex.map(function (l) { return '<li class="lv-' + l.tone + '"><b>' + E(l.title) + '</b> ' + E(l.text) + '</li>'; }).join('') + '</ol>' +
           (yg && yg.el != null ? '<p class="lv-sm">필요한 기운(용신) ' + E(EL_S[yg.el] + '(' + EL_HJ[yg.el] + ')') + ': 원국 ' + Math.round(yg.natal) + '% → 운을 겹친 뒤 ' + Math.round(yg.now) + '%</p>' : '');
       } catch (e) { out.ol = ''; }
@@ -231,7 +232,7 @@
     var L = layersOf(M, ch, x, kind), oc; try { oc = OV.compute(M, ch, L, { weights: opt.weights }); } catch (e) { return ''; }
     var y = oc.yong, ex = []; try { ex = OV.explain(oc, L.length); } catch (e) { }
     var me = ex[ex.length - 1], yl = y && y.el != null ? '필요한 기운(용신) <b>' + E(EL_S[y.el] + '(' + EL_HJ[y.el] + ')') + '</b>' + (y.el === 0 || y.el === 3 ? '이' : '가') + ' 원국 ' + Math.round(y.natal) + '% → 겹친 뒤 <b class="' + (y.now - y.natal > 0.4 ? 'lv-up' : y.now - y.natal < -0.4 ? 'lv-down' : '') + '">' + Math.round(y.now) + '%</b>' + (y.now - y.natal > 0.4 ? ' — 이 시기에 채워져요' : y.now - y.natal < -0.4 ? ' — 이 시기에 오히려 줄어요' : ' — 거의 그대로예요') : '';
-    return '<div class="lv-fig"><p class="lv-fig-h"><b>오행 겹쳐 보기</b> <span>원국 위에 ' + L.map(function (l) { return LEVEL_K[l.level]; }).join(' → ') + '</span></p>' + (yl ? '<p class="lv-fig-y">' + yl + '</p>' : '') + olVisual(oc, E) + (me ? '<p class="lv-sm">' + E(me.text) + '</p>' : '') + '</div>';
+    return '<div class="lv-fig"><p class="lv-fig-h"><b>오행 겹쳐 보기</b> <span>원국 위에 ' + L.map(function (l) { return LEVEL_K[l.level]; }).join(' → ') + '</span></p>' + (yl ? '<p class="lv-fig-y">' + yl + '</p>' : '') + olVisual(oc, E, opt.secret) + (me ? '<p class="lv-sm">' + E(me.text) + '</p>' : '') + '</div>';
   }
   // 상세 카드 한 장 분량(타임라인 시기 카드 아래에 붙인다)
   function card(M, ch, x, kind, opt) {

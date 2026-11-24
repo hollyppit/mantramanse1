@@ -63,8 +63,10 @@
     return { title: item.ganzhi + ' ' + (LEVEL_KO[r.level] || ''), natal: natal, chain: chain, note: note, own: Math.round(ev.ownFit), fit: Math.round(ev.fitScore), comps: comps, parts: (ev.parts || []).slice(0, 6).map(function (p) { return { label: p.label, v: Math.round(p.v * 10) / 10 }; }),
       relInfo: relInfo(ev).slice(0, 8), relations: (ev.relations || []).slice(0, 8), triggers: (ev.triggers || []).slice(0, 5), tg: item.tg, scores: item.scores, overlays: item.overlays };
   }
-  function evidenceHtml(e) {
+  // opt.secret(2026-11-24, 운명의 타임라인): 점수 성분·비중·기여 같은 계산 근거는 빼고, 십신·합충형파해·용신 판단만 보여 준다(화면 캡처로 계산식이 새지 않게)
+  function evidenceHtml(e, opt) {
     if (!e) return '';
+    if (opt && opt.secret) return evidenceSecret(e);
     var h = '<div class="ev"><h3>' + E(e.title) + ' · 근거</h3>', t = e.tg || {};
     h += '<section><h4>① 십신은 이렇게 나왔어요</h4><p><b>' + E(t.label) + '</b>' + (t.meaning ? ' — ' + E(t.meaning) : '') + '</p><p class="ev-s">' + E(t.line) + '. 운 간지의 천간·지지(본기)가 일간(나)과 어떤 관계인지로 정해요. 좋고 나쁨은 아래 흐름 점수와 신호등 색이 따로 알려 줘요.</p>' +
       (e.overlays && (e.overlays.volatility || e.overlays.defense) ? '<p class="ev-s">' + (e.overlays.volatility ? '변화 신호(변동성 ' + e.scores.volatility + ')가 기준을 넘었어요. ' : '') + (e.overlays.defense ? '부담 신호(부담도)가 기준을 넘었어요.' : '') + '</p>' : '') + '</section>';
@@ -86,6 +88,17 @@
     }
     if (e.natal.log.length) h += '<section><h4>⑤ 원국 기준(용신 판단)</h4><ul class="ev-l">' + e.natal.log.map(function (x) { return '<li>' + E(x) + '</li>'; }).join('') + '</ul></section>';
     return h + '<p class="ev-n">이 근거는 명리 규칙에 따른 계산 과정이며, 실제 사건을 예측하거나 보장하지 않습니다.</p></div>';
+  }
+
+  function evidenceSecret(e) {
+    var t = e.tg || {}, ul = function (a) { return '<ul class="ev-l">' + a.map(function (x) { return '<li>' + E(x) + '</li>'; }).join('') + '</ul>'; };
+    var h = '<div class="ev"><h3>' + E(e.title) + ' · 근거</h3>';
+    h += '<section><h4>① 십신</h4><p><b>' + E(t.label) + '</b>' + (t.meaning ? ' — ' + E(t.meaning) : '') + '</p><p class="ev-s">' + E(t.line) + '. 운 간지의 천간·지지(본기)가 일간(나)과 어떤 관계인지로 정해요.</p>' + (e.overlays && (e.overlays.volatility || e.overlays.defense) ? '<p class="ev-s">' + (e.overlays.volatility ? '변화 신호가 켜졌어요. ' : '') + (e.overlays.defense ? '부담 신호가 켜졌어요.' : '') + '</p>' : '') + '</section>';
+    h += '<section><h4>② 함께 작용하는 운</h4><ul class="ev-l"><li><b>원국</b> 일주 ' + E(e.natal.day) + (e.natal.zone ? ' · ' + E(e.natal.zone) : '') + (e.natal.yong ? ' · 용신 ' + E(e.natal.yong) + (e.natal.hee ? '·희신 ' + E(e.natal.hee) : '') : '') + '</li>' + e.chain.map(function (c) { return '<li><b>' + E(c.name) + '</b> ' + E(c.ganzhi) + '</li>'; }).join('') + '</ul></section>';
+    var rel = (e.relInfo || e.relations.map(function (x) { return { text: x }; })).map(function (r) { return r.text; }).concat(e.triggers || []), seen = {};
+    rel = rel.filter(function (x) { return x && !seen[x] && (seen[x] = 1); });
+    if (rel.length) h += '<section><h4>③ 합·충·형·파·해</h4>' + ul(rel) + '</section>';
+    return h + '<p class="ev-n">명리 규칙에 따른 판단이며, 실제 사건을 예측하거나 보장하지 않습니다.</p></div>';
   }
 
   /* ── 화면 ── */

@@ -18,7 +18,7 @@
   var tlP = null;
   function loadTl() {
     if (root.ReportV2 && root.ReportV2.Timeline) return Promise.resolve();
-    if (!tlP) tlP = Promise.all(V2.map(function (n) { return new Promise(function (ok, no) { var s = DOC.createElement('script'); s.src = '/report/v2/' + n + '.js'; s.async = false; s.onload = ok; s.onerror = function () { no(new Error('load ' + n)); }; DOC.head.appendChild(s); }); })).catch(function (e) { tlP = null; throw e; });
+    if (!tlP) tlP = Promise.all(V2.map(function (n) { return new Promise(function (ok, no) { var s = DOC.createElement('script'); s.src = '/report/v2/' + n + '.js?v=20261124-sec'; s.async = false; s.onload = ok; s.onerror = function () { no(new Error('load ' + n)); }; DOC.head.appendChild(s); }); })).catch(function (e) { tlP = null; throw e; });
     return tlP;
   }
 
@@ -77,7 +77,7 @@
       var F = root.MANTRA_FLAGS || {}, f = r[1] || {}, lc = F.luckCycle === true || f.luckCycle === true, ef = F.elementFlow === true || f.elementFlow === true;
       // 운 분석 층(2026-11-18, 만세력 운세 흐름과 같은 계산): 외부 환경·전환·상하위(luckEnv) · 오행 겹쳐 보기(luckOverlay) · 십성 작용(tenGodRoles)
       // 시대 흐름(삼원구운·원회운세·오운육기)은 2026-11-20부터 타임라인에서 빼고 만세력 운세 흐름의 시대 흐름 카드에만 둔다(개인 인생 흐름에 집중)
-      var on = function (k) { return F[k] === true || f[k] === true; }, lv = { luckEnv: on('luckEnv'), luckOverlay: on('luckOverlay'), tenGodRoles: on('tenGodRoles') }, LV_V = '?v=20261124-plain';
+      var on = function (k) { return F[k] === true || f[k] === true; }, lv = { luckEnv: on('luckEnv'), luckOverlay: on('luckOverlay'), tenGodRoles: on('tenGodRoles') }, LV_V = '?v=20261124-sec';
       var need = [].concat(lv.luckOverlay ? ['/luck-overlay.js'] : [], lv.tenGodRoles || lv.luckEnv ? ['/ten-god-roles.js'] : [], lv.luckEnv ? ['/luck-env.js'] : [], ['/amhap.js', '/element-strategy.js', '/luck-layers-view.js']);   // 암합·오행 전략(2026-11-20, 만세력과 같은 공용 모듈)
       var seq = function (list) { return list.reduce(function (pr, u) { return pr.then(function () { return H.load(u + LV_V).catch(function () { }); }); }, Promise.resolve()); };
       // 원국 한눈에 보기(2026-11-20, 만세력 원국 탭과 같은 natal-overview.js): 격국 판정(gyeok-structure.js)을 함께 읽는다. 스위치 없이 늘 보인다
@@ -158,9 +158,9 @@
         ? '<h3>' + esc(cp.hook) + '<small>' + esc(tg.label) + ' · ' + esc(tg.meaning) + '</small></h3>' + qk + '<p class="tq-copy">' + esc(cp.body) + '</p>' + (qk ? '' : '<ul class="tq-copy-l"><li><b>해 볼 것</b>' + esc(cp.do) + '</li><li><b>조심할 것</b>' + esc(cp.trap) + '</li></ul>')
         : '<h3>' + esc(tg.label) + '<small>' + esc(tg.meaning || '') + '</small></h3>' + qk;
       return '<article class="tq-card u-' + lvl + ' ' + KEYC(it) + (cp ? ' has-copy' : '') + '"><p class="tq-ct">' + esc(title) + '</p>' + head + '<p class="tq-rule"><b>십신</b> ' + esc(tg.line || '') + '</p>' + ov + (TG && it._ref ? domHtml(it, lvl) : fieldBars(it)) +
-        '<p class="tq-sc">흐름 점수 ' + pct(it.scores.fit) + ' · 운의 세기 ' + it.scores.intensity + ' · 변화 신호 ' + it.scores.volatility + (root.MantraLuckGrade && it.scores.fit != null ? ' · 등급 ' + root.MantraLuckGrade.flow(it.scores.fit).n : it.condition ? ' · 상태 ' + esc(it.condition) : '') + '</p>' + ovFig(it, lvl) + lvHtml(it, lvl, (TG && it._ref ? structHtml(it, lvl) : '') + (lvl === 'seun' && LV ? pairHtml(it.year) : '')) +
+        (root.MantraLuckGrade && it.scores.fit != null ? '<p class="tq-sc">등급 ' + root.MantraLuckGrade.flow(it.scores.fit).n + '</p>' : it.condition ? '<p class="tq-sc">상태 ' + esc(it.condition) + '</p>' : '')   /* 2026-11-24: 흐름 점수·운의 세기·변화 신호 숫자는 타임라인에서 숨김(계산 근거 보호) */ + ovFig(it, lvl) + lvHtml(it, lvl, (TG && it._ref ? structHtml(it, lvl) : '') + (lvl === 'seun' && LV ? pairHtml(it.year) : '')) +
         '<div class="tq-card-acts"><button type="button" class="tq-lnk" data-ev="' + lvl + '" aria-expanded="' + open + '">' + (open ? '근거 닫기' : '자세한 근거 보기') + '</button><a class="tq-lnk" href="#/go?to=future" data-track="timeline_topic_click" data-p="detail_' + lvl + '">이 시기 상세 풀이 →</a></div>' +
-        (open ? '<div class="tq-evbox">' + TL.evidenceHtml(TL.evidence(M, ch, it)) + '</div>' : '') + '</article>';
+        (open ? '<div class="tq-evbox">' + TL.evidenceHtml(TL.evidence(M, ch, it), { secret: true }) + '</div>' : '') + '</article>';
     }
     /* ── 그래프 지표(2026-11-12, 만세력 운세 흐름 탭과 같은 기준): 전체 흐름 · 연애 · 재물 · 건강 · 사고수 · 직업·가족 세부.
           막대 높이 = 고른 지표 점수(0~100), 막대 색·위 글자 = 신호 등급(좋음·무난·조심), 아래 작은 글자 = 그 시기의 성격(6분류).
@@ -321,19 +321,21 @@
     // 운 분석 층(luck-layers-view.js): 시기 카드 아래 ①외부 환경 ②내 사주 반응 ③상위·하위 운 ④영역 + 지장간, 대운 그래프 위 시대 흐름
     var LV = GF && GF.lv && root.MantraLuckView ? root.MantraLuckView : null;
     if (LV && !DOC.getElementById('lv-css')) { var lvs = DOC.createElement('style'); lvs.id = 'lv-css'; lvs.textContent = LV.CSS + '#hub .lv-sec{--lv-line:rgba(205,178,122,.3)}#hub .lv-era{color:#1b1b1b}#hub .lv-nf{--lv-halo:#e9eef0}#hub .lv-qr.good .lv-qt,#hub .lv-qr.good b,#hub .lv-qr.good .lv-qm,html:not(.theme-mist) #hub .lv-qr.good .lv-qt,html:not(.theme-mist) #hub .lv-qr.good b,html:not(.theme-mist) #hub .lv-qr.good .lv-qm{color:#178a4a!important}#hub .lv-qr.bad .lv-qt,#hub .lv-qr.bad b,#hub .lv-qr.bad .lv-qm,html:not(.theme-mist) #hub .lv-qr.bad .lv-qt,html:not(.theme-mist) #hub .lv-qr.bad b,html:not(.theme-mist) #hub .lv-qr.bad .lv-qm{color:#c9412d!important}html:not(.theme-mist) #hub .lv-qr.good .lv-qt,html:not(.theme-mist) #hub .lv-qr.good b,html:not(.theme-mist) #hub .lv-qr.good .lv-qm{color:#5fd68d!important}html:not(.theme-mist) #hub .lv-qr.bad .lv-qt,html:not(.theme-mist) #hub .lv-qr.bad b,html:not(.theme-mist) #hub .lv-qr.bad .lv-qm{color:#ff7a66!important}#hub .lv-up,#hub b.lv-up,#hub .lv-r.good,#hub .lv-d.good{color:#178a4a!important}#hub .lv-down,#hub b.lv-down,#hub .lv-r.bad,#hub .lv-d.bad{color:#c9412d!important}html:not(.theme-mist) #hub .lv-up,html:not(.theme-mist) #hub b.lv-up,html:not(.theme-mist) #hub .lv-r.good,html:not(.theme-mist) #hub .lv-d.good{color:#5fd68d!important}html:not(.theme-mist) #hub .lv-down,html:not(.theme-mist) #hub b.lv-down,html:not(.theme-mist) #hub .lv-r.bad,html:not(.theme-mist) #hub .lv-d.bad{color:#ff7a66!important}html:not(.theme-mist) #hub .lv-nf{--lv-halo:#17161d}html:not(.theme-mist) #hub .lv-et0{fill:#8fd19c}html:not(.theme-mist) #hub .lv-et1{fill:#f39a86}html:not(.theme-mist) #hub .lv-et2{fill:#ecc970}html:not(.theme-mist) #hub .lv-et3{fill:#dfe3ea}html:not(.theme-mist) #hub .lv-et4{fill:#8fb0ec}'; DOC.head.appendChild(lvs); }
-    function lvHtml(it, lvl, extra) { extra = extra || ''; var h = ''; if (LV && it && it._ref && it._ref.p) { try { h = LV.card(M, ch, it._ref.p, lvl, { flags: GF.lv, esc: esc, weights: GF.ow || undefined, noFigure: true }); } catch (e) { h = ''; } } if (!h) return extra; return '<details class="tq-fold tq-lvf"><summary>더 깊이 보기 · 운과 원국의 구조 · 오행·십성으로 본 이 시기</summary>' + extra + h + '</details>'; }   /* 구조·오행 흐름(structHtml)도 함께 접는다 */
+    function lvHtml(it, lvl, extra) { extra = extra || ''; var h = ''; if (LV && it && it._ref && it._ref.p) { try { h = LV.card(M, ch, it._ref.p, lvl, { flags: GF.lv, esc: esc, secret: true, weights: GF.ow || undefined, noFigure: true }); } catch (e) { h = ''; } } if (!h) return extra; return '<details class="tq-fold tq-lvf"><summary>더 깊이 보기 · 운과 원국의 구조 · 오행·십성으로 본 이 시기</summary>' + extra + h + '</details>'; }   /* 구조·오행 흐름(structHtml)도 함께 접는다 */
     function pairOf(y) { var LC = LCm(); if (!LC) return null; try { return LC.seunPair(M, ch, y); } catch (e) { return null; } }
     function qkHtml(it, lvl, cp) {
       if (!LV || !LV.quick || !it || !it._ref || !it._ref.p) return '';
       var extra = [], pr = lvl === 'seun' ? pairOf(it.year) : null;
       if (pr) extra.push(['2년 흐름', esc(pr.hook) + ' <small class="tq-q-sm">' + pr.start + '~' + pr.end + '년 천간 ' + esc(M.EL_K[pr.el]) + '</small>', pr.tone === 'good' ? 'good' : pr.tone === 'bad' ? 'bad' : '']);
       var after = cp && cp.trap ? [['조심할 것', esc(cp.trap)]] : [];
-      try { return LV.quick(M, ch, it._ref.p, lvl, { flags: GF.lv, esc: esc, weights: GF.ow || undefined, extra: extra, todo: cp && cp.do, after: after }); } catch (e) { return ''; }
+      try { return LV.quick(M, ch, it._ref.p, lvl, { flags: GF.lv, esc: esc, secret: true, weights: GF.ow || undefined, extra: extra, todo: cp && cp.do, after: after }); } catch (e) { return ''; }
     }
     // 오행 겹쳐 보기 그림(만세력과 같은 그림): 시기 카드 안에 접지 않고 바로 보인다
-    function ovFig(it, lvl) { if (!LV || !GF.lv.luckOverlay || !it || !it._ref || !it._ref.p) return ''; try { return LV.overlayFigure(M, ch, it._ref.p, lvl, { flags: GF.lv, esc: esc, weights: GF.ow || undefined }); } catch (e) { return ''; } }
+    function ovFig(it, lvl) { if (!LV || !GF.lv.luckOverlay || !it || !it._ref || !it._ref.p) return ''; try { return LV.overlayFigure(M, ch, it._ref.p, lvl, { flags: GF.lv, esc: esc, secret: true, weights: GF.ow || undefined }); } catch (e) { return ''; } }
     // 뚜렷한 신호 자동 알림은 2026-11-20 사용자 요청으로 만세력에서만 띄운다(타임라인 알림 제거, luck-alerts.js 는 index.html 에서만 쓴다)
-    function lcSteps(r) { return '<ol class="tq-lc-steps"><li><b>오행의 특징</b>' + esc(r.steps.trait) + '</li><li><b>나에게 미치는 영향</b>' + esc(r.steps.impact) + '</li><li><b>추천 전략</b>' + esc(r.steps.strategy) + '</li></ol>' + (r.basis && r.basis.length ? '<details class="tq-how"><summary>판단 근거 보기</summary><ul class="tq-lc-basis">' + r.basis.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul><p class="tq-sub">미리 써 둔 문구를 이 사주의 계산값으로 골라 조합했어요(AI 미사용). 흐름 점수는 바꾸지 않아요.</p></details>' : ''); }
+    // 2026-11-24: 판단 근거는 십성·통합 용신 이름만(점수 구성·비중·평균 같은 계산 값은 타임라인에서 숨김)
+    var SAFE_BASIS = function (b) { return /^(십성|통합 용신)/.test(String(b || '')); };
+    function lcSteps(r) { return '<ol class="tq-lc-steps"><li><b>오행의 특징</b>' + esc(r.steps.trait) + '</li><li><b>나에게 미치는 영향</b>' + esc(r.steps.impact) + '</li><li><b>추천 전략</b>' + esc(r.steps.strategy) + '</li></ol>' + (r.basis && r.basis.filter(SAFE_BASIS).length ? '<details class="tq-how"><summary>판단 근거 보기</summary><ul class="tq-lc-basis">' + r.basis.filter(SAFE_BASIS).map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul><p class="tq-sub">미리 써 둔 문구를 이 사주의 계산값으로 골라 조합했어요(AI 미사용). 흐름 점수는 바꾸지 않아요.</p></details>' : ''); }
     // 장기 운세 요약(2026-11-18): 대운 3개를 하나의 오행·하나의 길흉으로 묶던 30년 구간 판정을 걷고, 대운마다의 흐름과 그 사이 변화를 순서대로 보여 준다(luck-cycle.js longSummary)
     function spanHtml() {
       var LC = LCm(); if (!LC || !LC.longSummary) return '';
