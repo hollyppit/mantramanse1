@@ -162,6 +162,10 @@ ok(/body \+= spMansionSection\(kind, i, an\);/.test(html) && /28수 천문방위
 ok(html.indexOf('body += an ? spResult(kind, i, an)') < html.indexOf('body += spMansionSection(kind, i, an)'), 'B(현공) 다음 C·D 순서');
 ok(/\$\{tkMansionCard\(list\)\}/.test(html) && /tkMansionCell\(r\.jdn\)/.test(html), '택일 28수 연결');
 ok(/\$\{spMansionPalace\(ms\)\}/.test(html) && /<h3>12궁 묶음\(원전이 인정하는 범위\)<\/h3>/.test(html), '28수 카드 12궁 묶음 연결');
+ok(/function spGlance\(kind, i, an\)/.test(html) && /let h = spGlance\(kind, i, an\) \+/.test(html) && /<h2>한눈에 보기<\/h2>/.test(html), '공간·명당 한눈에 보기 카드');
+ok(/<details class=\\?"card sp-deep\\?">/.test(html) && /더 깊이 보기 — 하늘의 28수 별자리/.test(html), '28수·통합 해석은 접힌 「더 깊이 보기」 안');
+ok(!/verdictText\.slice\(0, 22\)/.test(html) && /SP_VERDICT\[j\.verdict\]/.test(html), '방 쓰임 추천: 잘린 문장 대신 짧은 판정 이름');
+ok(/function spPlainSaju/.test(html) && />건강 \$\{p\.shan\}</.test(html), '억부 용어·산성/향성을 쉬운 말로');
 ok(/<h3>밀일\(密日\)<\/h3>/.test(html) && /mi = ok \? r0\.miri/.test(html), '택일 화면 밀일 칸');
 ok(/<h3>옥갑기 두 판본 나란히<\/h3>/.test(html) && /r0\.omensAll/.test(html) && /\.ms-two\{/.test(html), '택일 화면 옥갑기 두 판본 나란히');
 ok(/<h3>복단일\(伏斷日\)<\/h3>/.test(html) && /r\.fuduan && r\.fuduan\.is \? ' <span class="chip warn">복단일<\/span>'/.test(html) && /\.chip\.warn \{/.test(html), '택일 화면 복단일 표시(카드·표·칩)');
