@@ -233,6 +233,7 @@
     if (kind === 'money') return moneyBlock(C);
     if (kind === 'spend') return spendBlock(C);
     if (kind === 'meet') return meetBlock(C);
+    if (kind === 'date') return dateBlock(C);
     return null;
   }
   // 종합풀이 '인연이 열리는 곳 · 순위'(timeline_self_27) 끝: 활동으로 넓히는 만남 자리
@@ -244,6 +245,21 @@
     return '<section class="dp-embed dp dp-apt"><div class="cap">활동으로 넓히는 만남 자리</div><p class="lead">' + esc(D.MEET_SIDE[side] || D.MEET_SIDE.bal) + '</p>' +
       '<div class="dp-tags">' + subs.map(function (x) { return '<span class="dp-chip">' + esc(x.sub.name + ' · ' + x.sub.ex[0]) + '</span>'; }).join('') + '</div>' +
       '<p class="dp-mi">' + esc((soc && soc.ok ? '사회·교류형은 ' + soc.levelK + '이에요. ' : '') + D.MEET_TIP) + '</p></section>';
+  }
+
+  // 인연운 '사랑할 때의 나'(timeline_love_04) 끝: 활동으로 보는 데이트 방식(2026-11-26 세분화) — 20세 미만은 넣지 않는다
+  function dateBlock(C) {
+    var D = DD(), t1 = C.ts[0]; if (C.kid || !t1) return null;
+    var y = typeOf(t1), how = y && D.AFFECTION[y.top.id];
+    var ax = {}; C.r.sport.axes.forEach(function (a) { ax[a.id] = a; });
+    var lines = ['in_out', 'short_long', 'solo_team'].map(function (k) { var a = ax[k]; return a && a.ok && a.side !== 'bal' ? D.DATE_AXIS[k][a.side] : ''; }).filter(Boolean);
+    var subs = D.DATE_IDS.map(function (id) { return C.subs[id]; }).filter(Boolean).sort(function (a, b) { return (b.sub.score - a.sub.score) || (a.sub.id < b.sub.id ? -1 : 1); }).slice(0, 3);
+    if (!how && !lines.length && !subs.length) return null;
+    return '<section class="dp-embed dp dp-apt"><div class="cap">활동으로 보는 데이트 방식</div>' +
+      (how ? '<p class="lead">' + esc(t1.name + ' 특기 안에서 ' + y.top.name + ' 결이 앞서서, 관계에서도 ' + J.예요(how) + '. ' + D.AFFECTION_TIP) + '</p>' : '') +
+      (lines.length ? '<p>' + esc(lines.join(' ')) + '</p>' : '') +
+      (subs.length ? '<div class="dp-tags">' + subs.map(function (x) { return '<span class="dp-chip">' + esc(x.sub.name + ' · ' + x.sub.ex[0]) + '</span>'; }).join('') + '</div>' : '') +
+      '<p class="dp-mi">' + esc(D.DATE_NOTE) + '</p></section>';
   }
 
   // ───────── 인연운 궁합 장(love-compat.js) '두 사람이 함께 하면 좋은 활동' ─────────
@@ -275,7 +291,10 @@
     cand.sort(function (x, y) { return (y.both - x.both) || (y.s - x.s) || (x.id < y.id ? -1 : 1); });
     var acts = [], perField = {};
     cand.forEach(function (x) { if (acts.length >= 3 || (perField[x.fid] || 0) >= 2) return; perField[x.fid] = (perField[x.fid] || 0) + 1; acts.push(x); });
-    return { names: [na, nb], common: common.slice(0, 3), roles: roles.slice(0, 3), axes: axes.slice(0, 3), acts: acts };
+    // 2026-11-26 세분화: 두 사람의 대표 특기 1위 결로 본 마음 전하는 방식
+    var expOf = function (r) { var t = r.talents.filter(function (x) { return x.ok; }).sort(function (x, y) { return (y.score - x.score) || (x.id < y.id ? -1 : 1); })[0], ty = typeOf(t); return ty && D.AFFECTION[ty.top.id] ? { type: ty.top.id, name: ty.top.name, how: D.AFFECTION[ty.top.id] } : null; };
+    var ea = expOf(ra), eb = expOf(rb), express = ea && eb ? { a: ea, b: eb, same: ea.type === eb.type } : null;
+    return { names: [na, nb], common: common.slice(0, 3), roles: roles.slice(0, 3), axes: axes.slice(0, 3), acts: acts, express: express };
   }
   function pairHtml(M, chA, chB, nameA, nameB) {
     var p = pair(M, chA, chB, nameA, nameB); if (!p) return '';
@@ -286,6 +305,7 @@
     return '<div class="lc-card lc-apt"><h3>두 사람이 함께 하면 좋은 활동</h3><p class="lc-sub">만세력 특기·적성과 같은 계산으로 두 사람을 나란히 봤어요</p>' +
       '<p class="lc-lead">' + esc(common) + '</p>' +
       (p.acts.length ? '<div class="lc-k">함께 해 볼 활동</div>' + li(p.acts.map(function (x) { return x.name + ' · ' + x.field + ' — ' + x.ex.slice(0, 2).join(', '); })) : '') +
+      (p.express ? '<div class="lc-k">마음을 전하는 방식</div><p>' + esc(p.express.same ? '두 사람 모두 ' + J.예요(p.express.a.how) + '. 표현 방식이 같아서 서로의 마음을 알아보기 쉬워요.' : J.은(na) + ' ' + p.express.a.how + ', ' + J.은(nb) + ' ' + J.예요(p.express.b.how) + '. 방식이 달라도 둘 다 마음을 전하는 중이라는 걸 알아 두면 서운함이 줄어요.') + '</p>' : '') +
       (p.roles.length ? '<div class="lc-k">서로 채워 주는 역할</div>' + li(p.roles.map(function (r) { return J.은(r.who) + ' ' + r.name + ' 쪽 힘이 뚜렷해서, 함께 할 때 ' + r.role + '을 맡으면 편해요.'; })) : '') +
       (p.axes.length ? '<div class="lc-k">활동 방식 맞춰 보기</div>' + li(p.axes.map(function (a) { return a.text; })) : '') +
       '<p class="lc-note">' + esc(D.PAIR_NOTE) + '</p></div>';

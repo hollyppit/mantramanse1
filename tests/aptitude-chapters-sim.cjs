@@ -22,7 +22,9 @@ Object.keys(D.WORK).forEach(k => { const w = D.WORK[k]; ['use', 'proof', 'kidPro
 assert.equal(Object.keys(D.MONEY).sort().join(), Object.keys(D.SIDE).sort().join(), '돈 구조 12개 = 부업 세부 분야');
 Object.keys(D.MONEY).forEach(k => ['model', 'cost', 'repeat', 'eff', 'caution'].forEach(x => assert.ok(D.MONEY[k][x], k + '.' + x)));
 assert.equal(D.TYPE_CLAUSE.length, 5); assert.equal(Object.keys(D.TALENT_MONEY).sort().join(), 'body,craft,expr,strat,study');
-const cnt = { ty: {}, mty: {} };
+const cnt = { ty: {}, mty: {}, aff: {} };
+Object.keys(D.WORK_TYPE).forEach(k => assert.ok(D.AFFECTION[k], '결 표현 방식 ' + k));
+D.DATE_IDS.forEach(id => assert.ok(!D.PAIR_SKIP.includes(id), '데이트 활동은 혼자 하는 활동 제외 ' + id));
 Object.keys(D.WORK_TYPE).forEach(k => assert.ok(D.TYPE_MONEY[k], '결 돈 문장 ' + k));
 // 세분화 문안: 결 15개 모두 일·진로 문장, 세부 분야 48개 모두 비용 유형, 새 축 2개 궁합 문장
 const AD = c.MantraAptitudeData;
@@ -67,7 +69,11 @@ for (let i = 0; i < N; i++) {
     ['short_long', 'in_out'].forEach(k => { const a = ax2[k]; if (a.ok && a.side !== 'bal') assert.ok(rp.includes(D.REST_AXIS[k][a.side]), '재충전 실천 축 ' + k); else Object.values(D.REST_AXIS[k]).forEach(x => assert.ok(!rp.includes(x))); });
     const hz = D.MATCH.filter(m => m.work === 'horizon');
     assert.ok(hz.filter(m => wc.risk.includes(m.same)).length <= 1, '같은 일 축 문장 한 번만');
-    AC.on = true; const wb = AC.block({ M, ch }, 'work'); AC.on = false; assert.ok(wb.includes(tyTop.name), '커리어 블록에 결');
+    AC.on = true; const wb = AC.block({ M, ch }, 'work'), db = AC.block({ M, ch }, 'date'); AC.on = false; assert.ok(wb.includes(tyTop.name), '커리어 블록에 결');
+    // 인연 세분화: 데이트 방식 블록 — 20세 미만 없음, 결의 표현 방식·기운 쪽 축만
+    if (age < 20) assert.equal(db, null, '20세 미만 데이트 블록 없음');
+    else { assert.ok(db && db.includes(D.AFFECTION[ty.top]), '데이트 블록에 결 표현 방식'); ['in_out', 'short_long', 'solo_team'].forEach(k => { const a = ax2[k]; if (a.ok && a.side !== 'bal') assert.ok(db.includes(D.DATE_AXIS[k][a.side]), '데이트 축 ' + k); else Object.values(D.DATE_AXIS[k]).forEach(x => assert.ok(!db.includes(x))); });
+      assert.ok(!BAN.test(db.replace(/<[^>]+>/g, ' ')) && !/를을|을를/.test(db), '데이트 블록 금지 표현'); cnt.aff[ty.top] = 1; }
     cnt.ty[ty.top] = (cnt.ty[ty.top] || 0) + 1; }
   // 조합 문장: 같은 꼬리 문장이 두 번 나오지 않음
   const re = all.timeline_career_talent.readingCore.reality.split('\n\n'), tails = re.map(p => p.split('예요. ')[1]).filter(Boolean);
@@ -107,7 +113,10 @@ for (let i = 0; i < N; i++) {
     assert.ok(p.acts.length <= 3 && p.acts.every(x => !D.PAIR_SKIP.includes(x.id)), '함께 할 활동 3개 이하·혼자 하는 활동 제외');
     p.roles.forEach(r => { const x = ra.talents.find(t => t.id === r.id), y = rb.talents.find(t => t.id === r.id); assert.ok((x.level === 'hi' && y.level === 'lo') || (y.level === 'hi' && x.level === 'lo'), '역할은 한쪽 뚜렷·한쪽 은은'); });
     p.axes.forEach(ax => assert.ok(!/\{|undefined/.test(ax.text), '축 문장 빈칸: ' + ax.text));
+    { const top1 = r => r.talents.filter(t => t.ok).sort((x, y) => (y.score - x.score) || (x.id < y.id ? -1 : 1))[0].types.top, ea = top1(ra), eb = top1(rb);
+      assert.ok(p.express && p.express.a.type === ea && p.express.b.type === eb && p.express.same === (ea === eb), '두 사람 표현 방식 = 각자 1위 결'); }
     const h = AC.pairHtml(M, a, b, '나', '민준'), t = h.replace(/<[^>]+>/g, ' ');
+    assert.ok(/마음을 전하는 방식/.test(h), '궁합 카드에 표현 방식');
     assert.ok(/두 사람이 함께 하면 좋은 활동/.test(h) && h.includes(D.PAIR_NOTE), '카드');
     assert.ok(!BAN.test(t) && !/를을|을를|은는 |는은 /.test(t), '카드 금지 표현·조사: ' + ((t.match(BAN) || [''])[0]));
     pairs++; if (p.acts.length) withActs++;
@@ -122,7 +131,7 @@ for (let i = 0; i < N; i++) {
     const ch = M.compute({ year: 1955 + (i * 7) % 55, month: 1 + (i * 5) % 12, day: 1 + (i * 11) % 28, hour: (i * 3) % 24, minute: 0, gender: i % 2 ? 'M' : 'F', calendar: 'solar' }), where = {};
     const put = (src, t) => sents(t).forEach(s => { (where[s] = where[s] || new Set()).add(src); });
     Object.values(AC.buildAll(M, ch, '')).forEach(x => Object.keys(x.readingCore).forEach(k => { if (k !== 'why') put(x.id, x.readingCore[k]); }));
-    ['work', 'money', 'spend', 'meet'].forEach(k => { const b = AC.block({ M, ch }, k); if (b) put('block:' + k, b); });
+    ['work', 'money', 'spend', 'meet', 'date'].forEach(k => { const b = AC.block({ M, ch }, k); if (b) put('block:' + k, b); });
     Object.keys(where).forEach(s => assert.ok(where[s].size === 1, '장·블록 사이 반복: ' + [...where[s]].join('+') + ' — ' + s.slice(0, 60)));
   }
   AC.on = false; }
@@ -136,11 +145,13 @@ for (let i = 0; i < N; i++) {
 const read = f => fs.readFileSync(path.join(root, f), 'utf8');
 assert.ok(/R\.AptChapters\.readyWithin\(2500\)\)S\.rep=R\.AptChapters\.add\(/.test(read('report/v2/viewer.js')), 'viewer 연결');
 assert.ok(/custom==='apt'/.test(read('report/v2/reading-feature.js')) && /\['timeline_career_01',\{custom:'apt',kind:'work'\}\],\['timeline_wealth_02',\{custom:'apt',kind:'money'\}\],\['timeline_wealth_03',\{custom:'apt',kind:'spend'\}\],\['timeline_self_27',\{custom:'apt',kind:'meet'\}\]/.test(read('report/v2/reading-feature.js')), '연결 블록 자리');
+assert.ok(/['timeline_love_04',{custom:'apt',kind:'date'}]/.test(read('report/v2/reading-feature.js')), '데이트 블록 자리');
 assert.ok(/aptitude-chapters\.js\?v=/.test(read('report/v2/index.html')) && /\/aptitude\.js\?v=/.test(read('report/v2/index.html')), '사용자 화면이 모듈을 불러옴');
 assert.ok(/'aptChapters'/.test(read('functions/api/luck-flags.js')) && /aptChapters: false/.test(read('feature-flags.js')) && /id="leAC"/.test(read('report/admin/v2-luckenv.js')), '스위치·관리자');
 assert.ok(/aptPairCard\(Rr\) \+ evidence/.test(read('report/v2/love-compat.js')) && /S\.resInp = Object\.assign\(\{\}, i\)/.test(read('report/v2/love-compat.js')), '궁합 장 연결');
 console.log('특기·적성 장 통과 — 사주 ' + n + '개(20세 미만 ' + kids + '개), 장 제목 문장 ' + Object.keys(titles).length + '종, 부업 문단 ' + side + '개, 재물 블록 돈 구조 ' + moneyN + '·지출 ' + spendN + '개');
 console.log('장에 들어간 대표 특기 결 분포', Object.keys(cnt.ty).length + '종', JSON.stringify(cnt.ty));
 assert.ok(Object.keys(cnt.ty).length >= 12, '장에 들어간 결이 사람마다 달라야 함');
+console.log('데이트 블록에 들어간 결', Object.keys(cnt.aff).length + '종'); assert.ok(Object.keys(cnt.aff).length >= 12, '데이트 블록의 결도 사람마다 달라야 함');
 console.log('돈 구조 블록에 들어간 결', Object.keys(cnt.mty).length + '종'); assert.ok(Object.keys(cnt.mty).length >= 12, '돈 구조 블록의 결도 사람마다 달라야 함');
 console.log('재충전 활동 분포', Object.entries(recharge).sort((a, b) => b[1] - a[1]).map(x => x[0] + ' ' + x[1]).join(' · '));
