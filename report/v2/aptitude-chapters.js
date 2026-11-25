@@ -2,7 +2,7 @@
    · 종합풀이 '내 손이 먼저 가는 일 — 특기와 끌리는 활동'(timeline_self_talent): '타고난 강점과 맞는 일'(timeline_self_26) 바로 뒤
    · 커리어운 심화 '내 특기가 일에서 무기가 되는 방식'(timeline_career_talent): '내 재능의 값'(timeline_career_02) 바로 뒤
    · 커리어운 심화 '일 밖에서 날을 세우는 법 — 재충전과 사이드 프로젝트'(timeline_career_recharge): '앞으로 10년 일의 흐름 그래프'(timeline_career_14) 바로 뒤
-   · 연결 블록: '일하는 방식 성향'(timeline_career_01)·'커리어 날을 세우는 습관'(timeline_career_15)에 짧은 요약(reading-feature.js custom:'apt')
+   · 연결 블록: '일하는 방식 성향'(timeline_career_01)에 짧은 요약(reading-feature.js custom:'apt'). 'rest' 블록은 재충전 장이 '커리어 날을 세우는 습관' 바로 앞에 오고 그 장은 블록 목록(SPEC)에 없어 붙이지 않는다
    · 재물운 심화 블록(2026-11-25): '이렇게 벌면 편해요'(timeline_wealth_02) 끝 '특기가 돈이 되는 구조'(20세 미만 제외)·'돈이 새는 자리 점검'(timeline_wealth_03) 끝 '취미에 나가는 돈 점검'
    · 표시 전용: /aptitude.js(MantraAptitude.build) · engine careerProfile 결과만 읽는다. AI·DB 문안·새 점수 없음. 문안은 aptitude-chapters-data.js
    · 20세 미만은 진로·동아리 말로 바꾼다. 실력·수입·건강을 단정하지 않는다(tests/aptitude-chapters-sim.cjs 금지 표현 검사).
