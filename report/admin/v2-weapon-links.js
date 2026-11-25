@@ -8,7 +8,7 @@
   var DEPS = ['/luck-grade.js?v=20261125-strict', '/weapon-data.js?v=20261126-v3', '/weapon.js?v=20261126-v3', '/report/v2/weapon-chapters-data.js?v=20261126-v3', '/report/v2/weapon-chapters.js?v=20261126-v3'];
   var TOPIC_K = { self: '종합풀이', wealth: '재물운', career: '커리어운', love: '인연운', remedy: '개운법' };
   var USE_KEYS = ['first', 'second', 'power', 'overlap', 'rootExp', 'tenGod', 'daeun', 'seun', 'wolun', 'activation', 'favor'];
-  var USE_S = { first: '1순위', second: '2순위', power: '세력', overlap: '병존·간여지동', rootExp: '통근·투간', tenGod: '십성', daeun: '대운', seun: '세운', wolun: '월운', activation: '활성도', favor: '유리도' };
+  var USE_S = { first: '1순위', second: '2순위', power: '세력', overlap: '병존·간여지동', rootExp: '통근·투간', tenGod: '십성', daeun: '대운', seun: '세운', wolun: '월운', activation: '발현도·활용 유리도', favor: '흐름 등급' };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var depsP = null;
   function loadDeps() {
@@ -37,7 +37,7 @@
       var on = fl && fl.weaponChapters;
       el.innerHTML = '<p style="margin:0 0 8px"><b>운명의 타임라인 주무기 상세풀이 연결</b> — 현재: <b style="color:' + (on ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : on ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
         '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="wlFlag"' + (fl ? '' : ' disabled') + '>' + (on ? '주무기 블록 끄기' : '주무기 블록 켜기') + '</button><a class="btn" href="/report/v2/?mantraFlags=weaponChapters" target="_blank" rel="noopener">미리보기 주소</a></div>' +
-        '<p class="muted" style="margin:8px 0">만세력 “나의 주무기”와 같은 판정을 유료 장 끝에 주제별 블록으로 붙입니다. 장을 새로 만들지 않고, 질문·상품·결제는 그대로예요. 건강·사고수·전생 장은 고를 수 없어요. 활성도와 유리도는 따로 보여 주고 합치지 않아요.</p>' +
+        '<p class="muted" style="margin:8px 0">만세력 “나의 주무기”와 같은 판정을 유료 장 끝에 주제별 블록으로 붙입니다. 장을 새로 만들지 않고, 질문·상품·결제는 그대로예요. 건강·사고수·전생 장은 고를 수 없어요. 발현도·활용 유리도·흐름 등급은 따로 보여 주고 합치지 않아요.</p>' +
         (st.rows ? rowsHtml() : '<p class="muted">설정을 불러오는 중…</p>') +
         '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px"><input id="wlNewId" placeholder="timeline_wealth_06" style="width:200px"><select id="wlNewTopic">' + Object.keys(TOPIC_K).map(function (t) { return '<option value="' + t + '">' + TOPIC_K[t] + '</option>'; }).join('') + '</select><button class="btn" id="wlAdd">질문 추가</button>' +
         '<button class="btn" id="wlSave">저장</button><button class="btn" id="wlReset">기본값으로</button><span class="muted" id="wlInfo">' + (st.version ? '저장본 v' + st.version : '저장본 없음 — 코드 기본값 사용 중') + (st.dirty ? ' · 저장 안 한 변경 있음' : '') + '</span></div>' +

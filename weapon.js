@@ -338,7 +338,7 @@
     rootHit.forEach(function (r) { cons.push(r.name + ' — 무기의 뿌리 자리가 흔들려요'); });
     rootOther.forEach(function (r) { cons.push(r.name + ' — 뿌리 자리에 걸리는 관계(길흉 판단 없이 참고)'); });
     if (pt && pt.tone === 'bad') cons.push(GN[lg] + ' 기운이 들어와 ' + pt.name + ' 같은 부담 조합이 커지기 쉬워요');
-    if (excess && (stemSame || rootAny)) cons.push('주무기가 이 명식에서 이미 많은 쪽(' + wRole + ')이라, 더 세지면 과하게 쓰기 쉬워요');
+    if (excess && (stemSame || rootAny) && !out) cons.push('주무기가 이 명식에서 이미 많은 쪽(' + wRole + ')이라, 더 세지면 과하게 쓰기 쉬워요');
     // 활용 방향: 운 천간의 일간 기준 십성 묶음(엔진 tenGod)
     var ds = ch.pillars.day.s, tg = M.tenGod(ds, p.s), tgG = Math.floor(M.TG.indexOf(tg) / 2);
     // ── 발현 판정 4판(2026-11-26): 오행 축 · 십성 축 · 합충(한 번만) → 주무기 유형별로 묶어 단계 결정 ──

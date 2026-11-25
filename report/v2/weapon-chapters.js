@@ -21,7 +21,7 @@
   var TOPICS = ['self', 'wealth', 'career', 'love', 'remedy'], TOPIC_K = { self: '종합풀이', wealth: '재물운', career: '커리어운', love: '인연운', remedy: '개운법' };
   var SCOPES = ['daeun', 'seun', 'wolun'], SCOPE_K = { daeun: '대운', seun: '세운', wolun: '월운' };
   var USE_KEYS = ['first', 'second', 'power', 'overlap', 'rootExp', 'tenGod', 'daeun', 'seun', 'wolun', 'activation', 'favor'];
-  var USE_K = { first: '1순위 주무기', second: '2순위 주무기', power: '오행 세력', overlap: '병존·간여지동 근거', rootExp: '통근·투간 근거', tenGod: '십성 작용', daeun: '대운', seun: '세운', wolun: '월운', activation: '주무기 활성도', favor: '활용 유리도' };
+  var USE_K = { first: '1순위 주무기', second: '2순위 주무기', power: '오행 세력', overlap: '병존·간여지동 근거', rootExp: '통근·투간 근거', tenGod: '십성 작용', daeun: '대운', seun: '세운', wolun: '월운', activation: '주무기 발현도·활용 유리도', favor: '흐름 등급' };
   var BLOCKED = /^timeline_(health|creative)_|^timeline_self_(3[56]|h\d+)$/;   // 건강·사고수(health_*, self_35, 건강 상세 self_h1~6)·전생(creative_*, self_36) 장
   var u = function (o) { var r = {}; USE_KEYS.forEach(function (k) { r[k] = !!(o && o[k]); }); return r; };
   var ALL = { first: 1, second: 1, power: 1, overlap: 1, rootExp: 1, tenGod: 1, activation: 1, favor: 1 };
@@ -95,7 +95,8 @@
     if (!r || !r.best) return '';
     var a = r.best, wd = WD(), d = DD(), bits = [];
     if (use.activation) bits.push('주무기 발현도 ' + a.levelK);
-    if (use.favor && r.favor) bits.push('활용 유리도 ' + r.favor.n);
+    var U = a.useFav; if (use.activation && U) bits.push('활용 유리도 ' + U.n);   // 5판: 강해진 주무기를 쓰는 게 명식 전체에 득인가(발현도·흐름 등급과 따로)
+    if (use.favor && r.favor) bits.push('흐름 ' + r.favor.n);
     var cls = /strong|on|shaky/.test(a.level) ? 'on' : /sup|quiet/.test(a.level) ? 'prep' : 'guard';   // 활성도 단계에 맞는 문장(조용한 때를 '좋은 때'로 읽지 않게)
     // 2판(2026-11-26): 주제 × 작용 유형(강화·지원·발산·조정·조용함) + 주제 × 들어오는 십성 — 같은 해라도 주제마다, 해마다 다른 풀이
     var typ = !a.types.length ? 'quiet' : (a.types.indexOf('adjust') >= 0 && cls !== 'on') ? 'adjust' : a.types[0];
@@ -107,8 +108,10 @@
     var rk = (a.roles.stem || '—') + '|' + (a.roles.branch || '—');   // 지원(용신 역할)은 앞 줄과 같으면 생략
     var sup = use.tenGod && (a.roles.stem || a.roles.branch) && !(B.seenLens && B.seenLens['r' + rk]) ? ' ' + fill(P.sup, { s: a.roles.stem || '—', b: a.roles.branch || '—' }) : ''; B.lastRole = rk; if (B.seenLens) B.seenLens['r' + rk] = 1;
     var cc = a.constraints.filter(function (c) { return !(B.seenLens && B.seenLens['c' + c]) && !(topic === 'self' && /이미 많은 쪽/.test(c)); })[0];   // 같은 제약은 블록 안에서 처음 한 번만
+    var ufc = U && use.activation && d.ufLens ? (/good/.test(U.k) ? 'good' : U.k === 'mid' ? 'mid' : 'bad') : '', ufs = ufc ? d.ufLens[topic][ufc] : '';
+    if (ufs && B.seenLens) { if (B.seenLens['f' + ufs]) ufs = ''; else B.seenLens['f' + ufs] = 1; }   // 활용 유리도 문장은 바뀔 때만
     var con = cc ? ' ' + fill(P.con, { c: cc }) : ''; if (cc) { B.hasCon = true; if (B.seenLens) B.seenLens['c' + cc] = 1; }
-    return '<li><b>' + esc(label + ' ' + r.gz) + '</b>' + (bits.length ? ' <span class="dp-mi">' + esc(bits.join(' · ')) + '</span>' : '') + '<br>' + esc((lens + dir + sup + con).trim()) + '</li>';
+    return '<li><b>' + esc(label + ' ' + r.gz) + '</b>' + (bits.length ? ' <span class="dp-mi">' + esc(bits.join(' · ')) + '</span>' : '') + '<br>' + esc((lens + (ufs ? ' ' + ufs : '') + dir + sup + con).trim()) + '</li>';
   }
   function timingBlock(B, topic, use, w) {
     var tl = B.tl, d = DD(); if (!tl || !w) return '';
