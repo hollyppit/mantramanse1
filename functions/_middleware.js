@@ -26,7 +26,17 @@ export function withSecurity(request, res) {
   return out;
 }
 
-export async function onRequest(ctx) { return withSecurity(ctx.request, await route(ctx)); }
+// 배포에서 뺄 경로(2026-11-25): 저장소 루트를 그대로 배포하므로, 서비스가 아닌 연구 자료 폴더는 누구에게도(관리자 포함) 내보내지 않는다.
+//   /validation/… = 유명인 생애 데이터 검증 시스템(validation/celebrity). 대소문자·중복 슬래시·%인코딩 우회도 막는다.
+export const PRIVATE_PATH = /^\/validation(\/|$)/i;
+export function isPrivatePath(rawUrl) {
+  let p; try { p = new URL(rawUrl).pathname; } catch { return false; }
+  try { p = decodeURIComponent(p); } catch { /* 잘못된 인코딩은 원래 경로로 판정 */ }
+  return PRIVATE_PATH.test(p.replace(/\\/g, '/').replace(/\/{2,}/g, '/'));
+}
+const notFound = () => new Response('Not Found', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
+
+export async function onRequest(ctx) { if (isPrivatePath(ctx.request.url)) return notFound(); return withSecurity(ctx.request, await route(ctx)); }
 async function route(ctx) {
   const hidden = await gatewayRedirect(ctx.request, ctx.env);   // 통합 첫 화면 숨김(기본) — /gate/ 를 /report/ 로
   if (hidden) return hidden;
