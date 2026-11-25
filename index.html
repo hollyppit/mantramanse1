@@ -1243,6 +1243,9 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="aptitude-data.js"></script>
 <script src="aptitude.js"></script>
 <script src="aptitude-view.js"></script>
+<script src="psych-data.js"></script>
+<script src="psych.js"></script>
+<script src="psych-view.js"></script>
 <script src="amhap.js"></script>
 <script src="ten-god-roles.js"></script>
 <script src="luck-env.js"></script>
@@ -5516,7 +5519,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const aptOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.aptitude === true && window.MantraAptitude && window.MantraAptitudeView);
   // 직업·활동 적성(renderCareer, wealth-career.js)은 2026-11-25 오행·강약 탭에서 이 탭 끝으로 옮겼다 — 화면 위치만 옮기고 계산은 섞지 않는다
   function renderAptitude() { let c = ''; try { c = renderCareer(S.ch); } catch (e) { c = ''; } try { return window.MantraAptitudeView.html(M, S.ch, { esc, term: (k, l) => term(k, l), careerHtml: c }); } catch (e) { return c; } }   // 직업·일 갈래는 view 가 [활동·취미 | 직업·일] 전환 안에 넣는다
-  const tabList = () => [['wonguk', '원국'], ['ohaeng', '오행·강약'], ['yong', '용신'], ['luck', '운세 흐름'], ...(aptOn() ? [['apt', '특기·적성']] : []), ...(spOn() ? [['space', '공간·명당']] : []), ['pair', '궁합'], ['tk', '택일'], ...(S.ch && S.ch.ziwei ? [['zw', '자미두수']] : []), ['face', '관상'], ...(spOn() ? [] : [['fs', '풍수']]), ['tarot', '타로'], ['iching', '주역'], ['gl', '용어']];
+  // 심리 솔루션(2026-11-25, psych.js·psych-data.js·psych-view.js): 마음의 상처 결·시기별 스트레스·심리 상태·솔루션. 표시 전용, 스위치 MANTRA_FLAGS.psych(기본 꺼짐, 관리자 /api/luck-flags psych)
+  const psyOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.psych === true && window.MantraPsych && window.MantraPsychView);
+  function renderPsych() { try { return window.MantraPsychView.html(M, S.ch, { esc, term: (k, l) => term(k, l) }); } catch (e) { return `<section class="card"><p class="err">심리 솔루션을 그리지 못했어요</p></section>`; } }
+  const tabList = () => [['wonguk', '원국'], ['ohaeng', '오행·강약'], ['yong', '용신'], ['luck', '운세 흐름'], ...(aptOn() ? [['apt', '특기·적성']] : []), ...(psyOn() ? [['psy', '심리 솔루션']] : []), ...(spOn() ? [['space', '공간·명당']] : []), ['pair', '궁합'], ['tk', '택일'], ...(S.ch && S.ch.ziwei ? [['zw', '자미두수']] : []), ['face', '관상'], ...(spOn() ? [] : [['fs', '풍수']]), ['tarot', '타로'], ['iching', '주역'], ['gl', '용어']];
   function renderTop() {
     const tabs = tabList();
     return `<header class="top"><div class="top-in">
@@ -7906,8 +7912,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     // elementFlow(오행 흐름 상자)는 [모두 켜기]와 따로 관리자 스위치로 켠다(functions/api/luck-flags.js)
     // luckCycle(오행 사이클: 대운 30년·세운 2년 묶음)도 따로 켠다
     // gyeokAnalysis(오행·강약 탭 '사주 격국 분석' 카드, gyeok-structure.js)도 따로 켠다
-    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis && F.luckOverlay && F.tenGodRoles && F.macroEra && F.luckEnv && F.luckAlerts && F.mulsangArt && F.sajuHouse && F.aptitude && F.groupCompat && window.MANTRA_OVERLAY_W)) return;   // 오행 겹쳐 보기 층 무게(overlayWeights)도 여기서 받는다
-    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle', 'luckOverlay', 'tenGodRoles', 'macroEra', 'luckEnv', 'luckAlerts', 'mulsangArt', 'sajuHouse'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (d.aptitude === true && !F.aptitude) { F.aptitude = true; ch = true; } if (d.groupCompat === true && !F.groupCompat) { F.groupCompat = true; ch = true; } if (d.overlayWeights && typeof d.overlayWeights === 'object') { window.MANTRA_OVERLAY_W = d.overlayWeights; if (F.luckOverlay) ch = true; } if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
+    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis && F.luckOverlay && F.tenGodRoles && F.macroEra && F.luckEnv && F.luckAlerts && F.mulsangArt && F.sajuHouse && F.aptitude && F.groupCompat && F.psych && window.MANTRA_OVERLAY_W)) return;   // 오행 겹쳐 보기 층 무게(overlayWeights)도 여기서 받는다
+    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle', 'luckOverlay', 'tenGodRoles', 'macroEra', 'luckEnv', 'luckAlerts', 'mulsangArt', 'sajuHouse'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (d.aptitude === true && !F.aptitude) { F.aptitude = true; ch = true; } if (d.groupCompat === true && !F.groupCompat) { F.groupCompat = true; ch = true; } if (d.psych === true && !F.psych) { F.psych = true; ch = true; } if (d.overlayWeights && typeof d.overlayWeights === 'object') { window.MANTRA_OVERLAY_W = d.overlayWeights; if (F.luckOverlay) ch = true; } if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
   })();
   window.addEventListener('mantra:daycompat', () => { try { readForm(); render(); } catch (e) { } });   // 일주 적합도 2판(compat-day.js) 스위치가 늦게 켜지면 다시 그린다
   // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
@@ -11911,6 +11917,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     else if (S.tab === 'tk') body = renderTk();
     else if (S.tab === 'zw') body = S.ch.ziwei ? renderZiwei() : renderWonguk();
     else if (S.tab === 'apt') body = aptOn() ? renderAptitude() : renderWonguk();
+    else if (S.tab === 'psy') body = psyOn() ? renderPsych() : renderWonguk();
     else body = renderGl();
     root.innerHTML = renderTop() + `<main class="wrap" style="padding-top:16px">${renderAdminLogin()}${renderForm()}${S.ch && !['face', 'fs', 'space', 'tarot', 'iching'].includes(S.tab) ? alertBar() : ''}${body}${adminPw ? '' : '<div class="admin-link-row"><a class="admin-link" href="#admin" onclick="setTimeout(()=>scrollTo(0,0),0)">관리자</a></div>'}</main>`;
     enhanceFold();

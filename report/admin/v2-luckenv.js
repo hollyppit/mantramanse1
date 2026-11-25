@@ -87,6 +87,10 @@
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운명의 타임라인 특기·적성 장(3장)</b> — 현재: <b style="color:' + (fl && fl.aptChapters ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.aptChapters ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leAC"' + (fl ? '' : ' disabled') + '>' + (fl && fl.aptChapters ? '특기·적성 장 끄기' : '특기·적성 장 켜기') + '</button><a class="btn" href="/report/v2/?mantraFlags=aptChapters" target="_blank" rel="noopener">미리보기 주소</a></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 운명의 타임라인에 <b>종합풀이</b> “내 손이 먼저 가는 일 — 특기와 끌리는 활동”(타고난 강점과 맞는 일 뒤), <b>커리어운 심화</b> “내 특기가 일에서 무기가 되는 방식”(내 재능의 값 뒤)·“일 밖에서 날을 세우는 법 — 재충전과 사이드 프로젝트”(앞으로 10년 일의 흐름 그래프 뒤)가 들어가고, ‘일하는 방식 성향’ 장 끝에 짧은 연결 블록이, 재물운 심화 ‘이렇게 벌면 편해요’ 끝에 “특기가 돈이 되는 구조”(20세 미만 제외)·‘돈이 새는 자리 점검’ 끝에 “취미에 나가는 돈 점검”이, 종합풀이 ‘인연이 열리는 곳 · 순위’ 끝에 “활동으로 넓히는 만남 자리”가 붙고, 인연운 심화 ‘그 사람과 나의 궁합’ 결과에 “두 사람이 함께 하면 좋은 활동”이 나옵니다. 만세력 특기·적성 탭과 같은 계산이며 표시 전용입니다.</p></div>';
+    // 심리 솔루션(2026-11-25, psych.js): 만세력 새 탭 — 마음의 상처 결·시기별 스트레스·심리 상태·솔루션, 표시 전용
+    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>심리 솔루션</b> — 현재: <b style="color:' + (fl && fl.psych ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.psych ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leSY"' + (fl ? '' : ' disabled') + '>' + (fl && fl.psych ? '심리 솔루션 끄기' : '심리 솔루션 켜기') + '</button><a class="btn" href="/?mantraFlags=psych" target="_blank" rel="noopener">미리보기 주소</a></div>' +
+      '<p class="muted" style="margin:8px 0 0">켜면 만세력에 <b>심리 솔루션</b> 탭이 생깁니다: 한눈에 보기 → 마음의 상처 결(명리로 읽는 잠재적 트라우마, 최대 3개) → 시기별 스트레스·마음 상태(대운 10년·앞으로 3년·올해 월별) → 심리 솔루션(현대 심리학 자기 돌봄 연습 + 용신 오행 생활 보완) → 도움 받을 곳(109·1577-0199·1388). 엔진 결과를 읽기만 하는 표시 전용이며, 진단·치료를 대신하지 않는다는 안내가 함께 나옵니다.</p></div>';
     // 특기·적성(2026-11-25, aptitude.js): 만세력 새 탭 — 특기 5영역·적성 6분야·운동·스포츠 상세·최종 추천, 표시 전용
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>특기·적성 분석</b> — 현재: <b style="color:' + (fl && fl.aptitude ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.aptitude ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leAPT"' + (fl ? '' : ' disabled') + '>' + (fl && fl.aptitude ? '특기·적성 끄기' : '특기·적성 켜기') + '</button><a class="btn" href="/?mantraFlags=aptitude" target="_blank" rel="noopener">미리보기 주소</a></div>' +
@@ -231,6 +235,11 @@
       var v = !(S.flags && S.flags.loveGroup);
       if (v && !confirm('인연운 심화 궁합 장의 여러 명 보기를 구매자 모두에게 공개합니다.\n켜시겠습니까?')) return;
       putFlags({ flags: { loveGroup: v } }, v ? '여러 명 보기를 켰습니다(약 1분 안에 반영)' : '여러 명 보기를 껐습니다(약 1분 안에 반영)');
+    };
+    $('#leSY').onclick = function () {   // 심리 솔루션 탭 스위치(psych.js)
+      var v = !(S.flags && S.flags.psych);
+      if (v && !confirm('만세력의 심리 솔루션 탭을 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
+      putFlags({ flags: { psych: v } }, v ? '심리 솔루션을 켰습니다(약 1분 안에 반영)' : '심리 솔루션을 껐습니다(약 1분 안에 반영)');
     };
     $('#leAPT').onclick = function () {   // 특기·적성 탭 스위치(aptitude.js)
       var v = !(S.flags && S.flags.aptitude);
