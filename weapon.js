@@ -301,7 +301,7 @@
     };
   }
 
-  var api = { VERSION: VERSION, CFG: CFG, ACT: ACT, TYPE_K: TYPE_K, PLUS_K: PLUS_K, analyze: analyze, luck: luck, timeline: timeline, favor: favor, judge: judge, sig: sig, _elementFacts: elementFacts };
+  var api = { VERSION: VERSION, CFG: CFG, ACT: ACT, TYPE_K: TYPE_K, PLUS_K: PLUS_K, analyze: analyze, luck: luck, timeline: timeline, favor: favor, readPair: readPair, judge: judge, sig: sig, _elementFacts: elementFacts };
   G.MantraWeapon = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

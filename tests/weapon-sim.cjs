@@ -101,6 +101,11 @@ dev.forEach((inp, i) => T('nohour#' + i, () => {
   const full = results[i]; nohour.push({ i, status: A.status, cand: A.candidates.map(e => EL_K[e]).join('·'), withHour: full ? full.status + ':' + full.weapons.map(w => w.el).join('·') : '', keepFirst: A.hourCheck.keepFirst });
   if (A.status === 'undetermined') ex('status-undetermined', { chart: `${inp.year}-${inp.month}-${inp.day} 시간 모름`, cand: A.candidates.map(e => EL_K[e]).join('·') || '—', keepFirst: A.hourCheck.keepFirst + '/12', withHour: nohour[nohour.length - 1].withHour });
 }));
+// 그래프 지표(2026-11-26): 지표를 고르면 띠·풀이가 그 지표로, 건강·사고수는 전체 흐름 + 안내
+T('그래프 지표 연동', () => { const ch = M.compute(dev[1]); const o = { now: Date.UTC(2026, 10, 26), curY: CUR_Y, wolY: CUR_Y, part: 'seun' };
+  const w = V.luck(M, ch, { ...o, metric: 'wealth', metricName: '재물', favorOf: () => ({ k: 'good', n: '좋음' }) }); assert.ok(w.includes('재물 좋음') && w.includes('재물 등급') && /돈/.test(w) && w.includes('재물 흐름도 받쳐 줘요'), '재물 지표 띠·풀이');
+  const h = V.luck(M, ch, { ...o, metric: 'health', metricName: '건강', favorOf: () => ({ k: 'good', n: '좋음' }) }); assert.ok(!h.includes('건강 좋음') && h.includes('건강과 잇지 않아요'), '건강 지표는 전체 흐름 + 안내');
+  const f0 = V.luck(M, ch, o); assert.ok(f0.includes('흐름 등급') && !f0.includes('재물'), '전체 흐름 기본'); });
 // 문안 파일 금지 표현
 T('data 금지 표현', () => { const walk = o => typeof o === 'string' ? assert.ok(!BAN.test(o), '금지: ' + o) : o && typeof o === 'object' && Object.values(o).forEach(walk); walk(DD); });
 // 스위치 기본 꺼짐

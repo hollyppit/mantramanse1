@@ -144,7 +144,7 @@
 
   // ── 운세 흐름 탭: 주무기 발현 타이밍 ──
   // 활성도 실선 그래프(단계 이름만, 숫자 눈금 없음) + 유리도 보조 띠(엔진 등급 색). 점 색 = 그 시기 천간의 오행(주요 오행 색상 태그)
-  function chart(rows, labels, nowIdx) {
+  function chart(rows, labels, nowIdx, bandName) {
     var n = rows.length; if (!n) return '';
     var CW = 46, LM = 52, H = 118, top = 12, step = 15, yOf = function (y) { return top + (4 - y) * step; };
     var wd = LM + n * CW, pts = [], dots = '', fav = '', xl = '';
@@ -154,23 +154,23 @@
       var col = EC[Math.floor((r.s == null ? 0 : r.s) / 2)];
       dots += '<circle cx="' + x + '" cy="' + y + '" r="' + (i === nowIdx ? 6 : 4.5) + '" fill="' + (a.level === 'shaky' || a.level === 'trim' ? 'var(--surface,#fff)' : col) + '" stroke="' + col + '" stroke-width="2"' + (a.level === 'shaky' ? ' stroke-dasharray="2 2"' : '') + '><title>' + esc0(labels[i] + ' ' + r.gz + ' · ' + a.levelK) + '</title></circle>';
       var fc = r.favor ? (r.favor.k === 'good' ? '#2DB36B' : r.favor.k === 'care' ? '#E8622C' : '#B5BDCB') : 'transparent';
-      fav += '<rect x="' + (x - CW / 2 + 4) + '" y="' + (yOf(0) + 16) + '" width="' + (CW - 8) + '" height="6" rx="3" fill="' + fc + '"><title>흐름 ' + esc0(r.favor ? r.favor.n : '') + '</title></rect>';
+      fav += '<rect x="' + (x - CW / 2 + 4) + '" y="' + (yOf(0) + 16) + '" width="' + (CW - 8) + '" height="6" rx="3" fill="' + fc + '"><title>' + esc0((r.favor && r.favor.metric || '흐름') + ' ' + (r.favor ? r.favor.n : '')) + '</title></rect>';
       xl += '<text x="' + x + '" y="' + (H - 4) + '" text-anchor="middle"' + (i === nowIdx ? ' style="font-weight:700;fill:var(--ink)"' : '') + '>' + esc0(labels[i]) + '</text>';
     });
     var grid = [[4, '강하게 켜짐'], [3, '켜짐'], [2, '받쳐 줌'], [1, '조용함'], [0, '눌림·정리']].map(function (g) { var y = yOf(g[0]); return '<line x1="' + LM + '" x2="' + wd + '" y1="' + y + '" y2="' + y + '" stroke="var(--line)" stroke-width="1"/><text class="lv" x="' + (LM - 4) + '" y="' + (y + 3) + '" text-anchor="end">' + g[1] + '</text>'; }).join('');
     return '<div class="wp-ch"><svg viewBox="0 0 ' + wd + ' ' + H + '" style="min-width:' + Math.round(wd * 0.82) + 'px;max-width:' + Math.round(wd * 1.3) + 'px" role="img" aria-label="주무기 활성도 단계 그래프">' + grid +
-      '<text class="lv" x="' + (LM - 4) + '" y="' + (yOf(0) + 22) + '" text-anchor="end">흐름 등급</text>' + fav +
+      '<text class="lv" x="' + (LM - 4) + '" y="' + (yOf(0) + 22) + '" text-anchor="end">' + esc0(bandName || '흐름 등급') + '</text>' + fav +
       '<polyline points="' + pts.join(' ') + '" fill="none" stroke="var(--ink-2)" stroke-width="2"/>' + dots + xl + '</svg></div>';
   }
   function detail(id, row, r, title, E) {
     var d = D(), a = r.best; if (!a) return '';
     var w = a, typesTxt = w.types.map(function (t) { return t === 'adjust' && /기신|구신/.test(w.roles.weapon) ? d.type.adjustExcess : d.type[t]; });
     var roleTxt = (w.roles.stem || w.roles.branch) ? '운의 천간 오행은 ' + (w.roles.stem || '—') + ', 지지 오행은 ' + (w.roles.branch || '—') + ' (통합 용신 기준 역할)' : '';
-    return '<div class="wp-det wp-e' + w.el + '" id="' + id + '" data-wpr="' + row + '"><h4>' + E(title + ' ' + r.gz) + ' — 활성도 ' + E(w.levelK) + ' · 흐름 ' + E(r.favor ? r.favor.n : '—') + '</h4>' +
-      '<p>' + E(d.combo[r.read]) + '</p>' +
+    return '<div class="wp-det wp-e' + w.el + '" id="' + id + '" data-wpr="' + row + '"><h4>' + E(title + ' ' + r.gz) + ' — 활성도 ' + E(w.levelK) + ' · ' + E(r.favor && r.favor.metric || '흐름') + ' ' + E(r.favor ? r.favor.n : '—') + '</h4>' +
+      '<p>' + E(r.mText || d.combo[r.read]) + '</p>' +
       (typesTxt.length ? '<p class="wp-s"><span class="wp-lb">작용 유형</span>' + E(typesTxt.join(' / ')) + '</p>' : '<p class="wp-s"><span class="wp-lb">작용 유형</span>주무기에 직접 닿는 작용이 없어요</p>') +
       '<p class="wp-s"><span class="wp-lb">활용 방향</span>운의 천간이 ' + E(w.use.tg) + '(' + E(w.use.groupName) + ')라 ' + E(d.use[w.use.group]) + ' 쓰기 쉬운 결이에요</p>' +
-      (roleTxt ? '<p class="wp-s"><span class="wp-lb">발현 지원</span>' + E(roleTxt) + ' · 유리도는 기존 흐름 등급 그대로예요</p>' : '') +
+      (roleTxt ? '<p class="wp-s"><span class="wp-lb">발현 지원</span>' + E(roleTxt) + ' · 유리도는 ' + E(r.favor && r.favor.metric ? '위 그래프의 ' + r.favor.metric + ' 등급' : '기존 흐름 등급') + ' 그대로예요</p>' : '') +
       (w.signals.length ? '<ul class="wp-ev">' + w.signals.map(function (s) { return '<li>' + E(s.x) + '</li>'; }).join('') + '</ul>' : '') +
       (w.constraints.length ? '<p class="wp-s" style="margin-top:4px"><span class="wp-lb">제약 요인</span></p><ul class="wp-ev">' + w.constraints.map(function (s) { return '<li>' + E(s) + '</li>'; }).join('') + '</ul>' : '') + '</div>';
   }
@@ -178,7 +178,7 @@
     if (!r) return '';
     var E = esc0, a = r.best, f = r.favor;
     return '<button type="button" class="wp-c wp-e' + (a ? a.el : 0) + (isNow ? ' wp-now' : '') + '" data-wpd="' + id + '" data-wpr="' + row + '"><span class="t">' + E(top) + '</span><span class="g">' + E(r.gz) + '</span>' +
-      (a ? '<span class="wp-a ' + a.key + '">' + E(a.levelK) + '</span>' : '<span class="wp-a qt">—</span>') + (f ? '<span class="wp-f ' + f.k + '">흐름 ' + E(f.n) + '</span>' : '') + (sub ? '<span class="t">' + E(sub) + '</span>' : '') + '</button>';
+      (a ? '<span class="wp-a ' + a.key + '">' + E(a.levelK) + '</span>' : '<span class="wp-a qt">—</span>') + (f ? '<span class="wp-f ' + f.k + '">' + E(f.metric || '흐름') + ' ' + E(f.n) + '</span>' : '') + (sub ? '<span class="t">' + E(sub) + '</span>' : '') + '</button>';
   }
   function luck(M, ch, opt) {
     var A = get(M, ch); if (!A) return ''; var o = opts(opt), E = o.E, d = D(), Wm = W(); opt = opt || {};
@@ -188,21 +188,30 @@
     if (!L.length) return '<section class="card wp" id="weapon-luck" data-wp="' + E(sigOf(A)) + '"><div class="card-h"><h2>주무기 발현 타이밍</h2></div><p class="wp-head">' + E(headOf(A)) + '</p>' + extraNotes(ch, A, o, 'luck') + '<p class="wp-note">주무기로 서 있는 힘이 없어 운별 발현 타이밍은 그리지 않았어요. 위 흐름 그래프의 좋음·무난·조심은 그대로 참고하면 돼요.</p></section>';
     var now = opt.now || Date.now(), curY = opt.curY, wolY = opt.wolY || curY;
     var tl = Wm.timeline(M, ch, { fromY: curY, years: 10, wolY: wolY }); if (!tl) return '';
+    // 그래프 지표(재물·직업·연애 등)를 고르면 띠·풀이를 그 지표에 맞춘다. 건강·사고수는 주무기와 잇지 않아 전체 흐름 그대로
+    var mk = opt.metric && opt.metric !== 'flow' ? opt.metric : null, mName = opt.metricName || '', careM = mk === 'health' || mk === 'accident', mApplied = false;
+    if (mk && !careM && typeof opt.favorOf === 'function') {
+      var grp = d.metricGroup[mk] || 'general', LN = d.metricLens[grp], fillM = function (t) { return String(t || '').replace(/\{m\}/g, mName); };
+      var cls = function (a) { return /strong|on|shaky/.test(a.level) ? 'on' : /sup|quiet/.test(a.level) ? 'prep' : 'guard'; };
+      var apply = function (arr, src, kind) { arr.forEach(function (r, i) { if (!r || !r.best || !src[i]) return; var f = null; try { f = opt.favorOf(src[i], kind); } catch (e) { f = null; } if (!f) return; mApplied = true; r.favor = { k: f.k, n: f.n, metric: mName }; if (Wm.readPair) r.read = Wm.readPair(r.best, r.favor); r.mText = fillM(LN[cls(r.best)]) + ' ' + fillM(d.metricFavor[f.k]); }); };
+      apply(tl.daeun, ch.daeun.list, 'daeun'); apply(tl.seun, M.seunRange(ch, curY, curY + 9) || [], 'seun'); apply(tl.wolun, M.wolun(ch, wolY) || [], 'wolun');
+    }
+    var bandName = mApplied ? mName + ' 등급' : '흐름 등급', mNote = careM ? '<p class="wp-note">' + E(d.metricCare) + '</p>' : '';
     var du = ch.daeun.list, curDi = -1; du.forEach(function (x, i) { if (x.startMs <= now) curDi = i; });
     var curWi = -1; tl.wolun.forEach(function (r, i) { if (r && r.startMs <= now) curWi = i; }); if (wolY !== curY) curWi = -1;
     var names = L.slice(0, 2).map(function (w) { return EL_H[w.el] + ' ' + D().el[w.el].title; }).join(' · ');
     var legend = '<div class="wp-leg"><span><span class="wp-a on2">강하게 켜짐</span> 천간+뿌리</span><span><span class="wp-a on1">켜짐</span> 천간 또는 정기 뿌리</span><span><span class="wp-a shk">켜지되 흔들림</span></span><span><span class="wp-a sup">받쳐 줌</span> 생해 주거나 얕은 뿌리</span><span><span class="wp-a qt">조용함</span></span><span><span class="wp-a hit">눌림</span><span class="wp-a trm">정리</span> 극·합거·충(많은 힘이면 정리)</span><span>|</span><span><span class="wp-f good">흐름 좋음</span><span class="wp-f">무난</span><span class="wp-f care">조심</span> = 위 그래프와 같은 등급(보조 지표)</span></div>';
     var dLab = du.map(function (x) { return x.startAge + '세'; }), sLab = tl.seun.map(function (r) { return String(r.year); }), wLab = tl.wolun.map(function (r) { return r.month + '월'; });
     var block = function (row, rows, labs, subs, nowIdx, secT) {
-      return '<p class="wp-sec">' + E(secT) + '</p>' + chart(rows, labs, nowIdx) + '<div class="wp-row">' + rows.map(function (r, i) { return cell(r, labs[i], subs[i], i === nowIdx, 'wpd-' + row + '-' + i, row); }).join('') + '</div>' +
+      return '<p class="wp-sec">' + E(secT) + '</p>' + chart(rows, labs, nowIdx, bandName) + '<div class="wp-row">' + rows.map(function (r, i) { return cell(r, labs[i], subs[i], i === nowIdx, 'wpd-' + row + '-' + i, row); }).join('') + '</div>' +
         rows.map(function (r, i) { return r ? detail('wpd-' + row + '-' + i, row, r, labs[i], E) : ''; }).join('');
     };
     // 그래프 카드 아래에 붙는 한 단위(대운·세운·월운) — 같은 판정, 같은 칸·상세 카드
-    var short = '<div class="wp-leg"><span><span class="wp-a on2">강하게 켜짐</span><span class="wp-a on1">켜짐</span><span class="wp-a sup">받쳐 줌</span><span class="wp-a qt">조용함</span><span class="wp-a hit">눌림</span><span class="wp-a trm">정리</span></span><span>점 줄 = 주무기 활성도 · 아래 띠 = 위 그래프와 같은 흐름 등급(합치지 않아요) · 칸을 누르면 설명</span></div>';
+    var short = '<div class="wp-leg"><span><span class="wp-a on2">강하게 켜짐</span><span class="wp-a on1">켜짐</span><span class="wp-a sup">받쳐 줌</span><span class="wp-a qt">조용함</span><span class="wp-a hit">눌림</span><span class="wp-a trm">정리</span></span><span>점 줄 = 주무기 활성도 · 아래 띠 = 위 그래프와 같은 ' + E(bandName) + '(합치지 않아요) · 칸을 누르면 설명</span></div>' + mNote;
     var PART = { daeun: ['d', tl.daeun, dLab, du.map(function (x) { return x.startYear + '~'; }), curDi, '대운마다 주무기가 켜지는 정도'], seun: ['s', tl.seun, sLab, tl.seun.map(function (r) { return r.age ? r.age + '세' : ''; }), tl.seun.findIndex(function (r) { return r.year === curY; }), curY + '~' + (curY + 9) + '년 주무기가 켜지는 정도'], wolun: ['w', tl.wolun, wLab, tl.wolun.map(function (r) { return r.termName; }), curWi, wolY + '년 달마다 주무기가 켜지는 정도'] };
     if (PART[part]) { var p = PART[part]; return '<div class="wp wp-part wp-e' + L[0].el + '" id="weapon-luck-' + part + '" data-wp="' + E(sigOf(A)) + '" style="margin:10px 0 14px;padding:10px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)"><h3 style="margin:0;font-size:.95rem">주무기 발현 · ' + E(p[5]) + ' <span class="wp-note" style="font-weight:400">' + E(names) + '</span></h3>' + short + block(p[0], p[1], p[2], p[3], p[4], '').replace('<p class="wp-sec"></p>', '') + '</div>'; }
     var cur = tl.daeun[curDi] || null, picks = tl.seun.filter(function (r) { return r && r.best && /strong|on|shaky/.test(r.best.level); }).slice(0, 3);
-    var line = function (when, r) { return '<li><span class="when">' + E(when) + '</span> — 활성도 <b>' + E(r.best.levelK) + '</b> · 흐름 ' + E(r.favor ? r.favor.n : '—') + '<br>' + E(d.combo[r.read]) + '</li>'; };
+    var line = function (when, r) { return '<li><span class="when">' + E(when) + '</span> — 활성도 <b>' + E(r.best.levelK) + '</b> · ' + E(r.favor && r.favor.metric || '흐름') + ' ' + E(r.favor ? r.favor.n : '—') + '<br>' + E(r.mText || d.combo[r.read]) + '</li>'; };
     var lines = (cur ? [line('지금 대운 ' + cur.gz, cur)] : []).concat(picks.map(function (r) { return line(r.year + '년 ' + r.gz, r); }));
     if (part === 'summary') return '<section class="card wp" id="weapon-luck" data-wp="' + E(sigOf(A)) + '"><div class="card-h"><h2>주무기 발현 타이밍</h2><span class="note">' + E(names) + '</span></div>' +
       '<p class="wp-note">' + E(d.twoAxes) + (A.status === 'undetermined' ? ' 태어난 시간을 몰라 세 기둥 기준 후보로 봤어요.' : A.status === 'complex' ? ' 복합형이라 후보 중 가장 잘 켜지는 쪽을 보여 줘요.' : '') + ' 대운·세운·월운 그래프 카드마다 맨 아래에 그 단위의 주무기 줄이 있어요.</p>' + legend +
