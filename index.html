@@ -213,7 +213,7 @@ td.empty { color: var(--ink-3); background: var(--surface-2); border-radius: 14p
 .pill.b-순풍 { background: var(--good-soft); color: var(--good); } .pill.b-보통 { background: var(--surface-2); color: var(--ink-2); }
 .pill.b-주의 { background: color-mix(in srgb, var(--d-chg) 18%, var(--surface)); color: var(--d-chg); } .pill.b-부담 { background: var(--bad-soft); color: var(--bad); }
 button.pill { border: 0; cursor: pointer; font-family: inherit; }
-.pill.lv-강 { background: var(--bad); color: var(--surface); } .pill.lv-약 { background: var(--bad-soft); color: var(--bad); } .pill.lv-참고 { background: var(--surface-2); color: var(--ink-2); }
+.pill.lv-강 { background: var(--bad); color: var(--surface); } .pill.lv-후보 { background: transparent; color: var(--ink-3); border: 1px dashed var(--line); } .li.pat-cand .k, .li.pat-cand .v { color: var(--ink-3); } .pill.lv-약 { background: var(--bad-soft); color: var(--bad); } .pill.lv-참고 { background: var(--surface-2); color: var(--ink-2); }
 
 /* 목록·표 */
 .list { display: grid; gap: 0; }
@@ -6073,7 +6073,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     ${amhapCard(ch)}
     <section class="card">
       <div class="card-h"><h2>구조 진단</h2><span class="note">관살혼잡·상관견관 같은 구조가 성립하는지와 그 근거</span></div>
-      ${pat.list.length ? `<div class="list">${pat.list.map(p => `<div class="li"><span class="k">${term(patTerm(p.name), p.name)}</span><span class="v small">${esc(p.basis)}</span><span class="pill lv-${p.level}">${p.level}</span></div>`).join('')}</div>` : '<p class="muted small">특기할 구조가 없습니다.</p>'}
+      ${pat.list.length ? `<div class="list">${pat.list.map(p => `<div class="li"><span class="k">${term(patTerm(p.name), p.name)}</span><span class="v small">${esc(p.basis)}</span><span class="pill lv-${p.level}">${p.level}</span></div>`).join('')}</div>` : '<p class="muted small">특기할 구조가 없습니다.</p>'}${(pat.candidates || []).length ? `<p class="small muted" style="margin:10px 0 4px">구조 후보 — 십성 배치는 맞지만 성립 조건을 다 채우지 못해 구조로 보지 않아요(운세 점수에도 넣지 않음)</p><div class="list">${pat.candidates.map(p => `<div class="li pat-cand"><span class="k">${term(patTerm(p.name), p.name)}</span><span class="v small">${esc(p.basis)} · ${esc(p.statusWhy || '')}</span><span class="pill lv-후보">후보</span></div>`).join('')}</div>` : ''}
       <p class="note">강: 천간에 드러나거나 비율이 뚜렷함 · 약: 지지 정기까지 포함해야 성립 · 참고: 판단 보조. 구조가 성립해도 합·제어 관계에 따라 작용이 줄어들 수 있으며, 이 앱은 그 해소 여부를 판정하지 않습니다.</p>
       ${pat.tuchul.length ? `<div><h3 style="margin-bottom:6px">${term('투출')}</h3><div>${pat.tuchul.map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div></div>` : ''}
     </section>
@@ -6952,7 +6952,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const act = r.interactions.filter(o => o.status !== 'off'), off = r.interactions.filter(o => o.status === 'off');
     const ixRow = o => `<details class="tgr-ix"><summary><b>${esc(o.name)}</b> <span class="small muted">${esc(o.easy || '')} · ${esc(o.fromK)}${o.from === o.to ? '' : ' → ' + esc(o.toK)}</span> <span class="wc-chip ${TGR_ST[o.status]}">${esc(o.statusK)}</span>${o.toneK ? ` <span class="wc-chip ${TGR_TONE[o.tone]}">${esc(o.toneK)}</span>` : ''}</summary>
       ${o.toneWhy ? `<p>${esc(o.toneWhy)}</p>` : ''}<ul class="small">${o.conds.map(c => `<li>${c.ok ? '충족' : '미충족'} · ${esc(c.label)}${c.detail ? ' (' + esc(c.detail) + ')' : ''}${c.core ? '' : ' <span class="muted">— 강도 조건</span>'}</li>`).join('')}${o.blocks.filter(b => b.hit).map(b => `<li>약화 요인 · ${esc(b.label)}${b.detail ? ' (' + esc(b.detail) + ')' : ''}</li>`).join('')}</ul>
-      ${o.ref && (o.ref.gyeok || o.ref.engine) ? `<p class="note">${o.ref.gyeok ? '격국 카드 판정: ' + esc(o.ref.gyeok) : ''}${o.ref.gyeok && o.ref.engine ? ' · ' : ''}${o.ref.engine ? '용신 탭 패턴: ' + esc(o.ref.engine) : ''} (기준이 조금씩 달라 결과가 다를 수 있어요)</p>` : ''}</details>`;
+      ${o.ref && o.ref.common ? `<p class="note">구조 판정: ${esc(o.ref.engine)} — 용신 탭 구조 목록·운세 점수와 같은 기준이에요${o.ownStatus && (o.ownStatus === 'on') !== (o.status === 'on') ? ' (위 조건표만으로 보면 ' + esc(({ on: '성립', weak: '약하게 성립', off: '불성립' })[o.ownStatus]) + ')' : ''}${o.ref.gyeok ? ' · 격국 카드 판정: ' + esc(o.ref.gyeok) : ''}</p>` : o.ref && (o.ref.gyeok || o.ref.engine) ? `<p class="note">${o.ref.gyeok ? '격국 카드 판정: ' + esc(o.ref.gyeok) : ''}${o.ref.gyeok && o.ref.engine ? ' · ' : ''}${o.ref.engine ? '용신 탭 패턴: ' + esc(o.ref.engine) : ''} (기준이 조금씩 달라 결과가 다를 수 있어요)</p>` : ''}</details>`;
     return `<section class="card tgr" id="tenGodRoles">
       <div class="card-h"><h2>십성 작용 분석</h2><span class="note">많고 적음(세력)과 도움·부담(유불리)을 따로 봐요</span></div>
       <div class="tgr-sum">${r.summary.map(t => `<p>${esc(t)}</p>`).join('')}</div>
@@ -7113,7 +7113,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="note">격국 판단은 억부·조후·병약·종격과 따로 보는 관점이며, 용신 계산·흐름 점수·다른 탭의 해석에는 더해지지 않습니다. 표의 격국 행은 용신=상신, 희신=다음 상신, 기신=파격 요인입니다. 8격과 대표적인 상신·파격 조건만 구현한 단순화 모델이며, 전통 해석이므로 결과를 보장하지 않습니다.</p></section>`;
   }
   // 엔진이 남기는 억부 판단 로그의 “종격을 판정하지 않는다” 문장을 종격 판단 카드 안내로 바꿔 보여 준다(엔진 로그는 그대로)
-  const jgLog = l => l.replace('이 앱은 종격을 판정하지 않으므로 아래 결과를 그대로 받아들이기 전에 검토가 필요합니다.', '아래 ‘종격·전왕격 판단’에서 이 사주가 종격에 해당하는지 확인하세요.');
+  const jgLog = l => l.replace('종격·전왕격에 해당하는지는 별도의 종격 판정에서 확인합니다.', '아래 ‘종격·전왕격 판단’에서 이 사주가 종격에 해당하는지 확인하세요.').replace('이 앱은 종격을 판정하지 않으므로 아래 결과를 그대로 받아들이기 전에 검토가 필요합니다.', '아래 ‘종격·전왕격 판단’에서 이 사주가 종격에 해당하는지 확인하세요.');   // 2026-11-25 M7: 엔진 원문 정정 뒤에도 화면 문구는 그대로
   const jgRow = ch => {
     const J = window.MantraJonggyeok; if (!J) return ''; const r = J.analyze(M, ch);
     const f = e => e == null ? '<span class="muted small">—</span>' : `<span class="eltxt ${ECLS[e]}">${elLabel(e)}</span>`;

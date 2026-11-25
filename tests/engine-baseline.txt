@@ -1,14 +1,14 @@
-전체 5ceac3016d88
+전체 e2c311619668
   pillars   077b8bd01c31
   weights   3880d9677682
   strength  b163a7e67d2f
   yong      98ae812e2b5b
   climate   3420c7e3ee18
-  daeun     e168748e0868
-  seun      24ea9fda731f
-  wolun     4fa34f70e106
-  ilun      02259ddf7c74
+  daeun     497348e1d5e6
+  seun      5c88386daa5e
+  wolun     09b65ea25044
+  ilun      5621536729b6
   samjae    651aab616fb5
-  domain    e26102d032c6
-  career    e478d9410dae
+  domain    7b21c4008eeb
+  career    6e8081047414
   root      f7299d8692de

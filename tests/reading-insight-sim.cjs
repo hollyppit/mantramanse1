@@ -25,10 +25,11 @@ const R=globalThis.ReportV2,D=R.ReadingInsightData,RI=R.ReadingInsight;
   for(const p of PILLARS){assert(Array.isArray(D.PILLAR[L][p])&&D.PILLAR[L][p].length===3,'PILLAR.'+L+'.'+p);assert.equal(new Set(D.PILLAR[L][p]).size,3,'PILLAR 변형 중복 '+L+'.'+p);}
  }
  assert.deepEqual(Object.keys(D.PATTERN.PLAIN).sort(),PATS.slice().sort());assert(Object.keys(D.ROLE||D.DWY.ROLE).length===5);
- [D.PAIR,D.PATTERN,D.LACK,D.CLIMATE,D.PILLAR,D.TG,D.STAGE,D.RELPAIR,D.RELTYPE,D.DWG,D.DWY,D.SEG,D.SER,D.BANDG,D.DWN,D.DWR,D.SEN].forEach(collect);
+ for(const L of LENSES)need(D.FALLBACK&&D.FALLBACK[L],['용신','희신','기신'].flatMap(r=>['목','화','토','금','수'].map(e=>r+'|'+e)),'FALLBACK.'+L);   // 2026-11-26 대체 문단 표도 같은 형식 검사
+ [D.FALLBACK,D.PAIR,D.PATTERN,D.LACK,D.CLIMATE,D.PILLAR,D.TG,D.STAGE,D.RELPAIR,D.RELTYPE,D.DWG,D.DWY,D.SEG,D.SER,D.BANDG,D.DWN,D.DWR,D.SEN].forEach(collect);
  for(const t of all){assert(!FORBID.test(t),'금지어: '+t);assert(/요[.]$/.test(t),'문장 끝: '+t);assert(!/\s{2,}|undefined|NaN|null|[{}]/.test(t),'형식: '+t);assert(!/[A-Za-z]{3,}/.test(t),'영문: '+t);}
  // 같은 관점 안에서 서로 다른 항목이 같은 문장을 쓰지 않는다
- for(const L of LENSES){const seen=new Map();const dup=[];for(const [name,tab] of Object.entries({PAIR:D.PAIR[L],PATTERN:D.PATTERN[L],LACK:D.LACK[L],CLIMATE:D.CLIMATE[L],TG:D.TG[L],STAGE:D.STAGE[L],RELPAIR:D.RELPAIR[L],RELTYPE:D.RELTYPE[L],DWG:D.DWG[L],DWY:D.DWY[L],SEG:D.SEG[L],BANDG:D.BANDG[L],DWN:D.DWN[L],SEN:D.SEN[L],SERTYPE:D.SER.TYPE[L],DWRTYPE:D.DWR.TYPE[L]}))for(const [k,t] of Object.entries(tab)){if(seen.has(t))dup.push(name+'.'+k+' = '+seen.get(t));else seen.set(t,name+'.'+k);}
+ for(const L of LENSES){const seen=new Map();const dup=[];for(const [name,tab] of Object.entries({FALLBACK:D.FALLBACK[L],PAIR:D.PAIR[L],PATTERN:D.PATTERN[L],LACK:D.LACK[L],CLIMATE:D.CLIMATE[L],TG:D.TG[L],STAGE:D.STAGE[L],RELPAIR:D.RELPAIR[L],RELTYPE:D.RELTYPE[L],DWG:D.DWG[L],DWY:D.DWY[L],SEG:D.SEG[L],BANDG:D.BANDG[L],DWN:D.DWN[L],SEN:D.SEN[L],SERTYPE:D.SER.TYPE[L],DWRTYPE:D.DWR.TYPE[L]}))for(const [k,t] of Object.entries(tab)){if(seen.has(t))dup.push(name+'.'+k+' = '+seen.get(t));else seen.set(t,name+'.'+k);}
   assert.equal(dup.length,0,L+' 중복 문장 '+dup.slice(0,3).join(' / '));}
  // 2) 가상 명식 표본
  const V=await import(pathToFileURL(path.join(ROOT,'editorial/rebuild-20261022/publish/verify.mjs')).href);const sds=V.sampleCharts(240,ROOT);

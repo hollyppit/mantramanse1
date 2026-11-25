@@ -83,6 +83,8 @@ var PLAN=[
 ];
 // 마지막 보루: 선호 요소가 모두 없거나 이미 쓰였으면 이 순서로 아직 안 쓴 요소를 찾는다.
 var SPARE=['pair','bandg','clim','st_d','st_m','st_y','tg_ms','tg_mb','tg_db','tg_ys','tg_yb','dwg','dwy','seg','pat1','pat2','lack','rel1','rel2','rel3','dwn','sen','dwr','ser','st_h','tg_hs','tg_hb'];
+// 대체 문단(2026-11-26): 두 번 나눠 담은 뒤에도 문단이 0개인 장에만, 이 순서로 아직 안 쓴 요소를 하나 넣는다(yf 용신 오행 · gf 기신 오행 · hf 희신 오행). 다른 장의 배정은 바뀌지 않는다.
+var FALLBACK=['yf','gf','hf'];
 var PLAN_BY_ID={};PLAN.forEach(function(p){PLAN_BY_ID[p[0]]={lens:p[1],prefs:p[2]};});
 function D(){return R.ReadingInsightData||{};}
 function josa(word,a,b){var s=String(word),c=s.charCodeAt(s.length-1);return (c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28)?a:b;}
@@ -115,6 +117,7 @@ function facts(sd){var f={},P=sd.pillars||{};
   var el=STEM_EL[String(dw.ganzhi||'').charAt(0)],role=el&&sd.usefulElements&&sd.usefulElements.roles&&sd.usefulElements.roles[el];if(role)f.dwy={el:el,role:role};
   var list=sd.daewoon||[],at=-1;list.forEach(function(x,i){if(x&&x.ganzhi===dw.ganzhi&&x.startYear===dw.startYear)at=i;});var nx=at>=0?list[at+1]:null;if(nx&&TG_GROUP[nx.stemTG]&&Number.isFinite(nx.startYear))f.dwn={year:nx.startYear,group:nx.pull&&nx.pull.group||TG_GROUP[nx.stemTG]};
   var dr=luckRel(dw.relations,P);if(dr)f.dwr=dr;}
+ var UE=sd.usefulElements,UR=UE&&UE.roles;if(UE&&ELS.indexOf(UE.yong)>=0)f.yf={el:UE.yong,role:'용신'};if(UE&&ELS.indexOf(UE.hee)>=0)f.hf={el:UE.hee,role:'희신'};if(UR){var gi=ELS.filter(function(e){return UR[e]==='기신';})[0];if(gi)f.gf={el:gi,role:'기신'};}
  var nextY=(sd.annualLuck||[]).filter(function(a){return a&&sd.nowYear&&a.year===sd.nowYear+1&&TG_GROUP[a.stemTG];})[0];if(nextY)f.sen={year:nextY.year,group:TG_GROUP[nextY.stemTG]};
  var sw=sd.sewoon;
  if(sw&&(!sd.nowYear||sw.year===sd.nowYear)){
@@ -148,6 +151,7 @@ function text(lens,slot,v,opt){var d=D(),t,x;opt=opt||{};var J=function(lead,res
   return tm&&pm?J(relPlace(v.type,v.members)+' 사이에 '+v.type+josa(v.type,'이','가')+' 걸려 있어요. '+pm+' ',tm):'';}
  if(slot==='dwg'){t=d.DWG&&d.DWG[lens]&&d.DWG[lens][v.group+'|'+v.state];return t||'';}
  if(slot==='dwy'){t=d.DWY&&d.DWY[lens]&&d.DWY[lens][v.role];var rl=d.DWY&&d.DWY.ROLE&&d.DWY.ROLE[v.role];return t&&rl?J('지금 대운의 천간은 '+v.el+'이고, 내 사주에서 '+v.el+josa(v.el,'은','는')+' '+v.role+'에 해당해요. ',t):'';}
+ if(slot==='yf'||slot==='gf'||slot==='hf'){t=d.FALLBACK&&d.FALLBACK[lens]&&d.FALLBACK[lens][v.role+'|'+v.el];var rr=d.FALLBACK&&d.FALLBACK.ROLE&&d.FALLBACK.ROLE[v.role];return t&&rr?J(rr+josa(rr,'은','는')+' '+v.el+'('+EL_GLOSS[v.el]+')'+josa(v.el,'이에요','예요')+'. ',t):'';}
  if(slot==='seg'){t=d.SEG&&d.SEG[lens]&&d.SEG[lens][v.group];return t?J(v.year+'년 세운의 천간은 '+v.group+'('+GLOSS[v.group]+') 기운이에요. ',t):'';}
  if(slot==='bandg'){t=d.BANDG&&d.BANDG[lens]&&d.BANDG[lens][v.band+'|'+v.g];var pb=d.BANDG&&d.BANDG.PLAIN&&d.BANDG.PLAIN[v.band];return t&&pb?J(pb+'이고, 가장 큰 기운은 '+v.g+'('+GLOSS[v.g]+')이에요. ',t):'';}
  if(slot==='dwn'){t=d.DWN&&d.DWN[lens]&&d.DWN[lens][v.group];return t?J(v.year+'년부터는 '+v.group+'('+GLOSS[v.group]+') 기운의 대운으로 바뀌어요. ',t):'';}
@@ -168,11 +172,12 @@ function assign(sd){if(CACHE&&CACHE.has(sd))return CACHE.get(sd);
  function take(lens,id,list,limit){var got=out[id]||(out[id]=[]);for(var i=0;i<list.length&&got.length<limit;i++){var s=list[i];if(used[lens][s]||!f[s])continue;var pil=f[s].pillar,same=!!pil&&got.some(function(g){return g.pillar===pil;});var fk=s==='bandg'?'strong:'+f[s].g:s==='seg'||s==='sen'?'seun:'+f[s].year:s+':'+JSON.stringify(f[s]),noIntro=!!introSeen[fk];var t=text(lens,s,f[s],{pv:pil?(pcount[lens][pil]||0):0,skipPillar:same||noIntro,noIntro:noIntro});if(!t||usedText[t])continue;usedText[t]=1;if(!noIntro)introSeen[fk]=1;var tShort=t&&!noIntro?text(lens,s,f[s],{pv:0,skipPillar:true,noIntro:true}):t;if(!t)continue;used[lens][s]=1;if(pil&&!same)pcount[lens][pil]=(pcount[lens][pil]||0)+1;got.push({key:s,text:t,short:tShort,fk:fk,pillar:pil||null});}}
  PLAN.forEach(function(p){take(p[1],p[0],p[2].concat(SPARE),1);});
  PLAN.forEach(function(p){take(p[1],p[0],p[2].concat(SPARE),2);});
+ PLAN.forEach(function(p){if(!(out[p[0]]||[]).length)take(p[1],p[0],FALLBACK,1);});
  if(CACHE)CACHE.set(sd,out);return out;}
 function paragraphs(c,sd){var id=c&&(c.editorialContractId||c.id);if(!id||!sd||!sd.dayMaster||!PLAN_BY_ID[id])return [];
  var a=assign(sd),FO=R.FactOnce;return (a[id]||[]).map(function(x){var t=FO&&x.fk&&x.short&&!FO.own(sd,x.fk,id)?x.short:x.text;return {key:x.key,text:FO&&FO.uniq?FO.uniq(sd,t,id):t};}).filter(function(p){return p.text;});}
 function html(c,esc){var sd=c&&c.readingVisualData,ps=paragraphs(c,sd),AF=R.AgeFit,ab=AF?AF.band(sd):'';if(ab)ps=ps.map(function(p){return {key:p.key,text:AF.text(p.text,ab)};}).filter(function(p){return p.text;});if(!ps.length)return '';
  return '<div class="reading-insight"><h3>이 사주에서만 읽히는 포인트</h3>'+ps.map(function(p){return '<p class="lead" data-reading-role="insight" data-insight-key="'+p.key+'">'+esc(p.text)+'</p>';}).join('')+'</div>';}
 R.ReadingInsightData=R.ReadingInsightData||{};
-R.ReadingInsight={paragraphs:paragraphs,html:html,facts:facts,assign:assign,PLAN:PLAN,SPARE:SPARE};
+R.ReadingInsight={paragraphs:paragraphs,html:html,facts:facts,assign:assign,PLAN:PLAN,SPARE:SPARE,FALLBACK:FALLBACK};
 })(typeof window!=='undefined'?window:globalThis);

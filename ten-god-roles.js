@@ -146,7 +146,14 @@
 
   // ───────── 상호작용 구조 11종: 성립(on·weak·off)과 유불리(good·bad·mixed)를 따로 ─────────
   //   from→to 는 기운이 흐르거나 누르는 방향(그룹 번호). conds 는 성립 조건, blocks 는 성립을 약하게 만드는 요인.
-  function interactions(S, R) {
+  // eng(2026-11-25 M1): 원국 분석일 때 엔진 공통 구조 판정 { key: '성립'|'후보'|'없음' } — 이 7종은 자체 조건 대신 공통 판정을 쓴다(자체 판정은 ownStatus 로 남김)
+  const ENG_KEY = { salin: '살인상생', sikjesal: '식신제살', gyeongwan: '상관견관', paein: '상관패인', honjap: '관살혼잡', dosik: '효신탈식(도식)', bigeopjaeng: '군겁쟁재' };
+  function engineStatusOf(ch) {
+    const P = ch && ch.patterns; if (!P || !P.named) return null;
+    const out = {}; Object.keys(ENG_KEY).forEach(k => { const p = P.named.filter(x => x.name === ENG_KEY[k])[0]; out[k] = p ? p.status : '없음'; });
+    return out;
+  }
+  function interactions(S, R, eng) {
     const out = [], ge = g => mod5(S.dEl + g), v = g => R.unifiedV(ge(g));
     const lv = g => GN[g] + ' ' + r1(S.grp[g]) + '%' + (S.exposed[g].length ? '·투출' : '') + (S.root[g] >= 0.5 ? '·통근' : '');
     const lt = t => t + ' ' + r1(S.tg[t]) + '%' + (S.tgExposed[t] ? '·투출' : '');
@@ -155,6 +162,7 @@
     const mk = (o) => {
       const coreOk = o.conds.filter(x => x.core).every(x => x.ok), allOk = o.conds.every(x => x.ok), blocked = o.blocks.some(x => x.hit);
       o.status = !coreOk ? 'off' : allOk && !blocked ? 'on' : 'weak';
+      if (eng && eng[o.key]) { o.ownStatus = o.status; o.engineStatus = eng[o.key]; o.status = eng[o.key] === '성립' ? 'on' : 'off'; o.candidate = eng[o.key] === '후보'; }
       if (o.status === 'off') { o.tone = ''; o.toneWhy = ''; } else { const t = o.toneFn(); o.tone = t[0]; o.toneWhy = t[1]; }
       delete o.toneFn; out.push(o); return o;
     };
@@ -225,7 +233,7 @@
       conds: [c('비겁이 많음(' + TH.jaeng.bigeop + '% 이상)', S.grp[0] >= TH.jaeng.bigeop, lv(0)), c('재성이 조금이라도 있음', S.grp[2] >= 2 || S.root[2] > 0 || S.exposed[2].length > 0, lv(2)), c('재성이 비겁보다 적음(' + TH.jaeng.jae + '% 이하)', S.grp[2] <= TH.jaeng.jae, lv(2))],
       blocks: [b('관성이 비겁을 눌러 재를 지킴(관제비겁)', clear(S, 3), lv(3)), b('식상이 비겁 기운을 재로 이어 줌(통관)', clear(S, 1), lv(1))],
       toneFn: () => inB(2) ? ['mixed', '돈을 두고 나눔·경쟁이 생기지만, 이 사주엔 혼자 다 쥐기보다 나누는 게 오히려 편할 때도 있어요.'] : ['bad', '같이 하는 사람·경쟁자와 돈·몫을 나누게 되기 쉬운 구조예요. 동업·보증·공동 지출은 선을 그어 두세요.'] });
-    out.forEach(o => { o.easy = EASY_IX[o.key] || ''; o.fromK = GN[o.from]; o.toK = GN[o.to]; o.statusK = STATUS_K[o.status]; o.toneK = TONE_K[o.tone] || ''; o.roleFrom = roleName(o.from); o.roleTo = roleName(o.to); });
+    out.forEach(o => { o.easy = EASY_IX[o.key] || ''; o.fromK = GN[o.from]; o.toK = GN[o.to]; o.statusK = o.candidate ? '후보' : STATUS_K[o.status]; o.toneK = TONE_K[o.tone] || ''; o.roleFrom = roleName(o.from); o.roleTo = roleName(o.to); });
     return out;
   }
   const STATUS_K = { on: '성립', weak: '약하게 성립', off: '불성립' }, TONE_K = { good: '유리', bad: '불리', mixed: '엇갈림' };
@@ -319,7 +327,7 @@
   const cache = (typeof WeakMap !== 'undefined') ? new WeakMap() : null;
   function analyze(M, ch) {
     const hit = cache && cache.get(ch); if (hit) return hit;
-    const R = rolesOf(ch), S = buildState(M, ch, [], CFG.layerW), IX = interactions(S, R);
+    const R = rolesOf(ch), S = buildState(M, ch, [], CFG.layerW), IX = interactions(S, R, engineStatusOf(ch));
     const groups = groupsOf(M, ch, S, IX, R);
     // 격국 카드(gyeok-structure.js)와 엔진 패턴(ch.patterns)에 같은 이름의 구조가 있으면 대조 표시(판정은 이 모듈 기준, 서로 덮어쓰지 않음)
     let gx = null; try { gx = G.MantraGyeokStructure ? G.MantraGyeokStructure.analyze(M, ch) : null; } catch (e) { gx = null; }
@@ -328,7 +336,7 @@
     const pnames = (ch.patterns && ch.patterns.list || []).map(x => x.name);
     IX.forEach(o => {
       const gi = gx && (XMAP[o.key] || []).map(k => gx.items.filter(x => x.key === k)[0]).filter(Boolean)[0];
-      o.ref = { gyeok: gi ? (gi.on ? '성립' : '불성립') : null, engine: PMAP[o.key] ? (pnames.indexOf(PMAP[o.key]) >= 0 ? '있음' : '없음') : null };
+      o.ref = { gyeok: gi ? (gi.on ? '성립' : '불성립') : null, engine: o.engineStatus || (PMAP[o.key] ? (pnames.indexOf(PMAP[o.key]) >= 0 ? '있음' : '없음') : null), common: !!o.engineStatus };
     });
     const R0 = {
       version: VERSION, mode: R.mode, primary: R.primary,
@@ -489,6 +497,7 @@
     M = M || G.Manse; const list = (ch && ch.patterns && ch.patterns.list) || [];
     if (!M || !ch || !list.length) { const o = list.slice(); o.dropped = []; return o; }
     const hit = AGREE_CACHE && AGREE_CACHE.get(ch); if (hit) return hit;
+    if (ch.patterns.named) { const o = ch.patterns.list.slice(); o.dropped = (ch.patterns.candidates || []).map(p => p.name); o.candidates = (ch.patterns.candidates || []).slice(); o.common = true; if (AGREE_CACHE) AGREE_CACHE.set(ch, o); return o; }   // 2026-11-25 M1: 엔진 공통 판정(성립만 표시, 후보는 숨김 목록)
     let st = {}; try { (analyze(M, ch).interactions || []).forEach(it => { st[it.name] = it.status; }); } catch (e) { st = null; }
     const dropped = [], out = !st ? list.slice() : list.filter(p => { const k = PAT_MAP[p.name]; if (k && st[k] === 'off') { dropped.push(p.name); return false; } return true; });
     out.dropped = dropped; if (AGREE_CACHE) AGREE_CACHE.set(ch, out); return out;
