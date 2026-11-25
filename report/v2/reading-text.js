@@ -331,12 +331,12 @@
  // 시기표 카드가 다루는 운 문단(life-narrative.js chapterLuck·luckStage0 의 대운 문장): 지금 대운·교운기·다음 대운·말년 대운
  var PERIOD_PARA=/^(?:지금 지나는 만 \d|지금은 \S+ 대운이 저물고|곧 들어올 만 \d|\d{4}년 무렵\(만 \d+~\d+세\)(?:부터는| \S+ 대운으로 넘어가면)|만 \d+~\d+세\(\S+ 대운, \d{4}년~\))/;
  var TONE_TAG={good:['t-good','흐름 좋음'],mixed:['t-ok','좋고 나쁨 섞임'],hard:['t-care','무게 실림']};
- // 칸 등급은 같은 장 그래프와 같은 점수(dwTier: 대운 점수 → 좋음·무난·조심), 고지·교운기 안내는 리포트에서 처음 한 번만(2026-11-23)
+ // 칸 등급은 같은 장 그래프와 같은 점수(dwTier: 대운 점수 → 좋음·무난·조심), 고지·교운기 안내·칸 설명(u-line)은 리포트에서 처음 한 번만(2026-11-23, u-line 2026-11-25)
  var PERIOD_SEEN={},TIER_TAG={good:['t-good','흐름 좋음'],ok:['t-ok','흐름 무난'],care:['t-care','흐름 조심']};
  function periodsHtml(card,c){var items=card.items||[],sd=c&&c.readingVisualData,topic=c&&/^(wealth|career|love)$/.test(c.editorialTopicId||'')?c.editorialTopicId:((c&&(c.editorialContractId||c.id)||'').split('_')[1]||'life'),pk=sd?[sd.gender,sd.dayPillar&&sd.dayPillar.ko,sd.daewoon&&sd.daewoon[0]&&sd.daewoon[0].startYear,sd.nowYear].join('|'):'',seen=PERIOD_SEEN[pk]||(PERIOD_SEEN[pk]={});if(!/^(wealth|career|love)$/.test(topic))topic='life';
   var cur=items.filter(function(x){return x.tense==='current';})[0],crossTxt='';if(card.cross&&cur){var ye=+String(cur.years).split('~')[1]||0,ae=+(String(cur.age).match(/~(d+)/)||[])[1]||0;crossTxt=ye?ye+'년에 10년 운이 바뀌어요. 앞뒤 한 해씩('+(ye-1)+'~'+(ye+1)+'년'+(ae?', 만 '+(ae-1)+'~'+(ae+1)+'세':'')+')은 일·관계·생활이 흔들리기 쉬우니, 큰 결정은 새 흐름이 자리 잡는 걸 보고 내리세요.':card.cross;}
-  var showCross=crossTxt&&!seen.cross,showFoot=!seen.foot;if(showCross)seen.cross=1;seen.foot=1;
-  return '<div class="rd-periods u-daeun"><h3>시기별로 보면 '+unitChip('daeun')+'</h3><p class="u-line">칸 하나가 10년 운(대운)이에요. 해마다·달마다의 흐름은 "운이 바꾸는 것"에서 짚어요.</p><ol class="rp-list">'+items.map(function(x){var tr=sd&&R.ReadingText&&dwTier(sd,topic,x.gz,+String(x.years).slice(0,4)),t=tr?TIER_TAG[tr.k]:(TONE_TAG[x.tone]||TONE_TAG.mixed),now=x.tense==='current';
+  var showCross=crossTxt&&!seen.cross,showFoot=!seen.foot,showLine=!seen.line;if(showCross)seen.cross=1;seen.foot=1;seen.line=1;
+  return '<div class="rd-periods u-daeun"><h3>시기별로 보면 '+unitChip('daeun')+'</h3>'+(showLine?'<p class="u-line">칸 하나가 10년 운(대운)이에요. 해마다·달마다의 흐름은 "운이 바꾸는 것"에서 짚어요.</p>':'')+'<ol class="rp-list">'+items.map(function(x){var tr=sd&&R.ReadingText&&dwTier(sd,topic,x.gz,+String(x.years).slice(0,4)),t=tr?TIER_TAG[tr.k]:(TONE_TAG[x.tone]||TONE_TAG.mixed),now=x.tense==='current';
    return '<li class="rp-item '+t[0]+(now?' rp-now':'')+(x.tense==='past'?' rp-past':'')+'"><div class="rp-when"><b>'+esc(x.label)+'</b><span class="rp-age">'+esc(x.age)+' · '+esc(x.years)+'</span><em class="rp-tone">'+esc(t[1])+'</em></div><p>'+esc(x.text)+'</p><span class="rp-gz">'+esc(x.gz)+' 대운</span></li>';}).join('')+'</ol>'
   +(showCross?'<p class="rp-note">'+esc(crossTxt)+'</p>':'')+(showFoot?'<p class="rp-foot">지난 시기는 기억과 맞춰 보고, 앞으로의 시기는 준비할 방향으로 읽어 주세요. 좋음·무난·조심은 그 10년이 이 주제에서 나에게 얼마나 잘 맞는지예요.</p>':'')+'</div>';}
  function html(c,ci){var out=organize(c),h=section(c,ci,'head','<h2>'+esc(c.title)+'</h2>','rd-head rd-chead text-reading-head');
