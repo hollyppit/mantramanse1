@@ -83,6 +83,10 @@
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>십성 작용 분석</b> — 현재: <b style="color:' + (fl && fl.tenGodRoles ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.tenGodRoles ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leTG"' + (fl ? '' : ' disabled') + '>' + (fl && fl.tenGodRoles ? '십성 작용 분석 끄기' : '십성 작용 분석 켜기') + '</button><a class="btn" href="/?mantraFlags=tenGodRoles" target="_blank" rel="noopener">미리보기 주소</a></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 만세력 <b>오행·강약 탭</b>에 “십성 작용 분석” 카드(비겁·식상·재성·관성·인성 5종을 세력·역할·실제 작용으로 한눈에 비교, 누르면 상세)와 상호작용 구조 11종(식상생재·재생관·관인상생·살인상생·식신제살·상관견관·상관패인·재극인·도식·관살혼잡·비겁쟁재)의 성립/유불리가, <b>운세 흐름</b> 대운·세운·월운·일진 상세에 “원국과 운의 상호작용”(들어온 십성의 억부·조후·통합 역할, 구조의 신규 형성·강화·약화·해소, 감당 능력, 재물·커리어·인연)이 <b>약 1분 안에</b> 나타납니다. 설명용이라 강약·용신·흐름 점수·그래프는 바뀌지 않습니다.</p></div>';
+    // 특기·적성 장(2026-11-25, report/v2/aptitude-chapters.js): 운명의 타임라인 종합풀이 1장·커리어운 심화 2장 + 커리어 기존 장 연결 블록 2개
+    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운명의 타임라인 특기·적성 장(3장)</b> — 현재: <b style="color:' + (fl && fl.aptChapters ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.aptChapters ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leAC"' + (fl ? '' : ' disabled') + '>' + (fl && fl.aptChapters ? '특기·적성 장 끄기' : '특기·적성 장 켜기') + '</button><a class="btn" href="/report/v2/?mantraFlags=aptChapters" target="_blank" rel="noopener">미리보기 주소</a></div>' +
+      '<p class="muted" style="margin:8px 0 0">켜면 운명의 타임라인에 <b>종합풀이</b> “내 손이 먼저 가는 일 — 특기와 끌리는 활동”(타고난 강점과 맞는 일 뒤), <b>커리어운 심화</b> “내 특기가 일에서 무기가 되는 방식”(내 재능의 값 뒤)·“일 밖에서 날을 세우는 법 — 재충전과 사이드 프로젝트”(앞으로 10년 일의 흐름 그래프 뒤)가 들어가고, ‘일하는 방식 성향’·‘커리어 날을 세우는 습관’ 장 끝에 짧은 연결 블록이 붙습니다. 만세력 특기·적성 탭과 같은 계산이며 표시 전용입니다.</p></div>';
     // 특기·적성(2026-11-25, aptitude.js): 만세력 새 탭 — 특기 5영역·적성 6분야·운동·스포츠 상세·최종 추천, 표시 전용
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>특기·적성 분석</b> — 현재: <b style="color:' + (fl && fl.aptitude ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.aptitude ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leAPT"' + (fl ? '' : ' disabled') + '>' + (fl && fl.aptitude ? '특기·적성 끄기' : '특기·적성 켜기') + '</button><a class="btn" href="/?mantraFlags=aptitude" target="_blank" rel="noopener">미리보기 주소</a></div>' +
@@ -204,6 +208,11 @@
       var v = !(S.flags && S.flags.macroEra);
       if (v && !confirm('만세력 운세 흐름 맨 위의 시대 흐름(삼원구운) 카드를 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
       putFlags({ flags: { macroEra: v } }, v ? '시대 흐름을 켰습니다(약 1분 안에 반영)' : '시대 흐름을 껐습니다(약 1분 안에 반영)');
+    };
+    $('#leAC').onclick = function () {   // 특기·적성 장 스위치(report/v2/aptitude-chapters.js)
+      var v = !(S.flags && S.flags.aptChapters);
+      if (v && !confirm('운명의 타임라인 종합풀이·커리어운 심화에 특기·적성 장 3개와 연결 블록을 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
+      putFlags({ flags: { aptChapters: v } }, v ? '특기·적성 장을 켰습니다(약 1분 안에 반영)' : '특기·적성 장을 껐습니다(약 1분 안에 반영)');
     };
     $('#leAPT').onclick = function () {   // 특기·적성 탭 스위치(aptitude.js)
       var v = !(S.flags && S.flags.aptitude);

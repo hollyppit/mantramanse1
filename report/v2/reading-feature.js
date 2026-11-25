@@ -195,6 +195,7 @@ function teaser(c){var id=c&&(c.editorialContractId||c.id),H=c&&c.readingFeature
   var T=TEASE_TIMING[id];if(T&&H.M){var rows=rowsOf(H,T[0],T[1]);if(rows.length<3)return null;var top=rows.slice().sort(function(a,b){return b.v-a.v||a.i-b.i;})[0],when=T[1]==='month'?'다가오는 '+String(top.label).split(' · ')[0]:String(top.label).split(' ')[0];return who+(T[3]==='이'?'이 ':'의 ')+tjo(T[2],'은','는')+' '+when+'이에요.';}
  }catch(e){}
  return null;}
+[['timeline_career_01',{custom:'apt',kind:'work'}],['timeline_career_15',{custom:'apt',kind:'rest'}]].forEach(function(x){var sp=SPEC[x[0]];if(sp&&!sp.parts.some(function(p){return p.custom==='apt';}))sp.parts=sp.parts.concat([x[1]]);});   // 특기·적성 장 연결 블록은 장 끝에
 function embed(html){return String(html||'').replace(/^<section class="scene rv dp/,'<section class="dp-embed dp');}
 function build(c){var f=c&&c.readingFeature,id=c&&(c.editorialContractId||c.id),spec=SPEC[id],D=R.Deep;if(!f||!f.sd||!spec||!D||!D.SECTIONS)return null;
  var key=id+':'+Object.keys(f.assets||{}).length+':'+(R.TopicDeep?R.TopicDeep.rev:0);   // TopicDeep(주제 심화 2차)이 늦게 준비되면 다시 만든다if(c.__rfCache&&c.__rfCache.key===key)return c.__rfCache.out;
@@ -204,7 +205,8 @@ function build(c){var f=c&&c.readingFeature,id=c&&(c.editorialContractId||c.id),
   if(part.custom==='rank'){var rk=rankBlock(id,f);if(rk)scenes.push(rk);return;}
   if(part.custom==='healthmap'){var hm=healthMap(f);if(hm)scenes.push(hm);return;}
   if(part.custom==='talent'){var tb=talentBlock(f);if(tb)scenes.push(tb);return;}
-  if(part.custom==='es'){var eb=esBlock(f,part.lens);if(eb)scenes.push(eb);return;}   // 오행별 실전 전략(2026-11-20, element-strategy.js — 만세력 '돈 버는 방식'과 같은 계산)
+  if(part.custom==='es'){var eb=esBlock(f,part.lens);if(eb)scenes.push(eb);return;}
+  if(part.custom==='apt'){var ab=R.AptChapters&&R.AptChapters.block?R.AptChapters.block(f,part.kind):null;if(ab)scenes.push(ab);return;}   // 특기·적성 장 연결 블록(2026-11-25, aptitude-chapters.js — 스위치 aptChapters 가 꺼지면 null)   // 오행별 실전 전략(2026-11-20, element-strategy.js — 만세력 '돈 버는 방식'과 같은 계산)
   if(part.custom==='late'){var lt=lateLuck(f);if(lt)scenes.push(lt);return;}
   if(part.custom==='timing'){var t=timingRank(f,part.kind,part.scope);if(t)scenes.push(t);return;}
   if(part.custom&&R.FateBlocks&&R.FateBlocks.has(part.custom)){var fb=R.FateBlocks.render(part,f,id);if(fb)scenes.push(fb);return;}   // fate-blocks.js(구성 다양화)

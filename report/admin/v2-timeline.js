@@ -48,7 +48,7 @@
         // 사용자 화면(viewer.js)과 같이 오행 흐름·격국 장(flow-chapters.js)을 끼운다. 스위치가 꺼져 있어도 위치를 보여 주고 상태를 표시한다
         // 전성기 장(reading-peak.js)도 사용자 화면처럼 흐름·격국 장보다 먼저, '전체 인생 흐름' 바로 뒤에 끼운다(순서·노출은 다른 장처럼 바꿀 수 있음)
         if(R.PeakReading){try{doc=R.PeakReading.add(doc,sd,'');}catch(e){}}
-        state.flowOn=null;if(R.FlowChapters){try{state.flowOn=await R.FlowChapters.ready();doc=R.FlowChapters.add(doc,sd,'',M,ch);}catch(e){}}state.healthOn=null;if(R.HealthChapters){try{state.healthOn=await R.HealthChapters.ready();doc=R.HealthChapters.add(doc,sd,'',M,ch);}catch(e){}}try{await loveCompatScript();if(R.LoveCompat)doc=R.LoveCompat.add(doc,sd,'',M,ch);}catch(e){}if(token!==state.generation)return;
+        state.flowOn=null;if(R.FlowChapters){try{state.flowOn=await R.FlowChapters.ready();doc=R.FlowChapters.add(doc,sd,'',M,ch);}catch(e){}}state.healthOn=null;if(R.HealthChapters){try{state.healthOn=await R.HealthChapters.ready();doc=R.HealthChapters.add(doc,sd,'',M,ch);}catch(e){}}state.aptOn=null;if(R.AptChapters){try{state.aptOn=await R.AptChapters.ready();doc=R.AptChapters.add(doc,sd,'',M,ch);}catch(e){}}try{await loveCompatScript();if(R.LoveCompat)doc=R.LoveCompat.add(doc,sd,'',M,ch);}catch(e){}if(token!==state.generation)return;
         state.sd=sd; state.past=null; state.chapters=doc.chapters; draw(box);
       });
     }).catch(function(e){ if(token===state.generation) box.querySelector('[data-document]').textContent='목차를 구성하지 못했습니다: '+e.message; });

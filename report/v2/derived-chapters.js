@@ -16,11 +16,14 @@
     { id: 'timeline_self_h4', title: '올해·이번 달 몸 챙길 때', topic: 'self', after: 'timeline_self_h3', module: 'health-chapters.js', flag: 'healthChapters', group: '건강·사고수' },
     { id: 'timeline_self_h5', title: '사고수 신호 읽기 — 조심할 장면', topic: 'self', after: 'timeline_self_h4', module: 'health-chapters.js', flag: 'healthChapters', group: '건강·사고수' },
     { id: 'timeline_self_h6', title: '앞으로 10년 안전 흐름과 삼재', topic: 'self', after: 'timeline_self_h5', module: 'health-chapters.js', flag: 'healthChapters', group: '건강·사고수' },
+    { id: 'timeline_self_talent', title: '내 손이 먼저 가는 일 — 특기와 끌리는 활동', topic: 'self', after: 'timeline_self_26', module: 'aptitude-chapters.js', flag: 'aptChapters', group: '특기·적성' },
     { id: 'timeline_wealth_flow', title: '돈의 기운은 어떻게 흐를까?', topic: 'wealth', after: 'first:wealth', module: 'flow-chapters.js', flag: 'flowChapters', group: '오행 흐름·격국' },
     { id: 'timeline_career_flow', title: '일의 기운은 어떻게 흐를까?', topic: 'career', after: 'first:career', module: 'flow-chapters.js', flag: 'flowChapters', group: '오행 흐름·격국' },
+    { id: 'timeline_career_talent', title: '내 특기가 일에서 무기가 되는 방식', topic: 'career', after: 'timeline_career_02', module: 'aptitude-chapters.js', flag: 'aptChapters', group: '특기·적성' },
+    { id: 'timeline_career_recharge', title: '일 밖에서 날을 세우는 법 — 재충전과 사이드 프로젝트', topic: 'career', after: 'timeline_career_14', module: 'aptitude-chapters.js', flag: 'aptChapters', group: '특기·적성' },
     { id: 'timeline_love_flow', title: '인연의 기운은 어떻게 흐를까?', topic: 'love', after: 'first:love', module: 'flow-chapters.js', flag: 'flowChapters', group: '오행 흐름·격국' },
   ];
-  var FLAG_NAME = { flowChapters: '오행 흐름·격국 장', healthChapters: '건강·사고수 장' };
+  var FLAG_NAME = { flowChapters: '오행 흐름·격국 장', healthChapters: '건강·사고수 장', aptChapters: '특기·적성 장' };
   var topicOf = function (id) { var m = /^timeline_([a-z]+)_/.exec(id || ''); return m ? m[1] : ''; };
   // 계약 id 순서(order)에 엔진 장을 사용자 화면과 같은 자리로 끼워 넣는다. 앞 장이 없으면 그 주제 끝에 붙인다
   function insert(order, opts) {

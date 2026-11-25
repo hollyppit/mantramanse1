@@ -4,7 +4,7 @@
 const fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..');
 const DC = require(path.join(root, 'report/v2/derived-chapters.js'));
-const F = require(path.join(root, 'report/v2/flow-chapters.js')), H = require(path.join(root, 'report/v2/health-chapters.js'));
+const F = require(path.join(root, 'report/v2/flow-chapters.js')), H = require(path.join(root, 'report/v2/health-chapters.js')), AC = require(path.join(root, 'report/v2/aptitude-chapters.js'));
 const fails = [], ok = (c, m) => { if (!c) fails.push(m); };
 const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 
@@ -12,7 +12,8 @@ const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 Object.values(F.IDS).forEach(id => { const d = DC.byId(id); ok(d && d.title === F.TITLES[id] && d.flag === 'flowChapters' && d.module === 'flow-chapters.js', `흐름 장 ${id} 목록 불일치`); });
 H.IDS.forEach(id => { const d = DC.byId(id); ok(d && d.title === H.TITLES[id] && d.flag === 'healthChapters' && d.module === 'health-chapters.js', `건강 장 ${id} 목록 불일치`); });
 ok(/title:'내 인생의 전성기는 언제\?'/.test(read('report/v2/reading-peak.js')) && DC.byId('timeline_self_peak').title === '내 인생의 전성기는 언제?' && DC.byId('timeline_self_peak').flag === null, '전성기 장 목록 불일치');
-ok(DC.LIST.length === Object.keys(F.IDS).length + H.IDS.length + 1 && new Set(DC.LIST.map(d => d.id)).size === DC.LIST.length, '목록 수·중복 오류');
+Object.values(AC.IDS).forEach(id => { const d = DC.byId(id); ok(d && d.title === AC.TITLES[id] && d.flag === 'aptChapters' && d.module === 'aptitude-chapters.js', '특기·적성 장 ' + id + ' 목록 불일치'); });   // 2026-11-25 특기·적성 장 3개
+ok(DC.LIST.length === Object.keys(F.IDS).length + H.IDS.length + Object.keys(AC.IDS).length + 1 && new Set(DC.LIST.map(d => d.id)).size === DC.LIST.length, '목록 수·중복 오류');
 
 // 2. 자리: 사용자 화면(flow·health·peak add)과 같은 앞 장 뒤
 const order = ['timeline_self_03', 'timeline_self_02', 'timeline_self_20', 'timeline_self_35', 'timeline_self_36', 'timeline_wealth_01', 'timeline_wealth_02', 'timeline_career_01', 'timeline_love_01', 'timeline_love_02'];
