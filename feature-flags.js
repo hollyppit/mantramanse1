@@ -16,7 +16,7 @@
      · groupCompat: 만세력 궁합 탭 '여러 명' 보기(compat-group.js) — 3~6명 관계 지도·기운 방향·무리 오행 균형·이어 주는 사람·함께 좋은 달. 표시 전용, 두 사람 궁합 계산 불변. 관리자 스위치(/api/luck-flags groupCompat)
      · weapon: 만세력 '나의 주무기'(weapon.js·weapon-data.js·weapon-view.js) — 원국 탭 카드·오행·강약 판정표·특기·적성 맨 위·운세 흐름 '주무기 발현 타이밍'. 표시 전용, 엔진·점수 불변. 2026-11-26 사용자 승인으로 기본 켬(끄려면 false로 바꿔 배포)
      · timelineCopy: 운명의 타임라인 카드 첫머리 문안(report/hub/hub-timeline.js). 관리자 화면 스위치(/api/luck-flags timelineCopy)로도 켠다
-     · tlSimple: 운명의 타임라인 간단 보기(2026-11-26) — 무료 콘텐츠 맨 위·시기 카드 핵심만·자세히 접기·한국형 오컬트 테마(report/hub/hub-timeline.js·timeline-occult.css). 관리자 화면 스위치(/api/luck-flags tlSimple)로도 켠다
+     · tlSimple: 운명의 타임라인 간단 보기(2026-11-26) — 무료 콘텐츠 맨 위·시기 카드 핵심만·자세히 접기·읽기 정리(색·테마는 그대로)(report/hub/hub-timeline.js·timeline-occult.css). 관리자 화면 스위치(/api/luck-flags tlSimple)로도 켠다
    끄는 방법: 값을 false로 되돌려 배포. 기존 만세력·결제·무빙툰·관리자에는 영향이 없다. 절차: docs/LUCK_ENV_ROLLBACK_2026-11-02.md */
 (function (w) {
   var f = Object.assign({ tlSimple: false, luckAlerts: false, luckEnv: false, macroEra: false, tenGodRoles: false, luckOverlay: false, interpret: false, timeline: false, region: false, wealth: false, regionRead: false, wishSpots: false, space: false, timelineCopy: false, topicDeep: false, lifeNarrative: false, healthBody: true, accidentHint: true, elementFlow: false, luckCycle: false, gyeokAnalysis: false, dayCompat: false, aptitude: false, aptChapters: false, groupCompat: false, psych: false, weapon: true }, w.MANTRA_FLAGS || {});   // dayCompat(2026-11-16): 60갑자 일주 적합도 2판(compat-day.js). 관리자 화면 스위치(/api/luck-flags dayCompat)로도 켠다   // wealth: 직업·활동 적성 고도화(나의 돈 버는 방식·업무 환경·직업·약점). 관리자 화면 스위치로도 켠다(/api/wealth-career)

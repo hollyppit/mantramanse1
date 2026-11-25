@@ -108,7 +108,7 @@
     var dl = TL.daeun(M, ch, now), real = dl.filter(function (x) { return !x.pre; });
     var cur = real.filter(function (x) { return x.isCurrent; })[0] || real[0];
     var st = { d: cur ? cur.idx : null, y: nowY, m: null, ev: null, metric: 'flow' };
-    // 2026-11-26 간단 보기(스위치 tlSimple): 무료 콘텐츠 맨 위·시기 카드는 핵심만 보이고 나머지는 '자세히 보기'로 접음·단위 눈금자 숨김·한국형 오컬트 테마(timeline-occult.css). 꺼져 있으면 예전 화면 그대로
+    // 2026-11-26 간단 보기(스위치 tlSimple): 무료 콘텐츠 맨 위·시기 카드는 핵심만 보이고 나머지는 '자세히 보기'로 접음·단위 눈금자 숨김·글 폭·글자·모바일 여백 정리(timeline-occult.css, 색·테마는 그대로). 꺼져 있으면 예전 화면 그대로
     var SIMPLE = !!(GF && GF.simple);
     try { var sm = sessionStorage.getItem('mt_tl_metric'); if (sm && root.MantraTLGraph && root.MantraTLGraph.NAME[sm]) st.metric = sm; } catch (e) { }
     if (q.y && +q.y >= 1901 && +q.y <= 2098) st.y = +q.y;
@@ -567,7 +567,7 @@
     secs = secs.map(function (x) { var nm2 = SEC_NAME[x.id]; return nm2 ? Object.assign({}, x, { title: nm2[0], sub: nm2[1] }) : x; }).sort(function (a, b) { var ia = SEC_ORDER.indexOf(a.id), ib = SEC_ORDER.indexOf(b.id); return (ia < 0 ? 50 : ia) - (ib < 0 ? 50 : ib); });
     var builders = { glance: glanceHtml, free: freeHtml, birth: birthHtml, flow: flowHtml, now: nowHtml, themes: themesHtml, mine: mineHtml };
     var heroBg = asset('archive'), pos = Q.assetFocus(cfg, 'archive', mobile);
-    var html = '<div class="tq' + (SIMPLE ? ' tq-simple' : '') + '" id="tq"><header class="tq-hero" style="--hero:url(\'' + esc(heroBg) + '\');--pos:' + esc(pos) + '">' + (SIMPLE ? '<span class="tq-bu tq-bu-l" aria-hidden="true"><b>勅令</b><i>命簿開門</i></span><span class="tq-bu tq-bu-r" aria-hidden="true"><b>天地</b><i>日月星辰</i></span>' : '') + '<p class="kick">MANTRA · FATE TIMELINE</p><h1>운명의 타임라인</h1>' + (nm ? '<p class="tq-who">' + esc(A()) + '</p>' : '') + birthLine() + '<p class="tq-intro">' + esc(O.fill(TC.texts.intro, nm, cfg)) + '</p></header>' +
+    var html = '<div class="tq' + (SIMPLE ? ' tq-simple' : '') + '" id="tq"><header class="tq-hero" style="--hero:url(\'' + esc(heroBg) + '\');--pos:' + esc(pos) + '"><p class="kick">MANTRA · FATE TIMELINE</p><h1>운명의 타임라인</h1>' + (nm ? '<p class="tq-who">' + esc(A()) + '</p>' : '') + birthLine() + '<p class="tq-intro">' + esc(O.fill(TC.texts.intro, nm, cfg)) + '</p></header>' +
       '<nav class="tq-nav" id="tqNav" aria-label="타임라인 영역">' + secs.map(function (s, i) { return '<a href="#tq-' + s.id + '" data-z="' + s.id + '"><i>' + (i + 1) + '</i>' + esc(s.title) + '</a>'; }).join('') + (PREVIEW ? '' : '<a class="tq-edit" href="#/me" data-track="mypage_open" data-p="timeline_nav" aria-label="마이페이지">' + ME_ICON + ' 마이페이지</a>') + '</nav>' + guideHtml() +
       secs.map(function (s, i) { return '<section class="tq-sec" id="tq-' + s.id + '" data-z="' + s.id + '">' + (s.id === 'glance' && !PREVIEW ? avatarHtml() : '') + '<div class="tq-sech"><span>' + (i + 1) + '</span><div><h2>' + esc(s.title) + '</h2>' + (s.sub ? '<p>' + esc(s.sub) + '</p>' : '') + '</div></div><div class="tq-body" id="tqb-' + s.id + '">' + build(s.id) + '</div></section>'; }).join('') +
       '<footer class="tq-foot"><p class="dis">' + esc(TC.texts.notice) + '</p></footer></div>';
