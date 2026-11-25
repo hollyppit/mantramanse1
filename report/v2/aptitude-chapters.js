@@ -293,8 +293,13 @@
     var es = null; try { es = root.MantraElementStrategy && root.MantraElementStrategy.natal(C.M, C.ch); } catch (e) { es = null; }
     var lead = es && es.core ? es.core.type + ' × ' + t1.name + ' — ' + D.TYPE_CLAUSE[es.core.el] + ', ' + D.TALENT_MONEY[t1.id] : t1.name + ' — ' + D.TALENT_MONEY[t1.id];
     var subs = moneySubs(C);
+    // 2026-11-26 세분화: 대표 특기의 1위 결 · 돈 버는 리듬(짧고 굵게↔길고 꾸준히, 실내↔바깥) — 기운 쪽만
+    var y = typeOf(t1), typeLineM = y && D.TYPE_MONEY[y.top.id] ? D.TYPE_MONEY[y.top.id] : '';
+    var axm = {}; C.r.sport.axes.forEach(function (a) { axm[a.id] = a; });
+    var rhythm = ['short_long', 'in_out'].map(function (k) { var a = axm[k]; return a && a.ok && a.side !== 'bal' ? D.MONEY_AXIS[k][a.side] : ''; }).filter(Boolean);
     var rows = subs.map(function (x) { var m = D.MONEY[x.sub.id]; return '<div class="dp-talent"><h4>' + esc(x.sub.name + ' · ' + x.sub.recK) + '</h4><p>' + esc('버는 방식 ' + m.model + ' · 처음 드는 비용 ' + m.cost + ' · ' + m.repeat + '. ' + m.eff + '.') + '</p><p class="dp-mi">' + esc('주의: ' + m.caution) + '</p></div>'; }).join('');
-    return '<section class="dp-embed dp dp-apt"><div class="cap">특기가 돈이 되는 구조</div><p class="lead">' + esc(lead) + '</p>' + rows +
+    return '<section class="dp-embed dp dp-apt"><div class="cap">특기가 돈이 되는 구조</div><p class="lead">' + esc(lead) + '</p>' +
+      (typeLineM || rhythm.length ? '<p>' + esc([typeLineM].concat(rhythm).filter(Boolean).join(' ')) + '</p>' : '') + rows +
       '<p class="dp-mi">' + esc(D.MONEY_NOTE) + '</p></section>';
   }
   function moneySubs(C) {
@@ -311,8 +316,10 @@
       var t = D.COST_TYPE[hit.sub.id] || 'low'; (groups[t] = groups[t] || []).push(a.name);
     });
     var keys = ['gear', 'lesson', 'material', 'low'].filter(function (k) { return groups[k]; }); if (!keys.length) return null;
+    var sl = C.r.sport.axes.filter(function (a) { return a.id === 'short_long'; })[0], spendAx = sl && sl.ok && sl.side !== 'bal' ? D.SPEND_AXIS[sl.side] : '';   // 2026-11-26: 지출이 새는 모양
     return '<section class="dp-embed dp dp-apt"><div class="cap">취미에 나가는 돈 점검</div><p class="lead">' + esc((C.kid ? '해 보면 좋은 활동' : '추천 활동') + '을 시작하기 전에, 돈이 어떤 모양으로 나가는지 먼저 보면 새는 돈을 줄일 수 있어요.') + '</p>' +
       keys.map(function (k) { return '<div class="dp-talent"><h4>' + esc(D.COST_NAME[k] + ' · ' + groups[k].join(', ')) + '</h4><p>' + esc(D.COST_TIP[k]) + '</p></div>'; }).join('') +
+      (spendAx ? '<p>' + esc(spendAx) + '</p>' : '') +
       '<p class="dp-mi">' + esc('활동은 특기·적성 풀이(종합풀이 “' + TITLES[IDS.self] + '”)의 추천에서 가져왔어요. 이 사주의 돈 쓰는 성향은 이 장 위쪽 풀이와 함께 보세요.') + '</p></section>';
   }
 

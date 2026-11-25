@@ -22,7 +22,8 @@ Object.keys(D.WORK).forEach(k => { const w = D.WORK[k]; ['use', 'proof', 'kidPro
 assert.equal(Object.keys(D.MONEY).sort().join(), Object.keys(D.SIDE).sort().join(), '돈 구조 12개 = 부업 세부 분야');
 Object.keys(D.MONEY).forEach(k => ['model', 'cost', 'repeat', 'eff', 'caution'].forEach(x => assert.ok(D.MONEY[k][x], k + '.' + x)));
 assert.equal(D.TYPE_CLAUSE.length, 5); assert.equal(Object.keys(D.TALENT_MONEY).sort().join(), 'body,craft,expr,strat,study');
-const cnt = { ty: {} };
+const cnt = { ty: {}, mty: {} };
+Object.keys(D.WORK_TYPE).forEach(k => assert.ok(D.TYPE_MONEY[k], '결 돈 문장 ' + k));
 // 세분화 문안: 결 15개 모두 일·진로 문장, 세부 분야 48개 모두 비용 유형, 새 축 2개 궁합 문장
 const AD = c.MantraAptitudeData;
 Object.keys(AD.TALENT_SUB).forEach(t => AD.TALENT_SUB[t].forEach(x => ['work', 'kid', 'role', 'kidRole'].forEach(k => assert.ok(D.WORK_TYPE[x.id] && D.WORK_TYPE[x.id][k], '결 문안 ' + x.id + '.' + k))));
@@ -74,6 +75,10 @@ for (let i = 0; i < N; i++) {
   if (age < 20) assert.equal(mb, null, '20세 미만 돈 구조 블록 없음');
   else { assert.ok(mb && /특기가 돈이 되는 구조/.test(mb) && mb.includes(D.MONEY_NOTE), '돈 구조 블록'); const es = c.MantraElementStrategy.natal(M, ch); if (es && es.core) assert.ok(mb.includes(es.core.type), '핵심 수익 유형 = 오행별 실전 전략'); moneyN++; }
   assert.ok(sb && r.final.activities.some(a => sb.includes(a.name)), '취미 지출 블록은 추천 활동으로'); spendN++;
+  // 2026-11-26 재물 블록 세분화: 돈 구조에 대표 특기의 1위 결·기운 쪽 리듬, 지출에 짧고 굵게↔길고 꾸준히 — 실제 값과 일치
+  { const ty = top.types, ax = {}; r.sport.axes.forEach(a => { ax[a.id] = a; });
+    if (mb) { assert.ok(mb.includes(D.TYPE_MONEY[ty.top]), '돈 구조 블록에 1위 결 문장'); ['short_long', 'in_out'].forEach(k => { const a = ax[k]; if (a.ok && a.side !== 'bal') assert.ok(mb.includes(D.MONEY_AXIS[k][a.side]), '돈 리듬 ' + k); else Object.values(D.MONEY_AXIS[k]).forEach(x => assert.ok(!mb.includes(x), '균형이면 리듬 없음')); }); cnt.mty[ty.top] = 1; }
+    const sl = ax.short_long; if (sl.ok && sl.side !== 'bal') assert.ok(sb.includes(D.SPEND_AXIS[sl.side]), '지출 축 문장'); else assert.ok(!sb.includes(D.SPEND_AXIS.L) && !sb.includes(D.SPEND_AXIS.R)); }
   [mb || '', sb].forEach(t => assert.ok(!BAN.test(t.replace(/<[^>]+>/g, ' ')), '재물 블록 금지 표현: ' + (t.match(BAN) || [''])[0]));
   AC.on = false;
   // add(): 자리·중복
@@ -130,4 +135,5 @@ assert.ok(/aptPairCard\(Rr\) \+ evidence/.test(read('report/v2/love-compat.js'))
 console.log('특기·적성 장 통과 — 사주 ' + n + '개(20세 미만 ' + kids + '개), 장 제목 문장 ' + Object.keys(titles).length + '종, 부업 문단 ' + side + '개, 재물 블록 돈 구조 ' + moneyN + '·지출 ' + spendN + '개');
 console.log('장에 들어간 대표 특기 결 분포', Object.keys(cnt.ty).length + '종', JSON.stringify(cnt.ty));
 assert.ok(Object.keys(cnt.ty).length >= 12, '장에 들어간 결이 사람마다 달라야 함');
+console.log('돈 구조 블록에 들어간 결', Object.keys(cnt.mty).length + '종'); assert.ok(Object.keys(cnt.mty).length >= 12, '돈 구조 블록의 결도 사람마다 달라야 함');
 console.log('재충전 활동 분포', Object.entries(recharge).sort((a, b) => b[1] - a[1]).map(x => x[0] + ' ' + x[1]).join(' · '));
