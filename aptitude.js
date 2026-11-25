@@ -10,7 +10,7 @@
    · 사용: MantraAptitude.build(Manse, ch) */
 (function (G) {
   'use strict';
-  var VERSION = 'aptitude-20261125-1';
+  var VERSION = 'aptitude-20261126-1';   // 2026-11-26 세분화: 특기 결 15·세부 분야 6→8·활동 방식 7축
   var D = function () { return G.MantraAptitudeData; };
   var TGS = ['비견', '겁재', '식신', '상관', '편재', '정재', '편관', '정관', '편인', '정인'];
   var GOF = { 비견: 0, 겁재: 0, 식신: 1, 상관: 1, 편재: 2, 정재: 2, 편관: 3, 정관: 3, 편인: 4, 정인: 4 };
@@ -51,7 +51,18 @@
       water: { 't:skill': 0.5, 't:ind': 0.4, 't:discipline': 0.3, e4: 0.7, g4: 0.4, '정인': 0.2 },
       tech: { 't:skill': 0.8, 't:discipline': 0.5, 't:ind': 0.4, e3: 0.5, '식신': 0.3, 't:tactic': 0.2 },
       racket: { 't:tactic': 0.7, 't:compete': 0.6, 't:energy': 0.4, 't:skill': 0.3, e4: 0.3, e1: 0.3, '상관': 0.2 },
+      target: { e3: 0.5, '정관': 0.4, 't:discipline': 0.5, root: 0.2, '식신': 0.2 },
+      xtreme: { 't:energy': 0.6, '상관': 0.5, e1: 0.4, yeokma: 0.3, '편인': 0.3, 't:ind': 0.2 },
     },
+    // 특기 5영역의 결(영역마다 3개) — 원국 요소만 쓴다(운동 성향 t:* 는 쓰지 않음)
+    talentSub: {
+      expr: { visual: { e0: 0.5, '식신': 0.5, e3: 0.4, g1: 0.3, '편재': 0.2 }, verbal: { '상관': 0.6, g4: 0.5, e4: 0.5, '정인': 0.2 }, perform: { e1: 0.7, '상관': 0.4, '겁재': 0.4, g0: 0.3, strong: 0.3 } },
+      craft: { precise: { e3: 0.8, '식신': 0.5, '정재': 0.3 }, routine: { g3: 0.6, e2: 0.6, root: 0.5, '정관': 0.3 }, principle: { '편인': 0.6, g4: 0.4, e4: 0.4, e3: 0.3 } },
+      body: { burst: { e1: 0.7, '겁재': 0.4, '상관': 0.4, g1: 0.3 }, endure: { e2: 0.7, root: 0.5, '비견': 0.5, strong: 0.3 }, flow: { e4: 0.6, e0: 0.5, '정인': 0.4, '식신': 0.3 } },
+      study: { logic: { e3: 0.6, '편인': 0.5, '편관': 0.3, e4: 0.3 }, observe: { '정재': 0.4, '정인': 0.4, e2: 0.4, '정관': 0.3, '식신': 0.3 }, insight: { e4: 0.7, '정인': 0.4, '편인': 0.4, '상관': 0.2 } },
+      strat: { duel: { '겁재': 0.7, '편관': 0.6, g0: 0.4, e1: 0.3 }, reading: { '편재': 0.5, g4: 0.4, e4: 0.5, '편관': 0.2 }, persuade: { g2: 0.5, '상관': 0.5, e1: 0.3, '정관': 0.2, '식신': 0.2 } },
+    },
+    typeMix: 0.03,   // 1·2위 결 점수 차가 이보다 작으면 '섞여 있어요'
     detail: {
       art: {
         draw: { 't:skill': 0.5, g1: 0.5, '식신': 0.4, e0: 0.4, e3: 0.3, 't:ind': 0.3 },
@@ -60,6 +71,8 @@
         media: { '상관': 0.5, '편재': 0.5, e1: 0.4, e0: 0.3, 't:tactic': 0.3, yeokma: 0.3 },
         craft: { '식신': 0.6, e2: 0.4, e3: 0.5, 't:skill': 0.5, '정재': 0.3 },
         stage: { '상관': 0.6, e1: 0.6, 't:energy': 0.5, '겁재': 0.3, 't:coop': 0.3 },
+        design: { '정재': 0.5, e3: 0.4, '식신': 0.3, e0: 0.3, 't:skill': 0.3, '정관': 0.2 },
+        compose: { '편인': 0.5, '상관': 0.4, e4: 0.5, 't:ind': 0.4, e1: 0.2 },
       },
       intel: {
         board: { 't:tactic': 0.7, '편관': 0.3, 't:compete': 0.4, e4: 0.4 },
@@ -68,6 +81,8 @@
         lang: { '정인': 0.5, 't:discipline': 0.5, '식신': 0.3, e4: 0.3, '상관': 0.3 },
         code: { '편인': 0.5, e3: 0.5, 't:skill': 0.4, 't:tactic': 0.4 },
         read: { g4: 0.5, '상관': 0.3, 't:coop': 0.4, e0: 0.3 },
+        econ: { '편재': 0.5, g2: 0.3, 't:tactic': 0.4, e4: 0.3, '정관': 0.2, '상관': 0.2 },
+        mind: { '정인': 0.6, e4: 0.5, '편인': 0.3, 't:ind': 0.3, root: 0.2 },
       },
       outdoor: {
         hike: { e2: 0.4, e0: 0.4, 't:discipline': 0.3, root: 0.3, 't:energy': 0.3 },
@@ -76,6 +91,8 @@
         ride: { 't:energy': 0.5, 't:ind': 0.4, e0: 0.4, yeokma: 0.3, strong: 0.3 },
         fish: { e4: 0.6, '정인': 0.3, 't:ind': 0.4, 't:discipline': 0.3 },
         green: { e0: 0.6, '정재': 0.4, e2: 0.4, '식신': 0.3 },
+        city: { '식신': 0.4, '편재': 0.4, e1: 0.4, yeokma: 0.3, '상관': 0.2, e0: 0.2 },
+        eco: { '정인': 0.4, '편인': 0.3, e4: 0.4, e0: 0.4, 't:discipline': 0.2, g4: 0.2 },
       },
       life: {
         cook: { '식신': 0.6, '정재': 0.4, e1: 0.3, e2: 0.3 },
@@ -84,6 +101,8 @@
         care: { e0: 0.5, '정인': 0.4, e2: 0.4, '정재': 0.3 },
         fix: { '정관': 0.4, '정재': 0.4, e2: 0.4, e3: 0.4 },
         maker: { '편인': 0.5, e3: 0.4, 't:skill': 0.4, 't:tactic': 0.3 },
+        drink: { '식신': 0.5, '정재': 0.4, e4: 0.4, e1: 0.3, 't:skill': 0.3 },
+        reform: { '상관': 0.5, '편인': 0.4, e3: 0.4, 't:skill': 0.3, e2: 0.2 },
       },
       social: {
         club: { g2: 0.4, '정관': 0.4, 't:coop': 0.5, e1: 0.3 },
@@ -92,6 +111,8 @@
         teach: { '상관': 0.4, g4: 0.4, e1: 0.3, '정관': 0.3 },
         network: { '편재': 0.6, e1: 0.4, '겁재': 0.3, yeokma: 0.3 },
         team: { 't:coop': 0.4, 't:compete': 0.4, '편관': 0.3, 't:tactic': 0.3 },
+        host: { '편재': 0.5, '식신': 0.4, e1: 0.4, 't:tactic': 0.3, '상관': 0.2 },
+        listen: { '정인': 0.6, e4: 0.4, 't:coop': 0.4, '편인': 0.2, '정관': 0.2 },
       },
     },
     axis: {
@@ -100,6 +121,8 @@
       skill_stamina: { L: { '식신': 0.5, g4: 0.4, e3: 0.5 }, R: { g0: 0.4, e1: 0.4, e0: 0.4, strong: 0.5 } },
       duel_self: { L: { '겁재': 0.5, '편관': 0.5, '상관': 0.3 }, R: { '비견': 0.5, '정인': 0.4, '식신': 0.3 } },
       rule_adapt: { L: { '정관': 0.6, '정인': 0.4, e2: 0.4 }, R: { '편인': 0.4, '편재': 0.4, '상관': 0.3, e4: 0.4 } },
+      in_out: { L: { g4: 0.4, e4: 0.4, e3: 0.3, '정인': 0.3 }, R: { e0: 0.4, e1: 0.3, yeokma: 0.3, '편재': 0.4 } },
+      short_long: { L: { e1: 0.5, '상관': 0.4, '겁재': 0.4, '편재': 0.2 }, R: { e2: 0.5, root: 0.4, '식신': 0.4, g3: 0.3 } },
     },
     // 수준 문턱(여러 사주 분포로 맞춘 값 — tests/aptitude-sim.cjs 가 분포를 보고한다)
     lv: { hi: 0.53, mid: 0.37 },
@@ -207,6 +230,22 @@
     o.care = lv ? (txt.care || '') : '';
     if (txt.long) o.long = txt.long;
     return o;
+  }
+
+  // 특기 한 영역의 결 3개: 같은 원국 요소로 결마다 점수 → 영역 안 순위(상대 비교). 1·2위가 가까우면 '섞여 있어요'
+  function typesOf(F, hourKnown, t) {
+    var list = (D().TALENT_SUB || {})[t.id], specs = CFG.talentSub[t.id];
+    if (!t.ok || !list || !specs) return null;
+    var ty = list.map(function (x) {
+      var sc = scoreOf(F, specs[x.id]), lv = sc.ok && sc.basis.length ? levelOf(sc.score) : null;
+      return { id: x.id, name: x.name, easy: x.easy, ok: !!lv, score: r3(sc.score), level: lv, levelK: lv ? D().LEVEL[lv] : '', basis: sc.basis, link: lv ? linkOf(sc.basis) : '', acts: lv ? x.acts.slice() : [], txt: x.txt, confidence: confOf(sc, hourKnown) };
+    });
+    var ok = ty.filter(function (x) { return x.ok; }).sort(function (a, b) { return (b.score - a.score) || (a.id < b.id ? -1 : 1); });
+    if (!ok.length) return null;
+    ty.forEach(function (x) { x.rank = ok.indexOf(x); });
+    var top = ok[0], sec = ok[1], mix = !!(sec && top.score - sec.score < CFG.typeMix);
+    var text = ok.every(function (x) { return x.level === 'lo'; }) ? D().TYPE_LOW : mix ? D().TYPE_MIX.replace('{a}', J(top.name, '과', '와')).replace('{b}', sec.name) : top.txt;
+    return { list: ty, top: top.id, topName: top.name, mix: mix, second: mix ? sec.id : null, text: text };
   }
 
   // 세부 분야(종목) 목록: 점수 → 순위 → 추천 수준 3단계 → 고려할 점(활동 방식과 겹침·엇갈림)
@@ -335,8 +374,22 @@
     var fields = DD.FIELD.map(function (f) { return item(F, hk, 'field', f, CFG.field[f.id]); });
     var sport = sportBlock(F, hk);
     var details = detailBlock(F, hk, sport, talents, fields);
-    fields.forEach(function (fd) { fd.links = details[fd.id] ? details[fd.id].links : []; });
+    fields.forEach(function (fd) {
+      fd.links = details[fd.id] ? details[fd.id].links : [];
+      // 이 분야 안에서 앞선 세부 분야 2개(분야별 상세와 같은 순위)
+      fd.topSubs = fd.ok && details[fd.id] ? details[fd.id].subs.filter(function (x) { return x.ok; }).sort(function (a, b) { return a.rank - b.rank; }).slice(0, 2).map(function (x) { return { id: x.id, name: x.name, rec: x.rec, recK: x.recK }; }) : [];
+    });
+    talents.forEach(function (t) { t.types = typesOf(F, hk, t); });
     var fin = finalBlock(ch, talents, fields, sport, details);
+    // 내 특기 결로 골라 본 활동: 앞선 특기 2개(은은함 제외)의 1순위 결 활동 — 세부 분야 추천과 다른 각도
+    var tOrd = talents.filter(function (t) { return t.ok && t.types && t.level !== 'lo'; }).sort(function (x, y) { return (y.score - x.score) || (x.id < y.id ? -1 : 1); }).slice(0, 2);
+    var seenA = {}; fin.activities.forEach(function (a) { seenA[a.name] = 1; });
+    fin.typeActs = tOrd.map(function (t) {
+      var ty = t.types.list.filter(function (x) { return x.id === t.types.top; })[0];
+      var acts = ty.acts.filter(function (a) { return !seenA[a] && (seenA[a] = 1); }).slice(0, 2);
+      return acts.length ? { talent: t.id, talentName: t.name, type: ty.id, typeName: ty.name, levelK: ty.levelK, acts: acts } : null;
+    }).filter(Boolean);
+    fin.typeNote = DD.TYPE_ACTS_NOTE;
     var top = function (a) { return a.filter(function (x) { return x.ok; }).sort(function (x, y) { return (y.score - x.score) || (x.id < y.id ? -1 : 1); })[0]; };
     var tt = top(talents), tf = top(fields);
     var axLean = sport.axes.filter(function (a) { return a.ok && a.side !== 'bal'; }).sort(function (a, b) { return Math.abs(b.d) - Math.abs(a.d); }).slice(0, 2);

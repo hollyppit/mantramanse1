@@ -1,4 +1,5 @@
 /* 특기·적성 분석 — 화면 그리기 전용(만세력 '특기·적성' 탭). 계산은 aptitude.js, 문안은 aptitude-data.js. 2026-11-25
+   · 2026-11-26 세분화: 특기 카드에 결 3가지(typeBlock)·적성 카드에 앞선 세부 분야·추천에 결 활동, 세부 분야·축 수는 결과 길이대로
    · 흐름(2026-11-25 개편): 한눈에 보기(종합 흡수) → [활동·취미 | 직업·일] 전환
        활동·취미: 특기 5영역(방식) → 적성 6분야(분야, 이어진 특기) → 분야별 상세(6분야 선택, 기본은 대표 적성) → 추천
        직업·일: 직업·활동 적성(index.html renderCareer 결과를 opt.careerHtml 로 받아 그대로 넣음 — 계산 섞지 않음)
@@ -28,6 +29,8 @@
     '.apt-fsel{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}.apt-fsel button{border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:.82rem;background:var(--surface);color:var(--ink-2);cursor:pointer}.apt-fsel button.on{border-color:var(--accent);color:var(--ink);font-weight:700;background:color-mix(in srgb,var(--accent) 10%,var(--surface))}' +
     '.apt-intro{font-size:.88rem;color:var(--ink-2);margin:0 0 6px}.ov-grp{grid-column:1/-1;font-size:.78rem;font-weight:800;color:var(--ink-3);margin:4px 0 -2px}.ov-b.go{cursor:pointer}' +
     '#aptOverview .ov-grid{grid-template-columns:repeat(3,1fr)}@media(max-width:900px){#aptOverview .ov-grid{grid-template-columns:1fr 1fr}}@media(max-width:640px){#aptOverview .ov-grid{grid-template-columns:1fr}}' +
+    '.apt-b ul.apt-ty{list-style:none;margin:4px 0 0;padding:0}.apt-ty li{border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:5px 0;line-height:1.55}.apt-ty li.apt-ty1{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,var(--surface))}.apt-ty .rk{display:inline-block;margin-right:5px;font-size:.72rem;font-weight:800;color:var(--accent)}.apt-ty .bs{display:block;font-size:.74rem;color:var(--ink-3);margin-top:2px}' +
+    '.apt-tyl{font-size:.8rem;color:var(--ink-2)}.apt-tyl b{color:var(--ink)}.apt-ts{font-size:.74rem;color:var(--ink-3)}' +
     '@media(max-width:600px){.apt-axr{grid-template-columns:5.6em 1fr 5.6em}.apt-axt{padding-left:0}}';
   var injected = false;
   function inject() { if (injected || typeof document === 'undefined') return; injected = true; var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st); }
@@ -49,10 +52,22 @@
       if (!it.ok) return '<div class="apt-it"><summary><span class="apt-n">' + esc(it.name) + chip('근거 부족') + '</span><span class="apt-i">' + esc(it.interp) + '</span></summary></div>';
       return '<details class="apt-it"><summary><span class="apt-n"><span>' + esc(it.name) + '</span>' + chip(it.levelK, LV[it.level]) + '</span><span class="apt-e">' + esc(it.easy) + ' ' + dots(it.level) + '</span>' +
         (it.area === 'field' ? linkLine(it.links) : '') +
-        '<span class="apt-i">' + esc(it.interp) + '</span><span class="apt-more">눌러서 근거·연결 해석·추천 활동 보기</span></summary><div class="apt-b">' +
+        (it.types ? '<span class="apt-tyl">가장 앞선 결 · <b>' + esc(it.types.topName) + '</b>' + (it.types.mix ? ' (' + esc(it.types.list.filter(function (x) { return x.id === it.types.second; })[0].name) + '도 비슷)' : '') + '</span>' : '') +
+        (it.area === 'field' && it.topSubs && it.topSubs.length ? '<span class="apt-ts">이 분야에서 앞선 세부 분야: ' + it.topSubs.map(function (x) { return esc(x.name); }).join(' · ') + '</span>' : '') +
+        '<span class="apt-i">' + esc(it.interp) + '</span><span class="apt-more">눌러서 ' + (it.types ? '결 3가지·' : '') + '근거·연결 해석·추천 활동 보기</span></summary><div class="apt-b">' +
+        (it.types ? typeBlock(it.types) : '') +
         '<h4>명식 근거</h4>' + basisUl(it.basis) + (it.link ? '<h4>내 명식과의 연결</h4><p>' + esc(it.link) + '</p>' : '') +
         (it.acts.length ? '<h4>떠올려 볼 활동</h4>' + acts(it.acts) : '') + (it.care ? '<h4>함께 알아 둘 점</h4><p>' + esc(it.care) + '</p>' : '') +
         '<p class="small muted">' + esc(it.confK) + (r.hourKnown ? '' : ' · 시주 없이 계산') + '</p></div></details>';
+    };
+    var typeBlock = function (T) {
+      var ord = T.list.filter(function (x) { return x.ok; }).sort(function (a, b) { return a.rank - b.rank; });
+      return '<h4>힘을 쓰는 결 3가지</h4><p>' + esc(T.text) + '</p><ul class="apt-ty">' + ord.map(function (x) {
+        return '<li class="' + (x.rank === 0 ? 'apt-ty1' : '') + '"><span class="rk">' + (x.rank + 1) + '위</span><b>' + esc(x.name) + '</b> ' + dots(x.level) + ' <span class="small muted">' + esc(x.easy) + '</span>' +
+          (x.rank === 0 && !T.mix ? '' : '<br><span class="small">' + esc(x.txt) + '</span>') +
+          '<span class="bs">근거: ' + esc(x.basis.map(function (b) { return b.label; }).join(' · ')) + '</span>' +
+          (x.rank === 0 ? '<span class="bs">해 볼 만한 활동: ' + esc(x.acts.join(' · ')) + '</span>' : '') + '</li>';
+      }).join('') + '</ul><p class="small muted">' + esc(G.MantraAptitudeData.TYPE_NOTE) + '</p>';
     };
     var s = r.summary, sp = r.sport, f = r.final, det = r.details;
     var bySc = function (a) { return a.filter(function (x) { return x.ok; }).slice().sort(function (x, y) { return (y.score - x.score) || (x.id < y.id ? -1 : 1); }); };
@@ -69,7 +84,7 @@
         return '<div class="ov-b go" data-apt-go="' + go + '" role="button" tabindex="0"><div class="ov-h"><div class="ov-ht">' + esc(title) + '</div><span class="btn-link">자세히 ›</span></div>' +
           '<div class="ov-big">' + esc(big) + (small ? '<small>' + esc(small) + '</small>' : '') + '</div>' + (chips ? '<div class="ov-chips">' + chips + '</div>' : '') + (easy ? '<p class="ov-easy">' + esc(easy) + '</p>' : '') + '</div>';
       };
-      var b1 = ts[0] ? blk('대표 특기 · 힘 쓰는 방식', 'hobby:aptTalent', ts[0].name, ts[0].levelK, ts.slice(1, 3).map(function (t) { return oc(t.name + ' ' + t.levelK, LV[t.level]); }).join(''), ts[0].interp) : '';
+      var b1 = ts[0] ? blk('대표 특기 · 힘 쓰는 방식', 'hobby:aptTalent', ts[0].name, ts[0].levelK + (ts[0].types ? ' · ' + ts[0].types.topName + ' 결' : ''), ts.slice(1, 3).map(function (t) { return oc(t.name + ' ' + t.levelK, LV[t.level]); }).join(''), ts[0].interp) : '';
       var b2 = fs[0] ? blk('대표 적성 · 끌리는 분야', 'hobby:aptField', fs[0].name, fs[0].levelK, fs.slice(1, 3).map(function (t) { return oc(t.name + ' ' + t.levelK, LV[t.level]); }).join(''), fs[0].interp) : '';
       var b3 = f.activities.length ? blk('먼저 해 볼 활동', 'hobby:aptFinal', f.activities[0].name, f.activities[0].recK, f.activities.slice(1).map(function (a) { return oc(a.name, REC[a.rec]); }).join(''), f.longTerm ? '오래 다듬어 볼 활동: ' + f.longTerm.name : '') : '';
       var w = '';
@@ -95,7 +110,7 @@
       '<button type="button" role="tab" data-apt-mode="work" class="' + (mode === 'work' ? 'on' : '') + '" aria-selected="' + (mode === 'work') + '">직업·일<small>업무 방식·강점 분야·환경</small></button></div>' : '';
 
     // ── 활동·취미 ──
-    var h2 = '<section class="card apt" id="aptTalent"><div class="card-h"><h2>특기 5영역</h2><span class="note">이렇게 힘을 써요(방식)</span></div><div class="apt-grid">' + r.talents.map(card).join('') + '</div></section>';
+    var h2 = '<section class="card apt" id="aptTalent"><div class="card-h"><h2>특기 5영역</h2><span class="note">이렇게 힘을 써요(방식) · 영역마다 결 3가지</span></div><div class="apt-grid">' + r.talents.map(card).join('') + '</div></section>';
     var h3 = '<section class="card apt" id="aptField"><div class="card-h"><h2>적성 6분야</h2><span class="note">이런 분야에 끌려요(분야)</span></div><div class="apt-grid">' + r.fields.map(card).join('') + '</div></section>';
     var axBlock = function (axes) {
       return '<div class="apt-ax">' + axes.map(function (a) {
@@ -120,12 +135,13 @@
       var trs = d.traits ? '<div class="apt-sec">운동 성향 6가지</div><div class="apt-tr">' + d.traits.map(function (t) { return '<div><b>' + esc(t.name) + ' ' + (t.ok ? chip(t.levelK, t.bipolar ? '' : LV[t.level]) : chip('근거 부족')) + '</b>' + esc(t.interp) + '</div>'; }).join('') + '</div>' : '';
       return '<div class="apt-pane" data-apt-fpane="' + id + '"' + (id === fsel ? '' : ' hidden') + '><p class="apt-intro">' + esc(d.intro) + '</p>' +
         (d.links.length ? '<div class="apt-acts" style="margin-bottom:6px">' + d.links.map(function (l) { return '<span>이어진 특기 · ' + esc(l.name) + ' ' + esc(l.levelK) + '</span>'; }).join('') + '</div>' : '') + trs +
-        '<div class="apt-sec">활동 방식 5가지 기울기</div>' + axBlock(d.axes) +
-        '<div class="apt-sec">세부 분야 6가지</div><div class="apt-grid">' + d.subs.slice().sort(function (a, b) { return a.rank - b.rank; }).map(subCard).join('') + '</div></div>';
+        '<div class="apt-sec">활동 방식 ' + d.axes.length + '가지 기울기</div>' + axBlock(d.axes) +
+        '<div class="apt-sec">세부 분야 ' + d.subs.length + '가지</div><div class="apt-grid">' + d.subs.slice().sort(function (a, b) { return a.rank - b.rank; }).map(subCard).join('') + '</div></div>';
     }).join('');
     var h4 = '<section class="card apt" id="aptDetail"><div class="card-h"><h2>분야별 상세</h2><span class="note">분야를 골라 보세요 · ★ 대표 적성</span></div>' + fbtn + panes + '</section>';
     var h5 = '<section class="card apt" id="aptFinal"><div class="card-h"><h2>추천</h2><span class="note">직접 해 보며 맞는지 확인해 보세요</span></div>' +
       '<div class="apt-sec">탐색해 볼 활동</div><ul class="apt-rec">' + f.activities.map(function (a) { return '<li><b>' + esc(a.name) + '</b> ' + chip(a.recK, REC[a.rec]) + ' <span class="from">' + esc(a.from) + '</span><br><span class="small">' + esc(a.why) + '</span></li>'; }).join('') + '</ul>' +
+      (f.typeActs && f.typeActs.length ? '<div class="apt-sec">내 특기 결로 골라 본 활동</div><ul class="apt-rec">' + f.typeActs.map(function (a) { return '<li><b>' + esc(a.acts.join(' · ')) + '</b> <span class="from">' + esc(a.talentName + ' · ' + a.typeName + ' 결(' + a.levelK + ')') + '</span></li>'; }).join('') + '</ul><p class="small muted">' + esc(f.typeNote) + '</p>' : '') +
       (f.longTerm ? '<div class="apt-sec">오래 붙잡고 다듬어 볼 활동</div><div class="apt-box"><b>' + esc(f.longTerm.name) + '</b> <span class="small muted">' + esc(f.longTerm.from) + '</span><br>' + esc(f.longTerm.why) + '</div>' : '') +
       (f.complement ? '<div class="apt-sec">곁들이면 좋은 보완 성향</div><div class="apt-box"><b>' + esc(f.complement.name) + '</b> <span class="small muted">' + esc(f.complement.levelK) + '</span><br>' + esc(f.complement.text) + (f.yongNote ? '<br><span class="small muted">' + esc(f.yongNote) + '</span>' : '') + '</div>' : '') +
       '<p class="small muted" style="margin-top:6px">추천 수준: <b>적극 탐색 추천</b>(먼저 체험해 볼 만함) · <b>관심 가져볼 활동</b>(기회가 되면 시도) · <b>취향에 따라 선택</b>(주된 방향은 아니지만 고를 수 있음)</p>' +
