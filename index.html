@@ -8659,32 +8659,32 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="card-h"><h2>${term('대운')} 흐름 <span class="lvl">${LEVEL_ROLE.daeun}</span></h2><span class="note">${ch.daeun.forward ? term('순행') : term('역행')} · ${term('대운수')} ${ch.daeun.num} (정확히 ${ch.daeun.exact.toFixed(2)}년)</span></div>
       ${chartLegend()}
       ${elLegendBar()}<div class="chart" data-chart="daeun"></div>
+      ${wpBlock('luck', { curY, wolY: Y, part: 'daeun' })}
       <div class="lts">${ch.daeun.list.map((x, i) => luckTile(x, `${x.startAge}세 · ${x.startYear}`, 'daeun:' + i, sel.kind === 'daeun' && sel.i === i, du === x)).join('')}</div>
       ${lcDaeunHTML(ch)}
       ${foldBox('대운의 12운성 변화 보기 · 기운이 자라고 쉬는 순서', unDaeunHTML(ch, du))}
       ${daeunDetail || (isDomain() ? domNote('daeun') : '<p class="note">막대 높이는 흐름 적합도, 색은 그 시기에 두드러지는 오행(길흉 아님, 좋음·무난·조심은 보조 표시), 막대 아래 글자는 그 대운 천간의 십신, 변화·부담 신호는 테두리와 아래 글자(변·부)입니다. 막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>')}
-      ${wpBlock('luck', { curY, wolY: Y, part: 'daeun' })}
     </section>
     <section class="card">
       <div class="card-h"><h2>연도별 흐름 · ${term('세운')} <span class="lvl">${LEVEL_ROLE.seun}</span></h2></div>
       ${chartLegend()}
-      <div class="legend sj-leg" style="margin:4px 0 2px"><span><i class="sw sj-sw"></i><b style="color:var(--samjae)">빗금 띠·들/눌/날 = 삼재 3년</b> · 띠 기준 전통 참고 보조 지표(막대 색·점수와 별개)</span></div>
+      <div class="legend sj-leg" style="margin:4px 0 2px"><span><i class="sw sj-sw"></i><b style="color:var(--samjae)">빗금 띠·들/눌/날 = 삼재 3년</b> · 띠 기준 전통 참고 보조 지표(막대 색·점수와 별개)</span><span><i class="sw" style="background:none;border:2px solid var(--ink-3);border-radius:4px"></i>테두리 = 그 10년의 대운(색은 대운의 대표 오행) · <b>굵은 테두리</b> = 대운이 일주와 합해 그 오행이 더 강해지는 10년</span></div>
       ${elLegendBar()}<div class="chart" data-chart="life"></div>
+      ${wpBlock('luck', { curY, wolY: Y, part: 'seun' })}
       ${samjaeBox(sel.kind === 'seun' ? sel.Y : curY)}
       ${yearSummary(curY)}
       ${lcSeunHTML(sel.kind === 'seun' ? sel.Y : curY)}
       ${foldBox('환경 변화 타임라인 보기 · 직업·재물·인연·이동·학습이 부각되는 해', envTimeline('seun'))}
       ${seunDetail || (isDomain() ? domNote('seun') : '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60%를 섞은 흐름 점수, 색은 그 시기에 두드러지는 오행(길흉 아님, 좋음·무난·조심은 보조 표시), 테두리·아래 글자는 변화·부담 신호입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>')}
-      ${wpBlock('luck', { curY, wolY: Y, part: 'seun' })}
     </section>
     <section class="card">
       <div class="card-h"><h2>${Y}년 ${term('월운')} <span class="lvl">${LEVEL_ROLE.wolun}</span>${samjaeTag(samjaeOf(Y))}</h2><span class="seg"><button data-act="year:-1" aria-label="이전 해">‹</button><button data-act="year:1" aria-label="다음 해">›</button></span></div>
       ${chartLegend()}${tjLegend(Y)}
       ${elLegendBar()}<div class="chart" data-chart="wolun"></div>
+      ${wpBlock('luck', { curY, wolY: Y, part: 'wolun' })}
       ${envTimeline("wolun")}
       <div class="lts">${M.wolun(ch, Y).map((x, i, a) => luckTile(x, `${x.termName} · ${kstYMD(x.startMs)[1]}월`, 'wolun:' + i, sel.kind === 'wolun' && sel.i === i, NOW >= x.startMs && NOW < (a[i + 1] ? a[i + 1].startMs : Infinity))).join('')}</div>
       ${wolDetail ? wolDetail + (sel.kind === 'wolun' ? tjCompare(Y, sel.i) : '') : ''}${wolDetail ? '' : `<p class="note">입춘(${Y}.2.4 무렵)부터 다음 해 소한까지의 12개월입니다. 막대를 누르면 그 달의 ${term('일운')} 달력으로 이동합니다.</p>`}
-      ${wpBlock('luck', { curY, wolY: Y, part: 'wolun' })}
     </section>
     ${renderCalendar(cy, cm, cal, firstDow, sel, ilDetail)}
     ${regionCard(sel, du, se, curY)}
@@ -10913,6 +10913,15 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     for (let Y = Math.ceil(y0 / 10) * 10; Y <= y1; Y += 10) s += `<text x="${x(Y)}" y="${H - 8}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${Y}</text>`;
     const bw = Math.max(1.5, (W - L - R) / (y1 - y0 + 1) - 1.2);
     data.forEach(d => { const v = d.combined, yy = y(v), z = y(0); const h = Math.max(1.5, Math.abs(yy - z)); const de = elOf(d), col = de != null ? elFill(de) : sigFlow(v).c; s += `<rect x="${(x(d.year) - bw / 2).toFixed(1)}" y="${Math.min(yy, z).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(2, bw / 2)}" style="fill:${col};${ovStroke(d.ev.overlays)}"/>`; });
+    // 대운 테두리(2026-11-26): 세운 막대를 대운 10년씩 묶고, 테두리 색 = 그 대운의 대표 오행(대운 막대 색과 같은 mainEl).
+    //  대운이 일주(일간·일지)와 합해 바로 그 오행을 만들면(천간합·육합·반합·삼합, 엔진 luckRelations 의 합 오행) 더 굵게. 표시 전용, 점수 불변
+    ch.daeun.list.forEach(d => {
+      const a = Math.max(y0, d.startYear), b = Math.min(y1 + 1, d.startYear + 10); if (b <= a) return;
+      const de = elOf(d); if (de == null) return;
+      let strong = false; try { strong = (M.luckRelations(ch, d).rels || []).some(r => r.members.includes('day') && r.members.includes('luck') && /합/.test(r.type) && r.el === de); } catch (e) { strong = false; }
+      const xa = Math.max(L, x(a - 0.5)) + 1, xb = Math.min(W - R, x(b - 0.5)) - 1; if (xb - xa < 4) return;
+      s += `<rect class="du-frame${strong ? ' strong' : ''}" x="${xa.toFixed(1)}" y="${T + 1}" width="${(xb - xa).toFixed(1)}" height="${H - T - B - 2}" rx="6" style="fill:none;stroke:${elFill(de)};stroke-width:${strong ? 3.2 : 1.4};opacity:.95"/>`;
+    });
     if (showGhost()) s += `<polyline class="ghost-line" points="${data.map(d => `${x(d.year).toFixed(1)},${y(altOf(d)).toFixed(1)}`).join(' ')}"/>`;
     const curY = M.yearPillarAt(NOW).sajuYear;
     if (curY >= y0 && curY <= y1) s += `<line x1="${x(curY)}" x2="${x(curY)}" y1="${T}" y2="${H - B}" style="stroke:var(--seal);stroke-width:1.5" stroke-dasharray="4 3"/><text x="${x(curY) + 4}" y="${T + 11}" style="fill:var(--seal);font-size:10px;font-weight:700">올해</text>`;
