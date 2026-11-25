@@ -56,7 +56,7 @@ for (const inp0 of dev) for (const inp of [inp0, { ...inp0, hour: null }]) {
       assert.ok(!HEDGE.test(t), '가능성 표현: ' + (t.match(HEDGE) || [])[0]);
       assert.ok(!BAN.test(t), '금지어: ' + (t.match(BAN) || [])[0]);
       const hr = HEAD_RE[a.level]; assert.ok(hr instanceof RegExp ? hr.test(t) : t.includes(hr), '첫 문장 ↔ 단계 ' + a.level);
-      ['② 발현 강도', '③ 활용 유리도', '④ 작용 근거', '⑤ 활용 전략', '운의 흐름 등급'].forEach(k => assert.ok(t.includes(k), k + ' 없음'));
+      ['왜 이렇게 봤나요', '이렇게 써요', '자세한 명리 근거 보기', '발현 강도', '활용 유리도', '작용 근거', '운의 흐름 등급'].forEach(k => assert.ok(t.includes(k), k + ' 없음'));
       if (!a.limits.length) assert.ok(!t.includes('제약 요인'), '근거 없는 제약 칸');
       if (/strong|on/.test(a.level)) assert.ok(!/누르는 힘과|제약을 받아요/.test(t.split('②')[0]), '발현인데 첫 문장이 제약');
       const pl = (c.match(/<p class="wp-plan">([^<]*)<\/p>/) || [])[1]; assert.ok(!plans.has(pl), '대운 사이 같은 전략 문장'); plans.add(pl);
