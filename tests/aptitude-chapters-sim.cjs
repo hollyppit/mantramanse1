@@ -18,10 +18,17 @@ const KEYS = ['title', 'reality', 'strength', 'risk', 'reinforce', 'practice', '
 assert.equal(Object.keys(D.WORK).sort().join(), 'body,craft,expr,strat,study', '특기 5영역 문안');
 Object.keys(D.WORK).forEach(k => { const w = D.WORK[k]; ['use', 'proof', 'kidProof', 'trap', 'grow', 'weapon'].forEach(f => assert.ok(w[f], k + '.' + f)); assert.equal(w.roles.length, 3); assert.equal(w.kidRoles.length, 3); assert.equal(Object.keys(D.COMBO_TAIL[k]).sort().join(), 'make,people,system,think', k + ' 무대 유형 4개'); });
 
-// 재물 블록 문안: 돈 구조 = 부업 세부 분야 12개, 비용 유형 = 세부 분야 36개 전부
+// 재물 블록 문안: 돈 구조 = 부업 세부 분야(2026-11-26 17개), 비용 유형 = 세부 분야 48개 전부
 assert.equal(Object.keys(D.MONEY).sort().join(), Object.keys(D.SIDE).sort().join(), '돈 구조 12개 = 부업 세부 분야');
 Object.keys(D.MONEY).forEach(k => ['model', 'cost', 'repeat', 'eff', 'caution'].forEach(x => assert.ok(D.MONEY[k][x], k + '.' + x)));
 assert.equal(D.TYPE_CLAUSE.length, 5); assert.equal(Object.keys(D.TALENT_MONEY).sort().join(), 'body,craft,expr,strat,study');
+const cnt = { ty: {} };
+// 세분화 문안: 결 15개 모두 일·진로 문장, 세부 분야 48개 모두 비용 유형, 새 축 2개 궁합 문장
+const AD = c.MantraAptitudeData;
+Object.keys(AD.TALENT_SUB).forEach(t => AD.TALENT_SUB[t].forEach(x => ['work', 'kid', 'role', 'kidRole'].forEach(k => assert.ok(D.WORK_TYPE[x.id] && D.WORK_TYPE[x.id][k], '결 문안 ' + x.id + '.' + k))));
+const subIds = AD.SPORT.map(x => x.id).concat(...Object.values(AD.DETAIL).map(d => d.subs.map(x => x.id)));
+assert.equal(subIds.length, 48); subIds.forEach(id => assert.ok(D.COST_TYPE[id], '비용 유형 ' + id));
+['in_out', 'short_long'].forEach(a => assert.ok(D.PAIR_AXIS[a], '궁합 축 문장 ' + a));
 let n = 0, kids = 0, side = 0, moneyN = 0, spendN = 0; const titles = {}, recharge = {};
 const mockRep = () => ({ chapters: ['timeline_self_25', 'timeline_self_26', 'timeline_self_27', 'timeline_career_01', 'timeline_career_02', 'timeline_career_03', 'timeline_career_14', 'timeline_career_15'].map((id, i) => ({ id: 'c' + i, editorialContractId: id, editorialTopicId: /self/.test(id) ? 'self' : 'career', act: 1 })) });
 for (let i = 0; i < N; i++) {
@@ -45,6 +52,15 @@ for (let i = 0; i < N; i++) {
   assert.equal(all.timeline_career_talent.readingVisualData.talents[0], top.id, '커리어 장 대표 특기 = 탭 대표 특기');
   assert.equal(J(all.timeline_career_talent.readingVisualData.cats), J(P.top.slice(0, 3).map(x => x.category)), '강점 분야 = careerProfile.top');
   all.timeline_career_recharge.readingVisualData.recharge.forEach(id => { assert.ok(Object.values(r.details).some(d => d.subs.some(s => s.id === id && s.ok)), '재충전 활동은 실제 세부 분야: ' + id); recharge[id] = (recharge[id] || 0) + 1; });
+  // 2026-11-26 세분화: 대표 특기의 결이 종합풀이·커리어 장에 실제 값으로 들어감
+  { const ty = top.types, tyTop = ty.list.find(x => x.id === ty.top), sc = all.timeline_self_talent.readingCore, wc = all.timeline_career_talent.readingCore;
+    assert.equal(all.timeline_self_talent.readingVisualData.type, ty.top, '종합풀이 장 결 = 탭 1위 결');
+    assert.equal(all.timeline_career_talent.readingVisualData.types[0], ty.top, '커리어 장 결 = 탭 1위 결');
+    assert.ok(sc.reality.includes(tyTop.name) && sc.why.includes(tyTop.name), '종합풀이 장에 결 이름');
+    const wt = D.WORK_TYPE[ty.top]; assert.ok(wc.reality.includes(age < 20 ? wt.kid : wt.work) && wc.strength.includes(age < 20 ? wt.kidRole : wt.role), '커리어 장에 결의 일·진로 문장');
+    if (age < 20) assert.ok(!wc.reality.includes(wt.work), '20세 미만은 결도 진로 말');
+    (r.final.typeActs || []).forEach(a => assert.ok(sc.reinforce.includes(a.acts[0]), '결 활동이 종합풀이 장에'));
+    cnt.ty[ty.top] = (cnt.ty[ty.top] || 0) + 1; }
   // 조합 문장: 같은 꼬리 문장이 두 번 나오지 않음
   const re = all.timeline_career_talent.readingCore.reality.split('\n\n'), tails = re.map(p => p.split('예요. ')[1]).filter(Boolean);
   assert.equal(new Set(tails).size, tails.length, '조합 꼬리 문장 중복');
@@ -112,4 +128,6 @@ assert.ok(/aptitude-chapters\.js\?v=/.test(read('report/v2/index.html')) && /\/a
 assert.ok(/'aptChapters'/.test(read('functions/api/luck-flags.js')) && /aptChapters: false/.test(read('feature-flags.js')) && /id="leAC"/.test(read('report/admin/v2-luckenv.js')), '스위치·관리자');
 assert.ok(/aptPairCard\(Rr\) \+ evidence/.test(read('report/v2/love-compat.js')) && /S\.resInp = Object\.assign\(\{\}, i\)/.test(read('report/v2/love-compat.js')), '궁합 장 연결');
 console.log('특기·적성 장 통과 — 사주 ' + n + '개(20세 미만 ' + kids + '개), 장 제목 문장 ' + Object.keys(titles).length + '종, 부업 문단 ' + side + '개, 재물 블록 돈 구조 ' + moneyN + '·지출 ' + spendN + '개');
+console.log('장에 들어간 대표 특기 결 분포', Object.keys(cnt.ty).length + '종', JSON.stringify(cnt.ty));
+assert.ok(Object.keys(cnt.ty).length >= 12, '장에 들어간 결이 사람마다 달라야 함');
 console.log('재충전 활동 분포', Object.entries(recharge).sort((a, b) => b[1] - a[1]).map(x => x[0] + ' ' + x[1]).join(' · '));

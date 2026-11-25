@@ -8,11 +8,12 @@
    · 표시 전용: /aptitude.js(MantraAptitude.build) · engine careerProfile 결과만 읽는다. AI·DB 문안·새 점수 없음. 문안은 aptitude-chapters-data.js
    · 20세 미만은 진로·동아리 말로 바꾼다. 실력·수입·건강을 단정하지 않는다(tests/aptitude-chapters-sim.cjs 금지 표현 검사).
    · 공개 스위치: /api/luck-flags aptChapters(기본 꺼짐). 로컬·미리보기 주소에서는 ?mantraFlags=aptChapters
+   · 2026-11-26 세분화 반영: 특기 결(typeLine·WORK_TYPE)·두 번째 적성의 앞선 세부 분야·새 두 축(axisPick)·결 활동(final.typeActs), 새 세부 분야 12개는 재충전·부업·비용·만남·함께 할 활동 후보에
    · 같은 방식의 앞선 장: flow-chapters.js · health-chapters.js */
 (function (root) {
   'use strict';
   var R = root.ReportV2 = root.ReportV2 || {};
-  var VERSION = 'aptitude-chapters-20261125-3';
+  var VERSION = 'aptitude-chapters-20261126-1';   // 2026-11-26 특기 결·세부 분야 8·활동 방식 7축 반영
   var IDS = { self: 'timeline_self_talent', work: 'timeline_career_talent', rest: 'timeline_career_recharge' };
   var TITLES = { timeline_self_talent: '내 손이 먼저 가는 일 — 특기와 끌리는 활동', timeline_career_talent: '내 특기가 일에서 무기가 되는 방식', timeline_career_recharge: '일 밖에서 날을 세우는 법 — 재충전과 사이드 프로젝트' };
   var TOPIC = { timeline_self_talent: 'self', timeline_career_talent: 'career', timeline_career_recharge: 'career' };
@@ -49,6 +50,11 @@
       .filter(Boolean).sort(function (a, b) { return (b.lean - a.lean) || (a.key < b.key ? -1 : 1); });
   }
   function pickSub(C, ids, used, avoidField) { var c = ids.map(function (id) { return C.subs[id]; }).filter(function (x) { return x && !(used && used[x.sub.id]) && !(avoidField && x.field.id === avoidField); }).sort(function (a, b) { return (b.sub.score - a.sub.score) || (a.sub.id < b.sub.id ? -1 : 1); }); return c[0] || null; }
+  // 특기 결(2026-11-26): 1위 결 · 섞임이면 두 결
+  function typeOf(t) { if (!t || !t.types) return null; var T = t.types, top = T.list.filter(function (x) { return x.id === T.top; })[0], sec = T.mix ? T.list.filter(function (x) { return x.id === T.second; })[0] : null; return top ? { T: T, top: top, sec: sec } : null; }
+  function typeLine(t) { var y = typeOf(t); if (!y) return ''; return y.T.mix ? t.name + ' 안에서도 결이 나뉘는데, ' + y.T.text : t.name + ' 안에서도 가장 앞선 결은 ' + y.top.name + '(' + y.top.levelK + ')이에요. ' + y.top.txt; }
+  // 새 두 축(실내↔야외·짧고 굵게↔길고 꾸준히) 중 기운 것만
+  function axisPick(C) { return C.r.sport.axes.filter(function (a) { return (a.id === 'in_out' || a.id === 'short_long') && a.ok && a.side !== 'bal'; }).map(function (a) { return a.text; }); }
   function trait(C, id) { var t = C.r.sport.traits.filter(function (x) { return x.id === id; })[0]; return t && t.ok ? t : null; }
 
   function chapter(id, core, vd) {
@@ -71,16 +77,21 @@
       reality: join([
         '특기는 “이렇게 힘을 써요”, 적성은 “이런 분야에 끌려요”예요. ' + C.me + '에게 먼저 보이는 특기는 ' + t1.name + '(' + t1.levelK + ')' + (t2 ? '과 ' + t2.name + '(' + t2.levelK + ')' : '') + '이에요. ' + t1.interp,
         t1.link,
+        typeLine(t1),
         f1.name + '(' + f1.levelK + ')' + (f2 ? '과 ' + f2.name + '(' + f2.levelK + ')' : '') + ' 쪽이 먼저 끌리는 분야예요. ' + f1.interp + (links ? ' 이 분야는 ' + links + ' 특기와 이어져 있어요.' : ''),
       ]),
       strength: join([
         top3.length ? f1.name + ' 안에서 먼저 볼 만한 세부 분야는 ' + top3.map(function (s) { return s.name + '(' + s.recK + ')'; }).join(', ') + '이에요.' : '',
-      ].concat(top3.slice(0, 2).map(function (s) { return s.name + ' — ' + s.why + ' 예를 들면 ' + s.ex.join('·') + '처럼요.'; }))),
+      ].concat(top3.slice(0, 2).map(function (s) { return s.name + ' — ' + s.why + ' 예를 들면 ' + s.ex.join('·') + '처럼요.'; })).concat([
+        f2 && f2.topSubs && f2.topSubs.length ? '두 번째로 끌리는 ' + f2.name + ' 쪽에서는 ' + (f2.topSubs[1] ? J.과(f2.topSubs[0].name) + ' ' + f2.topSubs[1].name : f2.topSubs[0].name) + ' 쪽이 앞서요.' : '',
+        axisPick(C).length ? DD().AXIS_PICK + axisPick(C).join(' ') : '',
+      ])),
       risk: join([
         f.complement ? '곁들이면 좋은 쪽은 ' + f.complement.name + '(' + f.complement.levelK + ')이에요. ' + f.complement.text : '',
         t1.care,
       ]),
       reinforce: join([
+        (f.typeActs || []).map(function (a) { return DD().TYPE_ACT.replace('{talent}', a.talentName).replace('{type}', a.typeName).replace('{acts}', a.acts.join('·')); }).join(' '),
         f.longTerm ? '오래 붙잡고 다듬어 볼 활동으로는 ' + J.이(f.longTerm.name) + ' 잘 맞아요(' + f.longTerm.from + '). ' + f.longTerm.why : '',
         C.kid ? '지금 나이에는 하나를 깊게 파기보다 여러 활동을 맛보며 손이 가는 쪽을 찾는 시기예요.' : '',
       ]),
@@ -89,11 +100,12 @@
         '대표 특기(' + t1.name + ') 근거: ' + t1.basis.map(function (b) { return b.label; }).join(' · ') + '.',
         '대표 적성(' + f1.name + ') 근거: ' + f1.basis.map(function (b) { return b.label; }).join(' · ') + '.',
         '특기 5영역: ' + C.r.talents.map(function (t) { return t.name + ' ' + (t.levelK || '근거 부족'); }).join(' · ') + '.',
+        typeOf(t1) ? t1.name + ' 결 순서: ' + t1.types.list.filter(function (x) { return x.ok; }).sort(function (a, b) { return a.rank - b.rank; }).map(function (x) { return x.name + '(' + x.basis.map(function (b) { return b.label; }).slice(0, 2).join(', ') + ')'; }).join(' > ') + '.' : '',
         '적성 6분야: ' + C.r.fields.map(function (x) { return x.name + ' ' + (x.levelK || '근거 부족'); }).join(' · ') + '.',
         '만세력 특기·적성 탭과 같은 계산이에요. ' + DD().NOTE,
       ]),
     };
-    return chapter(IDS.self, core, { name: C.nm, talent: t1.id, field: f1.id });
+    return chapter(IDS.self, core, { name: C.nm, talent: t1.id, type: t1.types ? t1.types.top : null, field: f1.id });
   }
 
   // ───────── 2. 커리어 · 내 특기가 일에서 무기가 되는 방식 ─────────
@@ -113,13 +125,15 @@
       var aptSide = a.side === 'L' ? a.L : a.R, same = (a.side === 'L') === (p.side === 'L');
       return same ? m.same : m.cross.replace('{work}', p.name).replace('{apt}', aptSide);
     }).filter(Boolean).slice(0, 2);
-    var role = function (t) { var w = D.WORK[t.id]; return (C.kid ? w.kidRoles : w.roles).join(', '); };
+    var role = function (t) { var w = D.WORK[t.id], y = typeOf(t), wt = y && D.WORK_TYPE[y.top.id]; return (wt ? [C.kid ? wt.kidRole : wt.role] : []).concat(C.kid ? w.kidRoles : w.roles).join(', '); };
+    function typeWork(t) { var y = typeOf(t), wt = y && D.WORK_TYPE[y.top.id]; if (!wt) return ''; return '그중에서도 ' + y.top.name + ' 결이 앞서요' + (y.sec ? '(' + y.sec.name + ' 결도 비슷)' : '') + '. ' + (C.kid ? wt.kid : wt.work); }
     var core = {
       title: C.kid ? C.me + '이 진로에서 쓸 수 있는 무기는 ' + J.예요(W1.weapon) + '.' : C.me + '의 일하는 무기는 ' + J.예요(W1.weapon) + '.',
       reality: join([
         C.kid ? '아직 직업을 정할 나이는 아니라, 나중에 일할 때 어떤 힘이 무기가 되는지 미리 보는 장이에요. 진로·전공을 고를 때 참고로 보세요.' : '',
         C.me + '에게 먼저 보이는 특기는 ' + ts.map(function (t) { return t.name + '(' + t.levelK + ')'; }).join(', ') + '이에요. ' + W1.use,
-        t2 ? t2.name + ' 쪽에서는 — ' + D.WORK[t2.id].use : '',
+        typeWork(t1),
+        t2 ? t2.name + ' 쪽에서는 — ' + D.WORK[t2.id].use + (typeWork(t2) ? ' ' + typeWork(t2) : '') : '',
       ].concat(top.length ? ['직업 적성에서 강점 활용 분야로 나온 ' + J.과(top.map(function (c) { return c.name + '(조화도 ' + c.score + ')'; }).join(', ')) + ' 특기를 엮으면 이렇게 읽혀요.'].concat(combo).concat([combo2]) : [])),
       strength: join(ts.map(function (t) { var w = D.WORK[t.id]; return t.name + ' — 맞는 역할: ' + role(t) + '. ' + (C.kid ? w.kidProof : w.proof); })),
       risk: join(ts.slice(0, 2).map(function (t) { return t.name + ' — ' + D.WORK[t.id].trap; }).concat(match)),
@@ -129,12 +143,13 @@
       why: join([
         '대표 특기(' + t1.name + ') 근거: ' + t1.basis.map(function (b) { return b.label; }).join(' · ') + '.',
         '특기 5영역: ' + C.r.talents.map(function (t) { return t.name + ' ' + (t.levelK || '근거 부족'); }).join(' · ') + '.',
+        '앞선 특기의 결: ' + ts.map(function (t) { var y = typeOf(t); return y ? t.name + ' — ' + y.top.name + '(' + y.top.basis.map(function (b) { return b.label; }).slice(0, 2).join(', ') + ')' : ''; }).filter(Boolean).join(' · ') + '.',
         top.length ? '직업 강점 활용 분야(엔진 careerProfile): ' + top.map(function (c) { return c.name + ' ' + c.score; }).join(' · ') + '.' : '',
         ps.length ? '일하는 방식(양쪽 합 100%): ' + ps.slice(0, 3).map(function (p) { return p.name + ' ' + p.v + '%'; }).join(' · ') + '.' : '',
         '특기는 만세력 특기·적성 탭, 강점 분야는 커리어 장들과 같은 계산이에요. ' + D.NOTE,
       ]),
     };
-    return chapter(IDS.work, core, { name: C.nm, talents: ts.map(function (t) { return t.id; }), cats: top.map(function (c) { return c.category; }) });
+    return chapter(IDS.work, core, { name: C.nm, talents: ts.map(function (t) { return t.id; }), types: ts.map(function (t) { return t.types ? t.types.top : null; }), cats: top.map(function (c) { return c.category; }) });
   }
 
   // ───────── 3. 커리어 · 일 밖에서 날을 세우는 법 ─────────

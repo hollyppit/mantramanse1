@@ -227,6 +227,54 @@
     MEET_TIP: '활동이 목적인 모임은 처음 만나도 이야깃거리가 이미 있어서, 소개 자리보다 마음이 편하게 열리기 쉬워요.',
     NOTE: '명식의 기운 분포로 본 성향 참고예요. 실력이나 재능의 높낮이를 판단하지 않고, 직업·수입을 정해 주는 기준도 아니에요.',
   };
+  // ═══ 2026-11-26 특기·적성 세분화(결 15·세부 분야 48·활동 방식 7축) 반영 ═══
+  D.VERSION = 'aptitude-chapters-data-20261126-1';
+  // 특기 결(aptitude-data.js TALENT_SUB)을 일·진로의 말로 — work/kid: 한 문장, role/kidRole: 맡으면 편한 역할
+  D.WORK_TYPE = {
+    visual: { work: '일에서는 시안·도표·화면처럼 눈에 보이는 자료로 설명할 때 이 결이 살아나요.', kid: '발표에서도 그림·도표·사진을 곁들일 때 이 결이 살아나요.', role: '자료와 화면을 보기 좋게 만드는 역할', kidRole: '발표 자료·포스터를 꾸미는 역할' },
+    verbal: { work: '일에서는 보고서·제안서·설명처럼 말과 글로 정리해 전할 때 이 결이 살아나요.', kid: '글짓기·발표·토론처럼 말과 글로 정리할 때 이 결이 살아나요.', role: '문서를 쓰고 내용을 정리해 전하는 역할', kidRole: '모둠 활동을 글로 정리하는 역할' },
+    perform: { work: '일에서는 발표·시연·현장 진행처럼 사람들 앞에서 바로 보여 줄 때 이 결이 살아나요.', kid: '발표·공연·행사 진행처럼 앞에 나설 때 이 결이 살아나요.', role: '사람들 앞에서 발표하고 분위기를 이끄는 역할', kidRole: '발표·사회를 맡는 역할' },
+    precise: { work: '일에서는 수치·치수·오탈자처럼 작은 차이를 잡아내는 검수와 마감에서 이 결이 살아나요.', kid: '실험·만들기에서 정확하게 재고 맞출 때 이 결이 살아나요.', role: '세부를 확인하고 마감을 책임지는 역할', kidRole: '실험·과제의 마무리를 확인하는 역할' },
+    routine: { work: '일에서는 매일 같은 절차를 빈틈없이 돌리는 운영·관리에서 이 결이 살아나요.', kid: '매일 정해 둔 공부·연습을 꾸준히 이어 갈 때 이 결이 살아나요.', role: '정해진 절차를 꾸준히 지키고 다듬는 역할', kidRole: '모둠의 일정과 준비물을 챙기는 역할' },
+    principle: { work: '일에서는 구조를 이해한 뒤 방식을 바꿔 효율을 높이는 개선 작업에서 이 결이 살아나요.', kid: '원리를 이해하고 내 방식으로 응용하는 과목·활동에서 이 결이 살아나요.', role: '구조를 뜯어보고 방식을 개선하는 역할', kidRole: '문제 푸는 방법을 찾아내는 역할' },
+    burst: { work: '일에서는 마감 직전·현장 대응처럼 짧게 몰아쳐 해내야 하는 순간에 이 결이 살아나요.', kid: '시합·행사처럼 짧게 몰아쳐야 하는 순간에 이 결이 살아나요.', role: '급한 일을 빠르게 처리하는 역할', kidRole: '행사 당일 현장을 뛰어다니는 역할' },
+    endure: { work: '일에서는 오래 걸리는 프로젝트를 끝까지 버티며 끌고 가는 자리에서 이 결이 살아나요.', kid: '긴 과제·장기 연습을 끝까지 해낼 때 이 결이 살아나요.', role: '긴 일을 끝까지 끌고 가는 역할', kidRole: '긴 과제를 끝까지 챙기는 역할' },
+    flow: { work: '일에서는 사람·일정 사이의 흐름을 읽고 부드럽게 맞춰 주는 조율에서 이 결이 살아나요.', kid: '모둠 안에서 분위기와 순서를 부드럽게 맞출 때 이 결이 살아나요.', role: '흐름을 읽고 사이를 맞춰 주는 역할', kidRole: '친구들 사이를 이어 주는 역할' },
+    logic: { work: '일에서는 숫자·논리로 따져 답을 내는 분석과 문제 해결에서 이 결이 살아나요.', kid: '수학·과학처럼 따져서 답을 찾는 과목에서 이 결이 살아나요.', role: '따져 보고 답을 찾아내는 역할', kidRole: '문제의 답을 따져 보는 역할' },
+    observe: { work: '일에서는 자료를 모으고 분류해 한눈에 보이게 정리하는 일에서 이 결이 살아나요.', kid: '자료를 모아 정리하는 조사 과제에서 이 결이 살아나요.', role: '자료를 모으고 정리하는 역할', kidRole: '조사 자료를 모으는 역할' },
+    insight: { work: '일에서는 겉으로 드러나지 않은 이유를 읽어 내는 해석·기획에서 이 결이 살아나요.', kid: '책·역사·글을 깊이 읽고 생각을 펼칠 때 이 결이 살아나요.', role: '흐름 뒤의 이유를 읽어 방향을 잡는 역할', kidRole: '주제를 깊게 생각해 의견을 내는 역할' },
+    duel: { work: '일에서는 경쟁사·마감·실적처럼 상대가 분명한 판에서 이 결이 살아나요.', kid: '대회·시합처럼 상대가 분명한 자리에서 이 결이 살아나요.', role: '맞서는 판에서 앞장서는 역할', kidRole: '대회에 대표로 나가는 역할' },
+    reading: { work: '일에서는 전체 판을 보고 순서와 자원을 배치하는 기획·운영에서 이 결이 살아나요.', kid: '모둠 과제의 순서와 역할을 짜는 일에서 이 결이 살아나요.', role: '판 전체를 보고 순서를 짜는 역할', kidRole: '모둠 계획을 짜는 역할' },
+    persuade: { work: '일에서는 협상·영업·설득처럼 사람을 움직여 결과를 만드는 자리에서 이 결이 살아나요.', kid: '토론·학급 회의처럼 의견을 모아 설득하는 자리에서 이 결이 살아나요.', role: '조건을 맞추고 사람을 설득하는 역할', kidRole: '의견을 모아 설득하는 역할' },
+  };
+  // 새 세부 분야를 재충전 후보에 더한다(이 사주 점수가 높은 것부터 고르므로 후보가 넓을수록 사람마다 달라진다)
+  var RC2 = { independence: { L: ['host'], R: ['mind', 'compose'] }, stability: { L: ['city', 'xtreme'], R: ['drink', 'target'] }, creation: { L: ['target', 'drink'], R: ['compose', 'design', 'reform'] },
+    interaction: { L: ['mind', 'eco'], R: ['host', 'listen'] }, execution: { L: ['econ', 'mind'], R: ['reform', 'xtreme'] }, horizon: { L: ['mind', 'eco'], R: ['drink', 'city'] } };
+  Object.keys(RC2).forEach(function (k) { ['L', 'R'].forEach(function (s) { D.RECHARGE[k][s].ids = D.RECHARGE[k][s].ids.concat(RC2[k][s]); }); });
+  Object.assign(D.SIDE, {
+    design: { path: '디자인·스타일링은 소품 디자인·공간 꾸미기 도움·스타일링 의뢰로 넓혀 볼 수 있어요.', step: '먼저 내 방이나 책상 하나를 바꾼 전후 사진을 남겨 보세요.' },
+    compose: { path: '작곡은 배경 음악·짧은 효과음 작업·음원 공유로 넓혀 볼 수 있어요.', step: '먼저 1분짜리 곡 세 개를 끝까지 만들어 보세요.' },
+    drink: { path: '커피·차는 홈카페 클래스·블렌딩 소량 판매·음료 콘텐츠로 넓혀 볼 수 있어요.', step: '먼저 같은 원두·찻잎으로 비율을 바꿔 가며 기록 10개를 남겨 보세요.' },
+    reform: { path: '리폼·업사이클은 수선·리폼 의뢰·업사이클 소품 판매로 넓혀 볼 수 있어요.', step: '먼저 집에 있는 물건 하나를 고쳐 전후를 기록해 보세요.' },
+    host: { path: '행사·모임 기획은 원데이 행사 운영·모임 기획 대행으로 넓혀 볼 수 있어요.', step: '먼저 지인 몇 명과 작은 모임 하나를 처음부터 끝까지 열어 보세요.' },
+  });
+  Object.assign(D.MONEY, {
+    design: { model: '의뢰형·판매형', cost: '낮음', repeat: '단골 의뢰·템플릿 판매로 반복 여지', eff: '취향이 맞는 손님을 찾기까지 시간이 들어요', caution: '수정 범위를 정하지 않으면 작업이 끝나지 않기 쉬워요.' },
+    compose: { model: '콘텐츠형·판매형', cost: '중간', repeat: '만든 곡을 여러 번 쓰는 사용권 판매 여지', eff: '쌓인 곡 수가 늘어야 효율이 올라가요', caution: '장비·프로그램 지출이 먼저 커지기 쉬워, 무료 도구로 곡 수부터 늘려 보세요.' },
+    drink: { model: '판매형·강의형', cost: '중간', repeat: '정기 클래스·단골 주문으로 반복 여지', eff: '재료 원가와 시간이 함께 들어가요', caution: '음료·식품 판매는 신고·위생 기준을 먼저 확인해야 해요.' },
+    reform: { model: '의뢰형·판매형', cost: '낮음', repeat: '수선 단골·소품 반복 판매 여지', eff: '손이 많이 가서 시간당 값을 먼저 정해야 해요', caution: '남의 물건을 맡을 때는 망가졌을 때의 책임 범위를 미리 정해 두세요.' },
+    host: { model: '운영형', cost: '중간', repeat: '정기 모임·시리즈 행사로 반복 여지', eff: '장소·준비물 비용을 참가비에 넣어야 남아요', caution: '인원이 덜 모일 때의 손해를 미리 계산해 두세요.' },
+  });
+  Object.assign(D.COST_TYPE, { target: 'lesson', xtreme: 'gear', design: 'material', compose: 'gear', econ: 'low', mind: 'low', city: 'low', eco: 'low', drink: 'material', reform: 'material', host: 'material', listen: 'low' });
+  D.MEET_IDS = D.MEET_IDS.concat(['host', 'listen', 'city', 'eco']);
+  D.PAIR_SKIP = D.PAIR_SKIP.concat(['mind', 'compose']);
+  Object.assign(D.PAIR_AXIS, {
+    in_out: { diff: '{a}은 {aSide}, {b}는 {bSide} 쪽이에요. 한 주는 집·카페에서, 한 주는 밖에서 보내는 식으로 번갈아 고르면 둘 다 편해요.', same: '둘 다 {side} 쪽이라, 어디서 시간을 보낼지 고르기 쉬워요.' },
+    short_long: { diff: '{a}은 {aSide}, {b}는 {bSide} 쪽이에요. 하루 체험은 {L} 쪽 사람이, 몇 달 이어 가는 계획은 {R} 쪽 사람이 맡으면 서로 덜 지쳐요.', same: '둘 다 {side} 쪽이라, 함께 하는 활동의 속도를 맞추기 쉬워요.' },
+  });
+  // 결로 고른 활동 문장
+  D.TYPE_ACT = '{talent} 안에서도 {type} 결이 앞서서, {acts} 같은 활동이 손에 잘 맞기 쉬워요.';
+  D.AXIS_PICK = '활동을 고를 때는 이것도 함께 보세요 — ';
   R.AptChaptersData = D;
   if (typeof module !== 'undefined' && module.exports) module.exports = D;
 })(typeof window !== 'undefined' ? window : globalThis);
