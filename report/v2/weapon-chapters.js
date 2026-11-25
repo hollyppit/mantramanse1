@@ -94,7 +94,7 @@
   function periodLine(B, r, label, topic, use, w) {
     if (!r || !r.best) return '';
     var a = r.best, wd = WD(), d = DD(), bits = [];
-    if (use.activation) bits.push('주무기 활성도 ' + a.levelK);
+    if (use.activation) bits.push('주무기 발현도 ' + a.levelK);
     if (use.favor && r.favor) bits.push('활용 유리도 ' + r.favor.n);
     var cls = /strong|on|shaky/.test(a.level) ? 'on' : /sup|quiet/.test(a.level) ? 'prep' : 'guard';   // 활성도 단계에 맞는 문장(조용한 때를 '좋은 때'로 읽지 않게)
     // 2판(2026-11-26): 주제 × 작용 유형(강화·지원·발산·조정·조용함) + 주제 × 들어오는 십성 — 같은 해라도 주제마다, 해마다 다른 풀이
@@ -307,7 +307,7 @@
       if (use.favor && r.favor) fav += '<rect x="' + (x - CW / 2 + 5) + '" y="' + (yOf(0) + 16) + '" width="' + (CW - 10) + '" height="6" rx="3" fill="' + FAV_C[r.favor.k] + '"/>';
       xl += '<text x="' + x + '" y="' + (H - 3) + '" text-anchor="middle" font-size="10" fill="' + (i === G.nowIdx ? '#F3E3B5' : 'rgba(255,255,255,.55)') + '"' + (i === G.nowIdx ? ' font-weight="700"' : '') + '>' + esc(G.labs[i]) + '</text>';
     });
-    var grid = [[4, '강하게 켜짐'], [3, '켜짐'], [2, '받쳐 줌'], [1, '조용함'], [0, '눌림·정리']].map(function (g) { var y = yOf(g[0]); return '<line x1="' + LM + '" x2="' + wd + '" y1="' + y + '" y2="' + y + '" stroke="rgba(255,255,255,.08)"/><text x="' + (LM - 5) + '" y="' + (y + 3) + '" text-anchor="end" font-size="9" fill="rgba(255,255,255,.5)">' + g[1] + '</text>'; }).join('');
+    var grid = [[4, '강하게 발현'], [3, '발현'], [2, '보조·강화'], [1, '잠재·유지'], [0, '제약·조정']].map(function (g) { var y = yOf(g[0]); return '<line x1="' + LM + '" x2="' + wd + '" y1="' + y + '" y2="' + y + '" stroke="rgba(255,255,255,.08)"/><text x="' + (LM - 5) + '" y="' + (y + 3) + '" text-anchor="end" font-size="9" fill="rgba(255,255,255,.5)">' + g[1] + '</text>'; }).join('');
     var favL = use.favor ? '<text x="' + (LM - 5) + '" y="' + (yOf(0) + 22) + '" text-anchor="end" font-size="9" fill="rgba(255,255,255,.5)">흐름 등급</text>' : '';
     return '<div style="overflow-x:auto;margin:8px 0"><svg viewBox="0 0 ' + wd + ' ' + H + '" style="display:block;width:100%;min-width:' + Math.round(wd * 0.8) + 'px;max-width:' + Math.round(wd * 1.35) + 'px" role="img" aria-label="주무기 활성도 단계 그래프">' + grid + favL + fav + '<polyline points="' + pts.join(' ') + '" fill="none" stroke="rgba(243,227,181,.75)" stroke-width="2"/>' + dots + xl + '</svg></div>';
   }
@@ -332,7 +332,7 @@
     if (both.length) lines.push(fill(T.both, { list: lim(both) }));
     if (over.length && !allOver) lines.push(fill(T.over, { list: lim(over) }));
     if (low.length) lines.push(fill(T.low, { list: lim(low) }));
-    var leg = '선 = 주무기 활성도(' + EL_K[w.el] + ' · ' + WD().el[w.el].title + ')' + (use.favor ? ' · 아래 띠 = ' + favName + '(초록 좋음·회색 무난·주황 조심)' : '') + ' · 점 색 = 그 시기 천간의 오행 · 두 값은 합치지 않아요';
+    var leg = '선 = 주무기 발현도(' + EL_K[w.el] + ' · ' + WD().el[w.el].title + ')' + (use.favor ? ' · 아래 띠 = ' + favName + '(초록 좋음·회색 무난·주황 조심)' : '') + ' · 점 색 = 그 시기 천간의 오행 · 두 값은 합치지 않아요';
     return sec(fill(g.cap[scope], { t: TOPIC_K[topic] }), esc(fill(T.lead[scope] || T.lead.seun, { s: strong })), svgChart(G, use) + '<p class="dp-mi">' + esc(leg) + '</p><ul class="dp-ul">' + lines.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>', '');
   }
   var BUILD = { self: selfBlock, wealth: wealthBlock, career: careerBlock, love: loveBlock, remedy: remedyBlock };

@@ -13,7 +13,7 @@
   var esc0 = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var W = function () { return G.MantraWeapon; }, D = function () { return G.MantraWeaponData; };
   var EC = ['var(--wood,#2FA866)', 'var(--fire,#E5533D)', 'var(--earth,#C99A3B)', 'var(--metal,#8E9AAF)', 'var(--water,#3B6FD8)'];
-  var CSS = '.wp{display:grid;gap:10px}.wp p{margin:0;line-height:1.65}.wp-head{font-weight:800;font-size:1rem;line-height:1.55}' +
+  var CSS = '.wp{display:grid;gap:10px}.wp-u{border-radius:6px;padding:1px 4px;font-size:.68rem;border:1px solid var(--line);color:var(--ink-2)}.wp-u.u-good,.wp-u.u-good2{border-color:#2f7bd6;color:#1d5aa6}.wp-u.u-adj{border-color:#c9a227;color:#8a6d0f}.wp-u.u-bad{border-color:#b04a8a;color:#8a2f68}.wp-mix{font-size:.86rem;font-weight:600;color:var(--ink);margin:2px 0 4px!important}.wp-act{font-size:.84rem;margin-top:4px!important;color:var(--ink)}.wp-core{font-size:.9rem;line-height:1.65;margin:2px 0 6px!important;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,var(--wc,#888) 10%,var(--surface,#fff))}.wp-core b{color:var(--ink)}.wp-cb{border-top:1px solid var(--line);padding:6px 0 2px}.wp-ct{font-size:.78rem!important;font-weight:700;color:var(--ink-3);margin:0 0 2px!important}.wp-cn{display:inline-block;min-width:1.4em;color:var(--wi,var(--ink-2))}.wp-kind{border-radius:6px;padding:1px 6px;font-size:.78rem;background:var(--surface-2);color:var(--ink)}.wp-kind.k-boost{background:var(--wi,#555);color:#fff}.wp-kind.k-assist{border:1px solid var(--wc,#888);background:transparent}.wp-kind.k-limit{text-decoration:underline dotted}.wp-plan{font-size:.84rem;margin-top:4px!important;color:var(--ink)}.wp-det .wp-ev li{margin:1px 0}.wp p{margin:0;line-height:1.65}.wp-head{font-weight:800;font-size:1rem;line-height:1.55}' +
     '.wp-e0{--wc:var(--wood,#2FA866);--wi:var(--wood-ink,#17744B)}.wp-e1{--wc:var(--fire,#E5533D);--wi:var(--fire-ink,#B1321F)}.wp-e2{--wc:var(--earth,#C99A3B);--wi:var(--earth-ink,#8A6418)}.wp-e3{--wc:var(--metal,#8E9AAF);--wi:var(--metal-ink,#56627A)}.wp-e4{--wc:var(--water,#3B6FD8);--wi:var(--water-ink,#234A9A)}' +
     '.wp-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}' +
     '.wp-it{border:1px solid var(--line);border-left:4px solid var(--wc);border-radius:12px;padding:11px 13px;background:var(--surface);display:grid;gap:6px}' +
@@ -198,28 +198,86 @@
       fav += '<rect x="' + (x - CW / 2 + 4) + '" y="' + (yOf(0) + 16) + '" width="' + (CW - 8) + '" height="6" rx="3" fill="' + fc + '"><title>' + esc0((r.favor && r.favor.metric || '흐름') + ' ' + (r.favor ? r.favor.n : '')) + '</title></rect>';
       xl += '<text x="' + x + '" y="' + (H - 4) + '" text-anchor="middle"' + (i === nowIdx ? ' style="font-weight:700;fill:var(--ink)"' : '') + '>' + esc0(labels[i]) + '</text>';
     });
-    var grid = [[4, '강하게 켜짐'], [3, '켜짐'], [2, '받쳐 줌'], [1, '조용함'], [0, '눌림·정리']].map(function (g) { var y = yOf(g[0]); return '<line x1="' + LM + '" x2="' + wd + '" y1="' + y + '" y2="' + y + '" stroke="var(--line)" stroke-width="1"/><text class="lv" x="' + (LM - 4) + '" y="' + (y + 3) + '" text-anchor="end">' + g[1] + '</text>'; }).join('');
-    return '<div class="wp-ch"><svg viewBox="0 0 ' + wd + ' ' + H + '" style="min-width:' + Math.round(wd * 0.82) + 'px;max-width:' + Math.round(wd * 1.3) + 'px" role="img" aria-label="주무기 활성도 단계 그래프">' + grid +
+    var grid = [[4, '강하게 발현'], [3, '발현'], [2, '보조·강화'], [1, '잠재·유지'], [0, '제약·조정']].map(function (g) { var y = yOf(g[0]); return '<line x1="' + LM + '" x2="' + wd + '" y1="' + y + '" y2="' + y + '" stroke="var(--line)" stroke-width="1"/><text class="lv" x="' + (LM - 4) + '" y="' + (y + 3) + '" text-anchor="end">' + g[1] + '</text>'; }).join('');
+    return '<div class="wp-ch"><svg viewBox="0 0 ' + wd + ' ' + H + '" style="min-width:' + Math.round(wd * 0.82) + 'px;max-width:' + Math.round(wd * 1.3) + 'px" role="img" aria-label="주무기 발현도 단계 그래프">' + grid +
       '<text class="lv" x="' + (LM - 4) + '" y="' + (yOf(0) + 22) + '" text-anchor="end">' + esc0(bandName || '흐름 등급') + '</text>' + fav +
       '<polyline points="' + pts.join(' ') + '" fill="none" stroke="var(--ink-2)" stroke-width="2"/>' + dots + xl + '</svg></div>';
   }
-  function detail(id, row, r, title, E) {
-    var d = D(), a = r.best; if (!a) return '';
-    var w = a, typesTxt = w.types.map(function (t) { return t === 'adjust' && /기신|구신/.test(w.roles.weapon) ? d.type.adjustExcess : d.type[t]; });
-    var roleTxt = (w.roles.stem || w.roles.branch) ? '운의 천간 오행은 ' + (w.roles.stem || '—') + ', 지지 오행은 ' + (w.roles.branch || '—') + ' (통합 용신 기준 역할)' : '';
-    return '<div class="wp-det wp-e' + w.el + '" id="' + id + '" data-wpr="' + row + '"><h4>' + E(title + ' ' + r.gz) + ' — 활성도 ' + E(w.levelK) + ' · ' + E(r.favor && r.favor.metric || '흐름') + ' ' + E(r.favor ? r.favor.n : '—') + '</h4>' +
-      '<p>' + E(r.mText || d.combo[r.read]) + '</p>' +
-      (typesTxt.length ? '<p class="wp-s"><span class="wp-lb">작용 유형</span>' + E(typesTxt.join(' / ')) + '</p>' : '<p class="wp-s"><span class="wp-lb">작용 유형</span>주무기에 직접 닿는 작용이 없어요</p>') +
-      '<p class="wp-s"><span class="wp-lb">활용 방향</span>운의 천간이 ' + E(w.use.tg) + '(' + E(w.use.groupName) + ')라 ' + E(d.use[w.use.group]) + ' 쓰기 쉬운 결이에요</p>' +
-      (roleTxt ? '<p class="wp-s"><span class="wp-lb">발현 지원</span>' + E(roleTxt) + ' · 유리도는 ' + E(r.favor && r.favor.metric ? '위 그래프의 ' + r.favor.metric + ' 등급' : '기존 흐름 등급') + ' 그대로예요</p>' : '') +
-      (w.signals.length ? '<ul class="wp-ev">' + w.signals.map(function (s) { return '<li>' + E(s.x) + '</li>'; }).join('') + '</ul>' : '') +
-      (w.constraints.length ? '<p class="wp-s" style="margin-top:4px"><span class="wp-lb">제약 요인</span></p><ul class="wp-ev">' + w.constraints.map(function (s) { return '<li>' + E(s) + '</li>'; }).join('') + '</ul>' : '') + '</div>';
+  // 4판(2026-11-26) 상세 카드: ① 핵심 해석 ② 작용 유형 ③ 작용 근거 ④ 활용 방향 ⑤ 발현 지원 ⑥ 제약 ⑦ 운의 유불리
+  //  판정은 MantraWeapon.luck 그대로(별도 판정 없음). 지원·제약은 근거가 있을 때만 그린다.
+  var jo = function (w, a, b) { var c = String(w || '').charCodeAt(String(w || '').length - 1); var has = c >= 0xAC00 && c <= 0xD7A3 ? (c - 0xAC00) % 28 !== 0 : /[0-9LMNRlmnr]$/.test(w); return w + (has ? a : b); };
+  var fillJ = function (t, m) { return String(t).replace(/\{(\w)\}(이\(가\)|을\(를\)|과\(와\))?/g, function (_, k, j) { var v = m[k] == null ? '' : m[k]; if (!j) return v; return j === '이(가)' ? jo(v, '이', '가') : j === '을(를)' ? jo(v, '을', '를') : jo(v, '과', '와'); }); };
+  var GNV = ['비겁', '식상', '재성', '관성', '인성'];
+  function relWord(we, e) { var d = (e - we + 5) % 5; return ['same', 'out', 'ctrled', 'ctrl', 'gen'][d]; }
+  function detail(id, row, r, title, E, L, ch) {
+    var d = D(), C = d.card, a = r.best; if (!a) return '';
+    var w = (L || []).filter(function (x) { return x.el === a.el; })[0] || (L || [])[0]; if (!w || !C) return '';
+    var tW = { d: '이 대운', s: '이 해', w: '이 달' }[row] || '이 시기', T = a.wType || 'element', kk = { boost: 'up', assist: 'sup', keep: 'keep', limit: 'limit' }[a.kind] || 'keep';
+    var wName = EL_K[w.el] + '(' + EL_H[w.el] + ') ' + d.el[w.el].title, sW = d.el[w.el].strengths.slice(0, 2).join('·'), fW = (C.fn || [])[w.group] || d.group[w.group].way;
+    var lvKey = a.level === 'quiet' && a.axis && a.axis.mixed ? 'quietMixed' : a.level;
+    var head = fillJ(C.head[lvKey] || C.head.quiet, { w: wName, t: tW });
+    var mixed = a.axis && a.axis.mixed;
+    var feat = mixed ? fillJ(C.featMixed, { s: sW, f: fW }) : T === 'complex' ? fillJ(C.feat.complex[(a.axis && a.axis.rel) || 'quiet'] || '', { s: sW, f: fW }) : fillJ(C.feat[T][kk], { s: sW, f: fW });
+    var li = function (arr) { return '<ul class="wp-ev">' + arr.map(function (x) { return '<li>' + E(x) + '</li>'; }).join('') + '</ul>'; };
+    var sec = function (n, t, body) { return '<div class="wp-cb"><p class="wp-ct"><span class="wp-cn">' + n + '</span>' + E(t) + '</p>' + body + '</div>'; };
+    var Ls = a.letters || {}, st = Ls.stem || {}, br = Ls.branch || {}, pct = (ch && ch.weights && ch.weights.pct) || [];
+    var pctW = function (e) { var v = pct[e]; return v == null ? '' : ' 원국 ' + Math.round(v) + '%'; };
+    // ② 작용 유형
+    var kindB = '<p class="wp-s"><b class="wp-kind k-' + a.kind + '">' + E(a.kindK || '') + '</b> ' + E((mixed ? C.kind.keepMixed : C.kind[a.kind]) || '') + '</p>' +
+      (T === 'complex' && a.axis ? '<p class="wp-note">오행 축 ' + E(C.axisName[a.axis.e] + (a.axis.eDown ? '·눌림' : '')) + ' · 십성 축 ' + E(C.axisName[a.axis.t] + (a.axis.tDown ? '·제어' : '')) + ' → ' + E(C.relName[a.axis.rel] || '') + '</p>' : '<p class="wp-note">' + E(T === 'element' ? '오행형 주무기 — 오행의 유입·뿌리·생극·합충으로 판정했어요' : '십신형 주무기 — 십신의 투출·통근·격국 역할·짝 작용으로 판정했어요(단순 출현은 보조까지)') + '</p>');
+    // ③ 작용 근거(사실) — 오행 환경·십성·투간·통근·합충
+    var ev = [];
+    ev.push('오행 환경: 천간 ' + st.ch + '(' + EL_K[st.el] + ',' + pctW(st.el) + ') · 지지 ' + br.ch + '(' + EL_K[br.mainEl] + ',' + pctW(br.mainEl) + ') — 천간은 ' + C.letterRel[relWord(w.el, st.el)] + ', 지지는 ' + C.letterRel[relWord(w.el, br.mainEl)] + '이에요');
+    ev.push('십성: 천간 ' + st.tg + '(' + GNV[st.group] + ') · 지지 정기 ' + br.tg + '(' + GNV[br.group] + ') — 주무기는 ' + w.groupName + (w.tgs && w.tgs.length ? '(' + w.tgs.join('·') + ')' : '') + (a.axis && a.axis.exact ? ', 운 천간이 원국에 드러난 십신과 같아요' : ''));
+    ev.push('투간·통근: ' + (a.stemSame ? '운 천간에 주무기 오행이 드러나요' : '운 천간에 주무기 오행은 없어요') + ' · ' + (a.rootDepth ? '운 지지에 주무기 뿌리(' + a.rootDepth + ')가 있어요' : '운 지지에 주무기 뿌리는 없어요'));
+    var refs = a.refs || [], acts = (a.relNames || []).filter(function (n) { return refs.indexOf(n) < 0; });
+    ev.push('합충형파해: ' + (acts.length ? acts.join(' · ') + ' — 주무기 글자에 직접 작용해요(아래 지원·제약에 반영)' : '주무기 글자에 직접 작용하는 합충은 없어요') + (refs.length ? ' · ' + jo(refs.join('·'), '은', '는') + ' 길흉 판단 없이 참고만 해요' : ''));
+    // ④ 활용 방향
+    var P = a.partner && a.partner.tone !== 'bad' ? d.pair[pk(w.group, a.partner.group)] : null;
+    var ability = T === 'element' ? sW + ' 능력' : T === 'tengod' ? w.groupName + '의 ' + fW + ' 기능' : sW + ' 능력과 ' + w.groupName + '의 ' + fW + ' 기능';
+    // 5판: 활용 유리도(발현 강도와 별개, 합산 없음) — weapon.js useFavor 결과를 그대로 읽는다
+    var U = a.useFav || { k: 'mid', n: '보통', why: [] }, CU = C.uf, eTag = EL_K[w.el] + '(' + EL_H[w.el] + ')';
+    var ufLines = U.why.map(function (x) {
+      if (x.k === 'role') return x.role ? fillJ(CU.role[x.role] || '', { e: eTag }) : '';
+      if (x.k === 'zone') return !x.zone ? '' : x.used ? fillJ(CU.zoneUsed[x.v > 0 ? 'up' : x.v < 0 ? 'down' : 'flat'], { z: x.zone, g: GNV[w.group], h: CU.help[x.help ? 0 : 1] }) : fillJ(CU.zoneNote, { z: x.zone });
+      if (x.k === 'badpair') return fillJ(CU.badpair, { p: x.name || '' });
+      return CU[x.k] || '';
+    }).filter(Boolean);
+    var ufB = '<p class="wp-s"><b class="wp-u u-' + U.k + '">활용 ' + E(U.n) + '</b></p>' + li(ufLines) + '<p class="wp-note">발현 강도와 따로 판정해요. 강하게 켜져도 활용이 불리할 수 있고, 잠잠해도 유리한 힘일 수 있어요.</p>';
+    // 활용 전략: 강도 × 유리도 + 강화할 능력 · 조절할 기능 + 활용 결·분야·전략 문장
+    var hiK = a.kind === 'boost' ? 'hi' : a.kind === 'assist' ? 'mid' : 'lo', ufK = /good/.test(U.k) ? 'good' : U.k === 'mid' ? 'mid' : 'bad';
+    var grow = ufK !== 'bad' ? fillJ(C.grow.self, { a: ability + (P ? ' + 짝 능력 ' + P.name + '(' + P.ways.join('·') + ')' : '') }) : (U.yong != null && U.yongGroup != null ? fillJ(C.grow.alt, { y: EL_K[U.yong] + '(' + EL_H[U.yong] + ')', f: GNV[U.yongGroup] + '의 ' + C.fn[U.yongGroup] + ' 기능' }) : fillJ(C.grow.self, { a: ability }));
+    var badP = a.partner && a.partner.tone === 'bad' ? d.pair[pk(w.group, a.partner.group)] : null;
+    var adjust = (ufK === 'bad' || (a.limits || []).some(function (x) { return x.k === 'over'; })) ? '조절할 기능: ' + C.over[w.group] : badP && badP.tension ? '조절할 기능: ' + badP.tension : C.adjustNone;
+    var use = [grow, adjust,
+      '활용 결: ' + C.profile[a.use.group] + ' — 운 천간 ' + a.use.tg + '(' + a.use.groupName + ')',
+      '집중 분야: ' + C.fields[a.use.group],
+    ];
+    var pol = (C.polar || {})[a.use.tg], plan = (pol ? a.use.tg + '의 결이라 ' + pol + '이 맞아요. ' : '') + C.plan[w.group][a.use.group] + ' ' + (ufK === 'bad' && C.paceBad ? C.paceBad[a.kind] : C.pace[a.kind]);
+    // 지원 · 제약 — 근거가 있을 때만
+    var sups = (a.supports || []).map(function (x) { return x.x; });
+    if (st.role && /용신|희신/.test(st.role)) sups.push('운 천간 ' + st.ch + '(' + EL_K[st.el] + ')은 이 명식에서 ' + st.role + '이라 쓰는 힘에 도움이 돼요');
+    var lims = (a.limits || []).map(function (x) { return x.x; });   // 과잉 기능 설명은 ⑤ '조절할 기능'에 한 번만
+    // 운의 흐름 등급 — 기존 흐름 등급 그대로 + 글자별 역할(이분화하지 않음)
+    var f = r.favor, fk = f ? f.k : 'ok', roleTxt = function (x) { return x.role ? x.role + '(' + (C.roleWord[x.role] || '') + ')' : '역할 표시 없음'; };
+    var fav = '<p class="wp-s"><span class="wp-f ' + (f ? f.k : '') + '">' + E((f && f.metric) || '흐름') + ' ' + E(f ? f.n : '—') + '</span> 기존 운세 흐름 등급 그대로예요(발현 강도·활용 유리도와 합치지 않아요).</p>' +
+      li(['천간 ' + st.ch + ' — ' + EL_K[st.el] + ' · ' + st.tg + ' · ' + roleTxt(st), '지지 ' + br.ch + ' — 정기 ' + br.main + '(' + EL_K[br.mainEl] + ') · ' + br.tg + ' · ' + roleTxt(br)]) +
+      '<p class="wp-act">' + E(r.mText ? r.mText + ' ' : '') + E((C.act[a.kind] || C.act.keep)[fk] || '') + '</p>';
+    return '<div class="wp-det wp-e' + w.el + '" id="' + id + '" data-wpr="' + row + '"><h4>' + E(title + ' ' + r.gz) + ' — 주무기 ' + E(a.levelK) + ' · 활용 ' + E(U.n) + ' · ' + E((f && f.metric) || '흐름') + ' ' + E(f ? f.n : '—') + '</h4>' +
+      '<p class="wp-core"><b>' + E(head) + '</b> ' + E(feat) + ' <b>' + E(CU.head[U.k]) + '</b></p>' +
+      sec('②', '발현 강도', kindB) +
+      sec('③', '활용 유리도', ufB) +
+      sec('④', '작용 근거', li(ev)) +
+      sec('⑤', '활용 전략', '<p class="wp-mix">' + E(C.mix[hiK][ufK]) + '</p>' + li(use) + '<p class="wp-plan">' + E(plan) + '</p>') +
+      (sups.length ? sec('⑥', '발현 지원 요인', li(sups)) : '') +
+      (lims.length ? sec('⑦', '제약 요인', li(lims)) : '') +
+      sec(lims.length ? '⑧' : sups.length ? '⑦' : '⑥', '운의 흐름 등급', fav) + '</div>';
   }
   function cell(r, top, sub, isNow, id, row) {
     if (!r) return '';
     var E = esc0, a = r.best, f = r.favor;
     return '<button type="button" class="wp-c wp-e' + (a ? a.el : 0) + (isNow ? ' wp-now' : '') + '" data-wpd="' + id + '" data-wpr="' + row + '"><span class="t">' + E(top) + '</span><span class="g">' + E(r.gz) + '</span>' +
-      (a ? '<span class="wp-a ' + a.key + '">' + E(a.levelK) + '</span>' : '<span class="wp-a qt">—</span>') + (f ? '<span class="wp-f ' + f.k + '">' + E(f.metric || '흐름') + ' ' + E(f.n) + '</span>' : '') + (sub ? '<span class="t">' + E(sub) + '</span>' : '') + '</button>';
+      (a ? '<span class="wp-a ' + a.key + '">' + E(a.levelK) + '</span>' : '<span class="wp-a qt">—</span>') + (a && a.useFav ? '<span class="wp-u u-' + a.useFav.k + '">활용 ' + E(a.useFav.n) + '</span>' : '') + (f ? '<span class="wp-f ' + f.k + '">' + E(f.metric || '흐름') + ' ' + E(f.n) + '</span>' : '') + (sub ? '<span class="t">' + E(sub) + '</span>' : '') + '</button>';
   }
   function luck(M, ch, opt) {
     var A = get(M, ch); if (!A) return ''; var o = opts(opt), E = o.E, d = D(), Wm = W(); opt = opt || {};
@@ -241,18 +299,18 @@
     var du = ch.daeun.list, curDi = -1; du.forEach(function (x, i) { if (x.startMs <= now) curDi = i; });
     var curWi = -1; tl.wolun.forEach(function (r, i) { if (r && r.startMs <= now) curWi = i; }); if (wolY !== curY) curWi = -1;
     var names = L.slice(0, 2).map(function (w) { return EL_H[w.el] + ' ' + D().el[w.el].title; }).join(' · ');
-    var legend = '<div class="wp-leg"><span><span class="wp-a on2">강하게 켜짐</span> 천간+뿌리</span><span><span class="wp-a on1">켜짐</span> 천간 또는 정기 뿌리</span><span><span class="wp-a shk">켜지되 흔들림</span></span><span><span class="wp-a sup">받쳐 줌</span> 생해 주거나 얕은 뿌리</span><span><span class="wp-a qt">조용함</span></span><span><span class="wp-a hit">눌림</span><span class="wp-a trm">정리</span> 극·합거·충(많은 힘이면 정리)</span><span>|</span><span><span class="wp-f good">흐름 좋음</span><span class="wp-f">무난</span><span class="wp-f care">조심</span> = 위 그래프와 같은 등급(보조 지표)</span></div>';
+    var legend = '<div class="wp-leg"><span><span class="wp-a on2">강하게 발현</span><span class="wp-a on1">발현</span><span class="wp-a shk">발현·흔들림</span><span class="wp-a sup">보조·강화</span><span class="wp-a qt">잠재·유지</span><span class="wp-a hit">제약·조정</span></span><span>|</span><span><span class="wp-f good">흐름 좋음</span><span class="wp-f">무난</span><span class="wp-f care">조심</span> = 위 그래프와 같은 등급(보조 지표)</span></div>';
     var dLab = du.map(function (x) { return x.startAge + '세'; }), sLab = tl.seun.map(function (r) { return String(r.year); }), wLab = tl.wolun.map(function (r) { return r.month + '월'; });
     var block = function (row, rows, labs, subs, nowIdx, secT) {
       return '<p class="wp-sec">' + E(secT) + '</p>' + chart(rows, labs, nowIdx, bandName) + '<div class="wp-row">' + rows.map(function (r, i) { return cell(r, labs[i], subs[i], i === nowIdx, 'wpd-' + row + '-' + i, row); }).join('') + '</div>' +
-        rows.map(function (r, i) { return r ? detail('wpd-' + row + '-' + i, row, r, labs[i], E) : ''; }).join('');
+        rows.map(function (r, i) { return r ? detail('wpd-' + row + '-' + i, row, r, labs[i], E, L, ch) : ''; }).join('');
     };
     // 그래프 카드 아래에 붙는 한 단위(대운·세운·월운) — 같은 판정, 같은 칸·상세 카드
-    var short = '<div class="wp-leg"><span><span class="wp-a on2">강하게 켜짐</span><span class="wp-a on1">켜짐</span><span class="wp-a sup">받쳐 줌</span><span class="wp-a qt">조용함</span><span class="wp-a hit">눌림</span><span class="wp-a trm">정리</span></span><span>점 줄 = 주무기 활성도 · 아래 띠 = 위 그래프와 같은 ' + E(bandName) + '(합치지 않아요) · 칸을 누르면 설명</span></div>' + mNote;
-    var PART = { daeun: ['d', tl.daeun, dLab, du.map(function (x) { return x.startYear + '~'; }), curDi, '대운마다 주무기가 켜지는 정도'], seun: ['s', tl.seun, sLab, tl.seun.map(function (r) { return r.age ? r.age + '세' : ''; }), tl.seun.findIndex(function (r) { return r.year === curY; }), curY + '~' + (curY + 9) + '년 주무기가 켜지는 정도'], wolun: ['w', tl.wolun, wLab, tl.wolun.map(function (r) { return r.termName; }), curWi, wolY + '년 달마다 주무기가 켜지는 정도'] };
-    if (PART[part]) { var p = PART[part]; return '<div class="wp wp-part wp-e' + L[0].el + '" id="weapon-luck-' + part + '" data-wp="' + E(sigOf(A)) + '" style="margin:10px 0 14px;padding:10px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)"><h3 style="margin:0;font-size:.95rem">주무기 발현 · ' + E(p[5]) + ' <span class="wp-note" style="font-weight:400">' + E(names) + '</span></h3>' + short + block(p[0], p[1], p[2], p[3], p[4], '').replace('<p class="wp-sec"></p>', '') + '</div>'; }
+    var short = '<div class="wp-leg"><span><span class="wp-a on2">강하게 발현</span><span class="wp-a on1">발현</span><span class="wp-a sup">보조·강화</span><span class="wp-a qt">잠재·유지</span><span class="wp-a hit">제약·조정</span></span><span>점 줄 = 주무기 발현도 · 아래 띠 = 위 그래프와 같은 ' + E(bandName) + '(합치지 않아요) · 칸을 누르면 설명</span></div>' + mNote;
+    var PART = { daeun: ['d', tl.daeun, dLab, du.map(function (x) { return x.startYear + '~'; }), curDi, '대운별'], seun: ['s', tl.seun, sLab, tl.seun.map(function (r) { return r.age ? r.age + '세' : ''; }), tl.seun.findIndex(function (r) { return r.year === curY; }), curY + '~' + (curY + 9) + '년'], wolun: ['w', tl.wolun, wLab, tl.wolun.map(function (r) { return r.termName; }), curWi, wolY + '년 달별'] };
+    if (PART[part]) { var p = PART[part]; return '<div class="wp wp-part wp-e' + L[0].el + '" id="weapon-luck-' + part + '" data-wp="' + E(sigOf(A)) + '" style="margin:10px 0 14px;padding:10px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)"><h3 style="margin:0;font-size:.95rem">주무기 발현도 · ' + E(p[5]) + ' <span class="wp-note" style="font-weight:400">' + E(names) + '</span></h3>' + short + block(p[0], p[1], p[2], p[3], p[4], '').replace('<p class="wp-sec"></p>', '') + '</div>'; }
     var cur = tl.daeun[curDi] || null, picks = tl.seun.filter(function (r) { return r && r.best && /strong|on|shaky/.test(r.best.level); }).slice(0, 3);
-    var line = function (when, r) { return '<li><span class="when">' + E(when) + '</span> — 활성도 <b>' + E(r.best.levelK) + '</b> · ' + E(r.favor && r.favor.metric || '흐름') + ' ' + E(r.favor ? r.favor.n : '—') + '<br>' + E(r.mText || d.combo[r.read]) + '</li>'; };
+    var line = function (when, r) { return '<li><span class="when">' + E(when) + '</span> — 주무기 <b>' + E(r.best.levelK) + '</b> · ' + E(r.favor && r.favor.metric || '흐름') + ' ' + E(r.favor ? r.favor.n : '—') + '<br>' + E(r.mText || (d.card && r.best.kind ? (d.card.act[r.best.kind] || {})[r.favor ? r.favor.k : 'ok'] : d.combo[r.read])) + '</li>'; };
     var lines = (cur ? [line('지금 대운 ' + cur.gz, cur)] : []).concat(picks.map(function (r) { return line(r.year + '년 ' + r.gz, r); }));
     if (part === 'summary') return '<section class="card wp" id="weapon-luck" data-wp="' + E(sigOf(A)) + '"><div class="card-h"><h2>주무기 발현 타이밍</h2><span class="note">' + E(names) + '</span></div>' +
       '<p class="wp-note">' + E(d.twoAxes) + (A.status === 'undetermined' ? ' 태어난 시간을 몰라 세 기둥 기준 후보로 봤어요.' : A.status === 'complex' ? ' 복합형이라 후보 중 가장 잘 켜지는 쪽을 보여 줘요.' : '') + ' 대운·세운·월운 그래프 카드마다 맨 아래에 그 단위의 주무기 줄이 있어요.</p>' + legend +

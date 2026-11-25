@@ -16,7 +16,7 @@
    · 사용: MantraWeapon.analyze(M, ch) · MantraWeapon.luck(M, ch, pillar, kind) · MantraWeapon.timeline(M, ch, { fromY, years, wolY }) */
 (function (G) {
   'use strict';
-  var VERSION = 'weapon-20261126-4';   // 3판: 생극제화(십성 상호작용 성립) 근거·오행+십신 둘 다 있어야 확정·발현 조합(짝 십성)·운의 조합형   // 판정 2판: 격국·상신 구조 조건, 십신형 경로, 파격 제약, 유형(오행형·십신형·복합형), 표시 이름(주무기·잠정·미확정)
+  var VERSION = 'weapon-20261126-6';   // 5판: 발현 강도(강한 주무기 재강화 그대로 반영)와 활용 유리도(용신 역할·강약·관련 십성 작용) 분리   // 4판(운): 발현 단계 이름 통일·오행 축/십성 축/합충 한 번·유형별 분기·작용 유형 4종   // 3판: 생극제화(십성 상호작용 성립) 근거·오행+십신 둘 다 있어야 확정·발현 조합(짝 십성)·운의 조합형   // 판정 2판: 격국·상신 구조 조건, 십신형 경로, 파격 제약, 유형(오행형·십신형·복합형), 표시 이름(주무기·잠정·미확정)
   var EL_K = ['목', '화', '토', '금', '수'], EL_H = ['木', '火', '土', '金', '水'];
   var GN = ['비겁', '식상', '재성', '관성', '인성'];
   var POS = ['year', 'month', 'day', 'hour'], POSK = { year: '년', month: '월', day: '일', hour: '시', luck: '운' };
@@ -34,6 +34,11 @@
     hourVariants: [[0, 40], [2, 0], [4, 0], [6, 0], [8, 0], [10, 0], [12, 0], [14, 0], [16, 0], [18, 0], [20, 0], [22, 0]],   // 시진 12개(한국 시각 → 보정 후 각 시진 안쪽)
   };
   var mod = function (a, n) { return ((a % n) + n) % n; };
+  // 조사 자동: 한자 간지는 한글 음으로 받침을 본다(甲갑·丁정·亥해…) — 'X이(가)'·'X을(를)'·'X과(와)'를 고쳐 쓴다
+  var RD = { '甲': '갑', '乙': '을', '丙': '병', '丁': '정', '戊': '무', '己': '기', '庚': '경', '辛': '신', '壬': '임', '癸': '계', '子': '자', '丑': '축', '寅': '인', '卯': '묘', '辰': '진', '巳': '사', '午': '오', '未': '미', '申': '신', '酉': '유', '戌': '술', '亥': '해' };
+  var batch = function (ch) { ch = RD[ch] || ch; var c = ch.charCodeAt(0) - 0xAC00; return c >= 0 && c <= 11171 ? c % 28 !== 0 : null; };
+  var pickJ = function (b, j) { return j[0] === '이' ? (b ? '이' : '가') : j[0] === '을' ? (b ? '을' : '를') : (b ? '과' : '와'); };
+  var fixJ = function (t) { return String(t).replace(/(.)(\([^()]*\))(이\(가\)|을\(를\)|과\(와\))/g, function (m, ch, par, j) { var b = batch(ch); return b == null ? m : ch + par + pickJ(b, j); }).replace(/(.)(이\(가\)|을\(를\)|과\(와\))/g, function (m, ch, j) { var b = batch(ch); if (b == null) return m; return ch + (j[0] === '이' ? (b ? '이' : '가') : j[0] === '을' ? (b ? '을' : '를') : (b ? '과' : '와')); }); };
   var objJ = function (w) { var c = String(w).charCodeAt(String(w).length - 1) - 0xAC00; return w + (c >= 0 && c <= 11171 && c % 28 !== 0 ? '을' : '를'); };   // 목·화·토·금·수 + 을/를
   var genOf = function (e) { return mod(e + 4, 5); }, ctrlOf = function (e) { return mod(e + 3, 5); }, outOf = function (e) { return mod(e + 1, 5); };
   var pairKey = function (a, b) { var i = POS.indexOf(a), j = POS.indexOf(b); return i < j ? a + '|' + b : b + '|' + a; };
@@ -275,10 +280,33 @@
 
   // ── weapon-timing: 운 한 기둥이 무기를 켜는가(활성도)·어떤 방식인가(유형)·무엇이 막는가(제약) ──
   var ACT = {
-    strong: { n: '강하게 켜짐', k: 'on2', o: 0, y: 4 }, on: { n: '켜짐', k: 'on1', o: 1, y: 3 }, shaky: { n: '켜지되 흔들림', k: 'shk', o: 2, y: 3 },
-    sup: { n: '받쳐 줌', k: 'sup', o: 3, y: 2 }, quiet: { n: '조용함', k: 'qt', o: 4, y: 1 }, trim: { n: '정리', k: 'trm', o: 5, y: 0 }, hit: { n: '눌림', k: 'hit', o: 6, y: 0 },
+    strong: { n: '강하게 발현', k: 'on2', o: 0, y: 4 }, on: { n: '발현', k: 'on1', o: 1, y: 3 }, shaky: { n: '발현·흔들림', k: 'shk', o: 2, y: 3 },
+    sup: { n: '보조·강화', k: 'sup', o: 3, y: 2 }, quiet: { n: '잠재·유지', k: 'qt', o: 4, y: 1 }, trim: { n: '제약·조정', k: 'trm', o: 5, y: 0 }, hit: { n: '제약·조정', k: 'hit', o: 6, y: 0 },
   };
+  var KIND_K = { boost: '강화형', assist: '보조형', keep: '유지형', limit: '제약형' };   // 4판: 카드의 작용 유형(한 가지)
   var TYPE_K = { strengthen: '강화형', support: '지원형', release: '발산형', adjust: '조정형', partner: '조합형' };
+  // ── 주무기 활용 유리도(5판, 2026-11-26): 강해진 주무기가 원국 전체에 유리하게 쓰이는가 — 발현 강도와 따로, 합산하지 않는다 ──
+  //  기준: ① 주무기 오행의 통합 용신 역할(용신 +2·희신 +1·한신 0·구신 -1·기신 -2 — 엔진 ch.unified.roles 그대로)
+  //        ② 일간 강약(ch.strength.zone)은 역할이 한신일 때만 가른다(용신 계산에 이미 들어 있어 두 번 세지 않음)
+  //        ③ 이 운에서 생기는 관련 십성 작용: 쓰임처(설기)가 열림 +1 · 제화 +1 · 부담 조합 -1 · 많은 힘이 쓰임처 없이 더 세짐 -1
+  //  등급: 2↑ 유리 · 1 대체로 유리 · 0 보통 · -1 조절 필요 · -2↓ 부담. 운세 흐름 등급(favor)과도 별개
+  var UF_BASE = { '용신': 2, '희신': 1, '한신': 0, '구신': -1, '기신': -2 };
+  var UF_LV = [{ min: 2, k: 'good', n: '유리' }, { min: 1, k: 'good2', n: '대체로 유리' }, { min: 0, k: 'mid', n: '보통' }, { min: -1, k: 'adj', n: '조절 필요' }, { min: -99, k: 'bad', n: '부담' }];
+  function useFavor(ch, w, g, x) {
+    var roles = ch.unified && ch.unified.roles || {}, R = String(roles[w.el] || '').replace(/^조건부 /, ''), base = UF_BASE[R] != null ? UF_BASE[R] : 0;
+    var zone = ch.strength && ch.strength.zone || '', sS = /신강|태강|극왕/.test(zone), wS = /신약|태약|극약/.test(zone), helpG = g === 0 || g === 4, why = [];
+    why.push({ k: 'role', v: UF_BASE[R] != null ? UF_BASE[R] : 0, role: R });
+    var zv = 0; if (!R || R === '한신') zv = sS ? (helpG ? -1 : 1) : wS ? (helpG ? 1 : -1) : 0;
+    why.push({ k: 'zone', v: zv, zone: zone, help: helpG, used: !R || R === '한신' });
+    var t = base + zv;
+    if (x.out && x.excess) { t++; why.push({ k: 'release', v: 1 }); }
+    if (x.jehwa) { t++; why.push({ k: 'jehwa', v: 1 }); }
+    if (x.ptBad) { t--; why.push({ k: 'badpair', v: -1, name: x.ptName }); }
+    if (x.excess && x.grow && !x.out) { t--; why.push({ k: 'overheat', v: -1 }); }
+    var lv = UF_LV.filter(function (o) { return t >= o.min; })[0];
+    var yong = ch.unified && ch.unified.yong, dEl = null; try { dEl = mod(Math.floor(ch.pillars.day.s / 2), 5); } catch (e) { }
+    return { k: lv.k, n: lv.n, t: t, role: R, zone: zone, why: why, yong: yong, yongGroup: yong != null && dEl != null ? mod(yong - dEl, 5) : null };
+  }
   function luckOne(M, ch, w, p) {
     var se = M.stemEl(p.s), be = M.BR_EL[p.b], hid = M.HIDDEN[p.b], lab = M.hiddenLabels(p.b), s = [], cons = [];
     var roles = ch.unified && ch.unified.roles || {}, role = function (e) { return String(roles[e] || '').replace(/^조건부 /, ''); };
@@ -311,15 +339,78 @@
     rootOther.forEach(function (r) { cons.push(r.name + ' — 뿌리 자리에 걸리는 관계(길흉 판단 없이 참고)'); });
     if (pt && pt.tone === 'bad') cons.push(GN[lg] + ' 기운이 들어와 ' + pt.name + ' 같은 부담 조합이 커지기 쉬워요');
     if (excess && (stemSame || rootAny)) cons.push('주무기가 이 명식에서 이미 많은 쪽(' + wRole + ')이라, 더 세지면 과하게 쓰기 쉬워요');
-    var on = (stemSame && rootAny) ? 'strong' : (stemSame || rootDeep) ? 'on' : null;
-    var lv = on ? (hit ? 'shaky' : on) : (gen || rootAny) ? (hit ? 'quiet' : 'sup') : hit ? (excess ? 'trim' : 'hit') : 'quiet';
     // 활용 방향: 운 천간의 일간 기준 십성 묶음(엔진 tenGod)
-    var tg = M.tenGod(ch.pillars.day.s, p.s), tgG = Math.floor(M.TG.indexOf(tg) / 2);
+    var ds = ch.pillars.day.s, tg = M.tenGod(ds, p.s), tgG = Math.floor(M.TG.indexOf(tg) / 2);
+    // ── 발현 판정 4판(2026-11-26): 오행 축 · 십성 축 · 합충(한 번만) → 주무기 유형별로 묶어 단계 결정 ──
+    //  · 오행형: 오행 축만(유입·통근·투간·생극·합충) / 십신형: 십성 축만(같은 십신 투출·지지 통근·격국 역할·짝 작용, 단순 출현은 보조까지)
+    //  · 복합형: 두 축을 따로 판정하고 강화·보완·상충을 본다. 합충형파해는 두 축에 나눠 넣지 않고 마지막에 한 번만 반영(중복 가감 없음)
+    var bMain = M.mainHidden(p.b), bTg = M.tenGod(ds, bMain), bG = Math.floor(M.TG.indexOf(bTg) / 2), g = w.group;
+    var monthEl = M.stemEl(M.mainHidden(ch.pillars.month.b));
+    var hwaOk = function (r) { var sp = monthEl === r.el || mod(monthEl + 1, 5) === r.el; return sp && !rr.some(function (x) { return x !== r && x.kind === r.kind && /충/.test(x.type) && x.members.some(function (k) { return r.members.indexOf(k) >= 0; }); }); };
+    var hwaTo = [], boundBad = [];
+    bound.forEach(function (r) { if (hwaOk(r) && r.el === w.el) hwaTo.push(r); else boundBad.push({ r: r, hwa: hwaOk(r) }); });
+    var guk = rr.filter(function (r) { return r.kind === 'branch' && /삼합|방합|육합|반합/.test(r.type) && r.el === w.el && r.members.indexOf('luck') >= 0 && !rr.some(function (x) { return x.kind === 'branch' && x.type === '충' && x.members.some(function (k) { return k !== 'luck' && r.members.indexOf(k) >= 0; }); }); });
+    var gukFull = guk.some(function (r) { return /삼합|방합/.test(r.type); });
+    // 오행 축
+    var eAx = stemSame && rootAny ? 2 : (stemSame || rootDeep || gukFull) ? 1 : (gen || rootAny || guk.length || hwaTo.length) ? 0.5 : 0;
+    var eDown = hitStem, capped = false;
+    // 5판: 이미 강한 주무기가 다시 강해지는 것도 발현 강도에 그대로 반영한다(낮추지 않음). 과열 여부는 '활용 유리도'에서 따로 판정
+    // 십성 축
+    var exact = (w.tgs || []).indexOf(tg) >= 0, struct = (w.structure || []).length > 0, rootG = bG === g, rootGAny = rootAny;
+    var ctrlG = mod(g + 3, 5), ptGood = pt && pt.tone !== 'bad', ptBad = pt && pt.tone === 'bad';
+    var jehwa = w.type !== 'element' && tgG === ctrlG && ptGood;   // 누르는 십성이지만 원국에서 좋은 작용(예: 상관패인·식신제살)으로 성립 — 제약이 아니라 다듬어짐
+    var tAx = tgG === g && rootGAny && (exact || struct) ? 2 : (tgG === g && (rootGAny || exact || struct)) || (rootG && struct) || (ptGood && rootGAny) ? 1 : (tgG === g || rootGAny || ptGood || tgG === mod(g + 4, 5)) ? 0.5 : 0;
+    var tDown = ptBad || (tgG === ctrlG && !jehwa);
+    // 합충(한 번만)
+    var relDown = boundBad.length + clash.length + rootHit.length > 0;
+    var T = w.type === 'element' ? 'element' : w.type === 'tengod' ? 'tengod' : 'complex';
+    var up = function (x) { return x >= 1; };
+    var base, axisRel = '';
+    if (T === 'element') base = { v: eAx, down: eDown };
+    else if (T === 'tengod') base = { v: tAx, down: tDown };
+    else {
+      // 두 축 모두 오름 → 둘 중 하나가 2면 강하게 / 한 축만 오름 → 발현 / 둘 다 받침 이하 → 보조 또는 잠잠
+      var v = up(eAx) && up(tAx) ? (Math.max(eAx, tAx) === 2 ? 2 : 1) : (up(eAx) || up(tAx)) ? 1 : (eAx || tAx) ? 0.5 : 0;
+      base ={ v: v, down: (eDown && !up(tAx)) || (tDown && !up(eAx)) || (eDown && tDown), split: (up(eAx) && tDown) || (up(tAx) && eDown) };
+      axisRel = up(eAx) && up(tAx) ? 'reinforce' : (up(eAx) && tDown) || (up(tAx) && eDown) ? 'conflict' : (up(eAx) || up(tAx)) && (eAx >= 0.5 && tAx >= 0.5) ? 'complement' : (up(eAx) || up(tAx)) ? 'single' : (eDown || tDown) ? 'down' : (eAx && tAx) ? 'light' : (eAx || tAx) ? 'lightOne' : 'quiet';
+    }
+    var lv;
+    if (base.v >= 1) lv = (relDown || base.down || base.split) ? 'shaky' : base.v === 2 ? 'strong' : 'on';
+    else if (base.v === 0.5) lv = (relDown || base.down) ? 'quiet' : 'sup';
+    else lv = (relDown || base.down) ? (excess ? 'trim' : 'hit') : 'quiet';
+    if (T !== 'element' && jehwa && lv === 'hit') lv = 'quiet';   // 제화(좋은 누름)는 제약으로 세지 않는다
+    var mixedSig = base.v >= 0.5 && (relDown || base.down) && lv === 'quiet';   // 받침과 누름이 엇갈려 단계를 올리지 않음
+    var kind = /strong|on|shaky/.test(lv) ? 'boost' : lv === 'sup' ? 'assist' : lv === 'quiet' ? 'keep' : 'limit';
+    // 지원·제약 근거(카드 ⑤⑥) — 있을 때만
+    var sup = [], lim = [];
+    if (stemSame) sup.push({ k: 'stem', x: '운의 천간 ' + M.STEM[p.s] + '이(가) 주무기와 같은 ' + w.elK + ' 기운이라 능력이 겉으로 드러나요' + (exact ? ' (원국에 드러난 ' + tg + '과 같은 십신)' : '') });
+    if (rootAny) sup.push({ k: 'root', x: '운의 지지 ' + M.BR[p.b] + ' 속 ' + lab[rootIx] + ' ' + M.STEM[hid[rootIx][0]] + '이(가) 주무기에 ' + (rootDeep ? '깊은 ' : '얕은 ') + '뿌리를 대 줘요' });
+    if (gen) sup.push({ k: 'gen', x: EL_K[genOf(w.el)] + ' 기운(' + GN[mod(g + 4, 5)] + ')이 ' + objJ(w.elK) + ' 낳아 받쳐 줘요' });
+    if (out && !excess) sup.push({ k: 'out', x: EL_K[outOf(w.el)] + ' 기운(' + GN[mod(g + 1, 5)] + ')이 와서 주무기의 힘이 흘러 나갈 쓰임처가 생겨요' });
+    if (out && excess) sup.push({ k: 'out', x: EL_K[outOf(w.el)] + ' 기운(' + GN[mod(g + 1, 5)] + ')이 많은 주무기의 힘을 쓰임처로 빼 줘 과열을 덜어요' });
+    if (ptGood) sup.push({ k: 'partner', x: '운의 천간이 ' + GN[tgG] + '(' + tg + ') — 주무기와 짝을 이루는 ' + (pt.name || GN[tgG]) + ' 작용이 이 시기에 켜져요' + (jehwa ? '. 누르는 힘이지만 원국에서 좋은 작용으로 성립해, 지나친 힘을 다듬어 써요' : '') });
+    if (struct && tgG === g) sup.push({ k: 'struct', x: '격국에서 맡은 역할(' + w.structure[0].text + ')이 운 천간에서 다시 드러나요' });
+    hwaTo.forEach(function (r) { sup.push({ k: 'hwa', x: r.name + ' — 월령이 받쳐 합화가 성립해 주무기 기운이 더해져요' }); });
+    guk.forEach(function (r) { sup.push({ k: 'guk', x: r.name + ' — 지지가 ' + (/삼합|방합/.test(r.type) ? '모여 ' : '절반 모여 ') + w.elK + ' 기운을 만들어 주무기를 받쳐요' }); });
+    if (hitStem && !jehwa) lim.push({ k: 'ctrl', x: '운의 천간 ' + M.STEM[p.s] + '(' + EL_K[se] + ', ' + tg + ')이(가) ' + objJ(w.elK) + ' 눌러요 — ' + GN[ctrlG] + '이(가) ' + GN[g] + ' 기능을 제어해요' });
+    if (ptBad) lim.push({ k: 'badpair', x: GN[tgG] + '(' + tg + ')이 들어와 ' + pt.name + ' 같은 부담 조합이 커져요' });
+    boundBad.forEach(function (o) { lim.push({ k: 'bound', x: o.r.name + ' — ' + (o.hwa ? '합화가 성립해 원국의 주무기 천간이 다른 기운으로 바뀌어요' : '원국의 주무기 천간이 운과 합으로 묶여 기능이 둔해져요(합화 조건은 안 맞음)') }); });
+    clash.forEach(function (r) { lim.push({ k: 'clash', x: r.name + ' — 원국의 주무기 천간이 운과 부딪혀 쓰는 방식이 흔들려요' }); });
+    rootHit.forEach(function (r) { lim.push({ k: 'roothit', x: r.name + ' — 주무기의 뿌리 자리' + (r.members.indexOf('month') >= 0 ? '(월지)' : '') + '가 충을 받아 힘이 고르지 않아요' }); });
+    if (excess && (stemSame || rootDeep) && !out) lim.push({ k: 'over', x: '주무기가 이 명식에서 이미 많은 쪽(' + wRole + ')이라, 이 시기엔 ' + GN[g] + ' 기능이 과하게 쓰여요' });
+    sup.forEach(function (o) { o.x = fixJ(o.x); }); lim.forEach(function (o) { o.x = fixJ(o.x); }); s.forEach(function (o) { o.x = fixJ(o.x); }); cons = cons.map(fixJ);
+    var uf = useFavor(ch, w, g, { excess: excess, out: out, jehwa: jehwa, ptBad: w.type !== 'element' && ptBad, ptName: pt && pt.name, grow: stemSame || rootDeep });
+    var refs = rootOther.map(function (r) { return r.name; }), relNames = bound.concat(clash, rootHit, guk).map(function (r) { return r.name; }).concat(refs);
     return {
       el: w.el, level: lv, levelK: ACT[lv].n, key: ACT[lv].k, ord: ACT[lv].o, y: ACT[lv].y,
       types: types, typesK: types.map(function (t) { return TYPE_K[t]; }), signals: s, constraints: cons,
       use: { tg: tg, group: tgG, groupName: GN[tgG] }, partner: pt || null,
       roles: { stem: role(se), branch: role(be), weapon: wRole },
+      // 4판 추가
+      wType: T, kind: kind, kindK: KIND_K[kind], axis: { e: eAx, eDown: eDown, t: tAx, tDown: tDown, rel: axisRel, relDown: relDown, capped: capped, mixed: mixedSig, jehwa: jehwa, exact: exact },
+      supports: sup, limits: lim, refs: refs, relNames: relNames, rootDepth: rootDeep ? '정기' : rootAny ? lab[rootIx] : '', stemSame: stemSame, gen: gen, out: out, hitStem: hitStem,
+      letters: { stem: { ch: M.STEM[p.s], el: se, tg: tg, group: tgG, role: role(se) }, branch: { ch: M.BR[p.b], el: be, main: M.STEM[bMain], mainEl: M.stemEl(bMain), tg: bTg, group: bG, role: role(M.stemEl(bMain)) } },
+      wGroup: g, wTgs: w.tgs || [], excess: excess, useFav: uf,
     };
   }
 
@@ -364,7 +455,7 @@
     };
   }
 
-  var api = { VERSION: VERSION, CFG: CFG, ACT: ACT, TYPE_K: TYPE_K, PLUS_K: PLUS_K, analyze: analyze, luck: luck, timeline: timeline, favor: favor, readPair: readPair, judge: judge, sig: sig, _elementFacts: elementFacts };
+  var api = { VERSION: VERSION, CFG: CFG, ACT: ACT, KIND_K: KIND_K, TYPE_K: TYPE_K, PLUS_K: PLUS_K, analyze: analyze, luck: luck, timeline: timeline, favor: favor, readPair: readPair, judge: judge, sig: sig, _elementFacts: elementFacts };
   G.MantraWeapon = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
