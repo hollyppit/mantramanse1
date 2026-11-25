@@ -14,7 +14,7 @@ import {diagnosticRecord,saveDiagnostic} from './_reading-diagnostics.js';
 import {seedPassageIds,SEED_INDEX_VERSION} from './_reading-seed-index.js';
 import {seedPassages,SEED_VERSION} from './_reading-library-seed.js';
 import {chapterGate,lockedResponse} from './_commerce.js';
-export async function prepareReviewed(env,body,{draft=false,passages=null,store:requestStore=null,timings={},observation=null}={}){
+export async function prepareReviewed(env,body,{draft=false,passages=null,store:requestStore=null,timings={},observation=null,gate=null}={}){
  const clean=validate(body);if(!clean)throw Error('bad-payload');
  const baseStore=requestStore||kvOf(env),store=baseStore&&observeReadingStore(baseStore,env,observation);if(!store)throw Error('storage-unavailable');
  // Reuse identical reads only within this request; later requests always observe withdrawals and edits.
@@ -24,6 +24,8 @@ export async function prepareReviewed(env,body,{draft=false,passages=null,store:
  if(!draft&&saved&&(saved.state==='archived'||catalog.topics.some(t=>t.id===saved.topicId&&!t.enabled)))throw Error('unknown-reviewed-chapter');
  const contract=draft&&saved?saved:contractFor(catalog,clean.chapter);
  if(!contract)throw Error('unknown-reviewed-chapter');
+ // 유료 잠금(2026-11-26 보안): 본문을 고르는 바로 그 계약으로 판정한다. 예전에는 잠금만 {id,title}로 따로 찾아, base 를 붙인 요청이 잠금을 건너뛰고 유료 본문을 받았다.
+ if(gate){const locked=await gate(contract);if(locked)return {locked};}
  stageStarted=Date.now();const [items,library]=await Promise.all([loadServiceRules(kv,contract.sourceRuleIds,contractDomains(catalog,contract)),draft?readLibrary(kv,contract.id):readPublishedLibrary(kv,contract.id)]);
  timings.core=Date.now()-stageStarted;stageStarted=Date.now();const sourceIndex=await loadSourceIndex(kv,items.filter(r=>contract.sourceRuleIds.includes(r.id)),blocked),linked=new Set(contract.sourceRuleIds);
  timings.sources=Date.now()-stageStarted;stageStarted=Date.now();const analysis=analyze(body.sd,items.filter(r=>linked.has(r.id)),{...settings,sourceIndex,blockedDocs:blocked,domains:contractDomains(catalog,contract)});
@@ -48,7 +50,7 @@ export async function serveReviewed({request,env}){
  const context={requestId:crypto.randomUUID(),started:Date.now(),chapter:'',timings:{},synthetic:request.headers.has('x-release-verification')||request.headers.has('x-mantra-monitor')};
  try{const raw=await request.text();if(raw.length>160000)throw Error('too-large');let body;try{body=JSON.parse(raw);}catch{throw Error('bad-payload');}context.chapter=body.chapter?.id||'';context.expected=body.chapter?.paragraphs?.length;
   // 유료 세계 잠금(functions/_commerce.js): 장 → 세계는 서버 카탈로그의 topicId 로만 정한다. 잠겨 있으면 본문을 만들지 않고 401/402 를 돌려준다. 모니터 헤더(x-mantra-monitor 등)는 누구나 보낼 수 있으므로 면제하지 않는다 — 모니터는 관리자 토큰을 쓴다
-  if(typeof body.chapter?.id==='string'){const catalog=await loadEditorial(kvOf(env)).catch(()=>Editorial.defaults()),contract=contractFor(catalog,{id:body.chapter.id,title:body.chapter.title});if(contract){const gate=await chapterGate(request,env,{topicId:contract.topicId,chapterId:contract.id,sd:body.sd});if(!gate.ok)return lockedResponse(gate);}}
-  const value=await prepareReviewed(env,body,{timings:context.timings,observation:{colo:request.cf?.colo,synthetic:context.synthetic}});const {claims,selectionTrace,...publicValue}=value;const payload={...publicValue,requestCostUSD:0,providerCallCount:0,requestId:context.requestId,libraryEngine:LIBRARY_VERSION};const tracked=monitorReading(env,context,payload,200,context.expected),response=json(payload);if(context.synthetic)response.headers.set('Server-Timing',Object.entries(context.timings).map(([k,v])=>k+';dur='+Math.max(0,v)).join(', '));response.headers.set('x-mantra-monitor',tracked?MONITOR_VERSION:'unavailable');return response;}
+  const gate=async contract=>{const g=await chapterGate(request,env,{topicId:contract.topicId,chapterId:contract.id,sd:body.sd});return g.ok?null:g;};
+  const value=await prepareReviewed(env,body,{timings:context.timings,observation:{colo:request.cf?.colo,synthetic:context.synthetic},gate});if(value.locked)return lockedResponse(value.locked);const {claims,selectionTrace,...publicValue}=value;const payload={...publicValue,requestCostUSD:0,providerCallCount:0,requestId:context.requestId,libraryEngine:LIBRARY_VERSION};const tracked=monitorReading(env,context,payload,200,context.expected),response=json(payload);if(context.synthetic)response.headers.set('Server-Timing',Object.entries(context.timings).map(([k,v])=>k+';dur='+Math.max(0,v)).join(', '));response.headers.set('x-mantra-monitor',tracked?MONITOR_VERSION:'unavailable');return response;}
  catch(e){const known=['too-large','bad-payload','invalid-chart','unknown-hour-has-pillar','invalid-distribution','unknown-reviewed-chapter'],status=e.message==='too-large'?413:known.includes(e.message)?400:503,body={ok:false,error:known.includes(e.message)?e.message:'storage-unavailable',aiSkipped:true,providerCallCount:0,requestCostUSD:0},failure=diagnosticRecord(body,status,context);await saveDiagnostic(env,failure).catch(()=>{});const tracked=monitorReading(env,context,body,status,context.expected),response=json({...body,requestId:context.requestId,failure},status);response.headers.set('x-mantra-monitor',tracked?MONITOR_VERSION:'unavailable');return response;}
 }

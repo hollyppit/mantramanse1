@@ -103,7 +103,8 @@ const closedPage = () => new Response(null, { status: 302, headers: { ...HDR, lo
 //    회원은 Bearer 를 쓰지 않으므로(x-member-token) 영향이 없다.
 export const AUTH_FAIL_MAX = 20;
 async function failKey(request) {
-  const ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'local';
+  let ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'local';
+  if (ip.includes(':')) ip = ip.split(':').slice(0, 4).join(':') + '::/64';   // 2026-11-26: IPv6 는 /64 묶음으로 센다(주소를 바꿔 가며 대입하는 것 막기)
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('cm-authfail:' + ip));
   return 'cm:authfail:' + [...new Uint8Array(buf)].slice(0, 12).map(b => b.toString(16).padStart(2, '0')).join('') + ':' + new Date().toISOString().slice(0, 13);
 }
@@ -112,7 +113,8 @@ export async function authThrottle(request, env) {
   const k = await failKey(request); let n = 0;
   try { n = +(await env.GLOSSARY_KV.get(k)) || 0; } catch { n = 0; }
   if (n >= AUTH_FAIL_MAX) return new Response(JSON.stringify({ error: '인증 실패가 너무 많습니다. 1시간 뒤에 다시 시도해 주세요', need: 'auth-throttle' }), { status: 429, headers: { ...HDR, 'content-type': 'application/json; charset=utf-8', 'retry-after': '3600' } });
-  const good = isAdmin(request, env) || (looksStaff(request) && await staffOf(request, env));
+  // 2026-11-26: 예약 작업 열쇠(RAG_SCHEDULER_SECRET, agentic-rag·reading-blocks)도 맞는 열쇠로 본다 — 미들웨어가 이제 모든 /api/* 에 이 검사를 건다
+  const good = isAdmin(request, env) || (env.RAG_SCHEDULER_SECRET && isAdmin(request, { ADMIN_PASSWORD: env.RAG_SCHEDULER_SECRET })) || (looksStaff(request) && await staffOf(request, env));
   if (!good) { try { await env.GLOSSARY_KV.put(k, String(n + 1), { expirationTtl: 3700 }); } catch { } }
   return null;
 }

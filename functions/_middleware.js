@@ -3,7 +3,7 @@
 // 아래 "공개 읽기(GET)" 경로를 운영 주소로 대신 요청한다. 쓰기(POST/PUT/DELETE)와 관리자 경로는 건드리지 않는다.
 // 운영 호스트(mantramanse.pages.dev)와 그 외 호스트에서는 아무 일도 하지 않는다(요청을 그대로 통과).
 import { siteGate } from './_site-gate.js';
-import { communityGate } from './_community.js';
+import { communityGate, authThrottle } from './_community.js';
 import { gatewayRedirect } from './_gateway.js';
 
 const PROD = 'https://mantramanse.pages.dev';
@@ -28,7 +28,9 @@ export function withSecurity(request, res) {
 
 // 배포에서 뺄 경로(2026-11-25): 저장소 루트를 그대로 배포하므로, 서비스가 아닌 연구 자료 폴더는 누구에게도(관리자 포함) 내보내지 않는다.
 //   /validation/… = 유명인 생애 데이터 검증 시스템(validation/celebrity). 대소문자·중복 슬래시·%인코딩 우회도 막는다.
-export const PRIVATE_PATH = /^\/validation(\/|$)/i;
+// 2026-11-26 보안 점검: 저장소 루트 배포라 내부 폴더(유료 원고 editorial·문서·도구·테스트·DB 구조·설정)와 설명 문서(.md)·서버 전용 스크립트(.mjs·.cjs·.sql)도
+//   그대로 열렸다 → 모두 404. 서비스 화면(report·community·gate·루트 js)은 이 폴더·확장자를 쓰지 않는다(grep 확인).
+export const PRIVATE_PATH = /^\/(?:(?:validation|docs|editorial|tools|tests|supabase|config|output|workers|functions|node_modules|외부툴_프롬프트|\.(?!well-known(?:\/|$))[^/]*)(?:\/|$)|.*\.(?:md|mjs|cjs|sql|zip|map|ts|log|bak)$)/i;
 export function isPrivatePath(rawUrl) {
   let p; try { p = new URL(rawUrl).pathname; } catch { return false; }
   try { p = decodeURIComponent(p); } catch { /* 잘못된 인코딩은 원래 경로로 판정 */ }
@@ -38,6 +40,9 @@ const notFound = () => new Response('Not Found', { status: 404, headers: { 'cont
 
 export async function onRequest(ctx) { if (isPrivatePath(ctx.request.url)) return notFound(); return withSecurity(ctx.request, await route(ctx)); }
 async function route(ctx) {
+  // 2026-11-26 보안 점검: 관리자 비밀번호(Bearer) 대입 막기를 모든 /api/* 로 넓힌다(예전엔 /api/admin·/api/community/* 만 막고 나머지 약 70곳은 무제한).
+  //   같은 IP(IPv6 는 /64)에서 1시간에 20번 틀리면 그 시간 동안 Bearer 요청을 429. 커뮤니티 API 는 communityGate 안에서 같은 검사를 하므로 여기서는 건너뛴다(두 번 세지 않게).
+  { const p = new URL(ctx.request.url).pathname.replace(/\/{2,}/g, '/'); if (p.toLowerCase().startsWith('/api/') && !p.startsWith('/api/community/')) { const t = await authThrottle(ctx.request, ctx.env); if (t) return t; } }
   const hidden = await gatewayRedirect(ctx.request, ctx.env);   // 통합 첫 화면 숨김(기본) — /gate/ 를 /report/ 로
   if (hidden) return hidden;
   const locked = await siteGate(ctx.request, ctx.env);
