@@ -8668,7 +8668,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     <section class="card">
       <div class="card-h"><h2>연도별 흐름 · ${term('세운')} <span class="lvl">${LEVEL_ROLE.seun}</span></h2></div>
       ${chartLegend()}
-      <div class="legend sj-leg" style="margin:4px 0 2px"><span><i class="sw sj-sw"></i><b style="color:var(--samjae)">빗금 띠·들/눌/날 = 삼재 3년</b> · 띠 기준 전통 참고 보조 지표(막대 색·점수와 별개)</span><span><i class="sw" style="background:none;border:2px solid var(--ink-3);border-radius:4px"></i>테두리 = 그 10년의 대운(색은 대운의 대표 오행) · <b>굵은 테두리</b> = 대운이 일주와 합해 그 오행이 더 강해지는 10년</span></div>
+      <div class="legend sj-leg" style="margin:4px 0 2px"><span><i class="sw sj-sw"></i><b style="color:var(--samjae)">빗금 띠·들/눌/날 = 삼재 3년</b> · 띠 기준 전통 참고 보조 지표(막대 색·점수와 별개)</span><span><i class="sw" style="background:none;border:1px solid var(--ink-3);border-radius:4px"></i>테두리 = 그 10년의 대운(색은 대운의 대표 오행)</span></div>
       ${elLegendBar()}<div class="chart" data-chart="life"></div>
       ${wpBlock('luck', { curY, wolY: Y, part: 'seun' })}
       ${samjaeBox(sel.kind === 'seun' ? sel.Y : curY)}
@@ -10914,13 +10914,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const bw = Math.max(1.5, (W - L - R) / (y1 - y0 + 1) - 1.2);
     data.forEach(d => { const v = d.combined, yy = y(v), z = y(0); const h = Math.max(1.5, Math.abs(yy - z)); const de = elOf(d), col = de != null ? elFill(de) : sigFlow(v).c; s += `<rect x="${(x(d.year) - bw / 2).toFixed(1)}" y="${Math.min(yy, z).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(2, bw / 2)}" style="fill:${col};${ovStroke(d.ev.overlays)}"/>`; });
     // 대운 테두리(2026-11-26): 세운 막대를 대운 10년씩 묶고, 테두리 색 = 그 대운의 대표 오행(대운 막대 색과 같은 mainEl).
-    //  대운이 일주(일간·일지)와 합해 바로 그 오행을 만들면(천간합·육합·반합·삼합, 엔진 luckRelations 의 합 오행) 더 굵게. 표시 전용, 점수 불변
+    //  모든 테두리를 얇고 연하게 통일(2026-11-26 사용자 결정: 일주 합에 따른 굵기 구분은 뺌). 표시 전용, 점수 불변
     ch.daeun.list.forEach(d => {
       const a = Math.max(y0, d.startYear), b = Math.min(y1 + 1, d.startYear + 10); if (b <= a) return;
       const de = elOf(d); if (de == null) return;
-      let strong = false; try { strong = (M.luckRelations(ch, d).rels || []).some(r => r.members.includes('day') && r.members.includes('luck') && /합/.test(r.type) && r.el === de); } catch (e) { strong = false; }
       const xa = Math.max(L, x(a - 0.5)) + 1, xb = Math.min(W - R, x(b - 0.5)) - 1; if (xb - xa < 4) return;
-      s += `<rect class="du-frame${strong ? ' strong' : ''}" x="${xa.toFixed(1)}" y="${T + 1}" width="${(xb - xa).toFixed(1)}" height="${H - T - B - 2}" rx="6" style="fill:none;stroke:${elFill(de)};stroke-width:${strong ? 3.2 : 1.4};opacity:.95"/>`;
+      s += `<rect class="du-frame" x="${xa.toFixed(1)}" y="${T + 1}" width="${(xb - xa).toFixed(1)}" height="${H - T - B - 2}" rx="6" style="fill:none;stroke:${elFill(de)};stroke-width:1;opacity:.55"/>`;
     });
     if (showGhost()) s += `<polyline class="ghost-line" points="${data.map(d => `${x(d.year).toFixed(1)},${y(altOf(d)).toFixed(1)}`).join(' ')}"/>`;
     const curY = M.yearPillarAt(NOW).sajuYear;
