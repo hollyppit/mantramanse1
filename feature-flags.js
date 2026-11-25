@@ -12,7 +12,7 @@
      · macroEra: 운세 흐름 맨 위 '시대 흐름'(삼원구운 20년, 모두에게 공통) + 이 사주가 그 기운을 받아들이는 방식(macro-era.js·macro-era-bridge.js). 표시 전용, 점수·용신 불변. 관리자 스위치(/api/luck-flags macroEra)
      · tenGodRoles: 오행·강약 탭 '십성 작용 분석'(5종 비교·상호작용 구조)과 운세 흐름 상세 '원국과 운의 상호작용'(ten-god-roles.js). 표시 전용, 점수 불변. 관리자 스위치(/api/luck-flags tenGodRoles)
      · aptitude: 만세력 '특기·적성' 탭(aptitude.js·aptitude-data.js·aptitude-view.js) — 특기 5영역·적성 6분야·운동 상세·최종 추천. 표시 전용, 엔진 불변. 관리자 스위치(/api/luck-flags aptitude)
-     · psych: 만세력 '심리 솔루션' 탭(psych.js·psych-data.js·psych-view.js) — 마음의 상처 결(명리로 읽는 잠재적 트라우마)·시기별 스트레스·심리 상태·솔루션. 표시 전용, 엔진 불변. 관리자 스위치(/api/luck-flags psych)
+     · psych: 만세력 '심리 솔루션' 탭(psych.js·psych-data.js·psych-view.js) — 마음에 남은 경험과 반복되는 패턴(확인 응답)·시기별 감정·교운기·곡선 그래프·마음 체크·실천. 표시 전용, 엔진 불변. 관리자 스위치(/api/luck-flags psych)
      · groupCompat: 만세력 궁합 탭 '여러 명' 보기(compat-group.js) — 3~6명 관계 지도·기운 방향·무리 오행 균형·이어 주는 사람·함께 좋은 달. 표시 전용, 두 사람 궁합 계산 불변. 관리자 스위치(/api/luck-flags groupCompat)
      · timelineCopy: 운명의 타임라인 카드 첫머리 문안(report/hub/hub-timeline.js). 관리자 화면 스위치(/api/luck-flags timelineCopy)로도 켠다
    끄는 방법: 값을 false로 되돌려 배포. 기존 만세력·결제·무빙툰·관리자에는 영향이 없다. 절차: docs/LUCK_ENV_ROLLBACK_2026-11-02.md */
