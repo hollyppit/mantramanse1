@@ -1,0 +1,9 @@
+28c28,29
+<  [D.PAIR,D.PATTERN,D.LACK,D.CLIMATE,D.PILLAR,D.TG,D.STAGE,D.RELPAIR,D.RELTYPE,D.DWG,D.DWY,D.SEG,D.SER,D.BANDG,D.DWN,D.DWR,D.SEN].forEach(collect);
+---
+>  for(const L of LENSES)need(D.FALLBACK&&D.FALLBACK[L],['용신','희신','기신'].flatMap(r=>['목','화','토','금','수'].map(e=>r+'|'+e)),'FALLBACK.'+L);   // 2026-11-26 대체 문단 표도 같은 형식 검사
+>  [D.FALLBACK,D.PAIR,D.PATTERN,D.LACK,D.CLIMATE,D.PILLAR,D.TG,D.STAGE,D.RELPAIR,D.RELTYPE,D.DWG,D.DWY,D.SEG,D.SER,D.BANDG,D.DWN,D.DWR,D.SEN].forEach(collect);
+31c32
+<  for(const L of LENSES){const seen=new Map();const dup=[];for(const [name,tab] of Object.entries({PAIR:D.PAIR[L],PATTERN:D.PATTERN[L],LACK:D.LACK[L],CLIMATE:D.CLIMATE[L],TG:D.TG[L],STAGE:D.STAGE[L],RELPAIR:D.RELPAIR[L],RELTYPE:D.RELTYPE[L],DWG:D.DWG[L],DWY:D.DWY[L],SEG:D.SEG[L],BANDG:D.BANDG[L],DWN:D.DWN[L],SEN:D.SEN[L],SERTYPE:D.SER.TYPE[L],DWRTYPE:D.DWR.TYPE[L]}))for(const [k,t] of Object.entries(tab)){if(seen.has(t))dup.push(name+'.'+k+' = '+seen.get(t));else seen.set(t,name+'.'+k);}
+---
+>  for(const L of LENSES){const seen=new Map();const dup=[];for(const [name,tab] of Object.entries({FALLBACK:D.FALLBACK[L],PAIR:D.PAIR[L],PATTERN:D.PATTERN[L],LACK:D.LACK[L],CLIMATE:D.CLIMATE[L],TG:D.TG[L],STAGE:D.STAGE[L],RELPAIR:D.RELPAIR[L],RELTYPE:D.RELTYPE[L],DWG:D.DWG[L],DWY:D.DWY[L],SEG:D.SEG[L],BANDG:D.BANDG[L],DWN:D.DWN[L],SEN:D.SEN[L],SERTYPE:D.SER.TYPE[L],DWRTYPE:D.DWR.TYPE[L]}))for(const [k,t] of Object.entries(tab)){if(seen.has(t))dup.push(name+'.'+k+' = '+seen.get(t));else seen.set(t,name+'.'+k);}

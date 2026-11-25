@@ -1,0 +1,13 @@
+85a86,87
+> // 대체 문단(2026-11-26): 두 번 나눠 담은 뒤에도 문단이 0개인 장에만, 이 순서로 아직 안 쓴 요소를 하나 넣는다(yf 용신 오행 · gf 기신 오행 · hf 희신 오행). 다른 장의 배정은 바뀌지 않는다.
+> var FALLBACK=['yf','gf','hf'];
+117a120
+>  var UE=sd.usefulElements,UR=UE&&UE.roles;if(UE&&ELS.indexOf(UE.yong)>=0)f.yf={el:UE.yong,role:'용신'};if(UE&&ELS.indexOf(UE.hee)>=0)f.hf={el:UE.hee,role:'희신'};if(UR){var gi=ELS.filter(function(e){return UR[e]==='기신';})[0];if(gi)f.gf={el:gi,role:'기신'};}
+150a154
+>  if(slot==='yf'||slot==='gf'||slot==='hf'){t=d.FALLBACK&&d.FALLBACK[lens]&&d.FALLBACK[lens][v.role+'|'+v.el];var rr=d.FALLBACK&&d.FALLBACK.ROLE&&d.FALLBACK.ROLE[v.role];return t&&rr?J(rr+josa(rr,'은','는')+' '+v.el+'('+EL_GLOSS[v.el]+')'+josa(v.el,'이에요','예요')+'. ',t):'';}
+170a175
+>  PLAN.forEach(function(p){if(!(out[p[0]]||[]).length)take(p[1],p[0],FALLBACK,1);});
+177c182
+< R.ReadingInsight={paragraphs:paragraphs,html:html,facts:facts,assign:assign,PLAN:PLAN,SPARE:SPARE};
+---
+> R.ReadingInsight={paragraphs:paragraphs,html:html,facts:facts,assign:assign,PLAN:PLAN,SPARE:SPARE,FALLBACK:FALLBACK};

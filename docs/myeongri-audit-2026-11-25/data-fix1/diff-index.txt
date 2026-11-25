@@ -1,0 +1,16 @@
+216c216
+< .pill.lv-강 { background: var(--bad); color: var(--surface); } .pill.lv-약 { background: var(--bad-soft); color: var(--bad); } .pill.lv-참고 { background: var(--surface-2); color: var(--ink-2); }
+---
+> .pill.lv-강 { background: var(--bad); color: var(--surface); } .pill.lv-후보 { background: transparent; color: var(--ink-3); border: 1px dashed var(--line); } .li.pat-cand .k, .li.pat-cand .v { color: var(--ink-3); } .pill.lv-약 { background: var(--bad-soft); color: var(--bad); } .pill.lv-참고 { background: var(--surface-2); color: var(--ink-2); }
+6076c6076
+<       ${pat.list.length ? `<div class="list">${pat.list.map(p => `<div class="li"><span class="k">${term(patTerm(p.name), p.name)}</span><span class="v small">${esc(p.basis)}</span><span class="pill lv-${p.level}">${p.level}</span></div>`).join('')}</div>` : '<p class="muted small">특기할 구조가 없습니다.</p>'}
+---
+>       ${pat.list.length ? `<div class="list">${pat.list.map(p => `<div class="li"><span class="k">${term(patTerm(p.name), p.name)}</span><span class="v small">${esc(p.basis)}</span><span class="pill lv-${p.level}">${p.level}</span></div>`).join('')}</div>` : '<p class="muted small">특기할 구조가 없습니다.</p>'}${(pat.candidates || []).length ? `<p class="small muted" style="margin:10px 0 4px">구조 후보 — 십성 배치는 맞지만 성립 조건을 다 채우지 못해 구조로 보지 않아요(운세 점수에도 넣지 않음)</p><div class="list">${pat.candidates.map(p => `<div class="li pat-cand"><span class="k">${term(patTerm(p.name), p.name)}</span><span class="v small">${esc(p.basis)} · ${esc(p.statusWhy || '')}</span><span class="pill lv-후보">후보</span></div>`).join('')}</div>` : ''}
+6955c6955
+<       ${o.ref && (o.ref.gyeok || o.ref.engine) ? `<p class="note">${o.ref.gyeok ? '격국 카드 판정: ' + esc(o.ref.gyeok) : ''}${o.ref.gyeok && o.ref.engine ? ' · ' : ''}${o.ref.engine ? '용신 탭 패턴: ' + esc(o.ref.engine) : ''} (기준이 조금씩 달라 결과가 다를 수 있어요)</p>` : ''}</details>`;
+---
+>       ${o.ref && o.ref.common ? `<p class="note">구조 판정: ${esc(o.ref.engine)} — 용신 탭 구조 목록·운세 점수와 같은 기준이에요${o.ownStatus && (o.ownStatus === 'on') !== (o.status === 'on') ? ' (위 조건표만으로 보면 ' + esc(({ on: '성립', weak: '약하게 성립', off: '불성립' })[o.ownStatus]) + ')' : ''}${o.ref.gyeok ? ' · 격국 카드 판정: ' + esc(o.ref.gyeok) : ''}</p>` : o.ref && (o.ref.gyeok || o.ref.engine) ? `<p class="note">${o.ref.gyeok ? '격국 카드 판정: ' + esc(o.ref.gyeok) : ''}${o.ref.gyeok && o.ref.engine ? ' · ' : ''}${o.ref.engine ? '용신 탭 패턴: ' + esc(o.ref.engine) : ''} (기준이 조금씩 달라 결과가 다를 수 있어요)</p>` : ''}</details>`;
+7116c7116
+<   const jgLog = l => l.replace('이 앱은 종격을 판정하지 않으므로 아래 결과를 그대로 받아들이기 전에 검토가 필요합니다.', '아래 ‘종격·전왕격 판단’에서 이 사주가 종격에 해당하는지 확인하세요.');
+---
+>   const jgLog = l => l.replace('종격·전왕격에 해당하는지는 별도의 종격 판정에서 확인합니다.', '아래 ‘종격·전왕격 판단’에서 이 사주가 종격에 해당하는지 확인하세요.').replace('이 앱은 종격을 판정하지 않으므로 아래 결과를 그대로 받아들이기 전에 검토가 필요합니다.', '아래 ‘종격·전왕격 판단’에서 이 사주가 종격에 해당하는지 확인하세요.');   // 2026-11-25 M7: 엔진 원문 정정 뒤에도 화면 문구는 그대로

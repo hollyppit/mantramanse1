@@ -1,0 +1,481 @@
+--- a/engine.js
++++ b/engine.js
+@@ -589,7 +589,7 @@
+     let yong = null, hee = null, applicable = true;
+     if (school === 'eokbu') {
+       log.push(`나를 돕는 힘(비겁+인성) ${f1(st.help)}% → ${st.zone}. 50%를 기준으로 부족한 쪽을 보완합니다.`);
+-      if (st.zone === '극약' || st.zone === '극왕') log.push(`※ ${st.zone} 수준입니다. 이런 사주는 억부로 조절하지 않고 강한 세력을 따르는 종격·전왕격으로 보는 학파가 있습니다. 이 앱은 종격을 판정하지 않으므로 아래 결과를 그대로 받아들이기 전에 검토가 필요합니다.`);
++      if (st.zone === '극약' || st.zone === '극왕') log.push(`※ ${st.zone} 수준입니다. 이런 사주는 억부로 조절하지 않고 강한 세력을 따르는 종격·전왕격으로 보는 학파가 있습니다. 종격·전왕격에 해당하는지는 별도의 종격 판정에서 확인합니다.`);
+       if (st.help < 50) {
+         const harms = [[1, G[1]], [2, G[2]], [3, G[3]]].sort((a, b) => b[1] - a[1]);
+         const H = harms[0][0];
+@@ -744,7 +744,8 @@
+     // establish(2026-11-25 B안): 원국 구조 감점(pattern)은 이름만 같을 때가 아니라 성립 조건(제화·패인·재제효·관제비겁 없음 등)을 확인한 경우에만. false면 이전 계산
+     // goodGate(2026-11-25 C안): 운이 만드는 좋은 구조 가점은 용신 역할을 확인한 경우에만(편관이 쓸모 있으면 식신제살 가점 없음, 인성이 쓸모 있을 때만 살인상생 등). false면 이전 계산
+     //   근거·측정: docs/luck-engine-audit-2026-11-25/03(B·C안)·04(대운 등급 변화 B 1% · C 0.3~0.5%)
+-    structure: { roleGate: true, establish: true, goodGate: true, neutralPct: 20, scale: 0.8, pattern: { '관살혼잡': -12, '상관견관': -10, '군겁쟁재': -12, '효신탈식(도식)': -8 },
++    // commonStatus(2026-11-25 M1): 원국 구조 상태(성립·후보)를 한 곳(applyPatternStatus)에서 정해 화면·풀이·운 점수·제화가 같은 결과를 본다
++    structure: { roleGate: true, establish: true, goodGate: true, commonStatus: true, neutralPct: 20, scale: 0.8, pattern: { '관살혼잡': -12, '상관견관': -10, '군겁쟁재': -12, '효신탈식(도식)': -8 },
+       // 운 글자와 원국이 함께 만드는 구조(luckStructures). formed = 운이 와서 새로 생기는 약점, good = 좋은 구조, rescue = 원국 약점을 운이 풀어 줌
+       // branchMul 지지 정기에서 온 글자의 반영 비율 / ease 해소 글자가 있을 때 약점을 줄이는 비율 / groupMin 원국에 그 묶음이 있다고 볼 최소 %
+       // cap 한 운에서 이 구조들의 합계 한도(여러 구조가 겹쳐 점수가 튀지 않게). 값은 통합 용신과 겹치는 몫을 감안해 2026-11-10 2배로 올린 크기
+@@ -1030,9 +1031,60 @@
+     if (name === '군겁쟁재') return G[3] < 10 && G[1] < 10;
+     return true;
+   }
++  // ── 원국 구조 공통 판정(2026-11-25 정합성 개선 M1·M6, LUCK_CFG.structure.commonStatus) ──
++  //   같은 구조를 화면·풀이·운 점수·제화가 각자 다시 판정하지 않고, 여기서 정한 상태 하나를 함께 본다.
++  //   성립: 성립 조건 충족 · 후보: 이름(십성 배치)은 맞지만 성립 조건을 다 채우지 못함 · (목록에 없음 = 미성립)
++  //   약점 4종(관살혼잡·상관견관·효신탈식·군겁쟁재)은 운 점수에 쓰던 B안(patEstablished) 그대로,
++  //   좋은 구조 3종(식신제살·살인상생·상관패인)은 운 점수의 C안(goodGate)과 같은 역할 조건을 원국에도 적용한다(M6).
++  //   나머지(재다신약·관살과다·식상과다·인성과다·무○·결핍)는 비율 자체가 정의라 이름 판정 = 성립.
++  const PAT_B = ['관살혼잡', '상관견관', '효신탈식(도식)', '군겁쟁재'], PAT_GOOD = ['식신제살', '살인상생', '상관패인'];
++  const PAT_COND = {
++    '관살혼잡': '정관·편관 모두 5% 이상 · 식신 제살(8% 이상) 없음 · 신약일 때 인성 화살(15% 이상) 없음',
++    '상관견관': '정관이 쓸모 있음(용신·희신) · 정인 패인(8% 이상) 없음 · 상관·정관 모두 5% 이상',
++    '효신탈식(도식)': '식신이 쓸모 있음(용신·희신) · 재성 10% 미만(재제효 없음) · 편인 8% 이상',
++    '군겁쟁재': '관성·식상 모두 10% 미만(관제비겁·식상 통관 없음)',
++    '식신제살': '관성이 쓸모 없거나(한신·구신·기신) 관성이 아주 강함 — 편관이 용신·희신이면 제살은 용신을 다치게 함',
++    '살인상생': '인성이 쓸모 있음(용신·희신)',
++    '상관패인': '인성이 쓸모 있거나 식상이 쓸모 없음',
++  };
++  function goodEstablished(ch, name) {
++    const S = LUCK_CFG.structure, G = ch.weights.groups, dEl = stemEl(ch.pillars.day.s), useful = i => (ch.unified?.roleV?.[mod(dEl + i, 5)] ?? 1) > 0;
++    if (!S.goodGate) return true;
++    if (name === '식신제살') return !useful(3) || G[3] >= S.luck.heavy;
++    if (name === '살인상생') return useful(4);
++    if (name === '상관패인') return useful(4) || !useful(1);
++    return true;
++  }
++  function patternState(ch, name) {
++    const S = LUCK_CFG.structure;
++    if (PAT_B.includes(name)) return !S.establish || patEstablished(ch, name);
++    if (PAT_GOOD.includes(name)) return goodEstablished(ch, name);
++    return true;
++  }
++  // ch.patterns: named(이름 판정 전체, 계산 내부용) · list(성립만 — 화면·풀이가 쓰는 목록) · candidates(후보)
++  //   항목마다 status('성립'·'후보')와 statusWhy(성립 조건)를 붙인다. ch.unified 가 정해진 뒤에 부른다(역할 조건이 용신 역할값을 씀).
++  function applyPatternStatus(ch) {
++    const P = ch.patterns; if (!P.named) P.named = P.list.slice();
++    for (const p of P.named) { const ok = patternState(ch, p.name); p.status = ok ? '성립' : '후보'; p.statusWhy = PAT_COND[p.name] ? `${ok ? '성립 조건 충족' : '성립 조건 미충족'} — ${PAT_COND[p.name]}` : '비율 기준 구조(이름 판정이 곧 성립)'; }
++    P.list = P.named.filter(p => p.status === '성립'); P.candidates = P.named.filter(p => p.status === '후보');
++    return P.named.map(p => p.status).join(',');
++  }
++  // 통합 용신과 구조 상태를 함께 정한다. 제화가 성립 구조만 보면(M3) 통합 용신이 바뀌고 → 역할 조건이 바뀔 수 있어 고정점까지 되풀이한다(최대 4회)
++  function settleUnified(ch, force) {
++    ch.unified = integrateYongsin(ch, force);
++    if (!LUCK_CFG.structure.commonStatus) return;
++    let sig = applyPatternStatus(ch), k = 0;
++    if (UNIFIED_CFG.jehwaEstablishedOnly || UNIFIED_CFG.jehwaDedup) for (; k < 4; k++) {
++      const u = integrateYongsin(ch, force), same = u.roleV.every((v, e) => v === ch.unified.roleV[e]) && [0, 1, 2, 3, 4].every(e => u.roles[e] === ch.unified.roles[e]);
++      ch.unified = u; const s2 = applyPatternStatus(ch);
++      if (same && s2 === sig) break; sig = s2;
++    }
++    ch.patterns.settleRounds = k;
++  }
++  const natalPatternsAll = ch => (ch.patterns.named || ch.patterns.list);   // 계산 내부: 이름 판정 전체(점수 유지용)
+   function luckStructures(ch, p) {
+     const S = LUCK_CFG.structure.luck, d = ch.pillars.day.s, G = ch.weights.groups, help = ch.strength.help;
+-    const natalNames = new Set(ch.patterns.list.map(x => x.name));
++    const natalNames = new Set(natalPatternsAll(ch).map(x => x.name));   // 원국에 같은 이름(후보 포함)이 있으면 '새로 생김'으로 다시 세지 않는 기존 규칙 유지
+     const nS = [], nB = [];
+     ['year', 'month', 'hour'].forEach(k => { const q = ch.pillars[k]; if (q) nS.push(tenGod(d, q.s)); });
+     POS.forEach(k => { const q = ch.pillars[k]; if (q) nB.push(tenGod(d, mainHidden(q.b))); });
+@@ -1234,8 +1286,8 @@
+     let structRaw = 0; g.forEach((v, i) => { const c = v * need[i]; if (!S.roleGate || !U || c * U.roleV[(dEl + i) % 5] >= 0) structRaw += c; });
+     const structP = [];
+     let patAdj = 0;
+-    for (const pt of ch.patterns.list) {
+-      const adj = S.pattern[pt.name]; if (adj == null || pt.level === '참고' || (S.establish && !patEstablished(ch, pt.name))) continue;
++    for (const pt of natalPatternsAll(ch)) {
++      const adj = S.pattern[pt.name]; if (adj == null || pt.level === '참고' || (S.establish && (pt.status ? pt.status !== '성립' : !patEstablished(ch, pt.name)))) continue;   // 공통 상태가 있으면 그 값(같은 B안), 없으면 이전처럼 직접 판정
+       const hit = (pt.name === '관살혼잡' && g[3] >= 0.4) || (pt.name === '상관견관' && g[1] >= 0.4) || (pt.name === '군겁쟁재' && g[0] >= 0.4) || (pt.name === '효신탈식(도식)' && g[4] >= 0.4);
+       if (hit) { patAdj += adj; structP.push({ label: `${pt.name} 구조에 ${TG_GROUP[top]} 기운이 겹침`, v: adj }); }
+     }
+@@ -1443,12 +1495,12 @@
+     // 통합 판단(2026-11-08): 자동이면 억부·조후·격국·통관·제화·종격을 규칙 순서로 종합한 결과를 용신으로 쓴다(병행이라고 조후를 강제하지 않는다).
+     //  사용자가 학파를 직접 고르면 그 학파를 주 기준으로 두고 나머지는 조건으로만 반영한다. 운세 흐름·궁합도 같은 ch.unified 를 쓴다.
+     ch.schoolAdvice = methodAdvice(ch).verdict;
+-    ch.unified = integrateYongsin(ch, ch.schoolAuto ? null : ch.school);
++    settleUnified(ch, ch.schoolAuto ? null : ch.school);   // 통합 용신 + 원국 구조 공통 상태(M1·M3·M4)
+     if (ch.schoolAuto) { ch.school = ch.unified.schoolKey; ch.yong = unifiedAsYong(ch.unified); ch.yongFallback = false; }
+     else {
+       ch.yong = ch.yongAll[ch.school].applicable ? ch.yongAll[ch.school] : ch.yongAll.eokbu;
+       ch.yongFallback = !ch.yongAll[ch.school].applicable;
+-      if (ch.yongFallback) ch.unified = integrateYongsin(ch, 'eokbu');
++      if (ch.yongFallback) settleUnified(ch, 'eokbu');
+     }
+     ch.saryeong = saryeong(ch);
+     ch.daeun = daeun(ch);
+@@ -1620,6 +1672,9 @@
+     soften: { gi: -0.5, gu: -0.25, yong: 0.8, hee: 0.4 },   // 조건부일 때의 역할값(기본 용 1 · 희 0.5 · 한 0 · 구 −0.5 · 기 −1)
+     // johuDedup(2026-11-13 C안): 조후가 주 기준이면 역할표가 이미 조후 용신으로 짜였으므로, 조후 성분 중 역할점수로 설명되는 몫(60갑자 회귀)을 빼고
+     //   남은 몫(같은 오행이라도 글자마다 다른 조습 차이)만 kJ로 더하고, 역할점수 비중은 (1−kG)로 둔다. false면 이전 계산. 근거: docs/LUCK_SCORE_ENGINE_REVIEW_2026-11-13.md
++    // jehwaEstablishedOnly(2026-11-25 M3): 제화는 성립한 구조만 근거로 삼는다(후보·이름만 일치한 구조 제외)
++    // jehwaDedup(2026-11-25 M4): 운 구조 점수가 따로 감점하는 약점 구조(관살혼잡·상관견관·효신탈식·군겁쟁재)는 제화에서 용신·희신을 누그러뜨리지 않는다(같은 병을 두 번 깎지 않음, 운 구조 감점 쪽을 유지)
++    jehwaEstablishedOnly: true, jehwaDedup: true,
+     luck: { johuK: 0.3, gyeokK: [0, 0.06, 0.12, 0.15], rootUp: 0.2, floatDown: 0.3, johuDedup: true },
+     chain: { combo: 8, pair: 5, clashGood: -5, clashBad: 3, stem: 2 },
+   };
+@@ -1772,7 +1827,7 @@
+   };
+   function theoryJehwa(ch) {
+     const st = ch.strength, G = ch.weights.groups, dEl = stemEl(ch.pillars.day.s);
+-    const list = ch.patterns.list.filter(p => JEHWA[p.name] && p.level !== '참고').sort((a, b) => (a.level === '강' ? 0 : 1) - (b.level === '강' ? 0 : 1));
++    const list = (UNIFIED_CFG.jehwaEstablishedOnly ? ch.patterns.list : natalPatternsAll(ch)).filter(p => JEHWA[p.name] && p.level !== '참고' && (!UNIFIED_CFG.jehwaEstablishedOnly || p.status !== '후보')).sort((a, b) => (a.level === '강' ? 0 : 1) - (b.level === '강' ? 0 : 1));
+     if (!list.length) return { key: 'jehwa', name: '제화', applicable: false, urgency: 0, yong: null, hee: null, roles: null, favor: [], avoid: [], why: '원국에 눌러 주거나(제) 풀어 주어야(화) 할 뚜렷한 십성 충돌이 없습니다.' };
+     const pt = list[0], J = JEHWA[pt.name], [cg, how] = J.cure(st, G), yong = elOfGroup(dEl, cg), harmEl = elOfGroup(dEl, J.harm);
+     return { key: 'jehwa', name: '제화', applicable: true, urgency: pt.level === '강' ? 2 : 1, yong, hee: null, roles: null, favor: [yong], avoid: [harmEl], pattern: pt.name,
+@@ -1853,7 +1908,7 @@
+     const elOfRole = r => +Object.keys(roles).find(e => roles[e] === r);
+     // ── 조건부 역할: 주 기준이 아닌 이론이 필요로 하거나 꺼리는 오행 ──
+     const roleV = [0, 1, 2, 3, 4].map(e => ROLE_BASE[roles[e]]);
+-    const conditions = {}, addCond = (e, txt) => (conditions[e] = conditions[e] || []).push(txt);
++    const conditions = {}, addCond = (e, txt) => (conditions[e] = conditions[e] || []).push(txt), dedup = [];
+     for (const key of ['eokbu', 'johu', 'tonggwan', 'gyeok', 'jehwa']) {
+       const t = T[key]; if (!t.applicable || key === primary || mode === 'jong' && key === 'eokbu') continue;
+       for (const e of t.favor) {
+@@ -1866,6 +1921,9 @@
+       }
+       for (const e of (t.avoid || [])) {
+         const r = roles[e];
++        // M4(2026-11-25): 운 구조 점수가 같은 약점 구조를 따로 감점하면(성립 구조일 때) 여기서는 누그러뜨리지 않는다 — 유지: 운 구조 감점 · 제외: 제화 역할값 누그러뜨림
++        const sp = key === 'jehwa' && U.jehwaDedup && t.pattern ? natalPatternsAll(ch).find(p => p.name === t.pattern) : null;
++        if ((r === '용신' || r === '희신') && t.urgency >= 2 && sp && LUCK_CFG.structure.establish && LUCK_CFG.structure.pattern[t.pattern] != null && sp.status === '성립') { dedup.push({ el: e, role: r, pattern: t.pattern, kept: '운 구조 점수의 ' + t.pattern + ' 감점', removed: '제화의 ' + r + ' 역할값 누그러뜨림(' + (r === '용신' ? U.soften.yong : U.soften.hee) + ')' }); continue; }
+         if ((r === '용신' || r === '희신') && t.urgency >= 2) { roleV[e] = Math.min(roleV[e], r === '용신' ? U.soften.yong : U.soften.hee); addCond(e, `${josa(t.name, '으로/로')}는 ${key === 'gyeok' ? '격을 흔드는' : '부담이 되는'} 기운이라, ${r}이라도 지나치게 많아지면 부담이 됩니다.`); }
+       }
+     }
+@@ -1918,7 +1976,7 @@
+     const log = [...steps, ...notes, ...glyphNotes];
+     return {
+       version: U.version, mode, primary, primaryName: PNAME[primary], secondary, secondaryName: secondary ? PNAME[secondary] : null, forced: mode === 'forced',
+-      yong, hee, gi, gu, han, roles, roleV, conditions, conflicts, steps, notes, glyphNotes, theories, headline, summary, log,
++      dedup, yong, hee, gi, gu, han, roles, roleV, conditions, conflicts, steps, notes, glyphNotes, theories, headline, summary, log,
+       jong: { status: Z.status, kind: Z.kind }, gyeok: { kind: T.gyeok.kind, status: T.gyeok.status },
+       schoolKey: ['eokbu', 'johu', 'tonggwan'].includes(primary) ? primary : 'eokbu',
+     };
+@@ -2225,7 +2283,7 @@
+     const balance = lclamp(B.own * lclamp((B.ideal - pct[e]) / B.ideal, -1, 1) + sup, -1, 1);
+     // 십성 작용: 원국 구조의 약점을 더 키우면 −, 풀어 주면 +. 배우자성이 모자라면 채우는 쪽 +
+     let tg = 0;
+-    for (const pt of ch.patterns.list) {
++    for (const pt of natalPatternsAll(ch)) {   // 궁합 점수: 이번 범위 밖이라 이전 입력(이름 판정 전체) 유지
+       const r = C.pattern[pt.name]; if (!r || r[0] !== g) continue;
+       tg += r[1] * (C.patternLevel[pt.level] ?? 0.5);
+     }
+@@ -2248,7 +2306,7 @@
+     if (Math.abs(p.eokbu) >= 0.2) add(Math.abs(p.eokbu) * W.eokbu, p.eokbu > 0 ? `${st.zone} 사주라 ${tgName}(${EL_K[e]}) 기운이 ${weak ? '나를 돕습니다' : '넘치는 힘을 덜어 줍니다'}` : `${st.zone} 사주에 ${tgName}(${EL_K[e]}) 기운은 ${weak ? '나를 더 소모시킵니다' : '이미 강한 힘을 더 키웁니다'}`);
+     if (Math.abs(p.johu) >= 0.15) add(Math.abs(p.johu) * W.johu, p.johu > 0 ? `${nat ? nat + ' ' : ''}원국의 온도·습도를 ${EL_K[e]} 기운이 맞춰 줍니다` : `${EL_K[e]} 기운이 ${nat || '원국의'} 기후 치우침을 더 키웁니다`);
+     if (Math.abs(p.balance) >= 0.2) add(Math.abs(p.balance) * W.balance, p.balance > 0 ? `원국에 ${EL_K[e]}이 ${pct.toFixed(0)}%로 ${pct < 15 ? '적어 채워 줍니다' : '적당해 균형을 돕습니다'}` : `원국에 ${EL_K[e]}이 이미 ${pct.toFixed(0)}%로 많아 더해지면 쏠립니다`);
+-    if (Math.abs(p.tenGod) >= 0.2) add(Math.abs(p.tenGod) * W.tenGod, p.tenGod > 0 ? `${tgName} 기운이 원국의 구조를 풀어 줍니다` : `${tgName} 기운이 원국의 ${ch.patterns.list.filter(pt => C.pattern[pt.name] && C.pattern[pt.name][0] === p.group).map(pt => pt.name).join('·') || '약점'} 구조를 키웁니다`);
++    if (Math.abs(p.tenGod) >= 0.2) add(Math.abs(p.tenGod) * W.tenGod, p.tenGod > 0 ? `${tgName} 기운이 원국의 구조를 풀어 줍니다` : `${tgName} 기운이 원국의 ${natalPatternsAll(ch).filter(pt => C.pattern[pt.name] && C.pattern[pt.name][0] === p.group).map(pt => pt.name).join('·') || '약점'} 구조를 키웁니다`);
+     if (p.excess >= 0.3) add(p.excess * W.excessPenalty, `이미 많은 기운이라 과잉 위험이 있습니다`);
+     const reasons = rs.sort((a, b) => b[0] - a[0]).map(x => x[1]);
+     if (!reasons.length) reasons.push('원국에 뚜렷한 보완도 쏠림도 만들지 않는 무난한 기운입니다');
+@@ -2563,7 +2621,7 @@
+       pillar: pp, level, ev, rels, sinsal, sinNames, g, G, pct, after, elv, balanceGain, ovEl, ovLevel, newSkew, filled, jo, extremity,
+       fit: ev.ownFit, eokbu: ev.eokbuScore, johu: ev.johuScore, vol: ev.volatilityScore, volSignals: ev.volatilitySignals, help: st.help, zone: st.zone, weak: wk, strong: sg,
+       tension, bond, tensionRels, bondRels, spouse: sp, month: mo, stemHap: dayStem.some(r => r.type === '천간합'), stemClash: dayStem.some(r => r.type === '천간충'),
+-      dohwa: sinsal12(base, pp.b) === '연살', coreN, patterns: ch.patterns.list.map(x => x.name), luckPat: ev.luckStructures || [], gender: ch.gender === 'F' ? 'F' : 'M',
++      dohwa: sinsal12(base, pp.b) === '연살', coreN, patterns: natalPatternsAll(ch).map(x => x.name), luckPat: ev.luckStructures || [], gender: ch.gender === 'F' ? 'F' : 'M',
+       // 확장 지표(취업·이직·직업·사업·자식)용: 시지=자녀궁, 역마, 원국 직업 적성을 읽는 통로
+       hour: palace('hour'), year: palace('year'), hasHour: !!ch.hourKnown && !!ch.pillars.hour, yeokma: sinsal12(base, pp.b) === '역마살', ch,
+     };
+@@ -3447,7 +3505,7 @@
+       climate: c, climateDev: lclamp(Math.max(Math.abs(c.temp) / C.climate.tempFull, Math.abs(c.hum) / C.climate.humFull), 0, 1),
+       eokbu: ch.yongAll.eokbu, johu: ch.yongAll.johu,
+       relations: { clash, bond, clashLoad: lclamp(clash / C.relations.clashFull, 0, 1), list: rel },
+-      patterns: ch.patterns.list,
++      patterns: natalPatternsAll(ch),   // 직업·재물 계산: 이번 범위 밖이라 이전 입력 유지
+       balance: [0, 1, 2, 3, 4].map(e => cpElParts(ch, e).balance),
+       excess: w.pct.map(v => lramp(v, C.groupOver.from, C.groupOver.to)),
+       deficiency: w.pct.map(v => 1 - lramp(v, 0, C.lack)),
+--- a/ten-god-roles.js
++++ b/ten-god-roles.js
+@@ -146,7 +146,14 @@
+ 
+   // ───────── 상호작용 구조 11종: 성립(on·weak·off)과 유불리(good·bad·mixed)를 따로 ─────────
+   //   from→to 는 기운이 흐르거나 누르는 방향(그룹 번호). conds 는 성립 조건, blocks 는 성립을 약하게 만드는 요인.
+-  function interactions(S, R) {
++  // eng(2026-11-25 M1): 원국 분석일 때 엔진 공통 구조 판정 { key: '성립'|'후보'|'없음' } — 이 7종은 자체 조건 대신 공통 판정을 쓴다(자체 판정은 ownStatus 로 남김)
++  const ENG_KEY = { salin: '살인상생', sikjesal: '식신제살', gyeongwan: '상관견관', paein: '상관패인', honjap: '관살혼잡', dosik: '효신탈식(도식)', bigeopjaeng: '군겁쟁재' };
++  function engineStatusOf(ch) {
++    const P = ch && ch.patterns; if (!P || !P.named) return null;
++    const out = {}; Object.keys(ENG_KEY).forEach(k => { const p = P.named.filter(x => x.name === ENG_KEY[k])[0]; out[k] = p ? p.status : '없음'; });
++    return out;
++  }
++  function interactions(S, R, eng) {
+     const out = [], ge = g => mod5(S.dEl + g), v = g => R.unifiedV(ge(g));
+     const lv = g => GN[g] + ' ' + r1(S.grp[g]) + '%' + (S.exposed[g].length ? '·투출' : '') + (S.root[g] >= 0.5 ? '·통근' : '');
+     const lt = t => t + ' ' + r1(S.tg[t]) + '%' + (S.tgExposed[t] ? '·투출' : '');
+@@ -155,6 +162,7 @@
+     const mk = (o) => {
+       const coreOk = o.conds.filter(x => x.core).every(x => x.ok), allOk = o.conds.every(x => x.ok), blocked = o.blocks.some(x => x.hit);
+       o.status = !coreOk ? 'off' : allOk && !blocked ? 'on' : 'weak';
++      if (eng && eng[o.key]) { o.ownStatus = o.status; o.engineStatus = eng[o.key]; o.status = eng[o.key] === '성립' ? 'on' : 'off'; o.candidate = eng[o.key] === '후보'; }
+       if (o.status === 'off') { o.tone = ''; o.toneWhy = ''; } else { const t = o.toneFn(); o.tone = t[0]; o.toneWhy = t[1]; }
+       delete o.toneFn; out.push(o); return o;
+     };
+@@ -225,7 +233,7 @@
+       conds: [c('비겁이 많음(' + TH.jaeng.bigeop + '% 이상)', S.grp[0] >= TH.jaeng.bigeop, lv(0)), c('재성이 조금이라도 있음', S.grp[2] >= 2 || S.root[2] > 0 || S.exposed[2].length > 0, lv(2)), c('재성이 비겁보다 적음(' + TH.jaeng.jae + '% 이하)', S.grp[2] <= TH.jaeng.jae, lv(2))],
+       blocks: [b('관성이 비겁을 눌러 재를 지킴(관제비겁)', clear(S, 3), lv(3)), b('식상이 비겁 기운을 재로 이어 줌(통관)', clear(S, 1), lv(1))],
+       toneFn: () => inB(2) ? ['mixed', '돈을 두고 나눔·경쟁이 생기지만, 이 사주엔 혼자 다 쥐기보다 나누는 게 오히려 편할 때도 있어요.'] : ['bad', '같이 하는 사람·경쟁자와 돈·몫을 나누게 되기 쉬운 구조예요. 동업·보증·공동 지출은 선을 그어 두세요.'] });
+-    out.forEach(o => { o.easy = EASY_IX[o.key] || ''; o.fromK = GN[o.from]; o.toK = GN[o.to]; o.statusK = STATUS_K[o.status]; o.toneK = TONE_K[o.tone] || ''; o.roleFrom = roleName(o.from); o.roleTo = roleName(o.to); });
++    out.forEach(o => { o.easy = EASY_IX[o.key] || ''; o.fromK = GN[o.from]; o.toK = GN[o.to]; o.statusK = o.candidate ? '후보' : STATUS_K[o.status]; o.toneK = TONE_K[o.tone] || ''; o.roleFrom = roleName(o.from); o.roleTo = roleName(o.to); });
+     return out;
+   }
+   const STATUS_K = { on: '성립', weak: '약하게 성립', off: '불성립' }, TONE_K = { good: '유리', bad: '불리', mixed: '엇갈림' };
+@@ -319,7 +327,7 @@
+   const cache = (typeof WeakMap !== 'undefined') ? new WeakMap() : null;
+   function analyze(M, ch) {
+     const hit = cache && cache.get(ch); if (hit) return hit;
+-    const R = rolesOf(ch), S = buildState(M, ch, [], CFG.layerW), IX = interactions(S, R);
++    const R = rolesOf(ch), S = buildState(M, ch, [], CFG.layerW), IX = interactions(S, R, engineStatusOf(ch));
+     const groups = groupsOf(M, ch, S, IX, R);
+     // 격국 카드(gyeok-structure.js)와 엔진 패턴(ch.patterns)에 같은 이름의 구조가 있으면 대조 표시(판정은 이 모듈 기준, 서로 덮어쓰지 않음)
+     let gx = null; try { gx = G.MantraGyeokStructure ? G.MantraGyeokStructure.analyze(M, ch) : null; } catch (e) { gx = null; }
+@@ -328,7 +336,7 @@
+     const pnames = (ch.patterns && ch.patterns.list || []).map(x => x.name);
+     IX.forEach(o => {
+       const gi = gx && (XMAP[o.key] || []).map(k => gx.items.filter(x => x.key === k)[0]).filter(Boolean)[0];
+-      o.ref = { gyeok: gi ? (gi.on ? '성립' : '불성립') : null, engine: PMAP[o.key] ? (pnames.indexOf(PMAP[o.key]) >= 0 ? '있음' : '없음') : null };
++      o.ref = { gyeok: gi ? (gi.on ? '성립' : '불성립') : null, engine: o.engineStatus || (PMAP[o.key] ? (pnames.indexOf(PMAP[o.key]) >= 0 ? '있음' : '없음') : null), common: !!o.engineStatus };
+     });
+     const R0 = {
+       version: VERSION, mode: R.mode, primary: R.primary,
+@@ -489,6 +497,7 @@
+     M = M || G.Manse; const list = (ch && ch.patterns && ch.patterns.list) || [];
+     if (!M || !ch || !list.length) { const o = list.slice(); o.dropped = []; return o; }
+     const hit = AGREE_CACHE && AGREE_CACHE.get(ch); if (hit) return hit;
++    if (ch.patterns.named) { const o = ch.patterns.list.slice(); o.dropped = (ch.patterns.candidates || []).map(p => p.name); o.candidates = (ch.patterns.candidates || []).slice(); o.common = true; if (AGREE_CACHE) AGREE_CACHE.set(ch, o); return o; }   // 2026-11-25 M1: 엔진 공통 판정(성립만 표시, 후보는 숨김 목록)
+     let st = {}; try { (analyze(M, ch).interactions || []).forEach(it => { st[it.name] = it.status; }); } catch (e) { st = null; }
+     const dropped = [], out = !st ? list.slice() : list.filter(p => { const k = PAT_MAP[p.name]; if (k && st[k] === 'off') { dropped.push(p.name); return false; } return true; });
+     out.dropped = dropped; if (AGREE_CACHE) AGREE_CACHE.set(ch, out); return out;
+--- a/index.html
++++ b/index.html
+@@ -213,7 +213,7 @@
+ .pill.b-순풍 { background: var(--good-soft); color: var(--good); } .pill.b-보통 { background: var(--surface-2); color: var(--ink-2); }
+ .pill.b-주의 { background: color-mix(in srgb, var(--d-chg) 18%, var(--surface)); color: var(--d-chg); } .pill.b-부담 { background: var(--bad-soft); color: var(--bad); }
+ button.pill { border: 0; cursor: pointer; font-family: inherit; }
+-.pill.lv-강 { background: var(--bad); color: var(--surface); } .pill.lv-약 { background: var(--bad-soft); color: var(--bad); } .pill.lv-참고 { background: var(--surface-2); color: var(--ink-2); }
++.pill.lv-강 { background: var(--bad); color: var(--surface); } .pill.lv-후보 { background: transparent; color: var(--ink-3); border: 1px dashed var(--line); } .li.pat-cand .k, .li.pat-cand .v { color: var(--ink-3); } .pill.lv-약 { background: var(--bad-soft); color: var(--bad); } .pill.lv-참고 { background: var(--surface-2); color: var(--ink-2); }
+ 
+ /* 목록·표 */
+ .list { display: grid; gap: 0; }
+@@ -6073,7 +6073,7 @@
+     ${amhapCard(ch)}
+     <section class="card">
+       <div class="card-h"><h2>구조 진단</h2><span class="note">관살혼잡·상관견관 같은 구조가 성립하는지와 그 근거</span></div>
+-      ${pat.list.length ? `<div class="list">${pat.list.map(p => `<div class="li"><span class="k">${term(patTerm(p.name), p.name)}</span><span class="v small">${esc(p.basis)}</span><span class="pill lv-${p.level}">${p.level}</span></div>`).join('')}</div>` : '<p class="muted small">특기할 구조가 없습니다.</p>'}
++      ${pat.list.length ? `<div class="list">${pat.list.map(p => `<div class="li"><span class="k">${term(patTerm(p.name), p.name)}</span><span class="v small">${esc(p.basis)}</span><span class="pill lv-${p.level}">${p.level}</span></div>`).join('')}</div>` : '<p class="muted small">특기할 구조가 없습니다.</p>'}${(pat.candidates || []).length ? `<p class="small muted" style="margin:10px 0 4px">구조 후보 — 십성 배치는 맞지만 성립 조건을 다 채우지 못해 구조로 보지 않아요(운세 점수에도 넣지 않음)</p><div class="list">${pat.candidates.map(p => `<div class="li pat-cand"><span class="k">${term(patTerm(p.name), p.name)}</span><span class="v small">${esc(p.basis)} · ${esc(p.statusWhy || '')}</span><span class="pill lv-후보">후보</span></div>`).join('')}</div>` : ''}
+       <p class="note">강: 천간에 드러나거나 비율이 뚜렷함 · 약: 지지 정기까지 포함해야 성립 · 참고: 판단 보조. 구조가 성립해도 합·제어 관계에 따라 작용이 줄어들 수 있으며, 이 앱은 그 해소 여부를 판정하지 않습니다.</p>
+       ${pat.tuchul.length ? `<div><h3 style="margin-bottom:6px">${term('투출')}</h3><div>${pat.tuchul.map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div></div>` : ''}
+     </section>
+@@ -6952,7 +6952,7 @@
+     const act = r.interactions.filter(o => o.status !== 'off'), off = r.interactions.filter(o => o.status === 'off');
+     const ixRow = o => `<details class="tgr-ix"><summary><b>${esc(o.name)}</b> <span class="small muted">${esc(o.easy || '')} · ${esc(o.fromK)}${o.from === o.to ? '' : ' → ' + esc(o.toK)}</span> <span class="wc-chip ${TGR_ST[o.status]}">${esc(o.statusK)}</span>${o.toneK ? ` <span class="wc-chip ${TGR_TONE[o.tone]}">${esc(o.toneK)}</span>` : ''}</summary>
+       ${o.toneWhy ? `<p>${esc(o.toneWhy)}</p>` : ''}<ul class="small">${o.conds.map(c => `<li>${c.ok ? '충족' : '미충족'} · ${esc(c.label)}${c.detail ? ' (' + esc(c.detail) + ')' : ''}${c.core ? '' : ' <span class="muted">— 강도 조건</span>'}</li>`).join('')}${o.blocks.filter(b => b.hit).map(b => `<li>약화 요인 · ${esc(b.label)}${b.detail ? ' (' + esc(b.detail) + ')' : ''}</li>`).join('')}</ul>
+-      ${o.ref && (o.ref.gyeok || o.ref.engine) ? `<p class="note">${o.ref.gyeok ? '격국 카드 판정: ' + esc(o.ref.gyeok) : ''}${o.ref.gyeok && o.ref.engine ? ' · ' : ''}${o.ref.engine ? '용신 탭 패턴: ' + esc(o.ref.engine) : ''} (기준이 조금씩 달라 결과가 다를 수 있어요)</p>` : ''}</details>`;
++      ${o.ref && o.ref.common ? `<p class="note">구조 판정: ${esc(o.ref.engine)} — 용신 탭 구조 목록·운세 점수와 같은 기준이에요${o.ownStatus && (o.ownStatus === 'on') !== (o.status === 'on') ? ' (위 조건표만으로 보면 ' + esc(({ on: '성립', weak: '약하게 성립', off: '불성립' })[o.ownStatus]) + ')' : ''}${o.ref.gyeok ? ' · 격국 카드 판정: ' + esc(o.ref.gyeok) : ''}</p>` : o.ref && (o.ref.gyeok || o.ref.engine) ? `<p class="note">${o.ref.gyeok ? '격국 카드 판정: ' + esc(o.ref.gyeok) : ''}${o.ref.gyeok && o.ref.engine ? ' · ' : ''}${o.ref.engine ? '용신 탭 패턴: ' + esc(o.ref.engine) : ''} (기준이 조금씩 달라 결과가 다를 수 있어요)</p>` : ''}</details>`;
+     return `<section class="card tgr" id="tenGodRoles">
+       <div class="card-h"><h2>십성 작용 분석</h2><span class="note">많고 적음(세력)과 도움·부담(유불리)을 따로 봐요</span></div>
+       <div class="tgr-sum">${r.summary.map(t => `<p>${esc(t)}</p>`).join('')}</div>
+@@ -7113,7 +7113,7 @@
+       <p class="note">격국 판단은 억부·조후·병약·종격과 따로 보는 관점이며, 용신 계산·흐름 점수·다른 탭의 해석에는 더해지지 않습니다. 표의 격국 행은 용신=상신, 희신=다음 상신, 기신=파격 요인입니다. 8격과 대표적인 상신·파격 조건만 구현한 단순화 모델이며, 전통 해석이므로 결과를 보장하지 않습니다.</p></section>`;
+   }
+   // 엔진이 남기는 억부 판단 로그의 “종격을 판정하지 않는다” 문장을 종격 판단 카드 안내로 바꿔 보여 준다(엔진 로그는 그대로)
+-  const jgLog = l => l.replace('이 앱은 종격을 판정하지 않으므로 아래 결과를 그대로 받아들이기 전에 검토가 필요합니다.', '아래 ‘종격·전왕격 판단’에서 이 사주가 종격에 해당하는지 확인하세요.');
++  const jgLog = l => l.replace('종격·전왕격에 해당하는지는 별도의 종격 판정에서 확인합니다.', '아래 ‘종격·전왕격 판단’에서 이 사주가 종격에 해당하는지 확인하세요.').replace('이 앱은 종격을 판정하지 않으므로 아래 결과를 그대로 받아들이기 전에 검토가 필요합니다.', '아래 ‘종격·전왕격 판단’에서 이 사주가 종격에 해당하는지 확인하세요.');   // 2026-11-25 M7: 엔진 원문 정정 뒤에도 화면 문구는 그대로
+   const jgRow = ch => {
+     const J = window.MantraJonggyeok; if (!J) return ''; const r = J.analyze(M, ch);
+     const f = e => e == null ? '<span class="muted small">—</span>' : `<span class="eltxt ${ECLS[e]}">${elLabel(e)}</span>`;
+--- a/report/v2/reading-insight.js
++++ b/report/v2/reading-insight.js
+@@ -83,6 +83,8 @@
+ ];
+ // 마지막 보루: 선호 요소가 모두 없거나 이미 쓰였으면 이 순서로 아직 안 쓴 요소를 찾는다.
+ var SPARE=['pair','bandg','clim','st_d','st_m','st_y','tg_ms','tg_mb','tg_db','tg_ys','tg_yb','dwg','dwy','seg','pat1','pat2','lack','rel1','rel2','rel3','dwn','sen','dwr','ser','st_h','tg_hs','tg_hb'];
++// 대체 문단(2026-11-26): 두 번 나눠 담은 뒤에도 문단이 0개인 장에만, 이 순서로 아직 안 쓴 요소를 하나 넣는다(yf 용신 오행 · gf 기신 오행 · hf 희신 오행). 다른 장의 배정은 바뀌지 않는다.
++var FALLBACK=['yf','gf','hf'];
+ var PLAN_BY_ID={};PLAN.forEach(function(p){PLAN_BY_ID[p[0]]={lens:p[1],prefs:p[2]};});
+ function D(){return R.ReadingInsightData||{};}
+ function josa(word,a,b){var s=String(word),c=s.charCodeAt(s.length-1);return (c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28)?a:b;}
+@@ -115,6 +117,7 @@
+   var el=STEM_EL[String(dw.ganzhi||'').charAt(0)],role=el&&sd.usefulElements&&sd.usefulElements.roles&&sd.usefulElements.roles[el];if(role)f.dwy={el:el,role:role};
+   var list=sd.daewoon||[],at=-1;list.forEach(function(x,i){if(x&&x.ganzhi===dw.ganzhi&&x.startYear===dw.startYear)at=i;});var nx=at>=0?list[at+1]:null;if(nx&&TG_GROUP[nx.stemTG]&&Number.isFinite(nx.startYear))f.dwn={year:nx.startYear,group:nx.pull&&nx.pull.group||TG_GROUP[nx.stemTG]};
+   var dr=luckRel(dw.relations,P);if(dr)f.dwr=dr;}
++ var UE=sd.usefulElements,UR=UE&&UE.roles;if(UE&&ELS.indexOf(UE.yong)>=0)f.yf={el:UE.yong,role:'용신'};if(UE&&ELS.indexOf(UE.hee)>=0)f.hf={el:UE.hee,role:'희신'};if(UR){var gi=ELS.filter(function(e){return UR[e]==='기신';})[0];if(gi)f.gf={el:gi,role:'기신'};}
+  var nextY=(sd.annualLuck||[]).filter(function(a){return a&&sd.nowYear&&a.year===sd.nowYear+1&&TG_GROUP[a.stemTG];})[0];if(nextY)f.sen={year:nextY.year,group:TG_GROUP[nextY.stemTG]};
+  var sw=sd.sewoon;
+  if(sw&&(!sd.nowYear||sw.year===sd.nowYear)){
+@@ -148,6 +151,7 @@
+   return tm&&pm?J(relPlace(v.type,v.members)+' 사이에 '+v.type+josa(v.type,'이','가')+' 걸려 있어요. '+pm+' ',tm):'';}
+  if(slot==='dwg'){t=d.DWG&&d.DWG[lens]&&d.DWG[lens][v.group+'|'+v.state];return t||'';}
+  if(slot==='dwy'){t=d.DWY&&d.DWY[lens]&&d.DWY[lens][v.role];var rl=d.DWY&&d.DWY.ROLE&&d.DWY.ROLE[v.role];return t&&rl?J('지금 대운의 천간은 '+v.el+'이고, 내 사주에서 '+v.el+josa(v.el,'은','는')+' '+v.role+'에 해당해요. ',t):'';}
++ if(slot==='yf'||slot==='gf'||slot==='hf'){t=d.FALLBACK&&d.FALLBACK[lens]&&d.FALLBACK[lens][v.role+'|'+v.el];var rr=d.FALLBACK&&d.FALLBACK.ROLE&&d.FALLBACK.ROLE[v.role];return t&&rr?J(rr+josa(rr,'은','는')+' '+v.el+'('+EL_GLOSS[v.el]+')'+josa(v.el,'이에요','예요')+'. ',t):'';}
+  if(slot==='seg'){t=d.SEG&&d.SEG[lens]&&d.SEG[lens][v.group];return t?J(v.year+'년 세운의 천간은 '+v.group+'('+GLOSS[v.group]+') 기운이에요. ',t):'';}
+  if(slot==='bandg'){t=d.BANDG&&d.BANDG[lens]&&d.BANDG[lens][v.band+'|'+v.g];var pb=d.BANDG&&d.BANDG.PLAIN&&d.BANDG.PLAIN[v.band];return t&&pb?J(pb+'이고, 가장 큰 기운은 '+v.g+'('+GLOSS[v.g]+')이에요. ',t):'';}
+  if(slot==='dwn'){t=d.DWN&&d.DWN[lens]&&d.DWN[lens][v.group];return t?J(v.year+'년부터는 '+v.group+'('+GLOSS[v.group]+') 기운의 대운으로 바뀌어요. ',t):'';}
+@@ -168,11 +172,12 @@
+  function take(lens,id,list,limit){var got=out[id]||(out[id]=[]);for(var i=0;i<list.length&&got.length<limit;i++){var s=list[i];if(used[lens][s]||!f[s])continue;var pil=f[s].pillar,same=!!pil&&got.some(function(g){return g.pillar===pil;});var fk=s==='bandg'?'strong:'+f[s].g:s==='seg'||s==='sen'?'seun:'+f[s].year:s+':'+JSON.stringify(f[s]),noIntro=!!introSeen[fk];var t=text(lens,s,f[s],{pv:pil?(pcount[lens][pil]||0):0,skipPillar:same||noIntro,noIntro:noIntro});if(!t||usedText[t])continue;usedText[t]=1;if(!noIntro)introSeen[fk]=1;var tShort=t&&!noIntro?text(lens,s,f[s],{pv:0,skipPillar:true,noIntro:true}):t;if(!t)continue;used[lens][s]=1;if(pil&&!same)pcount[lens][pil]=(pcount[lens][pil]||0)+1;got.push({key:s,text:t,short:tShort,fk:fk,pillar:pil||null});}}
+  PLAN.forEach(function(p){take(p[1],p[0],p[2].concat(SPARE),1);});
+  PLAN.forEach(function(p){take(p[1],p[0],p[2].concat(SPARE),2);});
++ PLAN.forEach(function(p){if(!(out[p[0]]||[]).length)take(p[1],p[0],FALLBACK,1);});
+  if(CACHE)CACHE.set(sd,out);return out;}
+ function paragraphs(c,sd){var id=c&&(c.editorialContractId||c.id);if(!id||!sd||!sd.dayMaster||!PLAN_BY_ID[id])return [];
+  var a=assign(sd),FO=R.FactOnce;return (a[id]||[]).map(function(x){var t=FO&&x.fk&&x.short&&!FO.own(sd,x.fk,id)?x.short:x.text;return {key:x.key,text:FO&&FO.uniq?FO.uniq(sd,t,id):t};}).filter(function(p){return p.text;});}
+ function html(c,esc){var sd=c&&c.readingVisualData,ps=paragraphs(c,sd),AF=R.AgeFit,ab=AF?AF.band(sd):'';if(ab)ps=ps.map(function(p){return {key:p.key,text:AF.text(p.text,ab)};}).filter(function(p){return p.text;});if(!ps.length)return '';
+  return '<div class="reading-insight"><h3>이 사주에서만 읽히는 포인트</h3>'+ps.map(function(p){return '<p class="lead" data-reading-role="insight" data-insight-key="'+p.key+'">'+esc(p.text)+'</p>';}).join('')+'</div>';}
+ R.ReadingInsightData=R.ReadingInsightData||{};
+-R.ReadingInsight={paragraphs:paragraphs,html:html,facts:facts,assign:assign,PLAN:PLAN,SPARE:SPARE};
++R.ReadingInsight={paragraphs:paragraphs,html:html,facts:facts,assign:assign,PLAN:PLAN,SPARE:SPARE,FALLBACK:FALLBACK};
+ })(typeof window!=='undefined'?window:globalThis);
+--- a/report/v2/reading-insight-data-3.js
++++ b/report/v2/reading-insight-data-3.js
+@@ -172,4 +172,79 @@
+  }
+ }
+ });
++// 대체 문단(2026-11-26): 두 번 나눠 담은 뒤에도 문단이 하나도 없는 장에만 쓴다. 엔진 통합 용신의 용신·기신 오행을 관점별로 읽는다.
++//   키는 '역할|오행'. 구조(성립한 구조만 풀이에 쓰도록 바뀐 뒤) 문단이 줄어든 장이 비지 않게 하는 마지막 보루다.
++Object.assign(R.ReadingInsightData,{
++FALLBACK:{
++ ROLE:{"용신":"타고난 사주에서 가장 필요한 기운","희신":"타고난 사주에서 필요한 기운을 돕는 기운","기신":"타고난 사주에서 부담이 되기 쉬운 기운"},
++ self:{
++  "희신|목":"곁에서 새 일을 권하고 같이 시작해 주는 사람이 있을 때 한결 가볍게 움직이는 편이에요. 혼자 버티기보다 함께 출발할 사람을 찾아보세요.",
++  "희신|화":"좋아하는 것을 즐기고 웃을 일이 많을 때 다시 힘이 붙는 편이에요. 지칠수록 마음이 밝아지는 약속을 하나 잡아 두세요.",
++  "희신|토":"믿을 만한 사람과 익숙한 공간이 곁에 있을 때 마음이 놓이는 편이에요. 기댈 수 있는 자리 하나를 꾸준히 지켜 두세요.",
++  "희신|금":"해야 할 일의 순서가 정해져 있을 때 덜 흔들리는 편이에요. 아침마다 오늘 할 세 가지만 적어 보세요.",
++  "희신|수":"책이나 대화로 생각을 넓힐 때 막힌 마음이 풀리는 편이에요. 고민이 길어지면 믿는 사람에게 한 번 물어보세요.",
++  "용신|목":"새로 배우거나 처음 해 보는 일을 시작할 때 몸도 마음도 살아나는 편이에요. 답답할수록 작은 시작 하나를 만들어 보세요.",
++  "용신|화":"생각을 밖으로 꺼내 말하고 사람들 앞에 설 때 기운이 도는 편이에요. 혼자 삭이기보다 털어놓을 자리를 가까이 두세요.",
++  "용신|토":"하루 리듬이 일정하고 생활이 정돈돼 있을 때 가장 단단해지는 편이에요. 흔들릴 때는 잠·식사·정리부터 다시 잡아 보세요.",
++  "용신|금":"미뤄 둔 일을 정리하고 아닌 것을 끊어 낼 때 마음이 가벼워지는 편이에요. 할 일 목록을 줄이는 쪽이 오히려 힘이 돼요.",
++  "용신|수":"혼자 생각을 고르는 조용한 시간이 있어야 다시 힘이 차는 편이에요. 바쁠수록 하루 한 번은 혼자 있는 틈을 만들어 두세요.",
++  "기신|목":"하고 싶은 일이 한꺼번에 늘어날 때 오히려 지치기 쉬운 편이에요. 새로 벌이기 전에 지금 하던 것 하나를 먼저 마무리하세요.",
++  "기신|화":"감정이 달아오를 때 말과 행동이 생각보다 앞서기 쉬운 편이에요. 서운한 일은 하룻밤 지나고 말해도 늦지 않아요.",
++  "기신|토":"익숙한 방식만 붙들고 있을 때 고집이 세지고 몸도 무거워지기 쉬운 편이에요. 작은 것부터 바꿔 보는 연습이 도움이 돼요.",
++  "기신|금":"나와 남에게 기준을 너무 엄하게 들이댈 때 스스로가 먼저 지치기 쉬운 편이에요. 완벽 대신 충분히 괜찮음을 기준으로 두세요.",
++  "기신|수":"생각이 꼬리를 물고 걱정이 커질 때 몸이 먼저 굳어 버리기 쉬운 편이에요. 머릿속 고민은 종이에 적어 밖으로 꺼내 보세요."
++ },
++ wealth:{
++  "희신|목":"배우고 익힌 것을 일로 이어 갈 때 돈 흐름이 따라오는 편이에요. 새로 배운 것을 작게라도 써먹을 곳을 찾아보세요.",
++  "희신|화":"사람들과 어울리며 소개와 입소문이 날 때 돈 기회가 생기는 편이에요. 모임과 인맥을 아끼지 말고 챙겨 두세요.",
++  "희신|토":"한 번 정한 저축과 지출 계획을 오래 지킬 때 돈이 쌓이는 편이에요. 계획은 단순하게, 대신 오래 가게 잡아 두세요.",
++  "희신|금":"계약과 숫자를 꼼꼼히 확인할 때 손해를 피하는 편이에요. 서명 전에는 조건을 한 줄씩 다시 읽어 보세요.",
++  "희신|수":"여러 곳의 정보를 견주어 볼 때 더 나은 선택을 하는 편이에요. 한 사람 말만 듣지 말고 두세 곳을 비교해 보세요.",
++  "용신|목":"키워 가는 쪽에 돈을 둘 때 흐름이 살아나는 편이에요. 당장의 이자보다 배움·기술처럼 자라는 데 쓰는 돈이 나중에 돌아와요.",
++  "용신|화":"내가 하는 일을 알리고 드러낼수록 돈 기회가 따라오는 편이에요. 실력을 숨기지 말고 보여 주는 자리를 늘려 보세요.",
++  "용신|토":"꾸준히 모으고 묶어 두는 방식이 잘 맞는 편이에요. 자동이체처럼 신경 쓰지 않아도 쌓이는 구조를 먼저 만들어 두세요.",
++  "용신|금":"새는 돈을 정리하고 원칙을 세울 때 돈이 남기 시작하는 편이에요. 한 달에 한 번 지출 목록을 잘라 내는 날을 정해 보세요.",
++  "용신|수":"정보와 흐름을 먼저 읽을 때 돈 판단이 맞아떨어지는 편이에요. 결정 전에 하루 이틀 알아보는 시간을 꼭 두세요.",
++  "기신|목":"이것저것 동시에 벌이다 보면 돈이 조금씩 새기 쉬운 편이에요. 새 계획은 지금 하던 것 하나를 정리한 뒤로 미뤄 두세요.",
++  "기신|화":"기분이 오를 때 보여 주기 위한 지출이 커지기 쉬운 편이에요. 큰돈을 쓰기 전에는 하루를 두고 다시 생각해 보세요.",
++  "기신|토":"돈을 한곳에 오래 묶어 두다 필요할 때 못 쓰는 일이 생기기 쉬운 편이에요. 바로 꺼낼 수 있는 비상금을 따로 두세요.",
++  "기신|금":"아끼려는 마음이 지나쳐 써야 할 때를 놓치기 쉬운 편이에요. 나를 키우는 데 드는 돈은 아끼는 대상에서 빼 두세요.",
++  "기신|수":"고민만 길어지다 좋은 때를 흘려보내기 쉬운 편이에요. 알아볼 기한을 미리 정해 두면 결정이 한결 쉬워져요."
++ },
++ career:{
++  "희신|목":"배울 사람이 있고 성장하는 팀에 있을 때 실력이 빨리 느는 편이에요. 일을 고를 때 배울 거리가 있는지를 먼저 보세요.",
++  "희신|화":"분위기가 밝고 서로 칭찬하는 곳에서 능률이 오르는 편이에요. 동료의 성과를 먼저 알아봐 주면 나도 함께 빛나요.",
++  "희신|토":"역할과 책임이 분명한 자리에서 꾸준히 인정받는 편이에요. 맡은 범위를 처음에 분명히 정해 두세요.",
++  "희신|금":"평가 기준이 분명하고 결과로 말하는 곳에서 힘을 내는 편이에요. 목표를 숫자로 정해 두면 동기가 오래가요.",
++  "희신|수":"자료와 기록을 차곡차곡 쌓아 둘 때 결정적인 순간에 빛나는 편이에요. 일하며 알게 된 것을 꾸준히 정리해 두세요.",
++  "용신|목":"새 프로젝트를 맡거나 처음부터 기획할 때 실력이 가장 잘 드러나는 편이에요. 맡은 일 안에서도 새로 시작할 부분을 찾아보세요.",
++  "용신|화":"발표하고 알리고 사람을 모으는 자리에서 일이 잘 풀리는 편이에요. 결과를 조용히 넘기지 말고 꼭 공유하세요.",
++  "용신|토":"믿고 맡길 수 있는 사람이라는 평판이 쌓일 때 자리가 커지는 편이에요. 약속한 기한을 지키는 것이 가장 큰 무기예요.",
++  "용신|금":"기준을 세우고 마감을 정리하는 역할에서 진가가 나오는 편이에요. 흐지부지된 일을 깔끔하게 끝내는 사람으로 기억되세요.",
++  "용신|수":"자료를 파고들고 흐름을 읽는 일에서 남보다 앞서가는 편이에요. 겉으로 바쁜 일보다 깊게 들여다보는 일을 맡아 보세요.",
++  "기신|목":"시작한 일은 많은데 마무리가 밀리기 쉬운 편이에요. 새 일을 받기 전에 지금 손에 든 일의 끝부터 정해 두세요.",
++  "기신|화":"의욕이 지나쳐 한꺼번에 몰아붙이다 금방 지치기 쉬운 편이에요. 속도보다 오래 갈 수 있는 쉬는 틈을 일정에 넣어 두세요.",
++  "기신|토":"익숙한 방식을 바꾸지 않으려다 기회를 놓치기 쉬운 편이에요. 새 방법은 작은 일부터 한 번씩 시험해 보세요.",
++  "기신|금":"완벽하게 하려다 결과물을 늦게 내놓기 쉬운 편이에요. 일단 내놓고 고쳐 가는 쪽이 평가에 더 유리할 때가 많아요.",
++  "기신|수":"걱정과 계산이 길어져 시작이 늦어지기 쉬운 편이에요. 고민할 시간을 미리 정해 두고 그 뒤에는 움직여 보세요."
++ },
++ love:{
++  "희신|목":"서로의 꿈과 계획을 응원해 주는 관계에서 마음이 편해지는 편이에요. 상대가 하려는 일을 먼저 물어봐 주세요.",
++  "희신|화":"함께 웃고 즐길 거리가 많은 관계에서 정이 깊어지는 편이에요. 둘만의 즐거운 일정을 정기적으로 만들어 보세요.",
++  "희신|토":"가족과 주변 사람에게 인정받는 관계에서 안정감을 느끼는 편이에요. 서로의 가까운 사람들과도 천천히 가까워져 보세요.",
++  "희신|금":"서로의 생활 방식과 경계를 존중하는 관계에서 오래가는 편이에요. 각자의 시간과 공간을 미리 이야기해 두세요.",
++  "희신|수":"말하지 않아도 마음을 헤아려 주는 사람에게 끌리는 편이에요. 그래도 중요한 마음은 말로 확인하는 습관을 들여 보세요.",
++  "용신|목":"함께 새로운 걸 해 보고 같이 자라는 관계에서 마음이 깊어지는 편이에요. 둘이 처음 해 보는 일을 하나씩 만들어 보세요.",
++  "용신|화":"좋아하는 마음을 말과 표정으로 드러낼 때 관계가 따뜻해지는 편이에요. 고마운 건 그날 바로 말로 전해 보세요.",
++  "용신|토":"약속을 지키고 한결같이 곁에 있어 주는 사람에게 마음이 놓이는 편이에요. 큰 이벤트보다 꾸준한 연락이 더 힘이 돼요.",
++  "용신|금":"애매한 걸 분명히 하고 선을 정할 때 관계가 오히려 편해지는 편이에요. 서운한 점은 쌓기 전에 짧고 분명하게 말해 보세요.",
++  "용신|수":"천천히 대화를 나누며 속마음을 알아 갈 때 깊이 이어지는 편이에요. 서두르지 말고 이야기할 시간을 충분히 두세요.",
++  "기신|목":"마음이 앞서 관계를 너무 빨리 키우려다 상대가 부담을 느끼기 쉬운 편이에요. 상대의 속도에 한 박자 맞춰 보세요.",
++  "기신|화":"뜨겁게 시작했다가 다툴 때 말이 세져 마음이 빨리 식기 쉬운 편이에요. 화가 날 땐 바로 답하지 말고 잠깐 자리를 비워 보세요.",
++  "기신|토":"익숙해지면 표현을 줄이고 서운함을 속에 쌓아 두기 쉬운 편이에요. 편한 사이일수록 마음을 한 번 더 말로 꺼내 보세요.",
++  "기신|금":"상대의 부족한 점이 먼저 보이고 말이 차가워지기 쉬운 편이에요. 지적하기 전에 고마운 점 하나를 먼저 말해 보세요.",
++  "기신|수":"혼자 생각만 깊어지다 정작 마음을 전하지 못하기 쉬운 편이에요. 짐작하지 말고 궁금한 건 직접 물어보세요."
++ }
++}
++});
+ })(typeof window!=='undefined'?window:globalThis);
+--- a/report/v2/index.html
++++ b/report/v2/index.html
+@@ -174,9 +174,9 @@
+ <script src="reading-depth-data-5.js?v=20261124-cons"></script>
+ <script src="reading-insight-data-1.js?v=20261124-plain"></script>
+ <script src="reading-insight-data-2.js?v=20261027-insight"></script>
+-<script src="reading-insight-data-3.js?v=20261124-plain"></script>
++<script src="reading-insight-data-3.js?v=20261126-fallback"></script>
+ <script src="reading-insight-data-4.js?v=20261027-insight"></script>
+-<script src="reading-insight.js?v=20261124-dw"></script>
++<script src="reading-insight.js?v=20261126-fallback"></script>
+ <script src="reading-feature-data-1.js?v=20261031-feature6"></script>
+ <script src="reading-feature-data-2.js?v=20261031-feature6"></script>
+ <script src="reading-feature.js?v=20261125-ac4"></script><script src="topic-deep.js?v=20261125-elnat"></script><script src="fate-blocks.js?v=20261110-peak"></script><script src="fate-blocks-2.js?v=20261110-peak"></script><script src="fate-blocks-3.js?v=20261109-fx4"></script><script src="fate-blocks-4.js?v=20261124-plain"></script>
+--- a/tests/ten-god-roles-sim.cjs
++++ b/tests/ten-god-roles-sim.cjs
+@@ -41,7 +41,9 @@
+   r.interactions.forEach(o => {
+     stat[o.status]++;
+     const coreOk = o.conds.filter(c => c.core).every(c => c.ok), allOk = o.conds.every(c => c.ok), blocked = o.blocks.some(b => b.hit);
+-    assert.equal(o.status, !coreOk ? 'off' : allOk && !blocked ? 'on' : 'weak', '성립 판정 규칙 ' + o.name);
++    // 2026-11-25 M1: 원국 분석에서 엔진 공통 구조 판정을 쓰는 7종은 status = 공통 판정, 자체 조건 판정은 ownStatus 에 남는다 — 두 규칙을 모두 확인
++    assert.equal(o.ownStatus || o.status, !coreOk ? 'off' : allOk && !blocked ? 'on' : 'weak', '성립 판정 규칙(자체 조건) ' + o.name);
++    if (o.engineStatus) { const P = ch.patterns.named.find(p => p.name === ({ salin: '살인상생', sikjesal: '식신제살', gyeongwan: '상관견관', paein: '상관패인', honjap: '관살혼잡', dosik: '효신탈식(도식)', bigeopjaeng: '군겁쟁재' })[o.key]); assert.equal(o.engineStatus, P ? P.status : '없음', '공통 판정 연결 ' + o.name); assert.equal(o.status, o.engineStatus === '성립' ? 'on' : 'off', '공통 판정 → 카드 상태 ' + o.name); assert.equal(!!o.candidate, o.engineStatus === '후보', '후보 표시 ' + o.name); }
+     if (o.status === 'off') assert.equal(o.tone, '', '불성립이면 유불리 없음');
+     else { assert.ok(['good', 'bad', 'mixed'].includes(o.tone) && o.toneWhy.length > 10 && !T.BANNED.test(o.toneWhy), '유불리·이유 ' + o.name); texts.add(o.toneWhy); }
+   });
+--- a/tests/reading-insight-sim.cjs
++++ b/tests/reading-insight-sim.cjs
+@@ -25,10 +25,11 @@
+   for(const p of PILLARS){assert(Array.isArray(D.PILLAR[L][p])&&D.PILLAR[L][p].length===3,'PILLAR.'+L+'.'+p);assert.equal(new Set(D.PILLAR[L][p]).size,3,'PILLAR 변형 중복 '+L+'.'+p);}
+  }
+  assert.deepEqual(Object.keys(D.PATTERN.PLAIN).sort(),PATS.slice().sort());assert(Object.keys(D.ROLE||D.DWY.ROLE).length===5);
+- [D.PAIR,D.PATTERN,D.LACK,D.CLIMATE,D.PILLAR,D.TG,D.STAGE,D.RELPAIR,D.RELTYPE,D.DWG,D.DWY,D.SEG,D.SER,D.BANDG,D.DWN,D.DWR,D.SEN].forEach(collect);
++ for(const L of LENSES)need(D.FALLBACK&&D.FALLBACK[L],['용신','희신','기신'].flatMap(r=>['목','화','토','금','수'].map(e=>r+'|'+e)),'FALLBACK.'+L);   // 2026-11-26 대체 문단 표도 같은 형식 검사
++ [D.FALLBACK,D.PAIR,D.PATTERN,D.LACK,D.CLIMATE,D.PILLAR,D.TG,D.STAGE,D.RELPAIR,D.RELTYPE,D.DWG,D.DWY,D.SEG,D.SER,D.BANDG,D.DWN,D.DWR,D.SEN].forEach(collect);
+  for(const t of all){assert(!FORBID.test(t),'금지어: '+t);assert(/요[.]$/.test(t),'문장 끝: '+t);assert(!/\s{2,}|undefined|NaN|null|[{}]/.test(t),'형식: '+t);assert(!/[A-Za-z]{3,}/.test(t),'영문: '+t);}
+  // 같은 관점 안에서 서로 다른 항목이 같은 문장을 쓰지 않는다
+- for(const L of LENSES){const seen=new Map();const dup=[];for(const [name,tab] of Object.entries({PAIR:D.PAIR[L],PATTERN:D.PATTERN[L],LACK:D.LACK[L],CLIMATE:D.CLIMATE[L],TG:D.TG[L],STAGE:D.STAGE[L],RELPAIR:D.RELPAIR[L],RELTYPE:D.RELTYPE[L],DWG:D.DWG[L],DWY:D.DWY[L],SEG:D.SEG[L],BANDG:D.BANDG[L],DWN:D.DWN[L],SEN:D.SEN[L],SERTYPE:D.SER.TYPE[L],DWRTYPE:D.DWR.TYPE[L]}))for(const [k,t] of Object.entries(tab)){if(seen.has(t))dup.push(name+'.'+k+' = '+seen.get(t));else seen.set(t,name+'.'+k);}
++ for(const L of LENSES){const seen=new Map();const dup=[];for(const [name,tab] of Object.entries({FALLBACK:D.FALLBACK[L],PAIR:D.PAIR[L],PATTERN:D.PATTERN[L],LACK:D.LACK[L],CLIMATE:D.CLIMATE[L],TG:D.TG[L],STAGE:D.STAGE[L],RELPAIR:D.RELPAIR[L],RELTYPE:D.RELTYPE[L],DWG:D.DWG[L],DWY:D.DWY[L],SEG:D.SEG[L],BANDG:D.BANDG[L],DWN:D.DWN[L],SEN:D.SEN[L],SERTYPE:D.SER.TYPE[L],DWRTYPE:D.DWR.TYPE[L]}))for(const [k,t] of Object.entries(tab)){if(seen.has(t))dup.push(name+'.'+k+' = '+seen.get(t));else seen.set(t,name+'.'+k);}
+   assert.equal(dup.length,0,L+' 중복 문장 '+dup.slice(0,3).join(' / '));}
+  // 2) 가상 명식 표본
+  const V=await import(pathToFileURL(path.join(ROOT,'editorial/rebuild-20261022/publish/verify.mjs')).href);const sds=V.sampleCharts(240,ROOT);
+--- a/tests/engine-baseline.txt
++++ b/tests/engine-baseline.txt
+@@ -1,14 +1,14 @@
+-전체 5ceac3016d88
++전체 e2c311619668
+   pillars   077b8bd01c31
+   weights   3880d9677682
+   strength  b163a7e67d2f
+   yong      98ae812e2b5b
+   climate   3420c7e3ee18
+-  daeun     e168748e0868
+-  seun      24ea9fda731f
+-  wolun     4fa34f70e106
+-  ilun      02259ddf7c74
++  daeun     497348e1d5e6
++  seun      5c88386daa5e
++  wolun     09b65ea25044
++  ilun      5621536729b6
+   samjae    651aab616fb5
+-  domain    e26102d032c6
+-  career    e478d9410dae
++  domain    7b21c4008eeb
++  career    6e8081047414
+   root      f7299d8692de

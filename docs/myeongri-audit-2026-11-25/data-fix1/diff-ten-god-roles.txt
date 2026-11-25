@@ -1,0 +1,27 @@
+149c149,156
+<   function interactions(S, R) {
+---
+>   // eng(2026-11-25 M1): 원국 분석일 때 엔진 공통 구조 판정 { key: '성립'|'후보'|'없음' } — 이 7종은 자체 조건 대신 공통 판정을 쓴다(자체 판정은 ownStatus 로 남김)
+>   const ENG_KEY = { salin: '살인상생', sikjesal: '식신제살', gyeongwan: '상관견관', paein: '상관패인', honjap: '관살혼잡', dosik: '효신탈식(도식)', bigeopjaeng: '군겁쟁재' };
+>   function engineStatusOf(ch) {
+>     const P = ch && ch.patterns; if (!P || !P.named) return null;
+>     const out = {}; Object.keys(ENG_KEY).forEach(k => { const p = P.named.filter(x => x.name === ENG_KEY[k])[0]; out[k] = p ? p.status : '없음'; });
+>     return out;
+>   }
+>   function interactions(S, R, eng) {
+157a165
+>       if (eng && eng[o.key]) { o.ownStatus = o.status; o.engineStatus = eng[o.key]; o.status = eng[o.key] === '성립' ? 'on' : 'off'; o.candidate = eng[o.key] === '후보'; }
+228c236
+<     out.forEach(o => { o.easy = EASY_IX[o.key] || ''; o.fromK = GN[o.from]; o.toK = GN[o.to]; o.statusK = STATUS_K[o.status]; o.toneK = TONE_K[o.tone] || ''; o.roleFrom = roleName(o.from); o.roleTo = roleName(o.to); });
+---
+>     out.forEach(o => { o.easy = EASY_IX[o.key] || ''; o.fromK = GN[o.from]; o.toK = GN[o.to]; o.statusK = o.candidate ? '후보' : STATUS_K[o.status]; o.toneK = TONE_K[o.tone] || ''; o.roleFrom = roleName(o.from); o.roleTo = roleName(o.to); });
+322c330
+<     const R = rolesOf(ch), S = buildState(M, ch, [], CFG.layerW), IX = interactions(S, R);
+---
+>     const R = rolesOf(ch), S = buildState(M, ch, [], CFG.layerW), IX = interactions(S, R, engineStatusOf(ch));
+331c339
+<       o.ref = { gyeok: gi ? (gi.on ? '성립' : '불성립') : null, engine: PMAP[o.key] ? (pnames.indexOf(PMAP[o.key]) >= 0 ? '있음' : '없음') : null };
+---
+>       o.ref = { gyeok: gi ? (gi.on ? '성립' : '불성립') : null, engine: o.engineStatus || (PMAP[o.key] ? (pnames.indexOf(PMAP[o.key]) >= 0 ? '있음' : '없음') : null), common: !!o.engineStatus };
+491a500
+>     if (ch.patterns.named) { const o = ch.patterns.list.slice(); o.dropped = (ch.patterns.candidates || []).map(p => p.name); o.candidates = (ch.patterns.candidates || []).slice(); o.common = true; if (AGREE_CACHE) AGREE_CACHE.set(ch, o); return o; }   // 2026-11-25 M1: 엔진 공통 판정(성립만 표시, 후보는 숨김 목록)

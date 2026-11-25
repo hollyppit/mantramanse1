@@ -1,0 +1,110 @@
+{
+ "runAt": "2026-11-25T14:54:11.040Z",
+ "note": "개발 사본 폴더에서 수정한 세 파일(engine.js·ten-god-roles.js·index.html)만 운영 원본으로 되돌려 다시 돌린 결과 — 여기서도 실패면 폴더 환경 원인",
+ "results": [
+  {
+   "test": "climate16-review-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "coherent-reading-flow-sim.cjs",
+   "codeOrigFilesInDev": 0
+  },
+  {
+   "test": "element-adjustments-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "engine-baseline-sim.js",
+   "codeOrigFilesInDev": 0
+  },
+  {
+   "test": "g14-g15-comparators-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "g14-g15-overlap-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "gyeok-structure-sim.cjs",
+   "codeOrigFilesInDev": 0
+  },
+  {
+   "test": "held-literature-reinforcement-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "hidden-root-review-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "independent-case-review-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "literature-conditions32-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "literature-hidden-root-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "luck-yong-final-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "mobile-reading-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "occult-panels-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "rag-postgres17-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "reader-continuity-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "reading-block-runtime-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "reading-insight-sim.cjs",
+   "codeOrigFilesInDev": 0
+  },
+  {
+   "test": "reading-library-batch-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "reading-prompt-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "remaining16-review-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "six-root-effects-sim.cjs",
+   "codeOrigFilesInDev": 1
+  },
+  {
+   "test": "ten-god-roles-sim.cjs",
+   "codeOrigFilesInDev": 0
+  },
+  {
+   "test": "term-notes-sim.cjs",
+   "codeOrigFilesInDev": 0
+  },
+  {
+   "test": "timeline84-gaps-sim.cjs",
+   "codeOrigFilesInDev": 1
+  }
+ ]
+}

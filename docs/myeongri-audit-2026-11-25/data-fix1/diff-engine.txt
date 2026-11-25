@@ -1,0 +1,115 @@
+592c592
+<       if (st.zone === '극약' || st.zone === '극왕') log.push(`※ ${st.zone} 수준입니다. 이런 사주는 억부로 조절하지 않고 강한 세력을 따르는 종격·전왕격으로 보는 학파가 있습니다. 이 앱은 종격을 판정하지 않으므로 아래 결과를 그대로 받아들이기 전에 검토가 필요합니다.`);
+---
+>       if (st.zone === '극약' || st.zone === '극왕') log.push(`※ ${st.zone} 수준입니다. 이런 사주는 억부로 조절하지 않고 강한 세력을 따르는 종격·전왕격으로 보는 학파가 있습니다. 종격·전왕격에 해당하는지는 별도의 종격 판정에서 확인합니다.`);
+747c747,748
+<     structure: { roleGate: true, establish: true, goodGate: true, neutralPct: 20, scale: 0.8, pattern: { '관살혼잡': -12, '상관견관': -10, '군겁쟁재': -12, '효신탈식(도식)': -8 },
+---
+>     // commonStatus(2026-11-25 M1): 원국 구조 상태(성립·후보)를 한 곳(applyPatternStatus)에서 정해 화면·풀이·운 점수·제화가 같은 결과를 본다
+>     structure: { roleGate: true, establish: true, goodGate: true, commonStatus: true, neutralPct: 20, scale: 0.8, pattern: { '관살혼잡': -12, '상관견관': -10, '군겁쟁재': -12, '효신탈식(도식)': -8 },
+1032a1034,1084
+>   // ── 원국 구조 공통 판정(2026-11-25 정합성 개선 M1·M6, LUCK_CFG.structure.commonStatus) ──
+>   //   같은 구조를 화면·풀이·운 점수·제화가 각자 다시 판정하지 않고, 여기서 정한 상태 하나를 함께 본다.
+>   //   성립: 성립 조건 충족 · 후보: 이름(십성 배치)은 맞지만 성립 조건을 다 채우지 못함 · (목록에 없음 = 미성립)
+>   //   약점 4종(관살혼잡·상관견관·효신탈식·군겁쟁재)은 운 점수에 쓰던 B안(patEstablished) 그대로,
+>   //   좋은 구조 3종(식신제살·살인상생·상관패인)은 운 점수의 C안(goodGate)과 같은 역할 조건을 원국에도 적용한다(M6).
+>   //   나머지(재다신약·관살과다·식상과다·인성과다·무○·결핍)는 비율 자체가 정의라 이름 판정 = 성립.
+>   const PAT_B = ['관살혼잡', '상관견관', '효신탈식(도식)', '군겁쟁재'], PAT_GOOD = ['식신제살', '살인상생', '상관패인'];
+>   const PAT_COND = {
+>     '관살혼잡': '정관·편관 모두 5% 이상 · 식신 제살(8% 이상) 없음 · 신약일 때 인성 화살(15% 이상) 없음',
+>     '상관견관': '정관이 쓸모 있음(용신·희신) · 정인 패인(8% 이상) 없음 · 상관·정관 모두 5% 이상',
+>     '효신탈식(도식)': '식신이 쓸모 있음(용신·희신) · 재성 10% 미만(재제효 없음) · 편인 8% 이상',
+>     '군겁쟁재': '관성·식상 모두 10% 미만(관제비겁·식상 통관 없음)',
+>     '식신제살': '관성이 쓸모 없거나(한신·구신·기신) 관성이 아주 강함 — 편관이 용신·희신이면 제살은 용신을 다치게 함',
+>     '살인상생': '인성이 쓸모 있음(용신·희신)',
+>     '상관패인': '인성이 쓸모 있거나 식상이 쓸모 없음',
+>   };
+>   function goodEstablished(ch, name) {
+>     const S = LUCK_CFG.structure, G = ch.weights.groups, dEl = stemEl(ch.pillars.day.s), useful = i => (ch.unified?.roleV?.[mod(dEl + i, 5)] ?? 1) > 0;
+>     if (!S.goodGate) return true;
+>     if (name === '식신제살') return !useful(3) || G[3] >= S.luck.heavy;
+>     if (name === '살인상생') return useful(4);
+>     if (name === '상관패인') return useful(4) || !useful(1);
+>     return true;
+>   }
+>   function patternState(ch, name) {
+>     const S = LUCK_CFG.structure;
+>     if (PAT_B.includes(name)) return !S.establish || patEstablished(ch, name);
+>     if (PAT_GOOD.includes(name)) return goodEstablished(ch, name);
+>     return true;
+>   }
+>   // ch.patterns: named(이름 판정 전체, 계산 내부용) · list(성립만 — 화면·풀이가 쓰는 목록) · candidates(후보)
+>   //   항목마다 status('성립'·'후보')와 statusWhy(성립 조건)를 붙인다. ch.unified 가 정해진 뒤에 부른다(역할 조건이 용신 역할값을 씀).
+>   function applyPatternStatus(ch) {
+>     const P = ch.patterns; if (!P.named) P.named = P.list.slice();
+>     for (const p of P.named) { const ok = patternState(ch, p.name); p.status = ok ? '성립' : '후보'; p.statusWhy = PAT_COND[p.name] ? `${ok ? '성립 조건 충족' : '성립 조건 미충족'} — ${PAT_COND[p.name]}` : '비율 기준 구조(이름 판정이 곧 성립)'; }
+>     P.list = P.named.filter(p => p.status === '성립'); P.candidates = P.named.filter(p => p.status === '후보');
+>     return P.named.map(p => p.status).join(',');
+>   }
+>   // 통합 용신과 구조 상태를 함께 정한다. 제화가 성립 구조만 보면(M3) 통합 용신이 바뀌고 → 역할 조건이 바뀔 수 있어 고정점까지 되풀이한다(최대 4회)
+>   function settleUnified(ch, force) {
+>     ch.unified = integrateYongsin(ch, force);
+>     if (!LUCK_CFG.structure.commonStatus) return;
+>     let sig = applyPatternStatus(ch), k = 0;
+>     if (UNIFIED_CFG.jehwaEstablishedOnly || UNIFIED_CFG.jehwaDedup) for (; k < 4; k++) {
+>       const u = integrateYongsin(ch, force), same = u.roleV.every((v, e) => v === ch.unified.roleV[e]) && [0, 1, 2, 3, 4].every(e => u.roles[e] === ch.unified.roles[e]);
+>       ch.unified = u; const s2 = applyPatternStatus(ch);
+>       if (same && s2 === sig) break; sig = s2;
+>     }
+>     ch.patterns.settleRounds = k;
+>   }
+>   const natalPatternsAll = ch => (ch.patterns.named || ch.patterns.list);   // 계산 내부: 이름 판정 전체(점수 유지용)
+1035c1087
+<     const natalNames = new Set(ch.patterns.list.map(x => x.name));
+---
+>     const natalNames = new Set(natalPatternsAll(ch).map(x => x.name));   // 원국에 같은 이름(후보 포함)이 있으면 '새로 생김'으로 다시 세지 않는 기존 규칙 유지
+1237,1238c1289,1290
+<     for (const pt of ch.patterns.list) {
+<       const adj = S.pattern[pt.name]; if (adj == null || pt.level === '참고' || (S.establish && !patEstablished(ch, pt.name))) continue;
+---
+>     for (const pt of natalPatternsAll(ch)) {
+>       const adj = S.pattern[pt.name]; if (adj == null || pt.level === '참고' || (S.establish && (pt.status ? pt.status !== '성립' : !patEstablished(ch, pt.name)))) continue;   // 공통 상태가 있으면 그 값(같은 B안), 없으면 이전처럼 직접 판정
+1446c1498
+<     ch.unified = integrateYongsin(ch, ch.schoolAuto ? null : ch.school);
+---
+>     settleUnified(ch, ch.schoolAuto ? null : ch.school);   // 통합 용신 + 원국 구조 공통 상태(M1·M3·M4)
+1451c1503
+<       if (ch.yongFallback) ch.unified = integrateYongsin(ch, 'eokbu');
+---
+>       if (ch.yongFallback) settleUnified(ch, 'eokbu');
+1622a1675,1677
+>     // jehwaEstablishedOnly(2026-11-25 M3): 제화는 성립한 구조만 근거로 삼는다(후보·이름만 일치한 구조 제외)
+>     // jehwaDedup(2026-11-25 M4): 운 구조 점수가 따로 감점하는 약점 구조(관살혼잡·상관견관·효신탈식·군겁쟁재)는 제화에서 용신·희신을 누그러뜨리지 않는다(같은 병을 두 번 깎지 않음, 운 구조 감점 쪽을 유지)
+>     jehwaEstablishedOnly: true, jehwaDedup: true,
+1775c1830
+<     const list = ch.patterns.list.filter(p => JEHWA[p.name] && p.level !== '참고').sort((a, b) => (a.level === '강' ? 0 : 1) - (b.level === '강' ? 0 : 1));
+---
+>     const list = (UNIFIED_CFG.jehwaEstablishedOnly ? ch.patterns.list : natalPatternsAll(ch)).filter(p => JEHWA[p.name] && p.level !== '참고' && (!UNIFIED_CFG.jehwaEstablishedOnly || p.status !== '후보')).sort((a, b) => (a.level === '강' ? 0 : 1) - (b.level === '강' ? 0 : 1));
+1856c1911
+<     const conditions = {}, addCond = (e, txt) => (conditions[e] = conditions[e] || []).push(txt);
+---
+>     const conditions = {}, addCond = (e, txt) => (conditions[e] = conditions[e] || []).push(txt), dedup = [];
+1868a1924,1926
+>         // M4(2026-11-25): 운 구조 점수가 같은 약점 구조를 따로 감점하면(성립 구조일 때) 여기서는 누그러뜨리지 않는다 — 유지: 운 구조 감점 · 제외: 제화 역할값 누그러뜨림
+>         const sp = key === 'jehwa' && U.jehwaDedup && t.pattern ? natalPatternsAll(ch).find(p => p.name === t.pattern) : null;
+>         if ((r === '용신' || r === '희신') && t.urgency >= 2 && sp && LUCK_CFG.structure.establish && LUCK_CFG.structure.pattern[t.pattern] != null && sp.status === '성립') { dedup.push({ el: e, role: r, pattern: t.pattern, kept: '운 구조 점수의 ' + t.pattern + ' 감점', removed: '제화의 ' + r + ' 역할값 누그러뜨림(' + (r === '용신' ? U.soften.yong : U.soften.hee) + ')' }); continue; }
+1921c1979
+<       yong, hee, gi, gu, han, roles, roleV, conditions, conflicts, steps, notes, glyphNotes, theories, headline, summary, log,
+---
+>       dedup, yong, hee, gi, gu, han, roles, roleV, conditions, conflicts, steps, notes, glyphNotes, theories, headline, summary, log,
+2228c2286
+<     for (const pt of ch.patterns.list) {
+---
+>     for (const pt of natalPatternsAll(ch)) {   // 궁합 점수: 이번 범위 밖이라 이전 입력(이름 판정 전체) 유지
+2251c2309
+<     if (Math.abs(p.tenGod) >= 0.2) add(Math.abs(p.tenGod) * W.tenGod, p.tenGod > 0 ? `${tgName} 기운이 원국의 구조를 풀어 줍니다` : `${tgName} 기운이 원국의 ${ch.patterns.list.filter(pt => C.pattern[pt.name] && C.pattern[pt.name][0] === p.group).map(pt => pt.name).join('·') || '약점'} 구조를 키웁니다`);
+---
+>     if (Math.abs(p.tenGod) >= 0.2) add(Math.abs(p.tenGod) * W.tenGod, p.tenGod > 0 ? `${tgName} 기운이 원국의 구조를 풀어 줍니다` : `${tgName} 기운이 원국의 ${natalPatternsAll(ch).filter(pt => C.pattern[pt.name] && C.pattern[pt.name][0] === p.group).map(pt => pt.name).join('·') || '약점'} 구조를 키웁니다`);
+2566c2624
+<       dohwa: sinsal12(base, pp.b) === '연살', coreN, patterns: ch.patterns.list.map(x => x.name), luckPat: ev.luckStructures || [], gender: ch.gender === 'F' ? 'F' : 'M',
+---
+>       dohwa: sinsal12(base, pp.b) === '연살', coreN, patterns: natalPatternsAll(ch).map(x => x.name), luckPat: ev.luckStructures || [], gender: ch.gender === 'F' ? 'F' : 'M',
+3450c3508
+<       patterns: ch.patterns.list,
+---
+>       patterns: natalPatternsAll(ch),   // 직업·재물 계산: 이번 범위 밖이라 이전 입력 유지

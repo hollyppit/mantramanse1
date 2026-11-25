@@ -1,0 +1,2403 @@
+{
+ "runAt": "2026-11-25T15:14:29.152Z",
+ "root": "E:\\만트라 스튜디오 사업\\앱 개발 소스\\manse-dev-myeongri-fix-1",
+ "n": 342,
+ "pass": 314,
+ "sec": 673,
+ "results": [
+  {
+   "test": "access-period-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 146,
+   "tail": "access-period-sim OK: 25항목"
+  },
+  {
+   "test": "accident-hint-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 1324,
+   "tail": "읽기 1400회 · 항목 있음 73% · 기둥 위치 표시 930회 · 1위 장면 분포 {\"water\":153,\"metal\":159,\"wood\":145,\"earth\":329,\"fire\":210,\"edge\":18,\"sudden\":11} · 시기에 따라 1위가 달라지는 사주 93% |  | 모든 검증 통과"
+  },
+  {
+   "test": "account-link-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 125,
+   "tail": "로그인 연결 검증 통과"
+  },
+  {
+   "test": "account-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 115,
+   "tail": "[kakao-unlink] UNLINK_FROM_APPS withdrawn | [kakao-unlink] ACCOUNT_DELETE withdrawn | 회원 탈퇴 검증 통과"
+  },
+  {
+   "test": "admin-adjustment-comparison-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 1186,
+   "tail": "{\"passed\":true,\"input\":{\"year\":1961,\"month\":10,\"day\":22,\"hour\":21,\"minute\":20,\"gender\":\"F\"},\"before\":\"중화\",\"after\":\"신강\",\"publicParity\":true,\"draftIsolation\":true,\"unchangedAndChangedStates\":true,\"writes\":0}"
+  },
+  {
+   "test": "admin-editing-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 82,
+   "tail": "admin-editing-sim OK: 적용 전 전환·연속 편집·직접 저장·검증 실패 보존·중복 저장 방지·실패 복구"
+  },
+  {
+   "test": "admin-light-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 68,
+   "tail": "모든 검증 통과 · 로딩 · 기본 밝게 + 기기 기억 · 밝게/어둡게 단추 · CSS 전부 html.admin-light 범위"
+  },
+  {
+   "test": "admin-login-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 211,
+   "tail": "관리자 로그인 잠금 검증 모두 통과"
+  },
+  {
+   "test": "admin-navigation-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 72,
+   "tail": "admin-navigation-sim OK: 메뉴 중복·존재·8개 영역·영역당 7개 이하·옛 화면 보관·이전 온보딩 경로"
+  },
+  {
+   "test": "admin-reading-parts-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 76,
+   "tail": "PASS: admin quality card shows per-paragraph agree/disagree table (labels, counts, agree rate, review flag at n>=5 & <50%, small-sample note, escaping, ordering) while keeping the chapter table"
+  },
+  {
+   "test": "admin-stage7-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 177,
+   "tail": "admin-stage7-sim OK: 73항목(운영자 열쇠·권한표·잠금 통과·역할별 API·감사 작업자·지표·회원 찾기·운테크 문안·이용 기록·화면·마이그레이션)"
+  },
+  {
+   "test": "admin-tester-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 222,
+   "tail": "admin-tester-sim OK: 24항목(권한·준비·일회용 코드·덮어쓰기 안 함·A/B·실제 회원에게 숨김·복귀 페이지·관리자 화면)"
+  },
+  {
+   "test": "admin-timeline-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 76,
+   "tail": "Admin timeline: shared topic mapping, title, order, visibility, source preservation and server round-trip passed"
+  },
+  {
+   "test": "age-fit-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 808,
+   "tail": "모두 통과 · 나이 판정·문장 걸러내기·대체 문장·본문 조립(20세 미만/65세 이상/보통) · 근거 줄 4장×사주 60명 · 연결"
+  },
+  {
+   "test": "agentic-rag-runtime-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 187,
+   "tail": "agentic-rag-runtime OK: external provider contracts, checkpoints, atomic concurrency, daily KST scheduling, three budget caps, bounded retries, original ID/approval/publication preservation, source grounding/retrieval, automatic evidence publication, admin-only changed conclusions, isolated rollback/cache version, security/fabrication rejection"
+  },
+  {
+   "test": "agentic-rag-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 125,
+   "tail": "agentic-rag OK: authenticated audit, source quote check, same-condition conflict candidates, deduped planning, version guard, immutable proposals/withdrawals, original bytes preserved"
+  },
+  {
+   "test": "ai-metering-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 268,
+   "tail": "ai-metering-sim PASS: absent≠zero · actual model · usage · cache preserves original generation metadata"
+  },
+  {
+   "test": "ai-provider-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 120,
+   "tail": "PASS: 20 provider priority/fallback scenarios"
+  },
+  {
+   "test": "amhap-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 2146,
+   "tail": "amhap-sim PASS · 사주 300명(원국 기본 지지 암합 100명) · 기록 원국 388·운 152·궁합 2495 |   대표 5조합·참여 지장간 · 월률분야 미사용 · 원국/운 구분·운끼리 · 궁합 A↔B 교차 · 명암합 구분·중복 없음 · 합화 아님 · 없음 처리 · 엔진·궁합 점수 불변 · 단정 표현 없음"
+  },
+  {
+   "test": "annual-evidence-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 999,
+   "tail": "annual-evidence: 30 charts x 10 years; original engine unchanged; daeun transitions; per-year matching/provenance; draft isolation; stale/duplicate/oversize rejection; admin API PASS"
+  },
+  {
+   "test": "aptitude-blocks-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 341,
+   "tail": "특기·적성 블록 경로 통과 켜졌을 때 붙은 수 {\"timeline_career_01\":4,\"timeline_wealth_02\":3,\"timeline_wealth_03\":4,\"timeline_self_27\":4}"
+  },
+  {
+   "test": "aptitude-chapters-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 3718,
+   "tail": "두 사람 활동 궁합 120쌍 통과(함께 할 활동 있음 120쌍) | 특기·적성 장 통과 — 사주 300개(20세 미만 30개), 장 제목 문장 133종, 부업 문단 270개, 재물 블록 돈 구조 270·지출 300개 | 재충전 활동 분포 hike 61 · endur 50 · cook 49 · green 46 · stage 41 · craft 36 · volunteer 31 · racket 29 · care 28 · fish 27 · music 25 · sew 25 · draw 23 · write 19 · lang 18 · ball 17 · board 16 · wood 15 · media 11 · water 7 · team 7 · chorus 5 · camp 5 · read 3 · club 2 · scienc"
+  },
+  {
+   "test": "aptitude-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 2850,
+   "tail": "1순위 종목 { racket: 27, water: 104, tech: 71, endur: 96, ball: 43, combat: 59 } | 추천 활동 종류 36 개 | 세부 분야가 1순위로 나온 경우 36 / 36"
+  },
+  {
+   "test": "asset-art-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 894,
+   "tail": "4. 생성 API |  | 풀이 이미지 슬롯 검증 모두 통과"
+  },
+  {
+   "test": "asset-video-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 123,
+   "tail": "2. 제출 · 미리보기 | 3. 확정 · 공개 · 빼기 | 풀이 슬롯 영상 검증 모두 통과"
+  },
+  {
+   "test": "batch-video-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 146,
+   "tail": "2. 칸마다 따로 조회 · 완료 | 3. 취소(삭제) | 영상 일괄 만들기(서버) 검증 모두 통과"
+  },
+  {
+   "test": "bgm-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 774,
+   "tail": "BGM 규칙 검증 모두 통과"
+  },
+  {
+   "test": "byeongyak-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 2308,
+   "tail": "  약 방법 설 2000 · 제 2052 · 보 84 · 원국에 거의 없는 약 1363개 · 약1이 억부 용신·희신과 같음 83% |  | 모든 검증 통과"
+  },
+  {
+   "test": "calendar-input-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 106,
+   "tail": "입력 검증 통과: 잘못된 입력 36건 및 정상·음력 왕복 확인"
+  },
+  {
+   "test": "calendar-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 8075,
+   "tail": "6. 삼재·월령 사령 |  | 모든 검증 통과"
+  },
+  {
+   "test": "calendar-ui-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 64,
+   "tail": "SKIP: playwright 가 설치되어 있지 않아 실행하지 않았습니다(달력 UI 브라우저 테스트). 설치: npm i -D playwright, 로컬 서버 8768 필요"
+  },
+  {
+   "test": "career-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 5334,
+   "tail": "   금지 표현 0건 |  | 모든 검증 통과"
+  },
+  {
+   "test": "castle-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 133,
+   "tail": "황금의 성채 검증 완료 | 모두 통과"
+  },
+  {
+   "test": "chapter-data-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 827,
+   "tail": "사주 48건 · 차트 1440개 렌더 · 빈 차트(용신 없음) 0개 |  | 모두 통과"
+  },
+  {
+   "test": "chapter-hooks-personal-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 100,
+   "tail": "chapter-hooks-personal-sim OK — 장 65 × 일간 10 = 650문장, 최대 유사도 0.40 (timeline_self_18~timeline_career_11/경)"
+  },
+  {
+   "test": "chapter-interpretation-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 1053,
+   "tail": "chapter-interpretation: 32 calculated charts; topic routing; 5% ratio; synonym duplicates; grounded hook; source/cache/version/auth; independent AI review; admin rejection/preservation PASS"
+  },
+  {
+   "test": "chapter-output-schema-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 197,
+   "tail": "chapter-output-schema: provider contracts, configured models, exact allowed IDs, closed objects, writer/review/repair and legacy compatibility PASS"
+  },
+  {
+   "test": "chapter-presentation-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 204,
+   "tail": "PASS: 66 chapter charts across 3 actual charts, exact proportions, diverse shapes, 2 semantic day videos, named local peak timeline, idempotence, direct everyday copy; no fetch/provider used"
+  },
+  {
+   "test": "chart-lines-depth-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 1820,
+   "tail": "PASS: 269 depth sentences, every element covered, 0/6178 chapter lines carry a depth layer over 120 charts, once per element per report, positions follow the chart, no forbidden words"
+  },
+  {
+   "test": "chart-lines-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 3576,
+   "tail": "PASS: 410 lines over 65 chapter keys; every star(35)/12-sinsal/relation(12)/ten-god(10) has lines; 15514 picks over 300 charts all name elements the chart really has, no repeated sentence per report, <=5 chapters per element, avg 51.7 chapters per chart, every non-timing chapter >=40%; rarest-first, deterministic, apply idempotent; AI/network 0"
+  },
+  {
+   "test": "cinema-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 386,
+   "tail": "9. 서버 검증 미러(functions/_cinema.js) |  | 시네마 레이어 검증 모두 통과"
+  },
+  {
+   "test": "climate16-review-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 67,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "clipfile-edge-cache-sim.mjs",
+   "code": 0,
+   "signal": null,
+   "ms": 103,
+   "tail": "PASS clipfile-edge-cache-sim 5항목"
+  },
+  {
+   "test": "coherent-reading-flow-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 4396,
+   "tail": "PASS coherent flow: 1804 chart/chapter readings; one explanation with a concrete example, no appended component copy or long repeated sentences, unique practices, safe editor tokens and published template edits"
+  },
+  {
+   "test": "commerce-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 241,
+   "tail": "결제·잠금 검증 통과"
+  },
+  {
+   "test": "community-gate-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 173,
+   "tail": "community-gate-sim OK: 100항목(잠금 단계·입장 쿠키·권한·단계 변경·출시 알림·탈퇴·사이트 잠금·화면)"
+  },
+  {
+   "test": "community-login-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 308,
+   "tail": "community-login-sim OK: 22항목(카카오·구글·네이버 복귀·취소·실패·위험한 주소 막기·광장 로그인 버튼)"
+  },
+  {
+   "test": "compass-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 77,
+   "tail": "OK compass: 센서 변환·원형 평균·편각·8방위·지원 판정·화면 연결"
+  },
+  {
+   "test": "compat-group-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 3832,
+   "tail": "맞춰 갈 쌍이 있는 무리 92/120 · 중재자 190/239 · 오행 적은 기운 있는 무리 84 · 많은 기운 59 | 좋은 달 평균 1.2개 · 예민한 달 평균 2.6개 · 6명 계산 최대 23ms · 전체 3619ms | 통과"
+  },
+  {
+   "test": "compat-pair-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 182,
+   "tail": "쌍 144개 · 점수 21~98 · 등급 상극 주의/무난/천생연분/아주 좋음/노력 필요/좋음 | 예시 1992남×1990여 연인: 65 무난 오행·용신 보완64 일간 궁합70 일지·배우자궁46 간지 전체 조화45 십성 상호 보완72 관계별 상호작용45 | OK"
+  },
+  {
+   "test": "compat-pair-v2-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 2505,
+   "tail": "  사례 결핍 오행이 기신·구신 — ⑤ 가산 없음 | - | 147 |  | 0 |  | 맞음 |   사례 과다 십성(35%↑)을 더 받음 — 값이 낮음 | - | 847 | -0.583 | 5153 | 0.076 | 맞음 | OK"
+  },
+  {
+   "test": "compat-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 1659,
+   "tail": "[규칙] 일지 합 후보 9335건 중 상위5 진입 19% · '조화 높음' 16% (100%면 합=무조건 최고라는 뜻이라 실패) |  | 오류 없음"
+  },
+  {
+   "test": "complete-reading-library-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 29800,
+   "tail": "PASS: 615 full-book synthetic requests; 공개 64장(씨앗 미수록 23장은 재작성 본문으로 확인) × 15 charts, zero pending/provider calls, six visible sections, distinct action copy, five continuous fiction motifs, positive/counterexamples, evidence folding and no media"
+  },
+  {
+   "test": "compose-api-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 161,
+   "tail": "AI 컴포저 검증 모두 통과 (LLM 호출 2회)"
+  },
+  {
+   "test": "compound-reading-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 66925,
+   "tail": "PASS compound: 3344 actual chart/chapter checks; 134 components covered; same-band variation in all five roles, conjunction negatives, no jargon hiding"
+  },
+  {
+   "test": "conditional-body-copy-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 145,
+   "tail": "PASS: 228 complete conditional body bundles / 1140 distinct authored paragraphs; every body role differs across all bands, no common-body reuse, no hidden or dropped sentences, no event guarantees"
+  },
+  {
+   "test": "conditional-reading-library-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 23678,
+   "tail": "PASS: 123 chapter-band checks; 76 questions × 3 actual calculated bands, all five body roles differ by band, old intro-only DB fallback precedence, no false personal refs, missing facts, exact boundaries, zero AI"
+  },
+  {
+   "test": "consistency-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 1822,
+   "tail": "[절입] 2024-07-06 12시 월지=오 / 2024-07-07 12시 월지=미 |  | 정합성 검사 모두 통과"
+  },
+  {
+   "test": "content-db-sim.js",
+   "code": 1,
+   "signal": null,
+   "ms": 1685,
+   "tail": " ✗ 조립 결과 다름 |    기준 104 을축 full:7807f44c:21 |    현재 104 을축 full:f3325aec:21"
+  },
+  {
+   "test": "content-v3-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 943,
+   "tail": "   조심할 점: 결정을 혼자 내리고 통보하는 것입니다. 지금 해 볼 것: 이번 달 가계나 일정 중 하나는 배우자가 정하게 맡겨 보세요. |  | 모두 통과"
+  },
+  {
+   "test": "daewoon-group-sync-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 2743,
+   "tail": "PASS daewoon-group-sync-sim: 과제 카드 300명 · 천간 기준과 갈리던 사주 80명도 공통 판정으로 일치"
+  },
+  {
+   "test": "day-compat-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 3222,
+   "tail": "유형 분포(기존→2판): 보완형 5659→9387 · 활성형 2674→1818 · 안정형 5655→2967 · 상호자극형 9372→7880 · 혼합형 12640→13948 | 조건 분포(기존→2판): 조화 높음 2347→4980 · 조화 7859→7226 · 혼합 13151→13552 · 주의 요소 있음 12643→10242 | OK"
+  },
+  {
+   "test": "daypillar-condition-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 473,
+   "tail": "28 charts: exact day pillar conditions match; foreign day pillars remain rejected"
+  },
+  {
+   "test": "deep-ai-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 745,
+   "tail": "  ✓ 켜면 body=true (클라이언트가 본문 대체 모드로 조립) |  | 전부 통과"
+  },
+  {
+   "test": "deep-ask-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 328,
+   "tail": "PASS deep-ask-sim: 기본 꺼짐·상태, 동의·카드 검증, 서버 계산 카드만 근거·개인정보 미전송·저장 없음, 출력 검증과 재시도, 실패 미차감, 타로·주역 합산 기기당 2회, 마지막 질문 카드 노출·탭·결과·남은 횟수·이스케이프"
+  },
+  {
+   "test": "deep-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 432,
+   "tail": "3. 챕터 끼워 넣기 |  | 깊이 풀이 검증 모두 통과"
+  },
+  {
+   "test": "derived-chapters-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 85,
+   "tail": "모두 통과 · 엔진 장 15개 제목·모듈·스위치·자리 일치 · 타임라인 구성·챕터 계약·감사 성적표·감사 도구 연동 · AI 풀이 분야 8개 ↔ 타임라인 79장 짝"
+  },
+  {
+   "test": "detail-reading-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 2904,
+   "tail": "PASS: 680 sentences, no duplicates, 해요체·금지어·개운 제한; anchors cover 75/76 chapters (자동차 장 제외 전부), unique axis×variant per chapter, no repeated sentence within one chart's report; timeline_love_01: 196 → 200 distinct narrative bodies over 200 charts; AI/network 0"
+  },
+  {
+   "test": "domain-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 3169,
+   "tail": "   상위 운 결합으로 인한 최대 점수 변화 40 |  | 모든 검증 통과"
+  },
+  {
+   "test": "editorial-contract-alias-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 85,
+   "tail": "Unknown legacy ID resolves only one enabled active exact-title contract; drafts, disabled topics and ambiguous matches remain unavailable"
+  },
+  {
+   "test": "editorial-headline-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 83,
+   "tail": "editorial-headline: ten shorter conclusions; remaining 678-module content/conditions/assets preserved PASS"
+  },
+  {
+   "test": "editorial-manuscript-review-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 678,
+   "tail": "PASS 126 individual revisions, derived flow copy, all passage validation, existing publication wins until approval, zero writes/network/providers"
+  },
+  {
+   "test": "editorial-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 248,
+   "tail": "editorial: 7 topics/107 contracts(보관 43 포함); preservation; auth/version; gated publish; drafts/history; real-context case selection; active reader/PDF model PASS"
+  },
+  {
+   "test": "editorial-source-readiness-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 117,
+   "tail": "editorial-source-readiness: exact quote or existing chunk required; stale/missing/blocked evidence rejected PASS"
+  },
+  {
+   "test": "editorial-stable-version-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 1190,
+   "tail": "  ok 바뀐 파일의 ?v= 갱신(운영 도메인 JS 4시간 브라우저 캐시 대비) |   ok 스위치(/api/luck-flags) 세 곳 모두 마지막 값 보관 | PASS editorial-stable-version-sim 22항목"
+  },
+  {
+   "test": "element-adjustments-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 65,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "element-flow-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 996,
+   "tail": "평가 15000 판정 분포(%) {\"제압\":8,\"보통\":16,\"통관\":6,\"엇갈림\":27,\"순생\":24,\"극\":14,\"설기\":4,\"막힘\":1} | 모든 검증 통과"
+  },
+  {
+   "test": "element-strategy-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 7231,
+   "tail": "  부족 오행≠용신: {\"inp\":{\"year\":1964,\"month\":11,\"day\":23,\"hour\":6,\"minute\":0,\"gender\":\"F\",\"calendar\":\"solar\"},\"lack\":[\"화(火)\",\"토(土)\",\"금(金)\"],\"yong\":\"수(水)\"} |   과다 오행이 기신 아님: {\"inp\":{\"year\":1950,\"month\":1,\"day\":1,\"hour\":0,\"minute\":0,\"gender\":\"F\",\"calendar\":\"solar\"},\"over\":[\"수(水)=한신\"]} |   억부≠조후: {\"inp\":{\"year\":1971,\"month\":4,\"day\":6,\"hour\":9,\"minute\":0,\"gender\":\"M\",\"calendar\":\"solar\"},\"eokbu\":\"토\",\"johu\":"
+  },
+  {
+   "test": "engine-baseline-sim.js",
+   "code": 1,
+   "signal": null,
+   "ms": 1652,
+   "tail": "  현재 domain    7b21c4008eeb |   기준 career    e478d9410dae |   현재 career    6e8081047414"
+  },
+  {
+   "test": "engine-blocks-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 316,
+   "tail": "모두 통과 · 사주 150명(장기 요약 블록 150) · 구간·격국·주요 구조 일치 · 빈 값·금지 표현 없음 · 점수 불변 · 연결"
+  },
+  {
+   "test": "engine-single-source-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 4488,
+   "tail": "engine-single-source-sim PASS · 사주 200명 · 직업 재료 단계·투출·통근 = 엔진 gyeokCore · 궁합 글자 세력 = 엔진 최종 세력 · 용희기구 = 통합 용신"
+  },
+  {
+   "test": "epic-intro-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 367,
+   "tail": "4. 스키마 확장(hold·cue·big·lead·tail·MAXIMUM)이 정리 단계에서 살아남는지 + 서버 미러 | 5. 본편과의 분리: INTRO 문구·프리셋이 본편 생성 코드로 새지 않는다 | 모두 통과"
+  },
+  {
+   "test": "errlog-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 152,
+   "tail": "  env: { mobile: false, br: 'other', saveData: false } | } | 모두 통과"
+  },
+  {
+   "test": "everyday-reading-visuals-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 141,
+   "tail": "PASS: synthetic chart matches original Mantra engine; exact car/vessel assets, no portrait fallback, actual engine percentages, prose before visuals, folded calculation basis, missing-data protection"
+  },
+  {
+   "test": "everyday-scenes-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 860,
+   "tail": "PASS: 84 chapters × 3 real charts; 85 authored scenes; conditional 현침살 example; cached/UI/health/fiction paths; no duplicate examples; local-only escaped name; public API; provider calls 0"
+  },
+  {
+   "test": "explore-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 334,
+   "tail": "규칙에 안 걸려 막 기준 대체 세계로 간 챕터: life_prologue, life_here, c00, life_future, c17, c18 | 세계 지도 검증: 챕터 111건 매핑 | 모두 통과"
+  },
+  {
+   "test": "fact-once-trim-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 70,
+   "tail": "모두 통과 · 첫 장 유지·다시 그리기·소개 걷기·이름표·같아진 문장 빼기·사람별 기록·연결"
+  },
+  {
+   "test": "fate-blocks-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 564,
+   "tail": "PASS fate-blocks-sim: 54개 장 × 8개 사주 · 블록 연결 · 빈 값 없음 · 조사"
+  },
+  {
+   "test": "fengshui-api-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 110,
+   "tail": "API 검증 실패 0건 | 통과"
+  },
+  {
+   "test": "fengshui-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 463,
+   "tail": "패턴 분포(9운×24좌향): {\"ssanghyang\":60,\"ssangjwa\":60,\"wangsan-wanghyang\":48,\"sangsan-hasu\":48} | 문구 118개 · 실패 0건 | 통과"
+  },
+  {
+   "test": "fiction-name-flow-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 103,
+   "tail": "PASS: existing eight-part fiction uses local reader name, supporting-name collision handled, API payload has no name/birth"
+  },
+  {
+   "test": "flow-chapters-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 650,
+   "tail": "모두 통과 · 사주 300개(시주 미상 30) · 장 5개×7칸 · 첫 문장 종류 10/31/8/12/10 · 끼워 넣는 자리 · 점수 불변 · 연결"
+  },
+  {
+   "test": "flow-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 4288,
+   "tail": "5. 순환 의존·호환 |  | 모든 검증 통과"
+  },
+  {
+   "test": "frank-reading-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 48465,
+   "tail": "{\"passed\":true,\"realCharts\":6,\"chapters\":84,\"checks\":504,\"negativeConditions\":true,\"idempotent\":true}"
+  },
+  {
+   "test": "free-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 725,
+   "tail": "3. /api/free-content 정리 규칙 |  | 전부 통과"
+  },
+  {
+   "test": "full-flow-usability-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 121,
+   "tail": "PASS: bounded initial fetch/body, exact chapter jump, scoped reload restoration, long-page auto guard, mobile page windows, keyboard seek"
+  },
+  {
+   "test": "g14-g15-comparators-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 68,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "g14-g15-overlap-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 66,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "garden-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 261,
+   "tail": "인연의 정원 검증 완료 | 모두 통과"
+  },
+  {
+   "test": "gateway-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 147,
+   "tail": "gateway-sim OK: 15항목(기본 숨김·관리자만·확인 문구·공개 상태·링크·관리자 카드)"
+  },
+  {
+   "test": "glossary-cases-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 186,
+   "tail": "모두 통과 · 보강 용어 57개 · 사용자 수정 30개 모두 포함"
+  },
+  {
+   "test": "glossary-overlap-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 90,
+   "tail": "OK glossary-overlap: 18개 용어, 일주 간여지동 비견 무진·기축·무술·갑인·을묘·기미·경신·신유 / 겁재 병오·임자·정사·계해"
+  },
+  {
+   "test": "glossary-sections-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 88,
+   "tail": "모두 통과 · 보강 용어 80개 · 문장 623줄 (25자 미만 20줄)"
+  },
+  {
+   "test": "google-login-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 119,
+   "tail": "[google-login] google-email-unverified | [google-login] google-token:invalid_grant | 구글 로그인 검증 통과"
+  },
+  {
+   "test": "graph-text-consistency-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 1332,
+   "tail": "사주 105개(교운기 20개) 검사 | 모두 통과"
+  },
+  {
+   "test": "guide-visibility-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 65,
+   "tail": "Guide visibility: landing, welcome, selection, post-selection, return visits and viewer passed"
+  },
+  {
+   "test": "gyeok-structure-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 2384,
+   "tail": "  현재 전체 e2c311619668 |   기준 daeun     e168748e0868 |   현재 daeun     497348e1d5e6"
+  },
+  {
+   "test": "gyeokguk-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 5735,
+   "tail": "  시주 미상 3000명 중 보류 3000명 |  | 모든 검증 통과"
+  },
+  {
+   "test": "health-body-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 1031,
+   "tail": "읽기 1400회 · 항목 있음 91% · 1위 오행 분포 {\"0\":204,\"1\":216,\"2\":355,\"3\":202,\"4\":297} · 시기에 따라 1위가 달라지는 사주 94% · 도움 문구 516회 |  | 모든 검증 통과"
+  },
+  {
+   "test": "health-chapters-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 1986,
+   "tail": "모두 통과 · 사주 200명 · 장 6개×7칸 · 첫 문장 종류 12/6/10/104/18/140 · 지수·삼재 일치 · 안내 문장 · 자리 · 점수 불변 · 연결"
+  },
+  {
+   "test": "health-narrative-flow-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 88,
+   "tail": "SKIP health-narrative-flow-sim: 건강 주제가 꺼져 있음(timeline_health_* 보관) — 주제를 켜면 다시 검사"
+  },
+  {
+   "test": "health-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 258,
+   "tail": "건강 챕터 검증 통과: 12개월 엔진 일치 · 실제 문서 순서 · 5장면 보존 · 중복 방지 · 낮음/높음/누락/시간 미상"
+  },
+  {
+   "test": "held-literature-reinforcement-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 65,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "held-three-criteria-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 502,
+   "tail": "  \"externalAIRequests\": 0, |   \"limitations\": \"Synthetic checks validate software contracts, not traditional equivalence or predictive accuracy. Context false values in the synthetic adapter are controls, not validated structural diagnoses.\" | }"
+  },
+  {
+   "test": "held-three-disagreement-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 498,
+   "tail": "  \"allPublicationDisabled\": true, |   \"externalAIRequests\": 0 | }"
+  },
+  {
+   "test": "hidden-root-review-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 70,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "hub-input-usability-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 79,
+   "tail": "PASS: leap dates, lunar bounds, explicit unknown time, failed storage, duplicate submit, retry and navigation race"
+  },
+  {
+   "test": "hub-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 184,
+   "tail": "PASS  (읽기 780건, 카드 78장)"
+  },
+  {
+   "test": "hub-tarot-spread-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 72,
+   "tail": "PASS: 배열 3종 × 분야 4종 종합 읽기, 자리 이름·조언 자리·흐름, 잘못된 입력, 허브 연결"
+  },
+  {
+   "test": "iching-ai-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 371,
+   "tail": "PASS: 기본 꺼짐, 동의·횟수·비용 제한, 서버 계산 결과만 근거, 개인정보 미전송·저장 없음, 출력 검증(확률·확정·날짜·반말·지양·다른 괘·형식)과 1회 재시도, 미게시 문구 차단"
+  },
+  {
+   "test": "iching-card-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 103,
+   "tail": "PASS: 개방 여부별 노출, 절반 지점 삽입, 자동 진행 멈춤 표식·건너뛰기, 동의 고지, 이스케이프, 결과·AI 렌더와 폴백, 던지는 중·실패·복원, 읽기 문서 연결"
+  },
+  {
+   "test": "iching-content-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 1233,
+   "tail": "64괘 × 4분야 × 변효 0~6 조합 3072건 통과 | PASS: 원문 64괘·386효, 현대어 초안 64괘, 검수 상태 게이트(미검수 비노출·승인·반려), 대표 3괘×4분야×사주 유무 스키마·품질, 변효 0·1·2·3·6, 품질 검사기 음성 테스트"
+  },
+  {
+   "test": "iching-engine-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 109,
+   "tail": "PASS: 8괘·64괘 구조(유일성·짝 규칙·384효), 세 동전 점법 6·7·8·9, 효 순서, 변효 0~6개 4096 조합 전수, 주희 본의 규칙, 재현성"
+  },
+  {
+   "test": "iching-public-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 347,
+   "tail": "PASS: 개방 전 차단, 승인≠게시≠개방, 게시된 문구만 사용, 사주 입력 정리, 잘못된 입력 거부, 저장 없음, 수정 시 반쪽 해석 차단, 개방 끄기"
+  },
+  {
+   "test": "iching-review-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 529,
+   "tail": "PASS: 인증, 승인·반려·되돌리기, 수정 시 승인 무효, 규칙 위반 수정 거부, 게시 점검(dryRun)·게시·롤백, 동시 수정 충돌, 서비스 개방 점검, 미리보기, 이력"
+  },
+  {
+   "test": "ik-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 309,
+   "tail": "6. 조합 조건 · 깊이 · 진단 · 커버리지 · 가져오기 · 서비스 연결 |  | 전부 통과"
+  },
+  {
+   "test": "ilgan-intro-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 188,
+   "tail": "N. 일간·일주 문구 검사(기토 영상에 경금 문구가 붙은 경우) |  | 모두 통과"
+  },
+  {
+   "test": "independent-case-review-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 66,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "independent-reference-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 187,
+   "tail": "32 blinded cases; deterministic generation; grouped split; no model labels in review packet; 32 abstentions; 0 definitive references."
+  },
+  {
+   "test": "input-loop-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 111,
+   "tail": "input-loop-sim PASS: auth, separate PC/mobile, draft isolation, client merge, publish, remove mobile, unsafe URL filtering"
+  },
+  {
+   "test": "interpretation-engine-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 863,
+   "tail": "interpretation-engine: 40 charts, independent rules, actual source verification, conflict preservation, output refs, API/cache/budget/auth/rollback PASS"
+  },
+  {
+   "test": "intro-text-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 67,
+   "tail": "} |  | 모두 통과 (일간 10 · 일주 60, 각 4줄)"
+  },
+  {
+   "test": "jijanggan-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 106,
+   "tail": "jijanggan-sim PASS: 12지지 지장간 구성·비율 100%·子卯酉 단일·월률분야 사령 분리"
+  },
+  {
+   "test": "jonggyeok-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 6147,
+   "tail": "  시주 미상 4000명 중 보류 325명 |  | 모든 검증 통과"
+  },
+  {
+   "test": "journey-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 397,
+   "tail": "6. INTRO ↔ BODY 분리 |  | INTRO 여정 · BODY 분리 검증 모두 통과"
+  },
+  {
+   "test": "launch-stage8-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 160,
+   "tail": "launch-stage8-sim OK: 55항목(기준값·8항목 판정·권한·사람 확인·자료 실패는 미달·기준 변경·정식 공개 막기/사유·화면)"
+  },
+  {
+   "test": "library-history-split-sim.mjs",
+   "code": 0,
+   "signal": null,
+   "ms": 602,
+   "tail": "{\"passed\":true,\"api\":\"checked\"}"
+  },
+  {
+   "test": "library-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 242,
+   "tail": "천명의 서고 검증 완료 | 모두 통과"
+  },
+  {
+   "test": "life-doc-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 1032,
+   "tail": "  37 FINAL     운로 사용설명서  [기존 챕터 c20] |  | 모두 통과"
+  },
+  {
+   "test": "life-narrative-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 36267,
+   "tail": "  인생 모양 굴곡형 39% · 중반 정점형 26% · V자 반전형 13% · 늦게 피는 상승형 12% · 앞이 강한 하강형 8% · 잔잔한 흐름형 1% · 물결형 1% |   가장 많이 쓰인 규칙 w12-weak-base 40% · 쓰인 규칙 수 454/456 | 통과"
+  },
+  {
+   "test": "literature-conditions32-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 69,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "literature-hidden-root-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 64,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "love-compat-sim.mjs",
+   "code": 0,
+   "signal": null,
+   "ms": 367,
+   "tail": "✓ love-compat-sim 통과 — 같은 엔진·보유 잠금(12개월)·하루 10회·남은 횟수·인연운 마지막 장·관리자 목록"
+  },
+  {
+   "test": "love-group-sim.mjs",
+   "code": 0,
+   "signal": null,
+   "ms": 646,
+   "tail": "✓ love-group-sim 통과 — 같은 계산·관계 네 가지 한 번·스위치·잠금·인원 3~6명·1회 차감·화면·금지 표현"
+  },
+  {
+   "test": "luck-alerts-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 16906,
+   "tail": "luck-alerts-sim ok · 사주 80명 · 1인당 알림 타임라인 0.82·만세력 1.75 · 일진 신호 비율 3.4% · 좋은 104/주의 102 · 서로 다른 알림 조합 66"
+  },
+  {
+   "test": "luck-boundary-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 423,
+   "tail": "모든 검증 통과 · 입춘 4개년 · 절기 월주 연속 · 일진 100년 연속 · 대운 교체일 · 시간 미상 · 경도/서머타임"
+  },
+  {
+   "test": "luck-cache-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 158,
+   "tail": "모든 검증 통과 · 캐시 적중/무효화(원국·문구·직전 기간) · 기능 스위치 · 헤더 방어"
+  },
+  {
+   "test": "luck-care-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 766,
+   "tail": "luck-care-sim ok · 일진 730일 · 조심 신호 3027개(하루 평균 4.1) · 건강 245·사고수 279·재물손실 189 · 전체 흐름 조심 아닌 날에 신호 451일"
+  },
+  {
+   "test": "luck-cycle-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 2978,
+   "tail": "사주 240 · 30년 구간 960 성격(%) {\"mixed\":18,\"mid\":17,\"bad\":35,\"good\":30} · 2년 구간 2880 성격(%) {\"good\":43,\"mid\":17,\"bad\":41} · 문구 117 | 검사 범위 {\"mix\":{\"1\":563,\"2\":289,\"3\":108},\"lateDrop\":255,\"mixed\":173,\"lift\":99,\"drag\":108,\"part\":4,\"conflict\":9,\"johuNA\":185,\"past\":229,\"youth\":118} | 모든 검증 통과"
+  },
+  {
+   "test": "luck-element-theme-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 1025,
+   "tail": "luck-element-theme-sim ok · 해석 1360건 · 분야 해석 3264건 · 지표 풀이 640건 · 상태 {\"mixed\":420,\"careful\":556,\"steady\":241,\"use\":117,\"neutral\":26} · 오행별 서로 다른 해석 목212 화212 토250 금315 수217"
+  },
+  {
+   "test": "luck-env-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 3897,
+   "tail": "luck-env-sim ok · 사주 300명 · 전환 판정 {\"daeun\":{\"low\":123,\"mid\":114,\"high\":61},\"seun\":{\"low\":154,\"mid\":117,\"high\":29},\"wolun\":{\"low\":101,\"mid\":151,\"high\":48},\"ilun\":{\"low\":242,\"mid\":56,\"high\":2}} · 상하위 방향 다름 670 / 같음 230 · 지금 운 방향 {\"lean-good\":250,\"lean-bad\":235,\"mid\":189,\"bad\":105,\"good\":121} · 상하위 문장 19종 · 외부 환경 공통 · 엔진 불변"
+  },
+  {
+   "test": "luck-everyday-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 724,
+   "tail": "PASS: original engine annual/monthly TG and relations; 12 accurate dated months; 2027 crossing; stale/missing/unknown hour guards; actual clash only; visible simple 명리 basis; admin preview; provider calls 0"
+  },
+  {
+   "test": "luck-flags-api-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 146,
+   "tail": "모든 검증 통과 · 기본 꺼짐 · 관리자만 변경 · 모두 켜기/끄기 · 일부 켜기 · 잘못된 입력 거부 · 저장소 오류 시 꺼짐"
+  },
+  {
+   "test": "luck-interpret-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 879,
+   "tail": "해석 3960건 · 일진 대표 장면 종류 309 · 최다 문장 점유 13% · 문구 DB 162건 | 모든 검증 통과"
+  },
+  {
+   "test": "luck-layer-blocks-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 9260,
+   "tail": "그림 ok · 원국 오행 흐름 80 · 겹쳐 보기 80 | 한눈에 보기 ok | 캘린더 ok"
+  },
+  {
+   "test": "luck-overlay-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 3543,
+   "tail": "luck-overlay-sim ok · 사주 300명 · 층 1200개 · 풀이 서로 다른 문장 1190 · 결 {\"flat\":84,\"good\":578,\"bad\":398,\"mixed\":140} · 운끼리 관계 있는 층 715 · 원국과 관계 있는 층 1159 · 엔진 결과 불변 | 합화 ok · 사주 150명 · 합 후보 610 · 합화 성립 101"
+  },
+  {
+   "test": "luck-phrases-api-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 108,
+   "tail": "모든 검증 통과 · 승인→게시 순서 · 수정 시 게시본 제외 · 중복/단정/존댓말 거부 · 이력 복구"
+  },
+  {
+   "test": "luck-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 3126,
+   "tail": "ALL                 600  -0.6    26.8 |  24  20  22  33 |  24   42   24   10 |  18   10    |  42   54 0.40 0.18 |  | NaN/undefined/빈 phase 없음, 유형별 편향 기준 통과"
+  },
+  {
+   "test": "luck-ten-god-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 768,
+   "tail": "luck-ten-god: 40 charts; exact engine values; missing/stale/invalid rejection; separate scopes; source-bound time provenance PASS"
+  },
+  {
+   "test": "luck-yong-final-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 164,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "luck6-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 401,
+   "tail": "6분류 분포 {\"방어기\":228,\"변동기\":732,\"수확기\":674,\"기회기\":907,\"축적기\":1057,\"확장기\":602} · 평가 4200건 | 모두 통과"
+  },
+  {
+   "test": "macro-era-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 678,
+   "tail": "macro-era-sim ok · 사주 200명 · 2026년 시대 9운 화(火) · 원국 판정 {\"good\":94,\"bad\":71,\"mid\":35} · 대운 판정 역할 기준 200건 · 엔진·daeunSpans 불변"
+  },
+  {
+   "test": "macro-era3-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 87,
+   "tail": "시대 흐름 3체계 검사 통과 (원회운세 문헌 대조·경계, 삼원구운 회귀 1864~2103)"
+  },
+  {
+   "test": "mansions-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 324,
+   "tail": "OK mansions: 방위 정규화·편각·현공 기준선·도수 프로필·나경 대응 차단·경계 순환·통합·날짜 28수·원문 길흉·화면 연결"
+  },
+  {
+   "test": "mantra-reading-handoff-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 403,
+   "tail": "PASS: 11 original-to-hub-to-movingtoon inputs, including time correction, late-hour convention, city longitude, unknown hour and lunar date; same pillars and all reading facts"
+  },
+  {
+   "test": "match-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 187,
+   "tail": "match-sim OK: 76항목(성인 기준·궁합·조건·본인확인·인연 프로필·오늘의 인연·잇기/매칭·대화·신고/제재·차단·탈퇴·파일)"
+  },
+  {
+   "test": "member-consent-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 160,
+   "tail": "member-consent-sim OK: 70항목(동의 기본값·입력 검사·필수/광고 분리·처리 결과 메일·휴대폰·야간·프로필·광장 입장·관리자 통계·감사 로그·파일)"
+  },
+  {
+   "test": "metaphor-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 688,
+   "tail": "metaphor: 40 charts; varying vessel/route; car and wealth limits; engine unchanged PASS"
+  },
+  {
+   "test": "middleware-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 117,
+   "tail": "미들웨어 검증 통과"
+  },
+  {
+   "test": "mobile-reading-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 70,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "module-ai-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 116,
+   "tail": "모듈 AI(촌철살인 · DB 참고) 검증 모두 통과"
+  },
+  {
+   "test": "movingtoon-reading-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 328,
+   "tail": "원국 전체·자식운·AI 새 풀이·검증 실패 Claude 폴백·캐시·원자적 적용 통과"
+  },
+  {
+   "test": "mulsang-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 520,
+   "tail": "5. 화면·스위치 연결 |  | ✓ 물상 그림 검증 9868항목 통과"
+  },
+  {
+   "test": "music-video-api-sim.mjs",
+   "code": 0,
+   "signal": null,
+   "ms": 391,
+   "tail": "music-video-api-sim ok: 스위치·로그인·무료 주제 차단, 생성 3곡(종합·재물·신년운세), 캐시 재사용, 재생 Range, 패널 3,600칸(일주×성별×주제×구간) 만들기·비우기·자동 채우기, 여·남 다른 곡, 일주 풍경·영상 자동 생성, 고급 K-힙합 사람 주인공+수호 동물 지시문, Kling 패널 영상(작업·확인·저장·정리), 오류 처리, 키 노출 없음"
+  },
+  {
+   "test": "music-video-lyrics-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 6700,
+   "tail": "성별 ok: 160쌍(같은 사주 여·남)에서 보컬·추임새·패널 칸·곡이 모두 갈림 | 옵션 ok: 장르 17 × 분위기 11 × 보컬 3 × 톤 8, 서로 다른 스타일 352가지 | 일주 ok: 60갑자 마무리 대목 120줄, 곡 400개에서 일주 60종 확인"
+  },
+  {
+   "test": "narrative-extra-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 357,
+   "tail": "모두 통과 · 보강 규칙 34개 × 3단계 · 금지어·용어 없음 · 본문에 붙은 장 246"
+  },
+  {
+   "test": "narrative-reading-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 159,
+   "tail": "PASS: 76 complete six-paragraph readings, 228 unique condition openings; coherent guide priority, original evidence preserved, two prose signposts, no malformed Korean"
+  },
+  {
+   "test": "narrative-rules-api-sim.mjs",
+   "code": 0,
+   "signal": null,
+   "ms": 97,
+   "tail": "서사 규칙 API 전이 검증 통과 (버전 8)"
+  },
+  {
+   "test": "narrator-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 271,
+   "tail": "4. 글자 스타일 역할 분리 |  | 모두 통과"
+  },
+  {
+   "test": "natal-origin-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 98,
+   "tail": "  ok 자세한 원국표(지장간·12운성·12신살·신살) |   ok 타임라인과 같은 공용 표, 종합풀이 1장 중복 없음 | PASS natal-origin-sim"
+  },
+  {
+   "test": "naver-login-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 122,
+   "tail": "[naver-login] naver-token:invalid_request | 네이버 로그인 검증 통과"
+  },
+  {
+   "test": "newyear-api-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 401,
+   "tail": "newyear-api-sim ok: 입구 카드 ·서버 엔진 로드·관리자 검수(수정·승인·금지 표현·rev 충돌·이력)·closed/free/paid·맛보기 비노출·회원×사주 권한·첫 열람 기록·연도 상품 분리"
+  },
+  {
+   "test": "newyear-compose-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 654,
+   "tail": "newyear-compose-sim ok: 블록 131개, 현대어 144괘, 50명 괘 45종, 겹침률 평균 16.6% 최대 52.9%"
+  },
+  {
+   "test": "newyear-look-sim.mjs",
+   "code": 0,
+   "signal": null,
+   "ms": 199,
+   "tail": "newyear-look-sim PASS: 꾸미기 값 정리·공개 API·패널 고르기(오행·성별·겹침 없음·같은 그림 유지·끄기)·화면 연결"
+  },
+  {
+   "test": "newyear-month-deep-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 1388,
+   "tail": "│ 1       │ '조합' │ 113 │ 317.6  │ 382.8 │ 100   │ 12  │ 12     │ 1.6     │ 12     │ | └─────────┴────────┴─────┴────────┴───────┴───────┴─────┴────────┴─────────┴────────┘ | newyear-month-deep-sim ok: 심화 괘 116, 생일 116명, 기본 경로 보존 4명"
+  },
+  {
+   "test": "newyear-saju-link-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 677,
+   "tail": "newyear-saju-link-sim ok: 120명 — 세운 십성 10종, 등급 {\"주의\":29,\"부담\":24,\"순풍\":57,\"보통\":10}, 신호 조합 113, 월 흐름 102"
+  },
+  {
+   "test": "newyear-ui-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 70,
+   "tail": "newyear-ui-sim ok: 파일 연결·구매 창 연동·내 구매 내역 연결·맛보기·PDF 없음"
+  },
+  {
+   "test": "occult-panels-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 143,
+   "tail": "  syscall: 'open', |   path: 'E:\\\\만트라 스튜디오 사업\\\\앱 개발 소스\\\\manse-dev-myeongri-fix-1\\\\output\\\\sealed-webtoon\\\\all-topics\\\\editorial-public.json' | }"
+  },
+  {
+   "test": "onboard-art-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 124,
+   "tail": "4. 파일 지우기 제한 | 5. 초안 연결: renewal 만 보내도 다른 설정은 그대로 | 시네마틱 온보딩 이미지·영상 검증 모두 통과"
+  },
+  {
+   "test": "onboard-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 195,
+   "tail": "onboard-sim OK | onboard-sim(추가): 완료"
+  },
+  {
+   "test": "onboarding-integration-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 119,
+   "tail": "onboarding-integration-sim OK: 두 입력 방식·공통 결과 경로·커버 초안/게시/폐기/공개중지·기존 설정 보존"
+  },
+  {
+   "test": "onboarding-renewal-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 118,
+   "tail": "onboarding-renewal-sim PASS: auth, draft/live separation, compatibility, migration, publish validation, media/route safety, user preservation, save failure"
+  },
+  {
+   "test": "operations-binary-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 195,
+   "tail": "operations-binary-sim PASS: auth · missing-first refusal · SHA256 tamper refusal · conditional missing-only upload · idempotence · same-size conflict refusal · changed-source refusal · incomplete backup refusal"
+  },
+  {
+   "test": "operations-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 306,
+   "tail": "operations-sim PASS: auth · 430-key pagination · checksum · read-only preview · batched restore · stale edit refusal · failure rollback · undo created key · user preservation · Supabase tombstones"
+  },
+  {
+   "test": "opportunity-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 1269,
+   "tail": "5. 일진·월운·대운 1590건 정상 · 비정상 0건 |  | 모든 검증 통과"
+  },
+  {
+   "test": "panel-edit-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 220,
+   "tail": "패널 세부 수정 검증 모두 통과"
+  },
+  {
+   "test": "panel-repeat-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 874,
+   "tail": "PASS panel-repeat-sim: 사주 6명 × 64장 · 패널 144개 반복 0 (예전 방식 반복 726개) · 장 전용 그림 유지 · 주제 안 고르게 · 결정성"
+  },
+  {
+   "test": "panel-scenes-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 559,
+   "tail": "PASS: 210 scene slots; 70 topic/element/gender combinations with 3 ordered body scenes; creative pacing; approved-only, no backgrounds; GET auth/no writes; upload image+video; scoped bulk 35; provider calls 0"
+  },
+  {
+   "test": "panel-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 131,
+   "tail": "3. 공통 등장 연출(소스 검사) |  | 패널 이미지 검증 모두 통과"
+  },
+  {
+   "test": "panel-video-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 128,
+   "tail": "6. 신형 API (KLING_API_KEY · Kling 3.0 Turbo) |  | 컷 영상 생성(Kling) 검증 모두 통과"
+  },
+  {
+   "test": "past-story-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 314,
+   "tail": "Past story: full chart egress, grounded three-stage generation, independent rejection, exact-chart cache and deactivation passed"
+  },
+  {
+   "test": "pattern-agree-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 562,
+   "tail": "pattern-agree-sim ok · 사주 300명 · 뺀 패턴 0 · 남긴 패턴 476 · 엔진 불변 · 연결"
+  },
+  {
+   "test": "paywall-return-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 80,
+   "tail": "PASS paywall-return-sim: 모바일 복귀 처리 중·성공·실패·권한 실패·끊김, 남은 결제 다시 확인, 이어 읽기 보존, 최근 잠금 정보만 쓰기, 로그인 도구 한 번, 요청 중 장 다시 받기"
+  },
+  {
+   "test": "plain-reading-media-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 162,
+   "tail": "PASS: approved media matching, gender/topic exclusion, safe URLs, visible panels and plain/technical text separation | PASS: live climate wording regression chooses plain question answer while keeping original evidence"
+  },
+  {
+   "test": "plaza-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 230,
+   "tail": "plaza-sim OK: 145항목(잠금·일주 계산·글쓰기 조건·피드/검색/모임·고치기/지우기·좋아요/북마크·댓글/답글·차단·신고/자동 숨김·운영/제재/감사 로그·탈퇴·파일)"
+  },
+  {
+   "test": "polite-copy-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 78,
+   "tail": "PASS: honorific conjugation and idempotence; facts, quotes, titles and original history preserved; both put and atomic save automatically normalize new service copy"
+  },
+  {
+   "test": "premium-depth-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 17715,
+   "tail": "└─────────┴─────────────┴─────────┴────────┴──────────┴─────────┴─────────┴────────┴────────┴───────┴─────────┴────────┴──────────┘ | 사주 300명 · 시범 밖 장 동일 300/300(나머지 0건은 운 흐름 칸만 중복 제거로 달라짐) · 바탕 서사 사용 221회 | premium-depth-sim ok"
+  },
+  {
+   "test": "private-path-sim.mjs",
+   "code": 0,
+   "signal": null,
+   "ms": 121,
+   "tail": "private-path-sim OK: 차단 7 · 통과 6 · 잠금보다 먼저 404"
+  },
+  {
+   "test": "production-monitor-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 434,
+   "tail": "PASS monitor key header | PASS 503/AI/output/telemetry/latency, 256-combination coverage, max4 concurrency, no private data, admin/provider separation, dedup, missing-metrics detection, private endpoints"
+  },
+  {
+   "test": "prologue-fade-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 68,
+   "tail": "prologue-fade-sim PASS: 5s timeline, 0.6s fade in/out, hold, buffering, completion, skip cleanup, ilgan preserved"
+  },
+  {
+   "test": "prologue-guide-image-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 102,
+   "tail": "prologue paid-gate checks PASS | prologue-guide-image-sim PASS: w8·두 자리 주제, 이미지 슬롯·시간, 예전 저장 보존, 주소 검증, 안내자별 이미지 선택"
+  },
+  {
+   "test": "prologue-mute-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 65,
+   "tail": "prologue-mute-sim PASS: autoplay and tap retry stay silent, volume lock, no sound toggle, ilgan audio toggle preserved"
+  },
+  {
+   "test": "prologue-topics-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 98,
+   "tail": "Prologue topics: six worlds, guide fallback, legacy preservation, validation and admin authorization passed"
+  },
+  {
+   "test": "psych-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 4357,
+   "tail": "결 빈도 {\"unseen\":145,\"pressed\":74,\"burnout\":29,\"antenna\":151,\"silenced\":61,\"close\":145,\"frozen\":38,\"roots\":158,\"taken\":59,\"alone\":36,\"storm\":65,\"burden\":33} | 감정 빈도 {\"지침\":3493,\"경쟁심\":2985,\"차분함\":165,\"설렘\":1810,\"걱정\":3541,\"예민함\":1968,\"책임감의 무게\":2505,\"들뜸\":1586,\"과욕\":2594,\"조급함\":3716,\"무거움\":1316,\"허전함\":1572,\"답답함\":1230} | psych-sim 통과"
+  },
+  {
+   "test": "quality-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 329,
+   "tail": "#3 풀이 누락 의심 없음 · 단정 검토 0 | 서비스 점검 검증 완료 | 모두 통과"
+  },
+  {
+   "test": "quest-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 190,
+   "tail": "quest-sim OK"
+  },
+  {
+   "test": "rag-backup-audit-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 74,
+   "tail": "backup audit: exact values, links, states, metadata, tombstones and corruption detection PASS"
+  },
+  {
+   "test": "rag-cloud-backup-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 209,
+   "tail": "cloud backup: binary integrity, checksum, missing quota, negative usage, size mismatch and overwrite refusal PASS"
+  },
+  {
+   "test": "rag-link-repair-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 209,
+   "tail": "PASS gap→durable queue→planned→published→research version; isolated verification budgets; idempotent historic ledger split; multilingual source gate; bounded full-book excerpts"
+  },
+  {
+   "test": "rag-postgres17-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 73,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "rag-provider-probe-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 102,
+   "tail": "provider probe: GET-only auth, zero inference, no secret logs, free-search gate and single request PASS"
+  },
+  {
+   "test": "rag-store-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 104,
+   "tail": "rag-store OK: Supabase RPC contract, concurrent CAS retries, original rows preserved, no runtime memo cache, restricted additive SQL (SQL not executed against PostgreSQL)"
+  },
+  {
+   "test": "reader-continuity-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 218,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "reader-navigation-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 71,
+   "tail": "PASS: jump selection wins both observer directions; scrolling resumes; header and priority commit before movement | PASS: pending observer targets are replaced by hydrated body and grounds nodes | PASS: character ending cannot send an active world reader or a later chapter back to the map"
+  },
+  {
+   "test": "reader-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 68,
+   "tail": "6. 긴 풀이 문단 나누기(viewer.js chunk) |  | 읽기 문서 로직 검증 모두 통과"
+  },
+  {
+   "test": "reading-advice-history-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 85,
+   "tail": "PASS: all-topic distant advice retained, evidence/fiction/education/pending excluded, names removed, bounded untrusted history deduplicated"
+  },
+  {
+   "test": "reading-answer-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 120,
+   "tail": "PASS: 24 topic/choice contracts; provider fallback, validation, cache, rate limits, failure recovery and request races"
+  },
+  {
+   "test": "reading-block-runtime-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 66,
+   "tail": "    'E:\\\\만트라 스튜디오 사업\\\\앱 개발 소스\\\\manse-dev-myeongri-fix-1\\\\tests\\\\reading-block-runtime-sim.cjs' |   ] | }"
+  },
+  {
+   "test": "reading-blocks-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 200,
+   "tail": "PASS reading blocks: source/exception/style invalidation, candidate gates, exclusion, conflicts, duplicates, roles, cached-token pricing, failed-call ledger, privacy, singleflight, admin auth, stale writes and rollback"
+  },
+  {
+   "test": "reading-calculation-context-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 259,
+   "tail": "PASS: four synthetic charts, temporal and placement premises, boundary windows, unknown hour, immutable calculation context; no private fixtures"
+  },
+  {
+   "test": "reading-composition-policy-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 197,
+   "tail": "PASS composition schema, specificity, priority, legacy ordering, semantic duplicates, opposing verdicts, separate perspectives, source contradictions, metadata persistence, real composer suppression"
+  },
+  {
+   "test": "reading-context-duplicate-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 67,
+   "tail": "Shared trait word across distinct contexts accepted; repeated paragraph remains rejected"
+  },
+  {
+   "test": "reading-detail-admin-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 67,
+   "tail": "PASS: admin profile parsing, readable conditions, scoped filter, full edit rows preserved"
+  },
+  {
+   "test": "reading-detail-profiles-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 28084,
+   "tail": "PASS: 5 actual engine profile types; 20 complete chapter bundles; 160 passages; 60 one-condition counterexamples; no repeated body sentences; no network/provider"
+  },
+  {
+   "test": "reading-detail-public-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 354,
+   "tail": "PASS: 20 real public-handler reads; new detailed default bundles selected with old library; pending 0; provider/network calls 0; cost 0"
+  },
+  {
+   "test": "reading-failure-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 5883,
+   "tail": "reading-failure: isolated chapters, network/invalid JSON/per-chapter failure isolation, safe diagnostics, auth, opt-in, no stale prose PASS"
+  },
+  {
+   "test": "reading-feature-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 742,
+   "tail": "순위 블록 32장 × 10개 사주 = 320개, 순서가 달라지는 장 32 | PASS reading-feature-sim: 29 chapters × 6 charts × (no assets / all assets), ranked places and 일주 with images and reasons, lead/rest placement, no mutation | PASS 시기 순위·그래프와 장 사이 조각 중복 없음"
+  },
+  {
+   "test": "reading-focus-eight-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 39907,
+   "tail": "{\"pass\":\"8 focus chapters, real calculated positives/counterexamples, all seed validation, admin/public API, auth and override preservation\",\"computed\":2937,\"checks\":53,\"passages\":352,\"providerCalls\":0}"
+  },
+  {
+   "test": "reading-input-projection-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 125,
+   "tail": "PASS reading input projections: narrow RPCs only, original hash ordering, published overlays, fresh withdrawals, missing-record fallback, tombstone protection and invalid-ID rejection"
+  },
+  {
+   "test": "reading-insight-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 2928,
+   "tail": "PASS: insight dictionary complete (704 sentences), 240 charts, avg 89.7 paragraphs per report, no duplicates, deterministic, wired into the reader"
+  },
+  {
+   "test": "reading-library-batch-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 158,
+   "tail": "    'E:\\\\만트라 스튜디오 사업\\\\앱 개발 소스\\\\manse-dev-myeongri-fix-1\\\\tests\\\\reading-library-batch-sim.cjs' |   ] | }"
+  },
+  {
+   "test": "reading-library-catalog-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 194,
+   "tail": "PASS: production-shaped 163-chapter draft; only 84 supported current libraries queried; 79 preserved archives; no storage writes"
+  },
+  {
+   "test": "reading-metrics-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 126,
+   "tail": "reading-metrics: opt-in, origin/auth, de-identification, event dedup, completion/exit/feedback, separate expert outcomes PASS"
+  },
+  {
+   "test": "reading-on-demand-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 143,
+   "tail": "On-demand: zero entry calls; one in-flight; skipped selection discarded; completed chapter not regenerated PASS"
+  },
+  {
+   "test": "reading-plus-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 1726,
+   "tail": "PASS: 12 families × 6 lenses × 3 practices, 66 pairs, every chart element mapped; 120/120 charts with signature (families seen 11, max share 48%); cards for self_01/topic firsts/self_20/self_21/remedy_07 render without gaps or forbidden words; hour-unknown notice; part feedback detection and metrics summary; AI/network 0"
+  },
+  {
+   "test": "reading-prefetch-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 74,
+   "tail": "PASS: no forced delay; next two only; no cascading warm-up; foreground jumps win; topic boundary respected; opt-in only"
+  },
+  {
+   "test": "reading-priority-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 100,
+   "tail": "selected chapter priority, single request per chapter, and all bodies applied PASS"
+  },
+  {
+   "test": "reading-prompt-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 71,
+   "tail": "  syscall: 'open', |   path: 'E:\\\\만트라 스튜디오 사업\\\\앱 개발 소스\\\\manse-dev-myeongri-fix-1\\\\output\\\\reading-block-release\\\\measurement-hybrid-timeline_self_03-1792343341518.json' | }"
+  },
+  {
+   "test": "reading-public-projection-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 22702,
+   "tail": "PASS: narrow RPC projection, current publication freshness, invalid keys blocked, public endpoint and admin list never load full history/scenarios, zero provider calls"
+  },
+  {
+   "test": "reading-renewal-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 792,
+   "tail": "reading-renewal: 8명식 · 15주제/8요소 · 시간 미상 · 원본/엔진/특화 보존 · 개인화 · 모순/중복 · PDF 계산표 · 명칭 가드 · DB 호환 통과"
+  },
+  {
+   "test": "reading-text-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 80,
+   "tail": "PASS: archived 84-chart audit when available, six visible roles, basis expanded and blended into the reading, no legacy claims/media, pending protection, no data mutation, fiction separation and duplicate removal"
+  },
+  {
+   "test": "reading-topic-priority-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 135,
+   "tail": "Only explicitly selected chapters run; same-topic and unrelated chapters are not prefetched"
+  },
+  {
+   "test": "reading-trait-context-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 69,
+   "tail": "PASS: actual trait-summary/risk extension allowed; verbatim and close paraphrase remain rejected; semantic AI review remains required"
+  },
+  {
+   "test": "reading-transport-recovery-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 227,
+   "tail": "Transport recovery PASS: non-JSON gateway/truncated body/network/in-progress recover automatically; identical payload; bounded attempts; no quality/quota retry; mock-only, zero production AI calls"
+  },
+  {
+   "test": "reading-unlock-recheck-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 160,
+   "tail": "PASS reading-unlock-recheck-sim: 결제 중 요청하던 장은 잠금 답 대신 다시 받아 문안 표시, 잠금 해제 없으면 잠금 유지"
+  },
+  {
+   "test": "reality-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 659,
+   "tail": "샘플 32명 · 현실 장면 702개 · 챕터별 현실 장면이 없던 횟수 {\"c05\":4} | 모두 통과"
+  },
+  {
+   "test": "rebuild-concrete-sim.mjs",
+   "code": 0,
+   "signal": null,
+   "ms": 475,
+   "tail": "{\"passed\":true,\"ids\":606,\"fields\":974,\"doneTopicsAbstract\":0}"
+  },
+  {
+   "test": "rebuild-polish-sim.mjs",
+   "code": 0,
+   "signal": null,
+   "ms": 694,
+   "tail": "모든 검증 통과 · 문안 1025개 · 비는 필드·조사 깨짐 없음 · 내부 설명 대표 문장 제거 · 멱등 · notice 보존"
+  },
+  {
+   "test": "region-api-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 103,
+   "tail": "모든 검증 통과 · 출처 없는 값 거부 · 이력/되돌리기 · 병합"
+  },
+  {
+   "test": "region-reading-api-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 143,
+   "tail": "모든 검증 통과"
+  },
+  {
+   "test": "region-reading-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 947,
+   "tail": "   서로 다른 문구 조합 567 가지 |  | 모든 검증 통과"
+  },
+  {
+   "test": "region-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 615,
+   "tail": "모든 검증 통과 · 지역 17곳 · 통계 항목은 출처 확인 전까지 모두 자료 부족"
+  },
+  {
+   "test": "remaining16-review-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 67,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "report-repeat-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 787,
+   "tail": "PASS report-repeat-sim: 사주 6개 × 65장, 장 사이 반복 문장 0"
+  },
+  {
+   "test": "report-v2-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 6393,
+   "tail": "5. 기존 엔진 회귀 |  | 모두 통과"
+  },
+  {
+   "test": "research-review-api-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 109,
+   "tail": "research-review-api OK: auth, GET-only, 32 held, 6 roots, 2 overlaps, no DB/network"
+  },
+  {
+   "test": "responsive-basis-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 71,
+   "tail": "PASS: grouped grounds, original wording, natal facts, basis shown expanded"
+  },
+  {
+   "test": "review-tools-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 5013,
+   "tail": "PASS: review packet {\"entries\":1019,\"detail\":680,\"chartLines\":410,\"signatureMap\":74,\"signatureText\":186,\"insight\":704}; consistency audit runs (99 chapters, avg 2143 sentences, avg repeated 0); AI/network 0"
+  },
+  {
+   "test": "reviewed-library-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 1827,
+   "tail": "PASS: 4 charts × 84 chapters, zero network/provider calls, force/history cannot bypass; draft isolation, CAS, review + positive/counterexample publication, stale/withdrawn sources, automatic paid-flow guards"
+  },
+  {
+   "test": "root-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 12396,
+   "tail": "금지 표현 0건 |  | 모든 검증 통과"
+  },
+  {
+   "test": "saju-house-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 777,
+   "tail": "  ✗ 스위치 연결 |  | ✗ 1/11667 실패"
+  },
+  {
+   "test": "samjae-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 1083,
+   "tail": "7. 상세풀이 삼재 장(timeline_self_h6) 상세 풀이 |  | ✗ 1/26805 실패"
+  },
+  {
+   "test": "samsara-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 345,
+   "tail": "윤회의 문 검증 완료 | 모두 통과"
+  },
+  {
+   "test": "sanctuary-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 228,
+   "tail": "개운의 성역 검증 완료 | 모두 통과"
+  },
+  {
+   "test": "school-model-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 5694,
+   "tail": "  extreme: 62, |   unknown: 32 | }"
+  },
+  {
+   "test": "scoped-reading-grounding-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 88,
+   "tail": "PASS scoped grounding: identical published rules, domain moves, global collisions, hash invalidation, blocked sources, rollback and fresh state; no AI"
+  },
+  {
+   "test": "seal-admin-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 119,
+   "tail": "PASS seal admin: authorization, strict metadata validation, approved asset roles/chapter references, private drafts, required review, concurrent CAS conflict, restore-to-draft, public projection, re-read verification, fail-closed KV, zero network/AI"
+  },
+  {
+   "test": "seal-all-topics-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 1519,
+   "tail": "{\"pass\":true,\"scope\":\"seed fallback, live publication unverified\",\"catalogContracts\":64,\"derivedPeak\":1,\"runtimeChapters\":65,\"topicCounts\":{\"self\":20,\"wealth\":15,\"career\":15,\"love\":15},\"charts\":3,\"handlerContracts\":192,\"selectedMedia\":0,\"textFallbacks\":195,\"textFallbackIds\":[\"timeline_career_01\",\"timeline_career_02\",\"timeline_career_03\",\"timeline_career_04\",\"timeline_career_05\",\"timeline_career_06"
+  },
+  {
+   "test": "seal-media-publication-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 112,
+   "tail": "PASS media publication: save/reload/public response, explicit approval, lifecycle isolation, authenticated all, geometry/phase roundtrip; no external/AI calls"
+  },
+  {
+   "test": "seal-media-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 87,
+   "tail": "PASS exact chapter theme and strict paragraph role/phase matching, no unrelated filler | PASS wrong elemental condition is excluded instead of filling missing scenes | PASS media geometry server roundtrip, limits, invalid input and legacy unit conversion"
+  },
+  {
+   "test": "seal-reader-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 83,
+   "tail": "PASS seal contract: immutable source, counterconditions/references, stable metadata IDs, published-only, content fingerprints, identity isolation, storage failure memory fallback and no network calls"
+  },
+  {
+   "test": "seal-topic-queue-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 255,
+   "tail": "PASS 65-chapter explicit queue: default 0/current+2, one lane, foreground priority, duplicate 0, failure isolation, overlapping/ensure reuse, progress, queue cancel, chart replacement; synthetic reviewed API only"
+  },
+  {
+   "test": "seal-topics-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 93,
+   "tail": "PASS seal topics: 64 unchanged catalog contracts + actual PeakReading descriptor =65; self20/wealth15/career15/love15; unique IDs, real titles/questions, roles/basis preserved, integrated health/fiction/remedy scope, stable pure metadata, disabled/archive exclusion, responsive/reduced-motion CSS hooks"
+  },
+  {
+   "test": "seasonal-strength-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 619,
+   "tail": "To add an exception for this directory, call: |  | \tgit config --global --add safe.directory 'E:/만트라 스튜디오 사업/앱 개발 소스/manse-dev-myeongri-fix-1'"
+  },
+  {
+   "test": "selected-reason-handoff-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 66,
+   "tail": "PASS: selected reason requested and replaces generic fallback without changing other roles"
+  },
+  {
+   "test": "service-resilience-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 105,
+   "tail": "PASS: malformed/missing health arrays, stalled and synchronous fetch, corrupted profile recovery"
+  },
+  {
+   "test": "short-story-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 104,
+   "tail": "PASS: 40 complete plots × 7 names = 280 local render checks; 10 causal beats, seed/payoff, distinct complete plots, stable selection, josa, name collision, source immutability, media-free, zero fetch/AI"
+  },
+  {
+   "test": "signal-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 920,
+   "tail": "전체 흐름(세운) 단계 비율: 16% · 58% · 26% |  | 모두 통과 · 지표 16개 기준값 · 3단계 등급 · 전체 흐름 경계 · 사고수 반전 · 분포 비율 · 화면 연결"
+  },
+  {
+   "test": "sinsal-dohwa-hwagae-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 561,
+   "tail": "OK 신살 줄 도화살 203건·화개살 315건 (기둥 2400개, 12신살과 전부 일치)"
+  },
+  {
+   "test": "site-gate-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 126,
+   "tail": "사이트 잠금 검증 통과"
+  },
+  {
+   "test": "six-copy-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 66,
+   "tail": "모든 검증 통과 · 18칸 × 4 = 72문안 · 단정·존댓말·용어·시간 단위·중복·게시 반영"
+  },
+  {
+   "test": "six-root-effects-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 65,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "source-batch-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 117,
+   "tail": "source-batch: 55 chunks/3 REST reads + research state; order/duplicates/empty/tombstone/expiry/legacy fallback PASS"
+  },
+  {
+   "test": "src-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 481,
+   "tail": "9. 분석 영향(coverage) |  | 전부 통과"
+  },
+  {
+   "test": "stage9-security-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 215,
+   "tail": "stage9-security-sim OK: 80항목(기능 스위치·내 것 지우기 허용·대입 막기·보안 머리말·하루 한도·보안 점검 도구·화면)"
+  },
+  {
+   "test": "store-integration-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 189,
+   "tail": "  ✓ Supabase 에 쌓인 키 접두어: ik, src, free, rl |  | 전부 통과"
+  },
+  {
+   "test": "store-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 111,
+   "tail": "  ✓ 점검: 키가 틀리면 401 을 알려 줌 |  | 전부 통과"
+  },
+  {
+   "test": "story-composer-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 655,
+   "tail": "  [지금 해 볼 것] 공동 비용과 내 몫을 분리하고, 정산일과 책임 범위를 글로 남겨 보세요. |  | 모두 통과"
+  },
+  {
+   "test": "story-content-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 256,
+   "tail": "서사 검증 통과: 자녀상 10종 · 전생 드라마 6장면(한 줄 요약·근거·3장·결말) · 인연 챕터만 에피소드 · 억부/조후 충돌 재현 · AI 근거/종류 전달"
+  },
+  {
+   "test": "story-director-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 294,
+   "tail": "앞으로 10년 중 돈의 움직임이 커질 수 있는 해는 2031년, 2033년입니다. |  | 모두 통과"
+  },
+  {
+   "test": "story-personalization-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 73,
+   "tail": "PASS: all worlds, Korean/English/special names, josa, legacy name collision, deterministic text-only stories and zero name egress"
+  },
+  {
+   "test": "story-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 361,
+   "tail": "   1964-1-15-11-M 계해 → 이 이야기에서는 '스스로 길을 여는 힘'을 주요 동력으로 살펴봅니다. 실제 행동과 얼마나 맞는지는 경험을 돌아보며 확인해보세요. |  | 모두 통과"
+  },
+  {
+   "test": "style-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 323,
+   "tail": "  ✓ kind 없는 옛 AI 응답도 그대로 처리 |  | 전부 통과"
+  },
+  {
+   "test": "subdomain-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 3932,
+   "tail": "7. 단정 표현 0건 |  | 모두 통과"
+  },
+  {
+   "test": "system-integration-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 3629,
+   "tail": "system-integration-sim OK: 분야·챕터 문체 우선순위, 버전 변경, 게시·출처 정책, 관리자 권한, 공통 저장 상태 갱신"
+  },
+  {
+   "test": "tarot-art-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 124,
+   "tail": "2. API 흐름 |  | 타로 카드 이미지 검증 모두 통과"
+  },
+  {
+   "test": "tarot-symbols-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 96,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "ten-god-luck-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 1293,
+   "tail": "ten-god-luck-sim ok · 사주 60명 · 운 항목 3240개 · 십신 10종 · 문안 120줄"
+  },
+  {
+   "test": "ten-god-roles-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 6104,
+   "tail": " · 관성 운 대표 비교: 신약+인성 있음 → 관인/살인상생 형성·강화 75명 · 신약+인성 없음 → 형성 안 됨 44명 |  · 상하위 관계: 같은 세운 丙午 · 대운 甲子 vs 庚午 → 결과가 다른 명식 120/120 |  · 스위치: 기본 꺼짐 · 관리자 카드 · 원격 스위치 연결 확인"
+  },
+  {
+   "test": "term-notes-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 764,
+   "tail": "PASS term-notes-sim: 사전 240개, 사주 7개 × 서사 장 카드 409개, 각주·카드·포인트 검사 통과"
+  },
+  {
+   "test": "theme-mist-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 74,
+   "tail": "모든 검증 통과 · 스위치 mistTheme · 모두 켜기와 분리 · 관리자 버튼 · /report/·/report/hub/ 로딩 · CSS 전부 html.theme-mist 범위"
+  },
+  {
+   "test": "theme-sakura-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 77,
+   "tail": "모든 검증 통과 · 스위치 sakuraTheme · 모두 켜기와 분리 · 관리자 버튼 · 광장 로딩 · CSS 전부 html.theme-sakura 범위(꽃잎 상자 제외, 꺼지면 숨김)"
+  },
+  {
+   "test": "timeline-consistency-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 17209,
+   "tail": "timeline-consistency-sim PASS · 사주 200명 · 만세력/타임라인 입력·원국·운·SajuData·용희기구신 일치 · groupPull 단일화 |   암합 예외: 본문 그대로인 장 11143 · 암합 한 문장 덧붙은 장 491 (종합 58·재물 35·커리어 20·인연 33) · 오행 전략 문단 400 · 건강·사고 0 · 월운·일진 0 · 점수 불변"
+  },
+  {
+   "test": "timeline-graph-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 291,
+   "tail": "  ok hub-timeline.js 에 지표 칩·인생 90년·30년/2년 구간·상세 보강·앞으로 10년이 연결됨 |   ok 원국 지장간·12운성·12신살·신살 행, 일주 포스터 프로필(움직임 줄이기 설정 존중) | PASS timeline-graph-sim 9항목"
+  },
+  {
+   "test": "timeline-secret-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 2211,
+   "tail": "timeline-secret-sim ok · 사주 120명 · 월령 보임 360 · 합충형 보임 360 · 만세력 쪽 공식 그대로 360"
+  },
+  {
+   "test": "timeline-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 174,
+   "tail": "타임라인 검증 완료 | 모두 통과"
+  },
+  {
+   "test": "timeline84-gaps-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 106,
+   "tail": "}\r | \r | Node.js v24.19.0"
+  },
+  {
+   "test": "timeline84-local-health-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 219,
+   "tail": "PASS: loopback educational text only; no personal AI call/claims; production origin cannot load local drafts."
+  },
+  {
+   "test": "timeline84-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 5932,
+   "tail": "timeline84: counts, unique scenarios, 79 mappings, immutable/idempotent proposal, preserved media/archive, 8 charts, 7 topic routing, shared fictional story PASS"
+  },
+  {
+   "test": "tojeong-classical-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 236,
+   "tail": "tojeong-classical-sim: 13항목 통과 (원문 해석 1680줄 · 상세풀이 1116줄 · 월별 심화 5040칸)"
+  },
+  {
+   "test": "tojeong-engine-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 87,
+   "tail": "tojeong-engine-sim ok: 판본 조견표 대조·경계 사례 통과, 무작위 889건에서 괘 120종"
+  },
+  {
+   "test": "tojeong-month-overlay-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 1648,
+   "tail": "   점 2880 · 판정 있는 겹침 2464 · 비교 {\"same\":734,\"near\":972,\"opposite\":758,\"unknown\":2816} |  | ✓ 토정비결 월별 보조지표 검증 20529항목 통과"
+  },
+  {
+   "test": "tojeong-months-api-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 234,
+   "tail": "✓ 토정비결 월별 API 검증 22항목 통과"
+  },
+  {
+   "test": "tojeong-text-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 84,
+   "tail": "tojeong-text-sim ok: 140괘, 빠진 괘 663·711·862·863, 판독 불가 칸 21"
+  },
+  {
+   "test": "topic-deep-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 2132,
+   "tail": "모든 검증 통과 · 사주 40명 × 블록 36개 · 꺼짐/켜짐 · 등급 구간 · 궁합 · 현공 · 직업 순위 · 결정론"
+  },
+  {
+   "test": "topic-navigation-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 70,
+   "tail": "Topic navigation: timeline return, scoped previous/next, boundaries, header spacing and resume passed"
+  },
+  {
+   "test": "topic-reading-sync-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 2370,
+   "tail": "topic-reading-sync-sim PASS · 사주 150명 · 세운 간지·흐름 점수 = 엔진 · 재물 뿌리 지장간 기준(지장간에만 재성 있는 사주 40) · 계절 세 지표 · 오행 전략 블록 = 용희신 · 서사와 중복 없음"
+  },
+  {
+   "test": "topics-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 314,
+   "tail": "3. 용어 풀이 문장(개인화) |  | 주제 카드·용어 풀이 검증 모두 통과"
+  },
+  {
+   "test": "unified-yongsin-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 5422,
+   "tail": "  병행(methodAdvice) 사주: 조후 우선 671 · 억부 우선 175 (조후 강제 없음) |   보조 기준 용신을 조건부로 반영한 사주 104 · 상대 일간이 기신이어도 오행 보완 50점 이상 12쌍 | 통과"
+  },
+  {
+   "test": "unseong-cycle-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 330,
+   "tail": "실패 1건 |  - 어두운 테마 색 토큰 없음"
+  },
+  {
+   "test": "ux-onboarding-display-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 116,
+   "tail": "ux-onboarding-display PASS: public/draft display migration, original version/data/media preserved, zero writes"
+  },
+  {
+   "test": "ux-writing-api-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 287,
+   "tail": "UX API: isolated paragraph repair; valid prose and refs preserved; before/after; cache; failed repair rejected PASS"
+  },
+  {
+   "test": "ux-writing-copy-audit-sim.cjs",
+   "code": 1,
+   "signal": null,
+   "ms": 1425,
+   "tail": "  operator: 'deepStrictEqual', |   diff: 'simple' | }"
+  },
+  {
+   "test": "ux-writing-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 76,
+   "tail": "UX 정책: 기본값·강도·동의·챕터 예외·캐시·문체 검수·중복·근거 접기 통과"
+  },
+  {
+   "test": "volatility-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 1592,
+   "tail": "변동성 단계 분포: 안정적 27% · 움직임 있음 33% · 변동성 높음 28% · 변동성 매우 높음 13% · 변동기 18% |  | 모든 검증 통과"
+  },
+  {
+   "test": "wealth-career-api-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 229,
+   "tail": "모든 검증 통과"
+  },
+  {
+   "test": "wealth-career-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 25195,
+   "tail": "   대표·보조 근접 27.7% · 근거 부족(유형 미확정) 6.4% |  | 모든 검증 통과"
+  },
+  {
+   "test": "wish-spots-api-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 114,
+   "tail": "모든 검증 통과"
+  },
+  {
+   "test": "wish-spots-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 8592,
+   "tail": "소원 분야별 1위가 달라지는 사주 96% · 재물 1위 장소 종류 5가지 |  | 모든 검증 통과"
+  },
+  {
+   "test": "woon-gi-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 656,
+   "tail": "지금 구간 판정 분포 { good: 183, bad: 177, mid: 40 } | woon-gi 검사 통과 (12개 교과서 연도 · 1950~2090 구간 · 사주 400개)"
+  },
+  {
+   "test": "world-entry-sim.js",
+   "code": 0,
+   "signal": null,
+   "ms": 72,
+   "tail": "World entry: six topic links, scoped content, original indices, full report and preview passed"
+  },
+  {
+   "test": "world-places-sim.cjs",
+   "code": 0,
+   "signal": null,
+   "ms": 955,
+   "tail": "PASS world-places-sim: 해외 도시 147곳 · 시간대 9건(서머타임 포함) · 국내 300건 불변"
+  }
+ ]
+}

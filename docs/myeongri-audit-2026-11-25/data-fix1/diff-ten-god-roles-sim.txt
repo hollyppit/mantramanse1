@@ -1,0 +1,6 @@
+44c44,46
+<     assert.equal(o.status, !coreOk ? 'off' : allOk && !blocked ? 'on' : 'weak', '성립 판정 규칙 ' + o.name);
+---
+>     // 2026-11-25 M1: 원국 분석에서 엔진 공통 구조 판정을 쓰는 7종은 status = 공통 판정, 자체 조건 판정은 ownStatus 에 남는다 — 두 규칙을 모두 확인
+>     assert.equal(o.ownStatus || o.status, !coreOk ? 'off' : allOk && !blocked ? 'on' : 'weak', '성립 판정 규칙(자체 조건) ' + o.name);
+>     if (o.engineStatus) { const P = ch.patterns.named.find(p => p.name === ({ salin: '살인상생', sikjesal: '식신제살', gyeongwan: '상관견관', paein: '상관패인', honjap: '관살혼잡', dosik: '효신탈식(도식)', bigeopjaeng: '군겁쟁재' })[o.key]); assert.equal(o.engineStatus, P ? P.status : '없음', '공통 판정 연결 ' + o.name); assert.equal(o.status, o.engineStatus === '성립' ? 'on' : 'off', '공통 판정 → 카드 상태 ' + o.name); assert.equal(!!o.candidate, o.engineStatus === '후보', '후보 표시 ' + o.name); }
