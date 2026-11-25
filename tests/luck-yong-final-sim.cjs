@@ -20,6 +20,8 @@ const MO = loadEngine(withCurrentJijanggan(head('engine.js'), CUR)), MN = loadEn
 // 2026-11-20 계절·월령 세력(새 season 모델)도 이 검사 대상이 아니므로 새 엔진은 이전 방식(season1 = 옛 season)으로 비교한다
 // 이 검사는 해석 문구 변경(36dcdc5)만 본다. 그 뒤 의도적으로 바꾼 분야 지수 적합도 중복 제거(DOMAIN_COMMON.fitDedup, 2026-11-16)는 끄고 비교한다
 if (MN.DOMAIN_COMMON && 'fitDedup' in MN.DOMAIN_COMMON) MN.DOMAIN_COMMON.fitDedup = false;
+// 2026-11-25 의도적으로 바꾼 십성 구조 성립 조건(B안 establish)·좋은 구조 역할 확인(C안 goodGate)도 이 검사 대상이 아니므로 끄고 비교한다(docs/luck-engine-audit-2026-11-25/03)
+if (MN.LUCK_CFG && MN.LUCK_CFG.structure) { MN.LUCK_CFG.structure.establish = false; MN.LUCK_CFG.structure.goodGate = false; }
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'lyf-')), oldLiPath = path.join(tmp, 'luck-interpret-head.js');
 fs.writeFileSync(oldLiPath, head('luck-interpret.js'));
 const LIO = require(oldLiPath), LIN = require(path.join(root, 'luck-interpret.js'));

@@ -741,7 +741,10 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     relationScale: 4,      // 관계 합산(대략 ±15)을 ±100 축으로
     // roleGate(2026-11-13 S3안): 십성 균형 보상(모자란 묶음 채움 +, 넘치는 묶음 키움 −)은 그 묶음 오행의 통합 용신 역할과 방향이 같은 몫만 인정한다.
     //   기신 묶음이 원국에 모자라다고 +를 주거나 용신 묶음이 넘친다고 −를 주지 않는다. false면 이전 계산. 근거: docs/LUCK_SCORE_ENGINE_REVIEW_2026-11-13.md
-    structure: { roleGate: true, neutralPct: 20, scale: 0.8, pattern: { '관살혼잡': -12, '상관견관': -10, '군겁쟁재': -12, '효신탈식(도식)': -8 },
+    // establish(2026-11-25 B안): 원국 구조 감점(pattern)은 이름만 같을 때가 아니라 성립 조건(제화·패인·재제효·관제비겁 없음 등)을 확인한 경우에만. false면 이전 계산
+    // goodGate(2026-11-25 C안): 운이 만드는 좋은 구조 가점은 용신 역할을 확인한 경우에만(편관이 쓸모 있으면 식신제살 가점 없음, 인성이 쓸모 있을 때만 살인상생 등). false면 이전 계산
+    //   근거·측정: docs/luck-engine-audit-2026-11-25/03(B·C안)·04(대운 등급 변화 B 1% · C 0.3~0.5%)
+    structure: { roleGate: true, establish: true, goodGate: true, neutralPct: 20, scale: 0.8, pattern: { '관살혼잡': -12, '상관견관': -10, '군겁쟁재': -12, '효신탈식(도식)': -8 },
       // 운 글자와 원국이 함께 만드는 구조(luckStructures). formed = 운이 와서 새로 생기는 약점, good = 좋은 구조, rescue = 원국 약점을 운이 풀어 줌
       // branchMul 지지 정기에서 온 글자의 반영 비율 / ease 해소 글자가 있을 때 약점을 줄이는 비율 / groupMin 원국에 그 묶음이 있다고 볼 최소 %
       // cap 한 운에서 이 구조들의 합계 한도(여러 구조가 겹쳐 점수가 튀지 않게). 값은 통합 용신과 겹치는 몫을 감안해 2026-11-10 2배로 올린 크기
@@ -1014,6 +1017,19 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   // 운 글자(천간·지지 정기)의 십성과 원국 십성이 함께 만드는 구조. 원국에 이미 있는 약점 자극(structure.pattern)과 따로,
   // 운이 와서 새로 생기는 약점(formed), 좋은 구조(good: 식신제살·살인상생·상관패인), 원국 약점의 해소(rescue)를 판정한다.
   // 반환: [{ name, kind, v, label }] — v는 구조 성분(−100~+100) 단위 가감점
+  // B안(2026-11-25): 원국 구조가 실제로 성립할 때만 운의 같은 기운에 감점한다(이름만 일치하는 경우 제외). LUCK_CFG.structure.establish
+  //   관살혼잡: 정관·편관 모두 5% 이상 + 식신 제살(8% 이상) 없음 + 신약 인성 화살(인성 15% 이상) 없음
+  //   상관견관: 정관이 쓸모 있음(용·희) + 정인 패인(8% 이상) 없음 + 상관·정관 모두 5% 이상
+  //   효신탈식(도식): 식신이 쓸모 있음 + 재성 10% 미만(재제효 없음) + 편인 8% 이상
+  //   군겁쟁재: 관성·식상 모두 10% 미만(관제비겁·식상 통관 없음)
+  function patEstablished(ch, name) {
+    const G = ch.weights.groups, help = ch.strength.help, dEl = stemEl(ch.pillars.day.s), tp = ch.weights.tgPct, rv = i => ch.unified.roleV[mod(dEl + i, 5)];
+    if (name === '관살혼잡') return (tp['정관'] || 0) >= 5 && (tp['편관'] || 0) >= 5 && !((tp['식신'] || 0) >= 8) && !(help < 50 && G[4] >= 15);
+    if (name === '상관견관') return rv(3) > 0 && (tp['정인'] || 0) < 8 && (tp['상관'] || 0) >= 5 && (tp['정관'] || 0) >= 5;
+    if (name === '효신탈식(도식)') return rv(1) > 0 && G[2] < 10 && (tp['편인'] || 0) >= 8;
+    if (name === '군겁쟁재') return G[3] < 10 && G[1] < 10;
+    return true;
+  }
   function luckStructures(ch, p) {
     const S = LUCK_CFG.structure.luck, d = ch.pillars.day.s, G = ch.weights.groups, help = ch.strength.help;
     const natalNames = new Set(ch.patterns.list.map(x => x.name));
@@ -1056,12 +1072,15 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     // ── 좋은 구조
     const dosik = NS('편인') && G[2] < gm ? S.ease : 1;   // 도식이 걸려 있으면 식신의 제살이 약하다
     const sik = [...(N('편관') ? has('식신') : []), ...(N('식신') && G[1] >= gm ? has('편관') : [])];
-    add('good', '식신제살', G[3] >= S.heavy ? Gd['식신제살(강한 살)'] : Gd['식신제살'], sik, G[3] >= S.heavy ? `강한 편관(관성 ${G[3].toFixed(0)}%)을 식신이 제어함(식신제살)` : '식신이 편관을 제어함(식신제살)', dosik);
-    if (help < 50) {
+    // C안(2026-11-25, LUCK_CFG.structure.goodGate): 좋은 구조 가점은 용신 역할을 확인한 뒤에만.
+    //   식신제살: 관성 오행이 쓸모 없거나(한·구·기) 관성이 아주 강할 때 · 살인상생: 인성이 쓸모 있을 때 · 상관패인: 인성이 쓸모 있거나 식상이 쓸모 없을 때
+    const GG = LUCK_CFG.structure.goodGate;
+    if (!GG || !useful(3) || G[3] >= S.heavy) add('good', '식신제살', G[3] >= S.heavy ? Gd['식신제살(강한 살)'] : Gd['식신제살'], sik, G[3] >= S.heavy ? `강한 편관(관성 ${G[3].toFixed(0)}%)을 식신이 제어함(식신제살)` : '식신이 편관을 제어함(식신제살)', dosik);
+    if (help < 50 && (!GG || useful(4))) {
       add('good', '살인상생', Gd['살인상생'], G[3] >= 15 ? has(...grp.인성) : [], `원국 관성 ${G[3].toFixed(0)}%의 압박을 인성이 받아 나에게 넘김(살인상생)`);
       add('good', '살인상생(관 유입)', Gd['살인상생(관 유입)'], G[4] >= 15 ? has(...grp.관성) : [], `들어온 관성을 원국 인성 ${G[4].toFixed(0)}%가 받아 줌(살인상생)`);
     }
-    if (!natalNames.has('상관견관'))
+    if (!natalNames.has('상관견관') && (!GG || useful(4) || !useful(1)))
       add('good', '상관패인', Gd['상관패인'], [...(N('상관') ? has('정인') : []), ...(N('정인') ? has('상관') : [])], '정인이 상관을 다듬어 줌(상관패인)');
     // ── 원국 약점을 운이 풀어 줌
     if (natalNames.has('군겁쟁재')) {
@@ -1216,7 +1235,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     const structP = [];
     let patAdj = 0;
     for (const pt of ch.patterns.list) {
-      const adj = S.pattern[pt.name]; if (adj == null || pt.level === '참고') continue;
+      const adj = S.pattern[pt.name]; if (adj == null || pt.level === '참고' || (S.establish && !patEstablished(ch, pt.name))) continue;
       const hit = (pt.name === '관살혼잡' && g[3] >= 0.4) || (pt.name === '상관견관' && g[1] >= 0.4) || (pt.name === '군겁쟁재' && g[0] >= 0.4) || (pt.name === '효신탈식(도식)' && g[4] >= 0.4);
       if (hit) { patAdj += adj; structP.push({ label: `${pt.name} 구조에 ${TG_GROUP[top]} 기운이 겹침`, v: adj }); }
     }
