@@ -1,0 +1,13 @@
+const fs=require('fs'),vm=require('vm'),path=require('path');const ROOT=path.join(__dirname,'..','..');
+const c={console};c.window=c;vm.createContext(c);['engine.js','luck-grade.js'].forEach(f=>vm.runInContext(fs.readFileSync(path.join(ROOT,f),'utf8'),c));
+const M=c.Manse,LG=c.MantraLuckGrade;const keys=['love','wealth','health','accident','marriage'];
+let seed=7771;const rnd=()=>(seed=(seed*1103515245+12345)%2147483648)/2147483648;
+const ind=[...Array(120)].map(()=>({year:1935+Math.floor(rnd()*78),month:1+Math.floor(rnd()*12),day:1+Math.floor(rnd()*28),hour:Math.floor(rnd()*24),minute:Math.floor(rnd()*60),gender:rnd()<.5?'M':'F',calendar:'solar'}));
+const v={};keys.forEach(k=>v[k]=[]);
+ind.forEach(inp=>{const ch=M.compute(inp);M.seunRange(ch,ch.solar.y+15,ch.solar.y+75).filter((x,k)=>k%3===0).forEach(x=>{const r=M.evaluateDomainLuck(ch,x,'seun',{ms:x.midMs});keys.forEach(k=>v[k].push(r[k].score));});});
+keys.forEach(k=>{const cu=LG.SIG_CUTS[k],inv=LG.INVERSE[k],a=v[k];
+ const incl=s=>inv?(s<=cu[1]?'g':s>=cu[2]?'c':'o'):(s>=cu[2]?'g':s<=cu[1]?'c':'o');
+ const strict=s=>inv?(s<cu[1]?'g':s>cu[2]?'c':'o'):(s>cu[2]?'g':s<cu[1]?'c':'o');
+ const r=f=>{const o={g:0,o:0,c:0};a.forEach(s=>o[f(s)]++);return ['g','o','c'].map(x=>Math.round(o[x]/a.length*100)).join('/')};
+ const atCut=Math.round(a.filter(s=>s===cu[1]||s===cu[2]).length/a.length*100);
+ console.log(k.padEnd(9),'이상·이하',r(incl),' 초과·미만',r(strict),' 경계값에 걸린 비율',atCut+'%');});

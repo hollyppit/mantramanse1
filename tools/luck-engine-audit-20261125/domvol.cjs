@@ -1,0 +1,21 @@
+const fs=require('fs'),vm=require('vm'),path=require('path');const S=path.join(__dirname,'out'),ROOT=path.join(__dirname,'..','..');fs.mkdirSync(S,{recursive:true});
+const c={console};c.window=c;vm.createContext(c);['engine.js','luck-grade.js'].forEach(f=>vm.runInContext(fs.readFileSync(path.join(ROOT,f),'utf8'),c));
+const M=c.Manse,LG=c.MantraLuckGrade;const keys=['love','wealth','health','accident','job','move','career','business','child','marriage'];
+const dev=[...Array(200)].map((_,i)=>({year:1950+(i*7)%55,month:1+(i*5)%12,day:1+(i*11)%28,hour:(i*3)%24,minute:0,gender:i%2?'M':'F',calendar:'solar'}));
+let seed=7771;const rnd=()=>(seed=(seed*1103515245+12345)%2147483648)/2147483648;
+const ind=[...Array(200)].map(()=>({year:1935+Math.floor(rnd()*78),month:1+Math.floor(rnd()*12),day:1+Math.floor(rnd()*28),hour:Math.floor(rnd()*24),minute:Math.floor(rnd()*60),gender:rnd()<.5?'M':'F',calendar:'solar'}));
+const q=(a,p)=>{const s=[...a].sort((x,y)=>x-y);return Math.round(s[Math.floor(p*(s.length-1))])};
+function collect(sample){const v={};keys.forEach(k=>v[k]=[]);const per={};keys.forEach(k=>per[k]=[]);const vol=[],fit=[],volOn=[];
+ sample.forEach(inp=>{const ch=M.compute(inp);const sr=M.seunRange(ch,ch.solar.y+15,ch.solar.y+75).filter((x,k)=>k%3===0);const mine={};keys.forEach(k=>mine[k]=[]);
+  sr.forEach(x=>{const r=M.evaluateDomainLuck(ch,x,'seun',{ms:x.midMs});keys.forEach(k=>{const s=r[k]&&r[k].score;if(typeof s==='number'){v[k].push(s);mine[k].push(s);}});vol.push(x.ev.volatilityScore);fit.push(x.ev.fitScore);volOn.push(x.ev.overlays?x.ev.overlays.volatility.active:false);});
+  keys.forEach(k=>{if(mine[k].length>3){const s=[...mine[k]].sort((a,b)=>a-b);per[k].push(s[s.length-1]-s[0]);}});});
+ return {v,per,vol,fit,volOn};}
+const D=collect(dev),I=collect(ind);
+const out={cuts:{},check:{}};
+keys.forEach(k=>{const cut=[.1,.3,.7,.9].map(p=>q(D.v[k],p));out.cuts[k]={old:LG.SIG_CUTS[k],newFromDev:cut,personalSpreadMedian:q(D.per[k],.5)};
+ const inv=LG.INVERSE[k];const grade=(s,c)=>inv?(s<=c[1]?'좋음':s>=c[2]?'조심':'무난'):(s>=c[2]?'좋음':s<=c[1]?'조심':'무난');
+ const ratio=(arr,c)=>{const o={좋음:0,무난:0,조심:0};arr.forEach(s=>o[grade(s,c)]++);return ['좋음','무난','조심'].map(g=>Math.round(o[g]/arr.length*100)).join('/')};
+ out.check[k]={oldOnInd:ratio(I.v[k],LG.SIG_CUTS[k]),newOnInd:ratio(I.v[k],cut)};});
+const pear=(a,b)=>{const n=a.length,ma=a.reduce((s,x)=>s+x,0)/n,mb=b.reduce((s,x)=>s+x,0)/n;let sab=0,sa=0,sb=0;for(let i=0;i<n;i++){sab+=(a[i]-ma)*(b[i]-mb);sa+=(a[i]-ma)**2;sb+=(b[i]-mb)**2}return Math.round(sab/Math.sqrt(sa*sb)*1000)/1000};
+out.volatility={corrWithFit:pear(D.vol,D.fit),corrAbsFit:pear(D.vol,D.fit.map(Math.abs)),p25:q(D.vol,.25),med:q(D.vol,.5),p75:q(D.vol,.75),p90:q(D.vol,.9),overlayOnPct:Math.round(D.volOn.filter(Boolean).length/D.volOn.length*100)};
+fs.writeFileSync(path.join(S,'domvol-result.json'),JSON.stringify(out,null,1));console.log('done');
