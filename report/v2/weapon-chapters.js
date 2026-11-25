@@ -213,14 +213,32 @@
     var w = ws[0], g = w.group, wd = WD(), d = DD(), G = B.ch.weights.groups.map(function (x) { return Math.round(x * 10) / 10; });
     var lead = esc('직업에서 쓰는 주무기는 ') + '<b>' + esc(EL_K[w.el] + ' · ' + w.groupName + ' — ' + d.career.type[g]) + '</b>' + esc('이에요.');
     var body = '<h4>' + esc('업무 수행 방식') + '</h4><p>' + esc(d.career.how[g]) + '</p>';
+    var C2 = d.career2, P = null; try { P = B.M.careerProfile ? B.M.careerProfile(B.ch) : null; } catch (e) { P = null; }
     if (use.tenGod) {
-      var rich = [3, 1, 2].filter(function (k) { return k !== g && G[k] >= 20; });
-      body += '<h4>' + esc('주무기와 직업 십성의 결합') + '</h4><p>' + esc(fill(d.career.mixLine, { g3: G[3], g1: G[1], g2: G[2] }) + ' ' + (rich.length ? d.career.mixHint[rich[0]] : d.career.mixHint.none)) + '</p>';
+      // 2판(2026-11-26): 주무기 십성 g × 넉넉한(20% 이상) 직업 십성 k 조합 문장 — 다른 묶음이 없으면 같은 묶음, 그것도 없으면 '모두 적음'
+      var rich = [3, 1, 2].filter(function (k) { return k !== g && G[k] >= 20; }).sort(function (a, b) { return G[b] - G[a]; });
+      var ck = rich.length ? g + '-' + rich[0] : (G[g] >= 20 && C2.combo[g + '-' + g]) ? g + '-' + g : null;
+      body += '<h4>' + esc('주무기와 직업 십성의 결합') + '</h4><p>' + esc(fill(d.career.mixLine, { g3: G[3], g1: G[1], g2: G[2] }) + ' ' + (ck && C2.combo[ck] ? C2.combo[ck] : C2.comboNone)) + '</p>';
+    }
+    // 기존 직업 분석(엔진 careerProfile)과 맞춰 보기: 일하는 방식 축 · 앞선 직업 분야 · 업무 환경 — 서로 다르면 억지로 맞추지 않고 둘 다 살리는 자리를 제안
+    if (P && P.workStyle) {
+      var ax = [], ex = C2.expect[g] || {}, sameSaid = false;
+      Object.keys(ex).forEach(function (k) {
+        var a = P.workStyle[k]; if (!a) return; var side = a.value >= 50 ? a.left : a.right, v = Math.max(a.value, a.other);
+        if (Math.abs(a.value - 50) < 5) { if (!sameSaid) { ax.push(fill(C2.axisMid, { l: a.left, r: a.right, lv: a.value, rv: a.other, want: ex[k] })); sameSaid = true; } }   // 반반에 가까우면 '같은 방향'이라 단정하지 않음
+        else if (side === ex[k]) { if (!sameSaid) { ax.push(fill(C2.axisSame, { side: side, v: v })); sameSaid = true; } }
+        else ax.push(fill(C2.axisDiff[k], { want: ex[k], side: side, v: v, bridge: C2.bridge[k][ex[k]] }));
+      });
+      var tops = (P.top || []).slice(0, 2).map(function (t) { return t.name; }).filter(Boolean);
+      if (tops.length) ax.push(fill(C2.topLine, { list: tops.join(', '), how: C2.topHow[g] }));
+      var good = P.envSummary && P.envSummary.text && String(P.envSummary.text).replace(/편입니다.$/, '편이에요.').replace(/습니다.$/, '어요.'), bad = P.burdenEnvs && P.burdenEnvs[0] && P.burdenEnvs[0].name;
+      if (good) ax.push(bad ? fill(C2.env, { good: good, bad: bad }) : fill(C2.envNoBad, { good: good }));
+      if (ax.length) body += '<h4>' + esc('기존 직업 분석과 맞춰 보기') + '</h4><ul class="dp-ul">' + ax.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
     }
     body += '<h4>' + esc('조직과 협업에서') + '</h4><p>' + esc(d.career.lead[g]) + '</p>';
     body += timingBlock(B, 'career', use, w);
     body += '<h4>' + esc('경력 발전 방향') + '</h4><p>' + esc(d.career.move[g] + ' ' + d.career.over[g]) + '</p>';
-    return sec('직업적 주무기', lead, body, '직업은 주무기 하나로 정하지 않아요. 이 장 위쪽 직업 분석과 함께 보세요.');
+    return sec('직업적 주무기', lead, body, '직업은 주무기 하나로 정하지 않아요. 위의 기존 분석과 함께 보세요.');
   }
   function loveBlock(B, use) {
     if (!B.sure) return null; var ws = pickWeapons(B, use); if (!ws.length) return null;
