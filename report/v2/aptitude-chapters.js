@@ -120,11 +120,13 @@
     // 쉬는 쪽 활동 방식과 일하는 방식이 같은 방향인지
     var ps = poles(C), pmap = {}; ps.forEach(function (p) { pmap[p.key] = p; });
     var axes = {}; C.r.sport.axes.forEach(function (a) { axes[a.id] = a; });
+    var usedW = {};   // 같은 일 축(예: horizon)은 한 번만 — 2026-11-26 짧고 굵게↔길고 꾸준히 추가
     var match = D.MATCH.map(function (m) {
-      var a = axes[m.apt], p = pmap[m.work]; if (!a || !a.ok || a.side === 'bal' || !p || p.lean < 8) return '';
+      var a = axes[m.apt], p = pmap[m.work]; if (!a || !a.ok || a.side === 'bal' || !p || p.lean < 8 || usedW[m.work]) return ''; usedW[m.work] = 1;
       var aptSide = a.side === 'L' ? a.L : a.R, same = (a.side === 'L') === (p.side === 'L');
       return same ? m.same : m.cross.replace('{work}', p.name).replace('{apt}', aptSide);
     }).filter(Boolean).slice(0, 2);
+    var y1w = typeOf(t1) && D.WORK_TYPE[typeOf(t1).top.id];   // 2026-11-26: 1위 결의 역할을 실천 칸에
     var role = function (t) { var w = D.WORK[t.id], y = typeOf(t), wt = y && D.WORK_TYPE[y.top.id]; return (wt ? [C.kid ? wt.kidRole : wt.role] : []).concat(C.kid ? w.kidRoles : w.roles).join(', '); };
     function typeWork(t) { var y = typeOf(t), wt = y && D.WORK_TYPE[y.top.id]; if (!wt) return ''; return '그중에서도 ' + y.top.name + ' 결이 앞서요' + (y.sec ? '(' + y.sec.name + ' 결도 비슷)' : '') + '. ' + (C.kid ? wt.kid : wt.work); }
     var core = {
@@ -138,8 +140,8 @@
       strength: join(ts.map(function (t) { var w = D.WORK[t.id]; return t.name + ' — 맞는 역할: ' + role(t) + '. ' + (C.kid ? w.kidProof : w.proof); })),
       risk: join(ts.slice(0, 2).map(function (t) { return t.name + ' — ' + D.WORK[t.id].trap; }).concat(match)),
       reinforce: join(ts.map(function (t) { return t.name + ' 키우기 — ' + D.WORK[t.id].grow; })),
-      practice: C.kid ? '이번 달에 ‘' + D.WORK[t1.id].kidRoles[0] + '’에 한 번 도전해 보고, 끝나면 무엇이 편했고 무엇이 어려웠는지 세 줄로 적어 보세요.'
-        : '이번 주에 ' + J.이(W1.weapon) + ' 드러났던 일 하나를 골라, 남에게 보여 줄 수 있는 한 장짜리(무엇을·어떻게·결과)로 정리해 보세요.',
+      practice: C.kid ? '이번 달에 ‘' + (y1w ? y1w.kidRole : D.WORK[t1.id].kidRoles[0]) + '’에 한 번 도전해 보고, 끝나면 무엇이 편했고 무엇이 어려웠는지 세 줄로 적어 보세요.'
+        : '이번 주에 ' + J.이(W1.weapon) + ' 드러났던 일 하나를 골라, 남에게 보여 줄 수 있는 한 장짜리(무엇을·어떻게·결과)로 정리해 보세요.' + (y1w ? ' ' + D.TYPE_TRY.replace('{role}', y1w.role).replace('{type}', typeOf(t1).top.name) : ''),
       why: join([
         '대표 특기(' + t1.name + ') 근거: ' + t1.basis.map(function (b) { return b.label; }).join(' · ') + '.',
         '특기 5영역: ' + C.r.talents.map(function (t) { return t.name + ' ' + (t.levelK || '근거 부족'); }).join(' · ') + '.',
@@ -179,7 +181,7 @@
       risk: join(C.kid ? ['시험·과제가 몰리는 시기처럼 같은 일이 반복될 때 쉽게 지칠 수 있어요. 그럴수록 위 활동을 짧게라도 끼워 넣어 리듬을 바꿔 주세요.'] : burden.length ? ['특히 ' + burden.map(function (e) { return e.name; }).join('·') + ' 같은 환경이 겹치는 시기에는 지치기 쉬운 편이에요.'].concat(burden.map(function (e) { return D.REST_ENV[e.env] || ''; })) : []),
       reinforce: join(C.kid ? [ranked.length ? ranked.map(function (x) { return x.sub.name; }).join('·') + ' 쪽은 나중에 진로로도 이어질 수 있는 활동이에요. ' + D.SIDE_KID : ''] :
         ranked.map(function (x) { var s = D.SIDE[x.sub.id]; return x.sub.name + '(' + x.sub.recK + ') — ' + s.path + ' ' + s.step; }).concat(ranked.length ? [D.SIDE_NOTE + ' 처음 드는 비용·반복 수입 같은 돈의 구조는 재물운 심화 ‘이렇게 벌면 편해요’ 장에서 따로 짚어요.'] : [])),
-      practice: routine,
+      practice: join([routine].concat(['short_long', 'in_out'].map(function (k) { var a = C.r.sport.axes.filter(function (x) { return x.id === k; })[0]; return a && a.ok && a.side !== 'bal' ? D.REST_AXIS[k][a.side] : ''; }))),
       why: join([
         ps.length ? (C.kid ? '생활 방식' : '일하는 방식') + '(엔진 careerProfile, 양쪽 합 100%): ' + ps.map(function (p) { return p.name + ' ' + p.v + '%'; }).join(' · ') + '.' : '',
         '재충전 활동은 기울어진 두 축의 반대쪽 활동 중 이 사주의 세부 분야 점수가 높은 것으로 골랐어요: ' + rc.map(function (x) { return x.sub.name + ' ' + x.sub.recK; }).join(' · ') + '.',
@@ -220,6 +222,7 @@
     if (kind === 'work') {
       var t = C.ts.slice(0, 2), D = DD(); if (!t.length) return null;
       return '<section class="dp-embed dp dp-apt"><div class="cap">특기로 본 일하는 힘</div><p class="lead">' + esc('일하는 방식 위에, 힘을 쓰는 방식(특기)을 겹쳐 보면 ' + t.map(function (x) { return x.name + '(' + x.levelK + ')'; }).join('·') + ' 쪽이 먼저 보여요. 위의 일하는 방식이 “어떤 환경이 편한가”라면, 특기는 “그 환경에서 무엇으로 힘을 쓰는가”예요 — 한마디로 ' + J.예요(D.WORK[t[0].id].weapon) + '.') + '</p>' +   // 커리어 무기 장 첫 문단(WORK.use)과 겹치지 않게
+        (typeOf(t[0]) ? '<p>' + esc(t[0].name + ' — ' + D.TYPE_BLOCK.replace('{type}', J.예요(typeOf(t[0]).top.name))) + '</p>' : '') +
         '<p class="dp-mi">' + esc('이 특기가 어떤 직업 분야에서 무기가 되는지는 뒤의 “' + TITLES[IDS.work] + '” 장에서 자세히 풀어요.') + '</p></section>';
     }
     if (kind === 'rest') {

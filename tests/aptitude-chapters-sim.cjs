@@ -61,6 +61,13 @@ for (let i = 0; i < N; i++) {
     const wt = D.WORK_TYPE[ty.top]; assert.ok(wc.reality.includes(age < 20 ? wt.kid : wt.work) && wc.strength.includes(age < 20 ? wt.kidRole : wt.role), '커리어 장에 결의 일·진로 문장');
     if (age < 20) assert.ok(!wc.reality.includes(wt.work), '20세 미만은 결도 진로 말');
     (r.final.typeActs || []).forEach(a => assert.ok(sc.reinforce.includes(a.acts[0]), '결 활동이 종합풀이 장에'));
+    // 커리어 세분화: 실천 칸에 1위 결 역할, 재충전 실천에 새 두 축(기운 쪽만), 커리어 블록에 결 한 줄, 같은 일 축 문장은 한 번만
+    assert.ok(wc.practice.includes(age < 20 ? wt.kidRole : wt.role), '커리어 실천 칸에 결 역할');
+    const rp = all.timeline_career_recharge.readingCore.practice, ax2 = {}; r.sport.axes.forEach(a => { ax2[a.id] = a; });
+    ['short_long', 'in_out'].forEach(k => { const a = ax2[k]; if (a.ok && a.side !== 'bal') assert.ok(rp.includes(D.REST_AXIS[k][a.side]), '재충전 실천 축 ' + k); else Object.values(D.REST_AXIS[k]).forEach(x => assert.ok(!rp.includes(x))); });
+    const hz = D.MATCH.filter(m => m.work === 'horizon');
+    assert.ok(hz.filter(m => wc.risk.includes(m.same)).length <= 1, '같은 일 축 문장 한 번만');
+    AC.on = true; const wb = AC.block({ M, ch }, 'work'); AC.on = false; assert.ok(wb.includes(tyTop.name), '커리어 블록에 결');
     cnt.ty[ty.top] = (cnt.ty[ty.top] || 0) + 1; }
   // 조합 문장: 같은 꼬리 문장이 두 번 나오지 않음
   const re = all.timeline_career_talent.readingCore.reality.split('\n\n'), tails = re.map(p => p.split('예요. ')[1]).filter(Boolean);
