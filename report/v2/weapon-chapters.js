@@ -81,9 +81,12 @@
     var A; try { A = W().analyze(H.M, H.ch); } catch (e) { return null; } if (!A || !A.ok) return null;
     var now = H.now || Date.now(), nowY = H.M.yearPillarAt ? H.M.yearPillarAt(now).sajuYear : new Date(now).getFullYear();
     var tl = null; try { tl = W().timeline(H.M, H.ch, { fromY: nowY, years: 10, wolY: nowY }); } catch (e) { tl = null; }
+    // 유료 풀이는 1순위 주무기 이야기라, 시기마다 '가장 켜지는 무기' 대신 1순위 무기의 활성도로 맞춘다(보조 무기 신호가 섞이지 않게)
+    if (tl) ['daeun', 'seun', 'wolun'].forEach(function (k) { (tl[k] || []).forEach(prim); });
     var sure = A.weapons.length && A.status !== 'undetermined' && A.status !== 'complex';
     return { A: A, tl: tl, now: now, nowY: nowY, sure: sure, M: H.M, ch: H.ch, who: H.name || (H.sd && H.sd.name) || '' };
   }
+  function prim(r) { if (r && r.acts && r.acts[0]) { r.best = r.acts[0]; if (W().readPair) r.read = W().readPair(r.best, r.favor); } return r; }
   function pickWeapons(B, use) { var w = B.A.weapons.slice(); var out = []; if (use.first && w[0]) out.push(w[0]); if (use.second && w[1]) out.push(w[1]); return out; }
   function wTitle(w) { return EL_K[w.el] + '(' + EL_H[w.el] + ') — ' + WD().el[w.el].title; }
   function curIdx(list, now) { var c = -1; (list || []).forEach(function (r, i) { if (r && r.startMs <= now) c = i; }); return c; }
@@ -96,14 +99,14 @@
     var cls = /strong|on|shaky/.test(a.level) ? 'on' : /sup|quiet/.test(a.level) ? 'prep' : 'guard';   // 활성도 단계에 맞는 문장(조용한 때를 '좋은 때'로 읽지 않게)
     // 2판(2026-11-26): 주제 × 작용 유형(강화·지원·발산·조정·조용함) + 주제 × 들어오는 십성 — 같은 해라도 주제마다, 해마다 다른 풀이
     var typ = !a.types.length ? 'quiet' : (a.types.indexOf('adjust') >= 0 && cls !== 'on') ? 'adjust' : a.types[0];
-    var lens = topic === 'remedy' ? d.remedy.now[r.read] : topic === 'self' ? wd.combo[r.read] : d.typeLens[topic][typ];
+    var lens = topic === 'remedy' ? d.remedy.now[r.read] : topic === 'self' ? d.selfType[typ] : d.typeLens[topic][typ];
     if (B.seenLens) { if (B.seenLens[topic + lens]) lens = ''; else B.seenLens[topic + lens] = 1; }   // 같은 블록 안에서 같은 문장 반복 안 함
     var P = d.period[topic];   // 주제마다 다른 말로 — 같은 시기라도 주제 사이에 같은 문장이 나오지 않게
     var dir = use.tenGod ? ' ' + d.useLens[topic][a.use.group] + '(운 천간 ' + a.use.tg + ').' : '';
     if (dir && B.seenLens) { var ug = 'g' + a.use.group; if (B.seenLens[ug]) { dir = ' ' + fill(d.contUse[topic], { tg: a.use.tg }); if (B.seenLens['u' + dir]) dir = ''; else B.seenLens['u' + dir] = 1; } else B.seenLens[ug] = 1; }   // 같은 십성 묶음이 다시 오면 '이어져요' 한 줄로
     var rk = (a.roles.stem || '—') + '|' + (a.roles.branch || '—');   // 지원(용신 역할)은 앞 줄과 같으면 생략
     var sup = use.tenGod && (a.roles.stem || a.roles.branch) && !(B.seenLens && B.seenLens['r' + rk]) ? ' ' + fill(P.sup, { s: a.roles.stem || '—', b: a.roles.branch || '—' }) : ''; B.lastRole = rk; if (B.seenLens) B.seenLens['r' + rk] = 1;
-    var cc = a.constraints.filter(function (c) { return !(B.seenLens && B.seenLens['c' + c]); })[0];   // 같은 제약은 블록 안에서 처음 한 번만
+    var cc = a.constraints.filter(function (c) { return !(B.seenLens && B.seenLens['c' + c]) && !(topic === 'self' && /이미 많은 쪽/.test(c)); })[0];   // 같은 제약은 블록 안에서 처음 한 번만
     var con = cc ? ' ' + fill(P.con, { c: cc }) : ''; if (cc) { B.hasCon = true; if (B.seenLens) B.seenLens['c' + cc] = 1; }
     return '<li><b>' + esc(label + ' ' + r.gz) + '</b>' + (bits.length ? ' <span class="dp-mi">' + esc(bits.join(' · ')) + '</span>' : '') + '<br>' + esc((lens + dir + sup + con).trim()) + '</li>';
   }
@@ -113,7 +116,7 @@
     if (use.daeun) {
       var di = curIdx(tl.daeun, B.now), cur = tl.daeun[di];
       if (cur) lines.push(periodLine(B, cur, '지금 대운(' + (cur.startAge) + '세~)', topic, use, w));
-      if (topic !== 'remedy') { var nx = tl.daeun.slice(di + 1).filter(on)[0]; if (nx) lines.push(periodLine(B, nx, '다음 발현 대운(' + nx.startAge + '세~, ' + nx.startYear + '년)', topic, use, w)); }
+      var nx = topic !== 'remedy' ? tl.daeun.slice(di + 1).filter(on)[0] : null;   // 다음 발현 대운은 가까운 해·달 뒤에(시간 순서)
     }
     if (use.seun) {
       if (topic === 'remedy') { var cs = tl.seun.filter(function (r) { return r.year === B.nowY; })[0]; if (cs) lines.push(periodLine(B, cs, '올해 ' + cs.year + '년', topic, use, w)); }
@@ -124,8 +127,35 @@
       var pick = topic === 'remedy' ? ms.slice(0, 3) : ms.filter(on).slice(0, 2);
       pick.forEach(function (r) { lines.push(periodLine(B, r, r.month + '월(' + r.termName + ')', topic, use, w)); });
     }
+    if (use.daeun && nx) lines.push(periodLine(B, nx, '다음 발현 대운(' + nx.startAge + '세~, ' + nx.startYear + '년)', topic, use, w));
     lines = lines.filter(Boolean); if (!lines.length) return '';
-    return '<h4>' + esc(d.timing[topic]) + '</h4><ul class="dp-ul">' + lines.join('') + '</ul>' + (B.hasCon ? '<p>' + esc(d.conTail[topic]) + '</p>' : '') + ((use.activation && use.favor && topic === 'self') ? '<p class="dp-mi">' + esc('활성도는 운이 주무기를 켜는 정도, 유리도는 그 시기 전체 흐름 등급이에요. 서로 다른 지표라 합쳐 보지 않아요.') + '</p>' : '');
+    return '<h4>' + esc(d.timing[topic]) + '</h4><ul class="dp-ul">' + lines.join('') + '</ul>' + (B.hasCon ? '<p>' + esc(d.conTail[topic]) + '</p>' : '') + ((use.activation && use.favor && topic === 'self') ? '<p class="dp-mi">' + esc(d.selfFoot.axes) + '</p>' : '');
+  }
+  function formationPlain(B, w, use) {
+    var d = DD().selfPlain, P = { year: '년', month: '월', day: '일', hour: '시' }, out = [];
+    if (use.power) out.push(fill(d.power, { el: EL_K[w.el] + '(' + EL_H[w.el] + ')', pct: w.pct, rank: w.rank === 1 ? '가장' : w.rank + '번째로' }));
+    if (use.rootExp) {
+      out.push(fill(d.exposed, { list: w.stems.map(function (x) { return P[x.pos] + '간 ' + x.ch + '(' + x.tg + ')'; }).join(', ') }));
+      var seen = {}, rl = w.roots.filter(function (r) { var k = r.pos; if (seen[k]) return false; seen[k] = 1; return true; }).map(function (r) { return P[r.pos] + '지 ' + r.ch + ' 속 ' + r.hs; });
+      if (rl.length) out.push(fill(w.cond.deepRoot ? d.rootDeep : d.rootLight, { list: rl.join(', ') }));
+      if (w.season) out.push(fill(d.season[/왕|상/.test(w.season) ? 'good' : w.season === '휴' ? 'mid' : 'low'], { st: w.season }));
+    }
+    if (use.overlap) {
+      w.ganyeo.forEach(function (g) { out.push(fill(d.ganyeo, { pos: P[g.pos], gz: g.gz })); });
+      w.byeongjon.stem.concat(w.byeongjon.branch).forEach(function (b) { out.push(fill(d.byeong, { ch: b.ch, n: b.pos.length, adj: d.byeongAdj[b.adj ? 'near' : 'far'] })); });
+    }
+    if (use.rootExp) {
+      w.stems.forEach(function (x) { var nm = x.bound.concat(x.clash); if (nm.length) out.push(fill(d.bound, { pos: P[x.pos], ch: x.ch, names: nm.join('·') })); });
+      w.rootClash.forEach(function (r) { if (r.chung.length) out.push(fill(d.rootChung, { pos: P[r.pos] })); });
+      var oth = {}; w.rootClash.forEach(function (r) { r.other.forEach(function (n) { oth[n] = 1; }); }); var on = Object.keys(oth);
+      if (on.length) out.push(fill(d.rootOther, { names: on.slice(0, 3).join('·') }));
+    }
+    return out.length ? '<ul class="dp-ul">' + out.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' : '';
+  }
+  function fitLine(B, w) {
+    var d = DD().fit, st = B.A.strength, zone = st.zone, help = Math.round(st.help), drain = w.group >= 1 && w.group <= 3;
+    var k = /신약|태약|극약/.test(zone) ? (drain ? 'weakDrain' : 'weakHelp') : /신강|태강|극왕/.test(zone) ? (drain ? 'strongDrain' : 'strongHelp') : 'even';
+    return fill(d[k], { zone: zone, help: help });
   }
   function evidence(w, use) {
     var keep = (w.reasons || []).filter(function (t) {
@@ -148,13 +178,13 @@
     var ws = pickWeapons(B, use); if (!ws.length) return null; var w = ws[0], g = w.group;
     var lead = esc(J.은('주무기') + ' ') + '<b>' + esc(wTitle(w)) + '</b>' + esc('이에요. ' + wd.el[w.el].strengths.join('·') + ' 쪽이 대표 강점이에요.');
     var body = '';
-    if (use.power || use.rootExp || use.overlap) body += '<h4>' + esc('주무기의 형성 근거') + '</h4>' + evidence(w, use);
-    if (use.tenGod) body += '<h4>' + esc('강점이 발현되는 방식') + '</h4><p>' + esc(EL_K[w.el] + ' 기운이 ' + w.groupName + '(' + wd.group[g].way + ')으로 드러나요. ' + wd.elGroup[w.el][g] + '이 이 명식의 쓰는 방식이에요.' + (w.tgs.length ? ' 천간에 드러난 ' + w.tgs.join('·') + '은(는) ' + w.tgs.map(function (t) { return wd.tg[t]; }).join(', ') + '으로 읽혀요.' : '')) + '</p>';
-    if (ws[1]) { var v = ws[1]; body += '<h4>' + esc('보조 주무기와의 결합') + '</h4><p>' + esc('보조 주무기는 ' + wTitle(v) + '(' + v.groupName + ')이에요. ' + wd.group[g].short + '에 ' + wd.group[v.group].short + '이(가) 붙어, ' + wd.elGroup[v.el][v.group] + '이 주무기를 옆에서 받쳐 줘요.') + '</p>'; }
+    if (use.power || use.rootExp || use.overlap) body += '<h4>' + esc('주무기의 형성 근거') + '</h4>' + formationPlain(B, w, use);   // 2판: 실제 글자·자리를 쉬운 문장으로
+    if (use.tenGod) body += '<h4>' + esc('강점이 발현되는 방식') + '</h4><p>' + esc(EL_K[w.el] + ' 기운이 ' + w.groupName + '(' + wd.group[g].way + ')으로 드러나요. ' + wd.elGroup[w.el][g] + '이 이 명식의 쓰는 방식이에요.' + (w.tgs.length ? ' 천간에 드러난 ' + J.은(w.tgs.join('·')) + ' ' + w.tgs.map(function (t) { return wd.tg[t]; }).join(', ') + '으로 읽혀요.' : '')) + '</p>';
+    if (ws[1]) { var v = ws[1]; body += '<h4>' + esc('보조 주무기와의 결합') + '</h4><p>' + esc('보조 주무기는 ' + wTitle(v) + '(' + v.groupName + ')이에요. ' + wd.group[g].short + '에 ' + J.이(wd.group[v.group].short) + ' 붙어, ' + wd.elGroup[v.el][v.group] + '이 주무기를 옆에서 받쳐 줘요.') + '</p>'; }
     body += '<h4>' + esc('과잉 작용 시 주의점') + '</h4><p>' + esc(wd.el[w.el].overLine + ' ' + d.self.distort[g]) + (/기신|구신/.test(w.role || '') ? esc(' 이 명식에선 주무기가 균형상 이미 많은 쪽(' + w.role + ')이라 더 주의가 필요해요.') : '') + '</p>';
-    body += '<h4>' + esc('장기적인 발현 환경') + '</h4><p>' + esc(d.self.grow[g]) + '</p>';
+    body += '<h4>' + esc('장기적인 발현 환경') + '</h4><p>' + esc(fitLine(B, w) + ' ' + d.self.grow[g]) + '</p>';   // 강약과 주무기의 관계 + 십성별 키우는 환경
     body += timingBlock(B, 'self', use, w);
-    var mi = (A.yong ? (A.yong.isWeapon ? wd.yongRel.same : /기신|구신/.test(w.role || '') ? wd.yongRel.gisin : wd.yongRel.other) + ' ' : '') + wd.confidence[w.confidence] + ' — ' + wd.confidenceNote;
+    var mi = (A.yong ? (A.yong.isWeapon ? wd.yongRel.same : /기신|구신/.test(w.role || '') ? wd.yongRel.gisin : wd.yongRel.other) + ' ' : '') + fill(d.selfFoot.conf, { c: wd.confidence[w.confidence].replace('판정 근거 ', '') });
     return sec('나의 핵심 주무기', lead, body, mi);
   }
   function wealthBlock(B, use) {
@@ -214,7 +244,7 @@
     if (scope === 'daeun') return { rows: tl.daeun, labs: tl.daeun.map(function (r) { return r.startAge + '세'; }), when: tl.daeun.map(function (r) { return r.startAge + '세 대운(' + r.startYear + '~)'; }), nowIdx: curIdx(tl.daeun, B.now) };
     if (scope === 'seun') { var src = M.seunRange(ch, B.nowY, B.nowY + 9) || []; tl.seun.forEach(function (r, i) { if (r) r.src = src[i]; }); }
     if (scope === 'seun') return { rows: tl.seun, labs: tl.seun.map(function (r) { return "'" + String(r.year).slice(2); }), when: tl.seun.map(function (r) { return r.year + '년'; }), nowIdx: tl.seun.findIndex(function (r) { return r.year === B.nowY; }) };
-    var all = [B.nowY, B.nowY + 1].reduce(function (a, y) { return a.concat((M.wolun(ch, y) || []).map(function (x) { var r = W().luck(M, ch, x, 'wolun'); if (r) { var k = new Date(x.startMs + 9 * 3600e3); r.src = x; r.startMs = x.startMs; r.month = k.getUTCMonth() + 1; r.y = k.getUTCFullYear(); } return r; })); }, []);
+    var all = [B.nowY, B.nowY + 1].reduce(function (a, y) { return a.concat((M.wolun(ch, y) || []).map(function (x) { var r = prim(W().luck(M, ch, x, 'wolun')); if (r) { var k = new Date(x.startMs + 9 * 3600e3); r.src = x; r.startMs = x.startMs; r.month = k.getUTCMonth() + 1; r.y = k.getUTCFullYear(); } return r; })); }, []);
     var ci = Math.max(0, curIdx(all, B.now)), rows = all.slice(ci, ci + 12);
     return { rows: rows, labs: rows.map(function (r) { return r.month + '월'; }), when: rows.map(function (r) { return r.y + '년 ' + r.month + '월'; }), nowIdx: 0 };
   }

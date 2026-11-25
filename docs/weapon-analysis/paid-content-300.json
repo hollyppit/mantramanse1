@@ -210,18 +210,18 @@
    "timeline_love_14": 30
   },
   "avgChars": {
-   "self": 1560,
-   "wealth": 1368,
-   "career": 1329,
-   "love": 1146,
-   "remedy": 1011
+   "self": 1644,
+   "wealth": 1330,
+   "career": 1289,
+   "love": 1127,
+   "remedy": 1012
   },
   "nohour": {
    "selfNote": 191,
    "others": 109
   },
   "graphShown": 1980,
-  "linkedSeun": 4518
+  "linkedSeun": 4401
  },
  "results": [
   {
@@ -237,7 +237,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1627,
+    "self": 1685,
     "wealth": 1389,
     "career": 1367,
     "love": 1181,
@@ -257,10 +257,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1560,
-    "wealth": 1176,
-    "career": 1155,
-    "love": 1080,
+    "self": 1672,
+    "wealth": 1142,
+    "career": 1120,
+    "love": 1049,
     "remedy": 1013
    }
   },
@@ -277,7 +277,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1556,
+    "self": 1668,
     "wealth": 1171,
     "career": 1138,
     "love": 1080,
@@ -297,11 +297,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1785,
-    "wealth": 1662,
-    "career": 1605,
-    "love": 1259,
-    "remedy": 1192
+    "self": 1743,
+    "wealth": 1418,
+    "career": 1347,
+    "love": 1192,
+    "remedy": 1105
    }
   },
   {
@@ -317,11 +317,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1465,
-    "wealth": 1416,
-    "career": 1341,
-    "love": 1061,
-    "remedy": 1000
+    "self": 1650,
+    "wealth": 1463,
+    "career": 1400,
+    "love": 1166,
+    "remedy": 1052
    }
   },
   {
@@ -337,11 +337,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1915,
-    "wealth": 1482,
-    "career": 1405,
-    "love": 1224,
-    "remedy": 1154
+    "self": 2010,
+    "wealth": 1480,
+    "career": 1403,
+    "love": 1222,
+    "remedy": 1130
    }
   },
   {
@@ -357,7 +357,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1438,
+    "self": 1555,
     "wealth": 1418,
     "career": 1406,
     "love": 1134,
@@ -377,7 +377,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1438,
+    "self": 1621,
     "wealth": 1416,
     "career": 1369,
     "love": 1191,
@@ -397,7 +397,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1324,
+    "self": 1476,
     "wealth": 1261,
     "career": 1228,
     "love": 1099,
@@ -417,7 +417,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1720,
+    "self": 1852,
     "wealth": 1416,
     "career": 1436,
     "love": 1205,
@@ -437,7 +437,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1465,
+    "self": 1604,
     "wealth": 1387,
     "career": 1360,
     "love": 1126,
@@ -457,11 +457,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1536,
-    "wealth": 1514,
-    "career": 1400,
-    "love": 1087,
-    "remedy": 1052
+    "self": 1650,
+    "wealth": 1273,
+    "career": 1171,
+    "love": 1058,
+    "remedy": 1118
    }
   },
   {
@@ -477,10 +477,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1646,
-    "wealth": 1358,
-    "career": 1320,
-    "love": 1113,
+    "self": 1640,
+    "wealth": 1324,
+    "career": 1285,
+    "love": 1082,
     "remedy": 962
    }
   },
@@ -497,7 +497,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1431,
+    "self": 1478,
     "wealth": 1006,
     "career": 990,
     "love": 931,
@@ -517,7 +517,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1627,
+    "self": 1764,
     "wealth": 1454,
     "career": 1432,
     "love": 1264,
@@ -537,11 +537,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1730,
-    "wealth": 1543,
-    "career": 1447,
-    "love": 1163,
-    "remedy": 946
+    "self": 1785,
+    "wealth": 1154,
+    "career": 1049,
+    "love": 1017,
+    "remedy": 893
    }
   },
   {
@@ -557,11 +557,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1632,
-    "wealth": 1402,
-    "career": 1321,
-    "love": 1111,
-    "remedy": 1147
+    "self": 1731,
+    "wealth": 1339,
+    "career": 1264,
+    "love": 1148,
+    "remedy": 1091
    }
   },
   {
@@ -577,7 +577,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1446,
+    "self": 1519,
     "wealth": 1313,
     "career": 1251,
     "love": 1122,
@@ -597,11 +597,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1756,
-    "wealth": 1435,
-    "career": 1374,
-    "love": 1273,
-    "remedy": 1180
+    "self": 1773,
+    "wealth": 1235,
+    "career": 1158,
+    "love": 1082,
+    "remedy": 1080
    }
   },
   {
@@ -617,10 +617,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1366,
-    "wealth": 1092,
-    "career": 1015,
-    "love": 991,
+    "self": 1465,
+    "wealth": 1058,
+    "career": 980,
+    "love": 960,
     "remedy": 912
    }
   },
@@ -637,11 +637,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1906,
-    "wealth": 1675,
-    "career": 1599,
+    "self": 1917,
+    "wealth": 1566,
+    "career": 1487,
     "love": 1255,
-    "remedy": 1117
+    "remedy": 1114
    }
   },
   {
@@ -657,7 +657,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1415,
+    "self": 1490,
     "wealth": 1377,
     "career": 1365,
     "love": 1125,
@@ -677,7 +677,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1334,
+    "self": 1481,
     "wealth": 997,
     "career": 950,
     "love": 913,
@@ -697,7 +697,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1650,
+    "self": 1735,
     "wealth": 1546,
     "career": 1554,
     "love": 1211,
@@ -717,11 +717,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1770,
-    "wealth": 1456,
+    "self": 1795,
+    "wealth": 1463,
     "career": 1392,
-    "love": 1230,
-    "remedy": 1080
+    "love": 1232,
+    "remedy": 1123
    }
   },
   {
@@ -737,7 +737,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1698,
+    "self": 1742,
     "wealth": 1394,
     "career": 1327,
     "love": 1205,
@@ -757,7 +757,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1570,
+    "self": 1555,
     "wealth": 1396,
     "career": 1384,
     "love": 1148,
@@ -777,7 +777,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1742,
+    "self": 1953,
     "wealth": 1525,
     "career": 1485,
     "love": 1249,
@@ -797,11 +797,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1619,
-    "wealth": 1508,
-    "career": 1443,
-    "love": 1148,
-    "remedy": 1062
+    "self": 1506,
+    "wealth": 1309,
+    "career": 1253,
+    "love": 1008,
+    "remedy": 1052
    }
   },
   {
@@ -817,11 +817,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1611,
-    "wealth": 1343,
-    "career": 1273,
-    "love": 1198,
-    "remedy": 1094
+    "self": 1747,
+    "wealth": 1224,
+    "career": 1148,
+    "love": 1089,
+    "remedy": 1007
    }
   },
   {
@@ -837,7 +837,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1665,
+    "self": 1751,
     "wealth": 1256,
     "career": 1211,
     "love": 1150,
@@ -857,11 +857,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1566,
-    "wealth": 1522,
-    "career": 1451,
-    "love": 1133,
-    "remedy": 1157
+    "self": 1650,
+    "wealth": 1326,
+    "career": 1242,
+    "love": 1099,
+    "remedy": 1101
    }
   },
   {
@@ -877,11 +877,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1507,
-    "wealth": 1494,
-    "career": 1377,
-    "love": 1079,
-    "remedy": 998
+    "self": 1443,
+    "wealth": 1090,
+    "career": 970,
+    "love": 894,
+    "remedy": 937
    }
   },
   {
@@ -897,10 +897,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1766,
-    "wealth": 1477,
-    "career": 1470,
-    "love": 1215,
+    "self": 1739,
+    "wealth": 1443,
+    "career": 1435,
+    "love": 1184,
     "remedy": 1089
    }
   },
@@ -917,7 +917,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1219,
+    "self": 1326,
     "wealth": 1154,
     "career": 1102,
     "love": 891,
@@ -937,11 +937,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1513,
-    "wealth": 1369,
-    "career": 1271,
-    "love": 1061,
-    "remedy": 1033
+    "self": 1532,
+    "wealth": 1317,
+    "career": 1208,
+    "love": 1004,
+    "remedy": 1018
    }
   },
   {
@@ -957,7 +957,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1330,
+    "self": 1548,
     "wealth": 1457,
     "career": 1436,
     "love": 1140,
@@ -977,11 +977,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1731,
-    "wealth": 1585,
-    "career": 1520,
-    "love": 1282,
-    "remedy": 1150
+    "self": 1589,
+    "wealth": 1128,
+    "career": 1038,
+    "love": 993,
+    "remedy": 1116
    }
   },
   {
@@ -997,7 +997,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1419,
+    "self": 1498,
     "wealth": 1326,
     "career": 1260,
     "love": 1077,
@@ -1017,7 +1017,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1609,
+    "self": 1694,
     "wealth": 1282,
     "career": 1223,
     "love": 1112,
@@ -1037,7 +1037,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1284,
+    "self": 1412,
     "wealth": 990,
     "career": 917,
     "love": 912,
@@ -1057,11 +1057,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1669,
-    "wealth": 1638,
-    "career": 1587,
-    "love": 1270,
-    "remedy": 1129
+    "self": 1730,
+    "wealth": 1578,
+    "career": 1531,
+    "love": 1247,
+    "remedy": 1145
    }
   },
   {
@@ -1077,7 +1077,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1457,
+    "self": 1476,
     "wealth": 1368,
     "career": 1347,
     "love": 1116,
@@ -1113,7 +1113,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1684,
+    "self": 1865,
     "wealth": 1295,
     "career": 1266,
     "love": 1177,
@@ -1133,7 +1133,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1639,
+    "self": 1597,
     "wealth": 1389,
     "career": 1353,
     "love": 1146,
@@ -1153,7 +1153,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1563,
+    "self": 1664,
     "wealth": 1370,
     "career": 1342,
     "love": 1193,
@@ -1173,7 +1173,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1424,
+    "self": 1580,
     "wealth": 1353,
     "career": 1309,
     "love": 1174,
@@ -1193,7 +1193,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1751,
+    "self": 1766,
     "wealth": 1427,
     "career": 1372,
     "love": 1143,
@@ -1213,11 +1213,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1752,
-    "wealth": 1438,
-    "career": 1363,
-    "love": 1136,
-    "remedy": 1015
+    "self": 1756,
+    "wealth": 1450,
+    "career": 1369,
+    "love": 1174,
+    "remedy": 1082
    }
   },
   {
@@ -1233,7 +1233,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1565,
+    "self": 1653,
     "wealth": 1182,
     "career": 1146,
     "love": 1083,
@@ -1253,7 +1253,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1561,
+    "self": 1762,
     "wealth": 1440,
     "career": 1394,
     "love": 1180,
@@ -1273,7 +1273,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1380,
+    "self": 1515,
     "wealth": 1310,
     "career": 1260,
     "love": 1125,
@@ -1293,7 +1293,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1461,
+    "self": 1666,
     "wealth": 1462,
     "career": 1435,
     "love": 1168,
@@ -1313,10 +1313,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1591,
-    "wealth": 1413,
-    "career": 1344,
-    "love": 1112,
+    "self": 1701,
+    "wealth": 1444,
+    "career": 1383,
+    "love": 1144,
     "remedy": 1144
    }
   },
@@ -1333,7 +1333,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1587,
+    "self": 1635,
     "wealth": 1555,
     "career": 1541,
     "love": 1223,
@@ -1353,7 +1353,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1416,
+    "self": 1575,
     "wealth": 1311,
     "career": 1266,
     "love": 1139,
@@ -1373,7 +1373,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1470,
+    "self": 1620,
     "wealth": 1161,
     "career": 1092,
     "love": 1054,
@@ -1409,7 +1409,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1663,
+    "self": 1717,
     "wealth": 1433,
     "career": 1414,
     "love": 1172,
@@ -1429,7 +1429,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1511,
+    "self": 1555,
     "wealth": 1155,
     "career": 1112,
     "love": 1063,
@@ -1449,7 +1449,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1436,
+    "self": 1554,
     "wealth": 1276,
     "career": 1237,
     "love": 1109,
@@ -1469,7 +1469,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1491,
+    "self": 1587,
     "wealth": 1141,
     "career": 1104,
     "love": 1057,
@@ -1489,11 +1489,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1803,
-    "wealth": 1585,
-    "career": 1502,
-    "love": 1214,
-    "remedy": 1178
+    "self": 1735,
+    "wealth": 1349,
+    "career": 1255,
+    "love": 1138,
+    "remedy": 1098
    }
   },
   {
@@ -1509,7 +1509,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1707,
+    "self": 1735,
     "wealth": 1536,
     "career": 1518,
     "love": 1262,
@@ -1529,7 +1529,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1602,
+    "self": 1772,
     "wealth": 1421,
     "career": 1408,
     "love": 1248,
@@ -1549,10 +1549,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1493,
-    "wealth": 1121,
-    "career": 1085,
-    "love": 1023,
+    "self": 1609,
+    "wealth": 1087,
+    "career": 1050,
+    "love": 992,
     "remedy": 967
    }
   },
@@ -1569,7 +1569,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1548,
+    "self": 1583,
     "wealth": 1317,
     "career": 1317,
     "love": 1150,
@@ -1589,7 +1589,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1429,
+    "self": 1599,
     "wealth": 1346,
     "career": 1299,
     "love": 1156,
@@ -1609,11 +1609,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1532,
-    "wealth": 1514,
-    "career": 1458,
-    "love": 1070,
-    "remedy": 1141
+    "self": 1721,
+    "wealth": 1483,
+    "career": 1430,
+    "love": 1186,
+    "remedy": 1130
    }
   },
   {
@@ -1629,9 +1629,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1590,
-    "wealth": 1491,
-    "career": 1409,
+    "self": 1637,
+    "wealth": 1382,
+    "career": 1297,
     "love": 1091,
     "remedy": 939
    }
@@ -1649,11 +1649,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1772,
-    "wealth": 1549,
-    "career": 1507,
+    "self": 1767,
+    "wealth": 1444,
+    "career": 1399,
     "love": 1148,
-    "remedy": 1117
+    "remedy": 1137
    }
   },
   {
@@ -1669,7 +1669,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1493,
+    "self": 1599,
     "wealth": 1377,
     "career": 1371,
     "love": 1132,
@@ -1689,7 +1689,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1552,
+    "self": 1679,
     "wealth": 1093,
     "career": 1062,
     "love": 991,
@@ -1709,11 +1709,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1537,
-    "wealth": 1342,
-    "career": 1218,
-    "love": 1118,
-    "remedy": 1001
+    "self": 1660,
+    "wealth": 1380,
+    "career": 1251,
+    "love": 1147,
+    "remedy": 1005
    }
   },
   {
@@ -1729,11 +1729,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1632,
-    "wealth": 1426,
-    "career": 1359,
-    "love": 1113,
-    "remedy": 1020
+    "self": 1862,
+    "wealth": 1506,
+    "career": 1459,
+    "love": 1189,
+    "remedy": 1143
    }
   },
   {
@@ -1749,11 +1749,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1327,
-    "wealth": 1339,
-    "career": 1223,
-    "love": 1083,
-    "remedy": 790
+    "self": 1546,
+    "wealth": 1158,
+    "career": 1038,
+    "love": 1013,
+    "remedy": 866
    }
   },
   {
@@ -1769,11 +1769,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1623,
-    "wealth": 1370,
-    "career": 1269,
-    "love": 1206,
-    "remedy": 1096
+    "self": 1731,
+    "wealth": 1257,
+    "career": 1161,
+    "love": 1102,
+    "remedy": 1065
    }
   },
   {
@@ -1789,7 +1789,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1526,
+    "self": 1691,
     "wealth": 1423,
     "career": 1416,
     "love": 1212,
@@ -1809,10 +1809,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1599,
-    "wealth": 1294,
-    "career": 1252,
-    "love": 1108,
+    "self": 1792,
+    "wealth": 1260,
+    "career": 1217,
+    "love": 1077,
     "remedy": 867
    }
   },
@@ -1829,11 +1829,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1502,
-    "wealth": 1533,
-    "career": 1420,
-    "love": 1150,
-    "remedy": 958
+    "self": 1671,
+    "wealth": 1522,
+    "career": 1423,
+    "love": 1184,
+    "remedy": 1009
    }
   },
   {
@@ -1849,11 +1849,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1706,
-    "wealth": 1569,
-    "career": 1496,
-    "love": 1190,
-    "remedy": 1024
+    "self": 1762,
+    "wealth": 1534,
+    "career": 1466,
+    "love": 1192,
+    "remedy": 1003
    }
   },
   {
@@ -1869,7 +1869,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1361,
+    "self": 1484,
     "wealth": 1008,
     "career": 983,
     "love": 930,
@@ -1889,7 +1889,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1556,
+    "self": 1594,
     "wealth": 1416,
     "career": 1440,
     "love": 1149,
@@ -1909,7 +1909,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1450,
+    "self": 1701,
     "wealth": 1257,
     "career": 1211,
     "love": 1088,
@@ -1929,7 +1929,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1326,
+    "self": 1463,
     "wealth": 1042,
     "career": 971,
     "love": 949,
@@ -1949,10 +1949,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1514,
-    "wealth": 1400,
-    "career": 1363,
-    "love": 1212,
+    "self": 1541,
+    "wealth": 1366,
+    "career": 1328,
+    "love": 1181,
     "remedy": 1028
    }
   },
@@ -1969,7 +1969,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1580,
+    "self": 1763,
     "wealth": 1428,
     "career": 1403,
     "love": 1167,
@@ -1989,7 +1989,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1362,
+    "self": 1462,
     "wealth": 1425,
     "career": 1416,
     "love": 1107,
@@ -2009,7 +2009,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1439,
+    "self": 1563,
     "wealth": 1130,
     "career": 1090,
     "love": 1030,
@@ -2029,7 +2029,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1523,
+    "self": 1686,
     "wealth": 1152,
     "career": 1109,
     "love": 1052,
@@ -2049,7 +2049,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1742,
+    "self": 1780,
     "wealth": 1438,
     "career": 1433,
     "love": 1252,
@@ -2069,7 +2069,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1762,
+    "self": 1793,
     "wealth": 1489,
     "career": 1486,
     "love": 1223,
@@ -2089,11 +2089,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1758,
-    "wealth": 1490,
-    "career": 1444,
+    "self": 1829,
+    "wealth": 1486,
+    "career": 1448,
     "love": 1219,
-    "remedy": 1087
+    "remedy": 1140
    }
   },
   {
@@ -2109,11 +2109,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1626,
-    "wealth": 1406,
-    "career": 1338,
-    "love": 1186,
-    "remedy": 997
+    "self": 1712,
+    "wealth": 1225,
+    "career": 1147,
+    "love": 1082,
+    "remedy": 1021
    }
   },
   {
@@ -2129,11 +2129,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1701,
-    "wealth": 1480,
-    "career": 1392,
-    "love": 1249,
-    "remedy": 1134
+    "self": 1669,
+    "wealth": 1424,
+    "career": 1326,
+    "love": 1195,
+    "remedy": 1081
    }
   },
   {
@@ -2149,7 +2149,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1384,
+    "self": 1399,
     "wealth": 1261,
     "career": 1244,
     "love": 1012,
@@ -2169,11 +2169,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1682,
-    "wealth": 1521,
-    "career": 1459,
-    "love": 1214,
-    "remedy": 1007
+    "self": 1871,
+    "wealth": 1543,
+    "career": 1495,
+    "love": 1236,
+    "remedy": 1098
    }
   },
   {
@@ -2189,7 +2189,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1424,
+    "self": 1547,
     "wealth": 1384,
     "career": 1348,
     "love": 1128,
@@ -2209,7 +2209,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1652,
+    "self": 1696,
     "wealth": 1365,
     "career": 1333,
     "love": 1148,
@@ -2229,10 +2229,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1498,
-    "wealth": 1160,
-    "career": 1117,
-    "love": 1059,
+    "self": 1601,
+    "wealth": 1126,
+    "career": 1082,
+    "love": 1028,
     "remedy": 942
    }
   },
@@ -2249,7 +2249,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1665,
+    "self": 1770,
     "wealth": 1410,
     "career": 1408,
     "love": 1158,
@@ -2269,7 +2269,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1369,
+    "self": 1544,
     "wealth": 1420,
     "career": 1402,
     "love": 1140,
@@ -2289,7 +2289,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1316,
+    "self": 1510,
     "wealth": 1414,
     "career": 1390,
     "love": 1090,
@@ -2309,11 +2309,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1540,
-    "wealth": 1355,
-    "career": 1281,
-    "love": 1148,
-    "remedy": 1100
+    "self": 1713,
+    "wealth": 1253,
+    "career": 1195,
+    "love": 1115,
+    "remedy": 1066
    }
   },
   {
@@ -2329,7 +2329,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1454,
+    "self": 1580,
     "wealth": 1418,
     "career": 1396,
     "love": 1167,
@@ -2381,7 +2381,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1721,
+    "self": 1832,
     "wealth": 1423,
     "career": 1396,
     "love": 1162,
@@ -2401,7 +2401,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1691,
+    "self": 1685,
     "wealth": 1478,
     "career": 1456,
     "love": 1217,
@@ -2421,11 +2421,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1815,
-    "wealth": 1645,
-    "career": 1583,
-    "love": 1231,
-    "remedy": 1149
+    "self": 1879,
+    "wealth": 1244,
+    "career": 1167,
+    "love": 1106,
+    "remedy": 1132
    }
   },
   {
@@ -2441,7 +2441,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1374,
+    "self": 1446,
     "wealth": 1055,
     "career": 1020,
     "love": 967,
@@ -2461,7 +2461,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1639,
+    "self": 1735,
     "wealth": 1457,
     "career": 1423,
     "love": 1268,
@@ -2481,7 +2481,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1479,
+    "self": 1542,
     "wealth": 1392,
     "career": 1361,
     "love": 1151,
@@ -2501,7 +2501,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1745,
+    "self": 1764,
     "wealth": 1525,
     "career": 1513,
     "love": 1260,
@@ -2521,11 +2521,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1616,
-    "wealth": 1392,
-    "career": 1321,
-    "love": 1130,
-    "remedy": 1107
+    "self": 1606,
+    "wealth": 1160,
+    "career": 1061,
+    "love": 1008,
+    "remedy": 1046
    }
   },
   {
@@ -2541,7 +2541,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1302,
+    "self": 1423,
     "wealth": 1212,
     "career": 1143,
     "love": 1078,
@@ -2561,10 +2561,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1818,
-    "wealth": 1429,
-    "career": 1367,
-    "love": 1173,
+    "self": 1938,
+    "wealth": 1395,
+    "career": 1332,
+    "love": 1142,
     "remedy": 1060
    }
   },
@@ -2581,11 +2581,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1666,
-    "wealth": 1434,
-    "career": 1375,
-    "love": 1139,
-    "remedy": 1136
+    "self": 1464,
+    "wealth": 950,
+    "career": 849,
+    "love": 824,
+    "remedy": 1052
    }
   },
   {
@@ -2601,11 +2601,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1698,
-    "wealth": 1643,
-    "career": 1573,
-    "love": 1222,
-    "remedy": 902
+    "self": 1673,
+    "wealth": 1486,
+    "career": 1389,
+    "love": 1145,
+    "remedy": 936
    }
   },
   {
@@ -2621,7 +2621,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1625,
+    "self": 1754,
     "wealth": 1180,
     "career": 1138,
     "love": 1083,
@@ -2641,11 +2641,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1582,
-    "wealth": 1309,
-    "career": 1245,
-    "love": 1112,
-    "remedy": 961
+    "self": 1771,
+    "wealth": 1207,
+    "career": 1149,
+    "love": 1085,
+    "remedy": 1077
    }
   },
   {
@@ -2661,11 +2661,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1642,
-    "wealth": 1424,
-    "career": 1365,
-    "love": 1168,
-    "remedy": 998
+    "self": 1768,
+    "wealth": 1216,
+    "career": 1132,
+    "love": 1070,
+    "remedy": 1049
    }
   },
   {
@@ -2681,7 +2681,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1627,
+    "self": 1742,
     "wealth": 1462,
     "career": 1454,
     "love": 1193,
@@ -2701,7 +2701,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1546,
+    "self": 1711,
     "wealth": 1476,
     "career": 1459,
     "love": 1213,
@@ -2721,7 +2721,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1562,
+    "self": 1659,
     "wealth": 1409,
     "career": 1379,
     "love": 1152,
@@ -2741,7 +2741,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1533,
+    "self": 1595,
     "wealth": 1381,
     "career": 1366,
     "love": 1131,
@@ -2777,11 +2777,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1595,
-    "wealth": 1384,
-    "career": 1354,
-    "love": 1192,
-    "remedy": 1112
+    "self": 1697,
+    "wealth": 1172,
+    "career": 1130,
+    "love": 1056,
+    "remedy": 1128
    }
   },
   {
@@ -2797,10 +2797,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1605,
-    "wealth": 1327,
-    "career": 1292,
-    "love": 1147,
+    "self": 1590,
+    "wealth": 1293,
+    "career": 1257,
+    "love": 1116,
     "remedy": 992
    }
   },
@@ -2817,7 +2817,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1538,
+    "self": 1597,
     "wealth": 1310,
     "career": 1282,
     "love": 1132,
@@ -2837,7 +2837,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1543,
+    "self": 1594,
     "wealth": 1370,
     "career": 1341,
     "love": 1146,
@@ -2857,11 +2857,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1681,
-    "wealth": 1439,
-    "career": 1387,
-    "love": 1229,
-    "remedy": 1108
+    "self": 1761,
+    "wealth": 1476,
+    "career": 1419,
+    "love": 1257,
+    "remedy": 1118
    }
   },
   {
@@ -2877,10 +2877,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1708,
-    "wealth": 1267,
-    "career": 1263,
-    "love": 1159,
+    "self": 1719,
+    "wealth": 1233,
+    "career": 1228,
+    "love": 1128,
     "remedy": 1063
    }
   },
@@ -2897,7 +2897,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1553,
+    "self": 1667,
     "wealth": 1402,
     "career": 1386,
     "love": 1225,
@@ -2917,7 +2917,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1298,
+    "self": 1493,
     "wealth": 1360,
     "career": 1300,
     "love": 1037,
@@ -2937,7 +2937,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1379,
+    "self": 1510,
     "wealth": 1347,
     "career": 1319,
     "love": 1095,
@@ -2957,11 +2957,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1604,
-    "wealth": 1360,
-    "career": 1253,
-    "love": 1195,
-    "remedy": 973
+    "self": 1699,
+    "wealth": 1198,
+    "career": 1085,
+    "love": 1044,
+    "remedy": 927
    }
   },
   {
@@ -2977,11 +2977,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1635,
+    "self": 1851,
     "wealth": 1469,
     "career": 1425,
     "love": 1170,
-    "remedy": 1076
+    "remedy": 1070
    }
   },
   {
@@ -2997,11 +2997,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1558,
-    "wealth": 1297,
-    "career": 1237,
-    "love": 1031,
-    "remedy": 1070
+    "self": 1688,
+    "wealth": 1146,
+    "career": 1094,
+    "love": 1034,
+    "remedy": 1062
    }
   },
   {
@@ -3033,11 +3033,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1762,
-    "wealth": 1581,
-    "career": 1516,
-    "love": 1161,
-    "remedy": 984
+    "self": 1772,
+    "wealth": 1507,
+    "career": 1450,
+    "love": 1188,
+    "remedy": 1071
    }
   },
   {
@@ -3053,11 +3053,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1514,
-    "wealth": 1317,
-    "career": 1239,
-    "love": 1170,
-    "remedy": 1072
+    "self": 1486,
+    "wealth": 999,
+    "career": 915,
+    "love": 881,
+    "remedy": 1063
    }
   },
   {
@@ -3073,7 +3073,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1888,
+    "self": 1775,
     "wealth": 1438,
     "career": 1445,
     "love": 1179,
@@ -3093,11 +3093,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1719,
-    "wealth": 1627,
-    "career": 1581,
-    "love": 1224,
-    "remedy": 1033
+    "self": 1752,
+    "wealth": 1351,
+    "career": 1260,
+    "love": 1125,
+    "remedy": 969
    }
   },
   {
@@ -3113,10 +3113,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1311,
-    "wealth": 1037,
-    "career": 962,
-    "love": 951,
+    "self": 1445,
+    "wealth": 1003,
+    "career": 927,
+    "love": 920,
     "remedy": 937
    }
   },
@@ -3133,10 +3133,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1508,
-    "wealth": 1398,
-    "career": 1366,
-    "love": 1210,
+    "self": 1555,
+    "wealth": 1364,
+    "career": 1331,
+    "love": 1179,
     "remedy": 954
    }
   },
@@ -3153,7 +3153,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1652,
+    "self": 1776,
     "wealth": 1427,
     "career": 1401,
     "love": 1160,
@@ -3173,11 +3173,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1722,
-    "wealth": 1433,
-    "career": 1386,
-    "love": 1225,
-    "remedy": 1068
+    "self": 1865,
+    "wealth": 1205,
+    "career": 1166,
+    "love": 1083,
+    "remedy": 1139
    }
   },
   {
@@ -3193,11 +3193,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1459,
-    "wealth": 1232,
-    "career": 1149,
-    "love": 1036,
-    "remedy": 925
+    "self": 1806,
+    "wealth": 1201,
+    "career": 1134,
+    "love": 1062,
+    "remedy": 1095
    }
   },
   {
@@ -3213,7 +3213,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1496,
+    "self": 1638,
     "wealth": 1348,
     "career": 1330,
     "love": 1166,
@@ -3233,7 +3233,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1547,
+    "self": 1618,
     "wealth": 1348,
     "career": 1279,
     "love": 1160,
@@ -3253,7 +3253,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1675,
+    "self": 1670,
     "wealth": 1354,
     "career": 1332,
     "love": 1147,
@@ -3289,11 +3289,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1642,
-    "wealth": 1334,
-    "career": 1247,
-    "love": 1116,
-    "remedy": 1023
+    "self": 1692,
+    "wealth": 1143,
+    "career": 1062,
+    "love": 1008,
+    "remedy": 1065
    }
   },
   {
@@ -3309,7 +3309,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1343,
+    "self": 1480,
     "wealth": 1332,
     "career": 1297,
     "love": 1090,
@@ -3329,7 +3329,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1579,
+    "self": 1613,
     "wealth": 1455,
     "career": 1396,
     "love": 1166,
@@ -3349,7 +3349,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1203,
+    "self": 1361,
     "wealth": 1231,
     "career": 1156,
     "love": 971,
@@ -3369,10 +3369,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1706,
-    "wealth": 1492,
-    "career": 1476,
-    "love": 1268,
+    "self": 1824,
+    "wealth": 1458,
+    "career": 1441,
+    "love": 1237,
     "remedy": 1056
    }
   },
@@ -3390,10 +3390,10 @@
    ],
    "chars": {
     "self": 1656,
-    "wealth": 1522,
-    "career": 1444,
-    "love": 1286,
-    "remedy": 1106
+    "wealth": 1265,
+    "career": 1177,
+    "love": 1120,
+    "remedy": 1126
    }
   },
   {
@@ -3409,7 +3409,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1623,
+    "self": 1711,
     "wealth": 1446,
     "career": 1418,
     "love": 1252,
@@ -3429,7 +3429,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1775,
+    "self": 1831,
     "wealth": 1464,
     "career": 1468,
     "love": 1249,
@@ -3449,11 +3449,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1479,
-    "wealth": 1199,
-    "career": 1093,
-    "love": 1062,
-    "remedy": 1055
+    "self": 1533,
+    "wealth": 992,
+    "career": 879,
+    "love": 877,
+    "remedy": 1042
    }
   },
   {
@@ -3469,7 +3469,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1581,
+    "self": 1571,
     "wealth": 1349,
     "career": 1320,
     "love": 1108,
@@ -3489,7 +3489,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1816,
+    "self": 1717,
     "wealth": 1513,
     "career": 1505,
     "love": 1248,
@@ -3509,7 +3509,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1659,
+    "self": 1760,
     "wealth": 1173,
     "career": 1154,
     "love": 1077,
@@ -3529,7 +3529,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1600,
+    "self": 1724,
     "wealth": 1316,
     "career": 1305,
     "love": 1119,
@@ -3549,7 +3549,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1643,
+    "self": 1656,
     "wealth": 1447,
     "career": 1427,
     "love": 1254,
@@ -3569,7 +3569,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1641,
+    "self": 1686,
     "wealth": 1445,
     "career": 1438,
     "love": 1224,
@@ -3589,11 +3589,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1816,
-    "wealth": 1606,
-    "career": 1559,
-    "love": 1295,
-    "remedy": 1131
+    "self": 1825,
+    "wealth": 1288,
+    "career": 1238,
+    "love": 1156,
+    "remedy": 1129
    }
   },
   {
@@ -3609,7 +3609,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1525,
+    "self": 1572,
     "wealth": 1225,
     "career": 1153,
     "love": 1105,
@@ -3629,11 +3629,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1755,
-    "wealth": 1427,
-    "career": 1347,
-    "love": 1205,
-    "remedy": 1064
+    "self": 1828,
+    "wealth": 1508,
+    "career": 1433,
+    "love": 1275,
+    "remedy": 1147
    }
   },
   {
@@ -3649,7 +3649,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1466,
+    "self": 1526,
     "wealth": 1348,
     "career": 1291,
     "love": 1158,
@@ -3685,7 +3685,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1805,
+    "self": 1889,
     "wealth": 1450,
     "career": 1419,
     "love": 1228,
@@ -3705,7 +3705,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1626,
+    "self": 1595,
     "wealth": 1384,
     "career": 1370,
     "love": 1176,
@@ -3725,7 +3725,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1500,
+    "self": 1502,
     "wealth": 1350,
     "career": 1341,
     "love": 1109,
@@ -3745,7 +3745,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1911,
+    "self": 1981,
     "wealth": 1424,
     "career": 1444,
     "love": 1184,
@@ -3765,7 +3765,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1432,
+    "self": 1571,
     "wealth": 1107,
     "career": 1081,
     "love": 1022,
@@ -3785,11 +3785,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1711,
-    "wealth": 1618,
-    "career": 1573,
-    "love": 1237,
-    "remedy": 1134
+    "self": 1771,
+    "wealth": 1570,
+    "career": 1522,
+    "love": 1254,
+    "remedy": 1130
    }
   },
   {
@@ -3805,11 +3805,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1752,
-    "wealth": 1445,
-    "career": 1385,
-    "love": 1221,
-    "remedy": 1089
+    "self": 1863,
+    "wealth": 1480,
+    "career": 1424,
+    "love": 1217,
+    "remedy": 1104
    }
   },
   {
@@ -3825,7 +3825,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1489,
+    "self": 1665,
     "wealth": 1148,
     "career": 1117,
     "love": 1052,
@@ -3845,7 +3845,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1468,
+    "self": 1622,
     "wealth": 1184,
     "career": 1152,
     "love": 1075,
@@ -3865,7 +3865,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1522,
+    "self": 1705,
     "wealth": 1053,
     "career": 1036,
     "love": 973,
@@ -3885,7 +3885,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1696,
+    "self": 1802,
     "wealth": 1582,
     "career": 1547,
     "love": 1254,
@@ -3905,11 +3905,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1751,
-    "wealth": 1618,
-    "career": 1539,
-    "love": 1189,
-    "remedy": 1125
+    "self": 1886,
+    "wealth": 1426,
+    "career": 1337,
+    "love": 1195,
+    "remedy": 1130
    }
   },
   {
@@ -3925,11 +3925,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1717,
-    "wealth": 1260,
-    "career": 1184,
-    "love": 1121,
-    "remedy": 1161
+    "self": 1755,
+    "wealth": 1150,
+    "career": 1073,
+    "love": 1017,
+    "remedy": 1137
    }
   },
   {
@@ -3945,11 +3945,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1600,
-    "wealth": 1444,
-    "career": 1371,
-    "love": 1181,
-    "remedy": 1105
+    "self": 1645,
+    "wealth": 1214,
+    "career": 1127,
+    "love": 1070,
+    "remedy": 1114
    }
   },
   {
@@ -3965,11 +3965,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1668,
-    "wealth": 1550,
-    "career": 1476,
+    "self": 1749,
+    "wealth": 1445,
+    "career": 1368,
     "love": 1154,
-    "remedy": 1030
+    "remedy": 1090
    }
   },
   {
@@ -3985,7 +3985,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1550,
+    "self": 1668,
     "wealth": 1552,
     "career": 1571,
     "love": 1253,
@@ -4005,7 +4005,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1400,
+    "self": 1616,
     "wealth": 1210,
     "career": 1144,
     "love": 1085,
@@ -4025,10 +4025,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1705,
-    "wealth": 1188,
-    "career": 1176,
-    "love": 1096,
+    "self": 1728,
+    "wealth": 1154,
+    "career": 1141,
+    "love": 1065,
     "remedy": 935
    }
   },
@@ -4045,11 +4045,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1558,
-    "wealth": 1416,
-    "career": 1315,
-    "love": 1185,
-    "remedy": 1007
+    "self": 1627,
+    "wealth": 1162,
+    "career": 1047,
+    "love": 1013,
+    "remedy": 1037
    }
   },
   {
@@ -4065,11 +4065,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1725,
-    "wealth": 1552,
-    "career": 1514,
-    "love": 1222,
-    "remedy": 1164
+    "self": 1786,
+    "wealth": 1550,
+    "career": 1510,
+    "love": 1223,
+    "remedy": 1154
    }
   },
   {
@@ -4085,7 +4085,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1638,
+    "self": 1710,
     "wealth": 1440,
     "career": 1457,
     "love": 1190,
@@ -4105,7 +4105,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1638,
+    "self": 1630,
     "wealth": 1339,
     "career": 1278,
     "love": 1132,
@@ -4125,7 +4125,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1466,
+    "self": 1495,
     "wealth": 1342,
     "career": 1306,
     "love": 1092,
@@ -4145,11 +4145,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1717,
-    "wealth": 1468,
-    "career": 1419,
-    "love": 1299,
-    "remedy": 1104
+    "self": 1709,
+    "wealth": 1227,
+    "career": 1160,
+    "love": 1077,
+    "remedy": 1041
    }
   },
   {
@@ -4165,7 +4165,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1681,
+    "self": 1743,
     "wealth": 1473,
     "career": 1467,
     "love": 1224,
@@ -4185,11 +4185,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1611,
-    "wealth": 1593,
-    "career": 1557,
-    "love": 1182,
-    "remedy": 1106
+    "self": 1806,
+    "wealth": 1475,
+    "career": 1424,
+    "love": 1255,
+    "remedy": 1066
    }
   },
   {
@@ -4205,7 +4205,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1533,
+    "self": 1726,
     "wealth": 1416,
     "career": 1358,
     "love": 1216,
@@ -4225,7 +4225,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1648,
+    "self": 1664,
     "wealth": 1527,
     "career": 1513,
     "love": 1222,
@@ -4245,11 +4245,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1567,
-    "wealth": 1408,
-    "career": 1344,
-    "love": 1188,
-    "remedy": 1169
+    "self": 1675,
+    "wealth": 1218,
+    "career": 1148,
+    "love": 1081,
+    "remedy": 1173
    }
   },
   {
@@ -4265,9 +4265,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1588,
-    "wealth": 1352,
-    "career": 1347,
+    "self": 1631,
+    "wealth": 1318,
+    "career": 1312,
     "love": 1189,
     "remedy": 1094
    }
@@ -4285,10 +4285,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1459,
-    "wealth": 1273,
-    "career": 1222,
-    "love": 1072,
+    "self": 1581,
+    "wealth": 1239,
+    "career": 1187,
+    "love": 1041,
     "remedy": 849
    }
   },
@@ -4305,7 +4305,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1651,
+    "self": 1670,
     "wealth": 1455,
     "career": 1406,
     "love": 1194,
@@ -4325,7 +4325,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1625,
+    "self": 1671,
     "wealth": 1517,
     "career": 1518,
     "love": 1233,
@@ -4345,10 +4345,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1716,
-    "wealth": 1483,
-    "career": 1486,
-    "love": 1221,
+    "self": 1789,
+    "wealth": 1449,
+    "career": 1451,
+    "love": 1190,
     "remedy": 1057
    }
   },
@@ -4381,7 +4381,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1737,
+    "self": 1801,
     "wealth": 1429,
     "career": 1369,
     "love": 1237,
@@ -4401,7 +4401,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1396,
+    "self": 1489,
     "wealth": 1436,
     "career": 1380,
     "love": 1155,
@@ -4421,10 +4421,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1678,
-    "wealth": 1520,
-    "career": 1481,
-    "love": 1316,
+    "self": 1805,
+    "wealth": 1486,
+    "career": 1446,
+    "love": 1285,
     "remedy": 1082
    }
   },
@@ -4441,7 +4441,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1642,
+    "self": 1750,
     "wealth": 1443,
     "career": 1397,
     "love": 1179,
@@ -4461,7 +4461,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1523,
+    "self": 1669,
     "wealth": 1429,
     "career": 1421,
     "love": 1172,
@@ -4481,7 +4481,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1523,
+    "self": 1673,
     "wealth": 1166,
     "career": 1104,
     "love": 1058,
@@ -4501,7 +4501,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1637,
+    "self": 1753,
     "wealth": 1418,
     "career": 1409,
     "love": 1205,
@@ -4521,7 +4521,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1407,
+    "self": 1490,
     "wealth": 1339,
     "career": 1299,
     "love": 1093,
@@ -4541,7 +4541,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1561,
+    "self": 1649,
     "wealth": 1381,
     "career": 1325,
     "love": 1197,
@@ -4561,7 +4561,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1399,
+    "self": 1539,
     "wealth": 1057,
     "career": 1036,
     "love": 985,
@@ -4581,11 +4581,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1546,
-    "wealth": 1348,
-    "career": 1280,
-    "love": 1060,
-    "remedy": 1005
+    "self": 1774,
+    "wealth": 1241,
+    "career": 1158,
+    "love": 1087,
+    "remedy": 1028
    }
   },
   {
@@ -4601,11 +4601,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1590,
-    "wealth": 1617,
-    "career": 1530,
-    "love": 1228,
-    "remedy": 1003
+    "self": 1558,
+    "wealth": 1443,
+    "career": 1348,
+    "love": 1074,
+    "remedy": 1066
    }
   },
   {
@@ -4621,7 +4621,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1416,
+    "self": 1539,
     "wealth": 1026,
     "career": 966,
     "love": 942,
@@ -4641,7 +4641,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1639,
+    "self": 1654,
     "wealth": 1476,
     "career": 1458,
     "love": 1215,
@@ -4661,7 +4661,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1562,
+    "self": 1667,
     "wealth": 1506,
     "career": 1496,
     "love": 1211,
@@ -4681,11 +4681,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1618,
-    "wealth": 1413,
-    "career": 1301,
-    "love": 1105,
-    "remedy": 1024
+    "self": 1664,
+    "wealth": 1261,
+    "career": 1159,
+    "love": 1046,
+    "remedy": 1036
    }
   },
   {
@@ -4717,11 +4717,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1603,
-    "wealth": 1357,
-    "career": 1295,
-    "love": 1145,
-    "remedy": 973
+    "self": 1628,
+    "wealth": 1096,
+    "career": 1001,
+    "love": 965,
+    "remedy": 1042
    }
   },
   {
@@ -4737,7 +4737,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1589,
+    "self": 1591,
     "wealth": 1435,
     "career": 1447,
     "love": 1191,
@@ -4757,11 +4757,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1744,
-    "wealth": 1475,
-    "career": 1431,
-    "love": 1204,
-    "remedy": 1181
+    "self": 1862,
+    "wealth": 1466,
+    "career": 1430,
+    "love": 1199,
+    "remedy": 1146
    }
   },
   {
@@ -4777,7 +4777,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1735,
+    "self": 1733,
     "wealth": 1460,
     "career": 1474,
     "love": 1217,
@@ -4797,7 +4797,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1401,
+    "self": 1485,
     "wealth": 1230,
     "career": 1217,
     "love": 1062,
@@ -4817,11 +4817,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1630,
+    "self": 1781,
     "wealth": 1425,
     "career": 1338,
     "love": 1200,
-    "remedy": 1095
+    "remedy": 1134
    }
   },
   {
@@ -4837,7 +4837,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1370,
+    "self": 1490,
     "wealth": 1304,
     "career": 1282,
     "love": 1049,
@@ -4857,7 +4857,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1343,
+    "self": 1461,
     "wealth": 1485,
     "career": 1420,
     "love": 1183,
@@ -4877,7 +4877,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1460,
+    "self": 1541,
     "wealth": 1373,
     "career": 1314,
     "love": 1114,
@@ -4897,7 +4897,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1541,
+    "self": 1547,
     "wealth": 1389,
     "career": 1360,
     "love": 1131,
@@ -4917,10 +4917,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1516,
-    "wealth": 1165,
-    "career": 1153,
-    "love": 1080,
+    "self": 1549,
+    "wealth": 1131,
+    "career": 1118,
+    "love": 1049,
     "remedy": 1010
    }
   },
@@ -4937,7 +4937,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1318,
+    "self": 1421,
     "wealth": 1415,
     "career": 1411,
     "love": 1108,
@@ -4957,11 +4957,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1732,
-    "wealth": 1542,
-    "career": 1487,
-    "love": 1145,
-    "remedy": 1157
+    "self": 1863,
+    "wealth": 1495,
+    "career": 1451,
+    "love": 1151,
+    "remedy": 1147
    }
   },
   {
@@ -4977,10 +4977,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1385,
-    "wealth": 1321,
-    "career": 1274,
-    "love": 1148,
+    "self": 1531,
+    "wealth": 1287,
+    "career": 1239,
+    "love": 1117,
     "remedy": 852
    }
   },
@@ -4997,7 +4997,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1752,
+    "self": 1787,
     "wealth": 1421,
     "career": 1411,
     "love": 1187,
@@ -5017,10 +5017,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1637,
-    "wealth": 1213,
-    "career": 1193,
-    "love": 1112,
+    "self": 1732,
+    "wealth": 1179,
+    "career": 1158,
+    "love": 1081,
     "remedy": 1041
    }
   },
@@ -5037,7 +5037,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1471,
+    "self": 1625,
     "wealth": 1138,
     "career": 1097,
     "love": 1044,
@@ -5057,10 +5057,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1436,
-    "wealth": 1121,
-    "career": 1086,
-    "love": 1034,
+    "self": 1479,
+    "wealth": 1087,
+    "career": 1051,
+    "love": 1003,
     "remedy": 836
    }
   },
@@ -5077,7 +5077,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1511,
+    "self": 1648,
     "wealth": 1511,
     "career": 1521,
     "love": 1224,
@@ -5097,7 +5097,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1496,
+    "self": 1560,
     "wealth": 1414,
     "career": 1407,
     "love": 1166,
@@ -5117,7 +5117,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1483,
+    "self": 1644,
     "wealth": 1123,
     "career": 1093,
     "love": 1042,
@@ -5137,7 +5137,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1695,
+    "self": 1793,
     "wealth": 1216,
     "career": 1196,
     "love": 1113,
@@ -5157,7 +5157,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1606,
+    "self": 1762,
     "wealth": 1502,
     "career": 1474,
     "love": 1232,
@@ -5177,11 +5177,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1629,
-    "wealth": 1583,
-    "career": 1530,
+    "self": 1682,
+    "wealth": 1426,
+    "career": 1360,
     "love": 1117,
-    "remedy": 1031
+    "remedy": 990
    }
   },
   {
@@ -5197,7 +5197,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1621,
+    "self": 1674,
     "wealth": 1227,
     "career": 1218,
     "love": 1134,
@@ -5217,7 +5217,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1542,
+    "self": 1572,
     "wealth": 1329,
     "career": 1281,
     "love": 1109,
@@ -5237,7 +5237,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1372,
+    "self": 1566,
     "wealth": 1076,
     "career": 1006,
     "love": 975,
@@ -5257,10 +5257,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1349,
-    "wealth": 968,
-    "career": 932,
-    "love": 896,
+    "self": 1435,
+    "wealth": 934,
+    "career": 897,
+    "love": 865,
     "remedy": 895
    }
   },
@@ -5277,7 +5277,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1523,
+    "self": 1600,
     "wealth": 1272,
     "career": 1243,
     "love": 1077,
@@ -5297,11 +5297,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1609,
-    "wealth": 1450,
-    "career": 1386,
-    "love": 1097,
-    "remedy": 1116
+    "self": 1644,
+    "wealth": 1043,
+    "career": 994,
+    "love": 932,
+    "remedy": 1154
    }
   },
   {
@@ -5317,10 +5317,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1545,
-    "wealth": 1342,
-    "career": 1292,
-    "love": 1167,
+    "self": 1632,
+    "wealth": 1308,
+    "career": 1257,
+    "love": 1136,
     "remedy": 966
    }
   },
@@ -5337,7 +5337,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1783,
+    "self": 1882,
     "wealth": 1504,
     "career": 1477,
     "love": 1240,
@@ -5357,11 +5357,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1718,
-    "wealth": 1333,
-    "career": 1261,
-    "love": 1186,
-    "remedy": 1169
+    "self": 1660,
+    "wealth": 1180,
+    "career": 1104,
+    "love": 1041,
+    "remedy": 1142
    }
   },
   {
@@ -5377,11 +5377,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1575,
-    "wealth": 1553,
-    "career": 1492,
-    "love": 1098,
-    "remedy": 1114
+    "self": 1586,
+    "wealth": 1287,
+    "career": 1230,
+    "love": 1070,
+    "remedy": 1183
    }
   },
   {
@@ -5413,7 +5413,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1522,
+    "self": 1595,
     "wealth": 1480,
     "career": 1464,
     "love": 1184,
@@ -5449,7 +5449,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1616,
+    "self": 1759,
     "wealth": 1254,
     "career": 1235,
     "love": 1154,
@@ -5469,10 +5469,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1565,
-    "wealth": 1412,
-    "career": 1391,
-    "love": 1220,
+    "self": 1645,
+    "wealth": 1378,
+    "career": 1356,
+    "love": 1189,
     "remedy": 1034
    }
   },
@@ -5489,11 +5489,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1516,
-    "wealth": 1607,
-    "career": 1559,
-    "love": 1178,
-    "remedy": 1010
+    "self": 1620,
+    "wealth": 1191,
+    "career": 1115,
+    "love": 1043,
+    "remedy": 969
    }
   },
   {
@@ -5509,7 +5509,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1612,
+    "self": 1657,
     "wealth": 1550,
     "career": 1519,
     "love": 1249,
@@ -5529,7 +5529,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1411,
+    "self": 1461,
     "wealth": 1197,
     "career": 1151,
     "love": 988,
@@ -5549,11 +5549,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1786,
-    "wealth": 1512,
-    "career": 1435,
-    "love": 1257,
-    "remedy": 1146
+    "self": 1755,
+    "wealth": 1415,
+    "career": 1320,
+    "love": 1162,
+    "remedy": 1066
    }
   },
   {
@@ -5569,10 +5569,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1416,
-    "wealth": 1156,
-    "career": 1100,
-    "love": 1045,
+    "self": 1586,
+    "wealth": 1122,
+    "career": 1065,
+    "love": 1014,
     "remedy": 1000
    }
   },
@@ -5589,7 +5589,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1430,
+    "self": 1549,
     "wealth": 1378,
     "career": 1347,
     "love": 1201,
@@ -5609,11 +5609,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1435,
-    "wealth": 1288,
-    "career": 1221,
-    "love": 1093,
-    "remedy": 1057
+    "self": 1747,
+    "wealth": 1405,
+    "career": 1330,
+    "love": 1189,
+    "remedy": 1088
    }
   },
   {
@@ -5629,10 +5629,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1774,
-    "wealth": 1498,
-    "career": 1413,
-    "love": 1203,
+    "self": 1852,
+    "wealth": 1509,
+    "career": 1419,
+    "love": 1205,
     "remedy": 1141
    }
   },
@@ -5649,7 +5649,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1649,
+    "self": 1703,
     "wealth": 1579,
     "career": 1569,
     "love": 1277,
@@ -5669,11 +5669,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1708,
-    "wealth": 1492,
-    "career": 1408,
-    "love": 1258,
-    "remedy": 1046
+    "self": 1693,
+    "wealth": 1174,
+    "career": 1070,
+    "love": 1034,
+    "remedy": 1113
    }
   },
   {
@@ -5689,7 +5689,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1644,
+    "self": 1737,
     "wealth": 1483,
     "career": 1449,
     "love": 1220,
@@ -5709,10 +5709,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1597,
-    "wealth": 1597,
-    "career": 1546,
-    "love": 1221,
+    "self": 1719,
+    "wealth": 1554,
+    "career": 1509,
+    "love": 1212,
     "remedy": 1028
    }
   },
@@ -5729,7 +5729,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1531,
+    "self": 1627,
     "wealth": 1167,
     "career": 1107,
     "love": 1062,
@@ -5749,11 +5749,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1599,
-    "wealth": 1476,
-    "career": 1414,
-    "love": 1174,
-    "remedy": 1045
+    "self": 1679,
+    "wealth": 1434,
+    "career": 1378,
+    "love": 1142,
+    "remedy": 1038
    }
   },
   {
@@ -5769,11 +5769,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1784,
-    "wealth": 1604,
-    "career": 1556,
-    "love": 1302,
-    "remedy": 1153
+    "self": 1853,
+    "wealth": 1517,
+    "career": 1457,
+    "love": 1223,
+    "remedy": 1145
    }
   },
   {
@@ -5789,11 +5789,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1740,
-    "wealth": 1458,
-    "career": 1370,
-    "love": 1236,
-    "remedy": 1139
+    "self": 1794,
+    "wealth": 1427,
+    "career": 1337,
+    "love": 1211,
+    "remedy": 1128
    }
   },
   {
@@ -5809,7 +5809,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1662,
+    "self": 1722,
     "wealth": 1376,
     "career": 1344,
     "love": 1189,
@@ -5829,7 +5829,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1528,
+    "self": 1549,
     "wealth": 1352,
     "career": 1337,
     "love": 1108,
@@ -5849,10 +5849,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1506,
-    "wealth": 1303,
-    "career": 1263,
-    "love": 1101,
+    "self": 1554,
+    "wealth": 1269,
+    "career": 1228,
+    "love": 1070,
     "remedy": 931
    }
   },
@@ -5869,11 +5869,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1794,
-    "wealth": 1472,
-    "career": 1438,
-    "love": 1220,
-    "remedy": 1117
+    "self": 1835,
+    "wealth": 1178,
+    "career": 1124,
+    "love": 1057,
+    "remedy": 1135
    }
   },
   {
@@ -5889,11 +5889,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1537,
-    "wealth": 1356,
-    "career": 1242,
-    "love": 1186,
-    "remedy": 929
+    "self": 1666,
+    "wealth": 1172,
+    "career": 1045,
+    "love": 1016,
+    "remedy": 954
    }
   },
   {
@@ -5909,10 +5909,10 @@
     "remedy"
    ],
    "chars": {
-    "self": 1581,
-    "wealth": 1359,
-    "career": 1317,
-    "love": 1179,
+    "self": 1749,
+    "wealth": 1325,
+    "career": 1282,
+    "love": 1148,
     "remedy": 1037
    }
   },
@@ -5929,7 +5929,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1766,
+    "self": 1791,
     "wealth": 1525,
     "career": 1532,
     "love": 1262,
@@ -5949,7 +5949,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1434,
+    "self": 1552,
     "wealth": 1412,
     "career": 1344,
     "love": 1182,
@@ -5969,11 +5969,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1746,
-    "wealth": 1602,
-    "career": 1506,
-    "love": 1185,
-    "remedy": 1039
+    "self": 1856,
+    "wealth": 1494,
+    "career": 1395,
+    "love": 1182,
+    "remedy": 1099
    }
   },
   {
@@ -6005,11 +6005,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1461,
-    "wealth": 1277,
-    "career": 1197,
-    "love": 1069,
-    "remedy": 878
+    "self": 1661,
+    "wealth": 1137,
+    "career": 1054,
+    "love": 1003,
+    "remedy": 894
    }
   },
   {
@@ -6025,7 +6025,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1507,
+    "self": 1513,
     "wealth": 1364,
     "career": 1337,
     "love": 1178,
@@ -6045,7 +6045,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1811,
+    "self": 1943,
     "wealth": 1492,
     "career": 1440,
     "love": 1227,
@@ -6065,7 +6065,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1233,
+    "self": 1369,
     "wealth": 1081,
     "career": 1005,
     "love": 927,
@@ -6085,11 +6085,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1634,
-    "wealth": 1680,
-    "career": 1621,
-    "love": 1243,
-    "remedy": 1154
+    "self": 1571,
+    "wealth": 1299,
+    "career": 1214,
+    "love": 1085,
+    "remedy": 1120
    }
   },
   {
@@ -6105,7 +6105,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1300,
+    "self": 1397,
     "wealth": 1063,
     "career": 1006,
     "love": 963,
@@ -6125,7 +6125,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1311,
+    "self": 1511,
     "wealth": 1023,
     "career": 962,
     "love": 934,
@@ -6145,7 +6145,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1532,
+    "self": 1615,
     "wealth": 1428,
     "career": 1406,
     "love": 1204,
@@ -6165,7 +6165,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1648,
+    "self": 1801,
     "wealth": 1524,
     "career": 1527,
     "love": 1248,

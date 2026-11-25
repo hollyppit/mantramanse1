@@ -61,7 +61,7 @@ function runOne(inp, i, tag) {
     let di = -1; tl.daeun.forEach((r, k) => { if (r.startMs <= now) di = k; });
     if (di >= 0) assert.ok(txt(out.self).includes(tl.daeun[di].gz), '종합: 지금 대운 간지');
     const re = /(\d{4})년 (\S\S) [^가-힣]*주무기 활성도 (\S+(?: \S+)?) · 활용 유리도 (좋음|무난|조심)/g; let m, n = 0;
-    WC.TOPICS.forEach(t => { const s = txt(out[t]); while ((m = re.exec(s))) { const r = tl.seun.find(x => x.year === +m[1]); assert.ok(r, t + ' 세운 연도'); assert.equal(r.gz, m[2], t + ' 세운 간지'); assert.equal(r.favor.n, m[4], t + ' 유리도=엔진 등급'); assert.ok(m[3].startsWith(r.best.levelK.split(' ')[0]), t + ' 활성도'); n++; } });
+    WC.TOPICS.forEach(t => { const s = txt(out[t]); while ((m = re.exec(s))) { const r = tl.seun.find(x => x.year === +m[1]); assert.ok(r, t + ' 세운 연도'); assert.equal(r.gz, m[2], t + ' 세운 간지'); assert.equal(r.favor.n, m[4], t + ' 유리도=엔진 등급'); assert.ok(m[3].startsWith(((r.acts && r.acts[0]) || r.best).levelK.split(' ')[0]), t + ' 활성도(1순위 주무기)'); n++; } });
     stat.linkedSeun = (stat.linkedSeun || 0) + n;
     WC.TOPICS.forEach(t => { stat.topicShown[t]++; stat.avgChars[t] += txt(out[t]).length; });
   }
