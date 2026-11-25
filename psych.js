@@ -1,13 +1,14 @@
 /* 심리 솔루션 — 계산 로직(2판, 2026-11-25). 문안은 psych-data.js(MantraPsychData)에만 둔다.
    · 엔진(engine.js) M.compute 결과를 읽기만 한다(엔진 값 불변 — tests/psych-sim.cjs 검사).
-   · 세 가지 출처를 섞지 않는다: 명리 해석(이 파일) · 내가 확인한 경험(opt.state.answers/notes) · 내가 기록한 현재 상태(opt.state.history)
+   · 2026-11-25 3판(사용자 지시): 사용자 입력(확인 응답·메모·마음 기록·실천 고르기)과 질문을 모두 뺐다. 상담하는 사람이 읽고 설명하는 화면.
    · ① 마음에 남은 경험과 반복되는 패턴: 주제 12개(THEMES). 주제마다 방식(mode)이 여럿이고, 명식 전체 조합(십성 묶음·십성 위치·일간 힘·
        월령·합충형·신살·조후·오행·지금 대운)으로 방식을 가른다. 한 글자·한 십성만으로 카드를 만들지 않는다(근거 2개 이상).
        '제 얘기는 아니에요' 응답 주제는 빼고 다음 후보로 채운다. 같은 주제는 한 번만.
    · ② 시기: 대운·세운 3년·올해 월운마다 주제·감정 2~3개·마음의 온도(12운성)·돌아볼 질문. 좋고 나쁨이 아니라 변화의 두드러짐(중립).
    · ③ 교운기: 지금 대운·다음 대운, 시작·끝, 대운수 계산 기준, 앞뒤 1년 전환 구간
-   · ④ 곡선: 해마다 운↔원국 자리 부딪힘·대운 전환 근접·기운 흔들림 정도(설명은 D.GRAPH.how). 사용자 기록이 있을 때만 기록선.
-   · 같은 명식·같은 기준 시각·같은 응답이면 같은 결과. 사용: MantraPsych.build(Manse, ch, { now, state }) */
+   · ④ 곡선: 해마다 운↔원국 자리 부딪힘·대운 전환 근접·기운 흔들림 정도(설명은 D.GRAPH.how).
+   · ⑤ 솔루션: 지금 시기(감정별 다루는 법·교운기) + 패턴별(필요한 것·작은 실천) + 명리 보완(용신 오행)
+   · 같은 명식·같은 기준 시각이면 같은 결과. 사용: MantraPsych.build(Manse, ch, { now }) */
 (function (G) {
   'use strict';
   var VERSION = 'psych-20261125-2';
@@ -273,7 +274,7 @@
     var un = DD.UNSEONG[x.unseong] || null, G0 = mainG != null ? DD.GROUP['g' + mainG] : null;
     return {
       gz: F.M.gzNameK({ s: x.s, b: x.b }), stemTG: x.stemTG, branchTG: x.branchTG, group: mainG, level: level, levelK: DD.LEVEL[level], v: r3(sv),
-      theme: G0 ? G0.theme : '', question: G0 ? G0.q[0] : '', question2: G0 ? G0.q[1] : '',
+      theme: G0 ? G0.theme : '',
       emotions: emotions(F, x, h.list, gS, gB, mainG != null && F.g[mainG] < 10),
       mood: un ? { k: un.k, t: un.t, unseong: x.unseong } : null,
       hits: h.list.filter(function (q) { return CFG.hitW[q.type] >= 0.3; }).slice(0, 2),
@@ -304,7 +305,7 @@
   }
 
   // ── 곡선 그래프 ──
-  function curve(F, now, history) {
+  function curve(F, now) {
     var M = F.M, L = F.ch.daeun.list, by = F.ch.solar && F.ch.solar.y ? F.ch.solar.y : new Date(F.ch.utc).getUTCFullYear();
     var last = L.length ? L[L.length - 1].startAge + 10 : 80, span = Math.min(100, Math.max(60, last));
     var dHit = {}, raw = [], bounds = L.map(function (x) { return x.startYear; });
@@ -322,34 +323,19 @@
     var pts = raw.map(function (p, i) { var s = 0, n = 0; for (var k = -2; k <= 2; k++) if (raw[i + k]) { s += raw[i + k].v * SW[k + 2]; n += SW[k + 2]; } return { age: p.age, year: p.year, v: r3(s / n) }; });
     var bands = L.map(function (x, i) {
       var p = period(F, x), nx = L[i + 1];
-      return { i: i, startAge: x.startAge, endAge: nx ? nx.startAge : x.startAge + 10, startYear: x.startYear, gz: p.gz, tg: x.stemTG + '/' + x.branchTG, theme: p.theme, question: p.question, question2: p.question2, basis: p.basis, emotions: p.emotions.map(function (e) { return e.name; }), now: x.startMs <= now && (!nx || nx.startMs > now) };
+      return { i: i, startAge: x.startAge, endAge: nx ? nx.startAge : x.startAge + 10, startYear: x.startYear, gz: p.gz, tg: x.stemTG + '/' + x.branchTG, theme: p.theme, basis: p.basis, emotions: p.emotions.map(function (e) { return e.name; }), now: x.startMs <= now && (!nx || nx.startMs > now) };
     });
-    var mine = (history || []).filter(function (h) { return typeof h.level === 'number' && typeof h.t === 'number'; }).map(function (h) { return { age: r2((h.t - F.ch.utc) / YEAR_MS), level: h.level, t: h.t }; }).sort(function (a, b) { return a.t - b.t; });
-    return { points: pts, bands: bands, transitions: L.slice(1).map(function (x) { return { age: x.startAge, year: x.startYear }; }), nowAge: r2((now - F.ch.utc) / YEAR_MS), span: span, mine: mine, how: D().GRAPH.how };
-  }
-
-  // ── 사용자 기록 요약(명리 추정 없음) ──
-  function stateSummary(history) {
-    var h = (history || []).slice().sort(function (a, b) { return b.t - a.t; })[0]; if (!h) return null;
-    var DD = D(), parts = [];
-    if (h.emo && h.emo.length) parts.push('요즘 자주 느끼는 감정: ' + h.emo.join('·'));
-    if (h.load && h.load.length) parts.push('부담이 큰 쪽: ' + h.load.join('·'));
-    if (h.body && h.body.length) parts.push('달라진 점: ' + h.body.join(', '));
-    if (h.need) parts.push('지금 필요한 것: ' + h.need);
-    if (typeof h.level === 'number') parts.push('마음의 부담 ' + h.level + '/4');
-    var heavy = (typeof h.level === 'number' && h.level >= 4) || (h.body || []).some(function (b) { return /잠이 줄|바닥/.test(b); });
-    return { t: h.t, parts: parts, level: h.level, need: h.need || '', actions: h.need && DD.ACTIONS[h.need] ? DD.ACTIONS[h.need].slice() : [], care: heavy ? DD.CHECK.care : '' };
+    return { points: pts, bands: bands, transitions: L.slice(1).map(function (x) { return { age: x.startAge, year: x.startYear }; }), nowAge: r2((now - F.ch.utc) / YEAR_MS), span: span, how: D().GRAPH.how };
   }
 
   function build(M, ch, opt) {
     var DD = D(); opt = opt || {};
     if (!DD) return { ok: false, version: VERSION, reason: '문안 파일(psych-data.js)이 없어요' };
     if (!ch || !ch.weights || !ch.cells || !ch.pillars || !ch.daeun) return { ok: false, version: VERSION, reason: '명식 계산 결과가 없어요' };
-    var now = typeof opt.now === 'number' ? opt.now : Date.now(), st = opt.state || {};
-    var answers = st.answers || {}, notes = st.notes || {}, history = st.history || [];
+    var now = typeof opt.now === 'number' ? opt.now : Date.now();
     var F = features(M, ch);
     var cur = null; ch.daeun.list.forEach(function (x) { if (x.startMs <= now) cur = x; });
-    var th = themeCards(F, { curDaeun: cur }, answers, notes);
+    var th = themeCards(F, { curDaeun: cur }, {}, {});
     var daeun = ch.daeun.list.map(function (x) { var p = period(F, x); p.startAge = x.startAge; p.startYear = x.startYear; p.now = x === cur; return p; });
     var Y = new Date(now).getUTCFullYear(), seun = [];
     try { M.seunRange(ch, Y, Y + 2).forEach(function (x) { var p = period(F, x); p.year = x.year; p.age = x.age; seun.push(p); }); } catch (e) { }
@@ -361,25 +347,31 @@
         var p = period(F, x); p.startMs = m.startMs; p.termName = m.termName; p.idx = i; p.now = m.startMs <= now && (i === 11 || list[i + 1].startMs > now); months.push(p);
       });
     } catch (e) { }
-    var tr = transition(F, now), gr = curve(F, now, history), ss = stateSummary(history);
-    // 실천: 확인한 주제의 작은 실천 + 기록한 '필요한 것'의 실천(응답이 다음 제안에 반영)
-    var acts = [], seen = {};
-    var pushA = function (t, from, src) { if (!t || seen[t]) return; seen[t] = 1; acts.push({ text: t, from: from, src: src }); };
-    th.cards.filter(function (c) { return c.answer === 'yes' || c.answer === 'some'; }).forEach(function (c) { pushA(c.act, '"' + c.name + '"에 맞아요라고 답함', 'mine'); });
-    if (ss) ss.actions.forEach(function (t) { pushA(t, '기록한 필요: ' + ss.need, 'now'); });
-    if (!acts.length) th.cards.slice(0, 3).forEach(function (c) { pushA(c.act, c.name, 'myeongri'); });
+    var tr = transition(F, now), gr = curve(F, now);
+    var curP = daeun.filter(function (p) { return p.now; })[0] || null, yearP = seun[0] || null;
+    // 지금 시기에 올라오기 쉬운 감정: 지금 대운 + 올해(겹치면 한 번)
+    var nowEmo = [], seenE = {};
+    [curP, yearP].forEach(function (p) { if (p) p.emotions.forEach(function (e) { if (!seenE[e.id]) { seenE[e.id] = 1; nowEmo.push(e); } }); });
+    nowEmo = nowEmo.slice(0, 4);
+    // 솔루션
     var yong = ch.unified && typeof ch.unified.yong === 'number' ? ch.unified.yong : null;
     var elem = yong != null && DD.ELEMENT && DD.ELEMENT[yong] ? { name: DD.ELEMENT[yong].name, mind: DD.ELEMENT[yong].mind, acts: DD.ELEMENT[yong].acts.slice(), note: DD.ELEMENT_NOTE, basis: (ch.unified.primaryName ? ch.unified.primaryName + ' 기준 ' : '') + '용신 ' + DD.ELEMENT[yong].name } : null;
+    var solution = {
+      now: nowEmo.map(function (e) { return { name: e.name, care: e.care }; }),
+      transition: tr.from || tr.to ? { from: tr.from, to: tr.to, inWindow: tr.inWindow } : null,
+      patterns: th.cards.map(function (c) { return { name: c.name, core: c.core, need: c.need, act: c.act }; }),
+      elem: elem
+    };
     var top = th.cards[0] || null;
     return {
       ok: true, version: VERSION, hourKnown: !!ch.pillars.hour, year: Y,
       overview: {
-        pattern: top ? { text: top.core, name: top.name, src: top.answer === 'yes' || top.answer === 'some' ? 'mine' : 'myeongri' } : null,
-        daeun: tr.cur ? { text: tr.cur.startAge + '세~ ' + tr.cur.gz + ' 대운', next: tr.next ? tr.next.startAge + '세 · ' + tr.next.start : '', inWindow: tr.inWindow, src: 'myeongri' } : null,
-        state: ss ? { text: ss.parts.slice(0, 2).join(' · '), src: 'now' } : null,
-        action: st.pick ? { text: st.pick, src: 'mine' } : acts[0] ? { text: acts[0].text, src: acts[0].src } : null
+        pattern: top ? { text: top.core, name: top.name } : null,
+        daeun: tr.cur ? { text: tr.cur.startAge + '세~ ' + tr.cur.gz + ' 대운', theme: tr.cur.theme, next: tr.next ? tr.next.startAge + '세 · ' + tr.next.start : '', inWindow: tr.inWindow } : null,
+        emotions: nowEmo.map(function (e) { return e.name; }),
+        solution: top ? top.act : nowEmo[0] ? nowEmo[0].care : ''
       },
-      themes: th, daeun: daeun, seun: seun, months: months, transition: tr, graph: gr, state: ss, actions: acts.slice(0, 6), pick: st.pick || '', elem: elem
+      themes: th, daeun: daeun, seun: seun, months: months, transition: tr, graph: gr, solution: solution
     };
   }
 
