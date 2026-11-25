@@ -1,0 +1,2188 @@
+{
+  "group": "sports",
+  "collected_at": "2026-11-25",
+  "notes": "astro.com (Astro-Databank) pages returned a bot-check interstitial to automated fetch; Rodden ratings were read from Astrotheme pages, which reproduce the ADB rating and source (birth certificate / memory). ADB URLs are listed for manual re-check.",
+  "persons": [
+    {
+      "id": "sports-01-muhammad-ali",
+      "name": "Muhammad Ali",
+      "name_ko": "무하마드 알리",
+      "gender": "M",
+      "birth_date": "1942-01-17",
+      "birth_time": "18:35",
+      "birth_time_confidence": "verified",
+      "birth_time_source": "Rodden AA (birth certificate/record, contributor Gauquelin) via https://www.astrotheme.com/astrology/Muhammad_Ali ; ADB: https://www.astro.com/astro-databank/Ali,_Muhammad",
+      "birth_place": {
+        "city": "Louisville, Kentucky",
+        "country": "United States",
+        "lon": -85.7585,
+        "tz": "America/Kentucky/Louisville"
+      },
+      "profession": "sports",
+      "profession_detail": "boxing / heavyweight",
+      "death_date": "2016-06-03",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Muhammad_Ali",
+        "https://www.vanguardngr.com/2016/06/key-dates-in-muhammad-alis-life-and-career/amp/",
+        "https://www.the-star.co.ke/news/2016-06-04-factbox-key-bouts-in-late-muhammad-alis-boxing-career/",
+        "https://www.history.com/this-day-in-history/ali-defeats-spinks-to-win-world-heavyweight-championship",
+        "https://www.espn.com/blog/statsinfo/post/_/id/109975/looking-back-thrilla-in-manila-and-ali-holmes-40-and-35-years-later"
+      ]
+    },
+    {
+      "id": "sports-02-michael-jordan",
+      "name": "Michael Jordan",
+      "name_ko": "마이클 조던",
+      "gender": "M",
+      "birth_date": "1963-02-17",
+      "birth_time": "13:40",
+      "birth_time_confidence": "verified",
+      "birth_time_source": "Rodden AA (birth certificate/record, contributor Lois Rodden) via https://www.astrotheme.com/astrology/Michael_Jordan ; ADB: https://www.astro.com/astro-databank/Jordan,_Michael",
+      "birth_place": {
+        "city": "Brooklyn, New York",
+        "country": "United States",
+        "lon": -73.9442,
+        "tz": "America/New_York"
+      },
+      "profession": "sports",
+      "profession_detail": "basketball / shooting guard",
+      "death_date": null,
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Jordan",
+        "https://www.espn.com/nba/player/bio/_/id/1035/michael-jordan",
+        "https://basketball.realgm.com/player/Michael-Jordan/Timeline/1192",
+        "https://www.nba.com/history/legends/profiles/michael-jordan",
+        "https://nbcsports.com/bayarea/warriors/michael-jordan-devastated-breaking-foot-vs-warriors-last-dance"
+      ]
+    },
+    {
+      "id": "sports-03-tiger-woods",
+      "name": "Tiger Woods",
+      "name_ko": "타이거 우즈",
+      "gender": "M",
+      "birth_date": "1975-12-30",
+      "birth_time": "22:50",
+      "birth_time_confidence": "verified",
+      "birth_time_source": "Rodden AA (birth certificate/record, contributor Lois Rodden) via https://www.astrotheme.com/astrology/Tiger_Woods ; ADB: https://www.astro.com/astro-databank/Woods,_Tiger",
+      "birth_place": {
+        "city": "Long Beach, California (hometown Cypress)",
+        "country": "United States",
+        "lon": -118.1937,
+        "tz": "America/Los_Angeles"
+      },
+      "profession": "sports",
+      "profession_detail": "golf",
+      "death_date": null,
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Tiger_Woods",
+        "https://www.foxsports.com/articles/golf/tiger-woods-a-timeline-of-significant-moments-on-and-off-the-golf-course",
+        "https://wjla.com/news/nation-world/timeline-of-tiger-woods-career"
+      ]
+    },
+    {
+      "id": "sports-04-steffi-graf",
+      "name": "Steffi Graf",
+      "name_ko": "슈테피 그라프",
+      "gender": "F",
+      "birth_date": "1969-06-14",
+      "birth_time": "04:40",
+      "birth_time_confidence": "verified",
+      "birth_time_source": "Rodden AA (birth certificate/record) via https://www.astrotheme.com/astrology/Steffi_Graf ; ADB: https://www.astro.com/astro-databank/Graf,_Steffi",
+      "birth_place": {
+        "city": "Mannheim",
+        "country": "Germany",
+        "lon": 8.466,
+        "tz": "Europe/Berlin"
+      },
+      "profession": "sports",
+      "profession_detail": "tennis",
+      "death_date": null,
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Steffi_Graf",
+        "https://www.espn.com/classic/biography/s/Graf_Steffi.html",
+        "https://www.olympedia.org/athletes/124",
+        "https://www.tennisnet.com/en/news/25-years-ago-peter-graf-is-arrested",
+        "https://www.cbsnews.com/news/steffi-graf-calls-it-quits"
+      ]
+    },
+    {
+      "id": "sports-05-diego-maradona",
+      "name": "Diego Maradona",
+      "name_ko": "디에고 마라도나",
+      "gender": "M",
+      "birth_date": "1960-10-30",
+      "birth_time": "07:05",
+      "birth_time_confidence": "verified",
+      "birth_time_source": "Rodden AA (birth certificate/record, contributor Sy Scholfield) via https://www.astrotheme.com/astrology/Diego_Maradona ; ADB: https://www.astro.com/astro-databank/Maradona,_Diego",
+      "birth_place": {
+        "city": "Lanús (Policlínico Evita), Buenos Aires Province",
+        "country": "Argentina",
+        "lon": -58.396,
+        "tz": "America/Argentina/Buenos_Aires"
+      },
+      "profession": "sports",
+      "profession_detail": "football / attacking midfielder",
+      "death_date": "2020-11-25",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Diego_Maradona",
+        "https://worldsoccertalk.com/2020/11/25/diego-maradona-a-life-in-10-key-dates/",
+        "https://www.thestar.com.my/news/world/2020/11/26/timeline-of-argentine-football-legend-maradona039s-life",
+        "https://www.aljazeera.com/sports/2020/11/3/football-star-maradona-to-undergo-brain-surgery"
+      ]
+    },
+    {
+      "id": "sports-06-roger-federer",
+      "name": "Roger Federer",
+      "name_ko": "로저 페더러",
+      "gender": "M",
+      "birth_date": "1981-08-08",
+      "birth_time": "08:40",
+      "birth_time_confidence": "reported",
+      "birth_time_source": "Rodden A (from memory/autobiography) via https://www.astrotheme.com/astrology/Roger_Federer ; ADB: https://www.astro.com/astro-databank/Federer,_Roger",
+      "birth_place": {
+        "city": "Basel",
+        "country": "Switzerland",
+        "lon": 7.5886,
+        "tz": "Europe/Zurich"
+      },
+      "profession": "sports",
+      "profession_detail": "tennis",
+      "death_date": null,
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Roger_Federer",
+        "https://supersport.com/tennis/atp/news/7d953e4f-a903-4673-8322-8b959a9765f3/key-dates-from-roger-federer-s-historic-career",
+        "https://www.atptour.com/en/news/roger-federer-retirement-legacy-story",
+        "https://www.swissinfo.ch/eng/roger-federer-becomes-father-of-twin-girls/7523386",
+        "https://time.com/90515/roger-federer-twins-again"
+      ]
+    },
+    {
+      "id": "sports-07-serena-williams",
+      "name": "Serena Williams",
+      "name_ko": "세리나 윌리엄스",
+      "gender": "F",
+      "birth_date": "1981-09-26",
+      "birth_time": "20:28",
+      "birth_time_confidence": "verified",
+      "birth_time_source": "Rodden AA (birth certificate/record, contributor Shelley Ackerman) via https://www.astrotheme.com/astrology/Serena_Williams ; ADB: https://www.astro.com/astro-databank/Williams,_Serena",
+      "birth_place": {
+        "city": "Saginaw, Michigan",
+        "country": "United States",
+        "lon": -83.9508,
+        "tz": "America/Detroit"
+      },
+      "profession": "sports",
+      "profession_detail": "tennis",
+      "death_date": null,
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Serena_Williams",
+        "https://www.wral.com/archive/17271795/",
+        "https://www.aljazeera.com/sports/2022/9/3/timeline-serena-williams-career",
+        "https://www.wtatennis.com/news/4523474/serena-williams-to-return-to-singles-at-wimbledon-after-accepting-wild-card"
+      ]
+    },
+    {
+      "id": "sports-08-michael-phelps",
+      "name": "Michael Phelps",
+      "name_ko": "마이클 펠프스",
+      "gender": "M",
+      "birth_date": "1985-06-30",
+      "birth_time": null,
+      "birth_time_confidence": "unknown",
+      "birth_time_source": "Rodden C on https://www.astrotheme.com/astrology/Michael_Phelps (source unknown) - not used",
+      "birth_place": {
+        "city": "Baltimore, Maryland",
+        "country": "United States",
+        "lon": -76.6122,
+        "tz": "America/New_York"
+      },
+      "profession": "sports",
+      "profession_detail": "swimming",
+      "death_date": null,
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Phelps",
+        "https://www.npr.org/2008/08/17/93671607/phelps-turns-legend-with-8th-beijing-gold",
+        "https://www.npr.org/sections/thetwo-way/2014/12/19/371916403/michael-phelps-pleads-guilty-to-dui",
+        "https://bleacherreport.com/articles/2222678-michael-phelps-suspended-latest-details-comments-and-reaction",
+        "https://www.cbsnews.com/news/michael-phelps-secretly-got-married-in-june"
+      ]
+    },
+    {
+      "id": "sports-09-kim-yuna",
+      "name": "Kim Yuna",
+      "name_ko": "김연아",
+      "gender": "F",
+      "birth_date": "1990-09-05",
+      "birth_time": null,
+      "birth_time_confidence": "unknown",
+      "birth_time_source": null,
+      "birth_place": {
+        "city": "Bucheon, Gyeonggi",
+        "country": "South Korea",
+        "lon": 126.766,
+        "tz": "Asia/Seoul"
+      },
+      "profession": "sports",
+      "profession_detail": "figure skating (ladies' singles)",
+      "death_date": null,
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Yuna_Kim",
+        "https://olympics.com/en/news/yuna-kim-and-her-life-changing-vancouver-2010-gold",
+        "https://www.nbcsports.com/olympics/news/yuna-kim-announces-retirement-after-sochi-silver",
+        "https://www.washingtontimes.com/news/2014/feb/20/olympic-silver-medal-at-end-of-yuna-kims-career/",
+        "https://www.koreatimes.co.kr/amp/lifestyle/people-events/20220725/koreas-figure-skating-icon-kim-yuna-to-wed-singer-ko-woo-rim"
+      ]
+    },
+    {
+      "id": "sports-10-park-ji-sung",
+      "name": "Park Ji-sung",
+      "name_ko": "박지성",
+      "gender": "M",
+      "birth_date": "1981-03-30",
+      "birth_time": null,
+      "birth_time_confidence": "unknown",
+      "birth_time_source": null,
+      "birth_place": {
+        "city": "Seoul",
+        "country": "South Korea",
+        "lon": 126.978,
+        "tz": "Asia/Seoul"
+      },
+      "profession": "sports",
+      "profession_detail": "football / midfielder",
+      "death_date": null,
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Park_Ji-sung",
+        "https://www.washingtontimes.com/news/2014/may/14/park-ji-sung-announces-retirement-at-age-33/",
+        "https://www.koreatimes.co.kr/amp/southkorea/20140514/park-ji-sung-retires",
+        "https://www.koreajoongangdaily.com/korea/retired-footballer-park-jisung-weds/10045712"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "person_id": "sports-01-muhammad-ali",
+      "event_date": "1960",
+      "event_category": "achievement",
+      "event_type": "olympic_gold",
+      "event_description": "Rome Olympics light-heavyweight gold",
+      "event_significance": 3,
+      "evidence_text": "Won the light-heavyweight gold medal at the 1960 Rome Olympics.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Muhammad_Ali",
+        "https://www.vanguardngr.com/2016/06/key-dates-in-muhammad-alis-life-and-career/amp/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-01-muhammad-ali",
+      "event_date": "1960-10-29",
+      "event_category": "career_change",
+      "event_type": "debut",
+      "event_description": "Professional debut vs Tunney Hunsaker",
+      "event_significance": 2,
+      "evidence_text": "Professional debut: six-round decision over Tunney Hunsaker, October 29, 1960.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Muhammad_Ali"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-01-muhammad-ali",
+      "event_date": "1964-02-25",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "Won world heavyweight title vs Sonny Liston",
+      "event_significance": 3,
+      "evidence_text": "Won the heavyweight title by defeating Sonny Liston on February 25, 1964.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Muhammad_Ali",
+        "https://www.the-star.co.ke/news/2016-06-04-factbox-key-bouts-in-late-muhammad-alis-boxing-career/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-01-muhammad-ali",
+      "event_date": "1964",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Married Sonji Roi (divorced 1966)",
+      "event_significance": 2,
+      "evidence_text": "Married Sonji Roi in 1964; divorced 1966.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Muhammad_Ali"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-01-muhammad-ali",
+      "event_date": "1967-04-28",
+      "event_category": "failure",
+      "event_type": "ban",
+      "event_description": "Refused army induction; stripped of title and boxing license (exile until 1970)",
+      "event_significance": 3,
+      "evidence_text": "Refused induction April 28, 1967; lost his boxing license and title.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Muhammad_Ali",
+        "https://www.vanguardngr.com/2016/06/key-dates-in-muhammad-alis-life-and-career/amp/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-01-muhammad-ali",
+      "event_date": "1971-03-08",
+      "event_category": "failure",
+      "event_type": "defeat_final",
+      "event_description": "First professional loss, to Joe Frazier (Fight of the Century)",
+      "event_significance": 3,
+      "evidence_text": "Lost his first professional fight to Joe Frazier on March 8, 1971.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Muhammad_Ali",
+        "https://www.the-star.co.ke/news/2016-06-04-factbox-key-bouts-in-late-muhammad-alis-boxing-career/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-01-muhammad-ali",
+      "event_date": "1971-06-28",
+      "event_category": "achievement",
+      "event_type": "legal_victory",
+      "event_description": "US Supreme Court overturned draft-evasion conviction",
+      "event_significance": 2,
+      "evidence_text": "Supreme Court overturned his draft conviction on June 28, 1971.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Muhammad_Ali"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-01-muhammad-ali",
+      "event_date": "1974-10-30",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "Regained heavyweight title vs George Foreman (Rumble in the Jungle)",
+      "event_significance": 3,
+      "evidence_text": "Regained the title against George Foreman in the Rumble in the Jungle, October 30, 1974.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Muhammad_Ali",
+        "https://www.the-star.co.ke/news/2016-06-04-factbox-key-bouts-in-late-muhammad-alis-boxing-career/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-01-muhammad-ali",
+      "event_date": "1975-10-01",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "Beat Joe Frazier in Thrilla in Manila",
+      "event_significance": 2,
+      "evidence_text": "Ali beat Joe Frazier in Manila on Oct 1, 1975.",
+      "evidence_urls": [
+        "https://www.espn.com/blog/statsinfo/post/_/id/109975/looking-back-thrilla-in-manila-and-ali-holmes-40-and-35-years-later",
+        "https://www.vanguardngr.com/2016/06/key-dates-in-muhammad-alis-life-and-career/amp/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-01-muhammad-ali",
+      "event_date": "1978-02-15",
+      "event_category": "failure",
+      "event_type": "defeat_final",
+      "event_description": "Lost title to Leon Spinks (split decision)",
+      "event_significance": 2,
+      "evidence_text": "Lost the title to Leon Spinks by 15-round split decision, Feb 15, 1978.",
+      "evidence_urls": [
+        "https://www.history.com/this-day-in-history/ali-defeats-spinks-to-win-world-heavyweight-championship",
+        "https://www.the-star.co.ke/news/2016-06-04-factbox-key-bouts-in-late-muhammad-alis-boxing-career/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-01-muhammad-ali",
+      "event_date": "1978-09-15",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "Beat Spinks in rematch; first three-time heavyweight champion",
+      "event_significance": 3,
+      "evidence_text": "Won rematch Sept 15, 1978, first three-time world heavyweight champion.",
+      "evidence_urls": [
+        "https://www.history.com/this-day-in-history/ali-defeats-spinks-to-win-world-heavyweight-championship"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-01-muhammad-ali",
+      "event_date": "1980-10-02",
+      "event_category": "failure",
+      "event_type": "defeat_final",
+      "event_description": "Comeback loss to Larry Holmes; corner stopped the fight",
+      "event_significance": 2,
+      "evidence_text": "Stopped by Larry Holmes Oct 2, 1980; first time his corner stopped a fight.",
+      "evidence_urls": [
+        "https://www.espn.com/blog/statsinfo/post/_/id/109975/looking-back-thrilla-in-manila-and-ali-holmes-40-and-35-years-later",
+        "https://www.the-star.co.ke/news/2016-06-04-factbox-key-bouts-in-late-muhammad-alis-boxing-career/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-01-muhammad-ali",
+      "event_date": "1981-12-11",
+      "event_category": "retirement",
+      "event_type": "retirement",
+      "event_description": "Final fight, loss to Trevor Berbick; retired",
+      "event_significance": 3,
+      "evidence_text": "Lost decision to Trevor Berbick in the Bahamas, Dec 11, 1981, his final fight.",
+      "evidence_urls": [
+        "https://www.the-star.co.ke/news/2016-06-04-factbox-key-bouts-in-late-muhammad-alis-boxing-career/",
+        "https://en.wikipedia.org/wiki/Muhammad_Ali"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-01-muhammad-ali",
+      "event_date": "1984-09",
+      "event_category": "health_event",
+      "event_type": "illness",
+      "event_description": "Diagnosed with Parkinson's syndrome",
+      "event_significance": 3,
+      "evidence_text": "Undergoes tests that diagnose Parkinson's disease, September 1984.",
+      "evidence_urls": [
+        "https://www.vanguardngr.com/2016/06/key-dates-in-muhammad-alis-life-and-career/amp/",
+        "https://en.wikipedia.org/wiki/Muhammad_Ali"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-01-muhammad-ali",
+      "event_date": "1986",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Married Yolanda 'Lonnie' Williams (after divorcing Veronica Porché, 1986)",
+      "event_significance": 2,
+      "evidence_text": "Married Yolanda 'Lonnie' Williams in 1986; divorce from Veronica Porché also 1986.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Muhammad_Ali"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-02-michael-jordan",
+      "event_date": "1984",
+      "event_category": "achievement",
+      "event_type": "olympic_gold",
+      "event_description": "Los Angeles Olympics basketball gold",
+      "event_significance": 3,
+      "evidence_text": "Won Olympic gold at the 1984 Los Angeles Games.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Jordan",
+        "https://www.nba.com/history/legends/profiles/michael-jordan"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-02-michael-jordan",
+      "event_date": "1984-06",
+      "event_category": "career_change",
+      "event_type": "debut",
+      "event_description": "Drafted 3rd overall by Chicago Bulls",
+      "event_significance": 2,
+      "evidence_text": "Bulls selected Jordan third overall, after Olajuwon and Sam Bowie.",
+      "evidence_urls": [
+        "https://www.espn.com/nba/player/bio/_/id/1035/michael-jordan",
+        "https://en.wikipedia.org/wiki/Michael_Jordan"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-02-michael-jordan",
+      "event_date": "1985-10-29",
+      "event_category": "health_event",
+      "event_type": "injury",
+      "event_description": "Broke left foot; missed 64 games",
+      "event_significance": 3,
+      "evidence_text": "Broke his left foot Oct. 29, 1985 vs Warriors; missed 64 games.",
+      "evidence_urls": [
+        "https://nbcsports.com/bayarea/warriors/michael-jordan-devastated-breaking-foot-vs-warriors-last-dance",
+        "https://en.wikipedia.org/wiki/1985%E2%80%9386_Chicago_Bulls_season"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-02-michael-jordan",
+      "event_date": "1988",
+      "event_category": "achievement",
+      "event_type": "mvp",
+      "event_description": "First NBA MVP (1987-88)",
+      "event_significance": 3,
+      "evidence_text": "Won his first MVP award for the 1987–88 season.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Jordan",
+        "https://www.espn.com/nba/player/bio/_/id/1035/michael-jordan"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-02-michael-jordan",
+      "event_date": "1989-09-02",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Married Juanita Vanoy",
+      "event_significance": 2,
+      "evidence_text": "Married Juanita Vanoy on September 2, 1989.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Jordan",
+        "https://softschools.com/timelines/michael_jordan_timeline/30/"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-02-michael-jordan",
+      "event_date": "1991-06",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "First NBA championship and Finals MVP",
+      "event_significance": 3,
+      "evidence_text": "ESPN lists Finals MVP 1991, his first of six.",
+      "evidence_urls": [
+        "https://www.espn.com/nba/player/bio/_/id/1035/michael-jordan",
+        "https://en.wikipedia.org/wiki/Michael_Jordan"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-02-michael-jordan",
+      "event_date": "1993-10-06",
+      "event_category": "retirement",
+      "event_type": "retirement",
+      "event_description": "First retirement from NBA",
+      "event_significance": 3,
+      "evidence_text": "Retired from the NBA on October 6, 1993.",
+      "evidence_urls": [
+        "https://basketball.realgm.com/player/Michael-Jordan/Timeline/1192",
+        "https://en.wikipedia.org/wiki/Michael_Jordan"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-02-michael-jordan",
+      "event_date": "1994-02-07",
+      "event_category": "career_change",
+      "event_type": "switch_sport",
+      "event_description": "Signed minor-league baseball deal with White Sox (Birmingham Barons)",
+      "event_significance": 2,
+      "evidence_text": "Signed with the White Sox Feb 7, 1994; played for Birmingham Barons.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Jordan",
+        "https://www.espn.com/nba/player/bio/_/id/1035/michael-jordan"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-02-michael-jordan",
+      "event_date": "1995-03-18",
+      "event_category": "career_change",
+      "event_type": "comeback",
+      "event_description": "Returned to the Bulls",
+      "event_significance": 2,
+      "evidence_text": "Announced return March 18, 1995, wearing number 45.",
+      "evidence_urls": [
+        "https://basketball.realgm.com/player/Michael-Jordan/Timeline/1192",
+        "https://en.wikipedia.org/wiki/Michael_Jordan"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-02-michael-jordan",
+      "event_date": "1999-01-13",
+      "event_category": "retirement",
+      "event_type": "retirement",
+      "event_description": "Second retirement after sixth title (1998)",
+      "event_significance": 3,
+      "evidence_text": "Retired a second time on January 13, 1999.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Jordan",
+        "https://basketball.realgm.com/player/Michael-Jordan/Timeline/1192"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-02-michael-jordan",
+      "event_date": "2001-09-25",
+      "event_category": "career_change",
+      "event_type": "comeback",
+      "event_description": "Comeback with Washington Wizards",
+      "event_significance": 2,
+      "evidence_text": "Announced return with the Wizards on September 25, 2001.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Jordan"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-02-michael-jordan",
+      "event_date": "2003-05-07",
+      "event_category": "failure",
+      "event_type": "dismissal",
+      "event_description": "Final retirement (April 2003) then fired from Wizards front office",
+      "event_significance": 2,
+      "evidence_text": "Played final game April 16, 2003; fired by the Wizards May 7, 2003.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Jordan",
+        "https://basketball.realgm.com/player/Michael-Jordan/Timeline/1192"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-02-michael-jordan",
+      "event_date": "2006-12-29",
+      "event_category": "relationship_event",
+      "event_type": "divorce",
+      "event_description": "Divorce from Juanita Vanoy, reported $168M settlement",
+      "event_significance": 2,
+      "evidence_text": "Divorce granted December 29, 2006; reported $168 million settlement.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Jordan"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-02-michael-jordan",
+      "event_date": "2013-04-27",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Married Yvette Prieto",
+      "event_significance": 2,
+      "evidence_text": "Married Yvette Prieto on April 27, 2013.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Jordan"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-02-michael-jordan",
+      "event_date": "2023-08",
+      "event_category": "financial_event",
+      "event_type": "financial_gain",
+      "event_description": "Sold majority stake in Charlotte Hornets (~$3B valuation)",
+      "event_significance": 2,
+      "evidence_text": "Hornets stake sale completed August 2023 for about $3 billion.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Jordan"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-03-tiger-woods",
+      "event_date": "1996-08",
+      "event_category": "career_change",
+      "event_type": "debut",
+      "event_description": "Turned professional",
+      "event_significance": 2,
+      "evidence_text": "Turned pro in August 1996 at age 20.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Tiger_Woods",
+        "https://wjla.com/news/nation-world/timeline-of-tiger-woods-career"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-03-tiger-woods",
+      "event_date": "1997-04-13",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "First major: Masters by record 12 shots",
+      "event_significance": 3,
+      "evidence_text": "Wins the Masters at 21 with record 270 and 12-shot margin.",
+      "evidence_urls": [
+        "https://www.foxsports.com/articles/golf/tiger-woods-a-timeline-of-significant-moments-on-and-off-the-golf-course",
+        "https://en.wikipedia.org/wiki/Tiger_Woods"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-03-tiger-woods",
+      "event_date": "2001-04",
+      "event_category": "achievement",
+      "event_type": "record",
+      "event_description": "Completed 'Tiger Slam' (four straight majors) at 2001 Masters",
+      "event_significance": 3,
+      "evidence_text": "2001 Masters win completed the Tiger Slam of four consecutive majors.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Tiger_Woods",
+        "https://wjla.com/news/nation-world/timeline-of-tiger-woods-career"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-03-tiger-woods",
+      "event_date": "2004-10",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Married Elin Nordegren",
+      "event_significance": 2,
+      "evidence_text": "Married Elin Nordegren in 2004.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Tiger_Woods"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-03-tiger-woods",
+      "event_date": "2008-06",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "US Open win (14th major) at Torrey Pines in playoff",
+      "event_significance": 3,
+      "evidence_text": "Wins U.S. Open playoff at Torrey Pines for his 14th major.",
+      "evidence_urls": [
+        "https://www.foxsports.com/articles/golf/tiger-woods-a-timeline-of-significant-moments-on-and-off-the-golf-course",
+        "https://wjla.com/news/nation-world/timeline-of-tiger-woods-career"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-03-tiger-woods",
+      "event_date": "2008-06",
+      "event_category": "health_event",
+      "event_type": "surgery",
+      "event_description": "Season-ending ACL reconstruction on left knee (out 8 months)",
+      "event_significance": 3,
+      "evidence_text": "A week later, reconstructive left-knee ACL surgery; out for eight months.",
+      "evidence_urls": [
+        "https://www.foxsports.com/articles/golf/tiger-woods-a-timeline-of-significant-moments-on-and-off-the-golf-course",
+        "https://en.wikipedia.org/wiki/Tiger_Woods"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-03-tiger-woods",
+      "event_date": "2009-11-27",
+      "event_category": "failure",
+      "event_type": "scandal_penalty",
+      "event_description": "SUV crash, infidelity scandal, loss of sponsors",
+      "event_significance": 3,
+      "evidence_text": "Crashes SUV outside Windermere home; affairs reported; loses major sponsorships.",
+      "evidence_urls": [
+        "https://www.foxsports.com/articles/golf/tiger-woods-a-timeline-of-significant-moments-on-and-off-the-golf-course",
+        "https://en.wikipedia.org/wiki/Tiger_Woods"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-03-tiger-woods",
+      "event_date": "2009-12",
+      "event_category": "retirement",
+      "event_type": "hiatus",
+      "event_description": "Indefinite break from golf until April 2010 Masters",
+      "event_significance": 2,
+      "evidence_text": "Hiatus from December 2009 to April 2010; returned at the Masters.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Tiger_Woods",
+        "https://wjla.com/news/nation-world/timeline-of-tiger-woods-career"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-03-tiger-woods",
+      "event_date": "2010-08",
+      "event_category": "relationship_event",
+      "event_type": "divorce",
+      "event_description": "Divorce from Elin Nordegren finalized",
+      "event_significance": 2,
+      "evidence_text": "August 2010: His divorce from Elin Nordegren is finalized.",
+      "evidence_urls": [
+        "https://www.foxsports.com/articles/golf/tiger-woods-a-timeline-of-significant-moments-on-and-off-the-golf-course",
+        "https://en.wikipedia.org/wiki/Tiger_Woods"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-03-tiger-woods",
+      "event_date": "2017-04-20",
+      "event_category": "health_event",
+      "event_type": "surgery",
+      "event_description": "Fourth back surgery (spinal fusion) after 2014-2017 series",
+      "event_significance": 3,
+      "evidence_text": "Four back surgeries 2014–2017, including April 20, 2017.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Tiger_Woods"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-03-tiger-woods",
+      "event_date": "2017-05-30",
+      "event_category": "failure",
+      "event_type": "scandal_penalty",
+      "event_description": "DUI arrest in Jupiter, Florida; later reckless-driving plea",
+      "event_significance": 2,
+      "evidence_text": "Arrested on suspicion of DUI, found asleep at the wheel; blamed pain medication.",
+      "evidence_urls": [
+        "https://www.foxsports.com/articles/golf/tiger-woods-a-timeline-of-significant-moments-on-and-off-the-golf-course",
+        "https://wjla.com/news/nation-world/timeline-of-tiger-woods-career"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-03-tiger-woods",
+      "event_date": "2019-04-14",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "Masters win, 15th major, first in 11 years",
+      "event_significance": 3,
+      "evidence_text": "Wins the Masters for his 15th major, first major in 11 years.",
+      "evidence_urls": [
+        "https://www.foxsports.com/articles/golf/tiger-woods-a-timeline-of-significant-moments-on-and-off-the-golf-course",
+        "https://en.wikipedia.org/wiki/Tiger_Woods"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-03-tiger-woods",
+      "event_date": "2021-02-23",
+      "event_category": "health_event",
+      "event_type": "injury",
+      "event_description": "Rollover car crash, open fractures of right leg",
+      "event_significance": 3,
+      "evidence_text": "Single-vehicle rollover; comminuted open fractures in right leg needing rod and screws.",
+      "evidence_urls": [
+        "https://www.foxsports.com/articles/golf/tiger-woods-a-timeline-of-significant-moments-on-and-off-the-golf-course",
+        "https://en.wikipedia.org/wiki/Tiger_Woods"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-03-tiger-woods",
+      "event_date": "2026-03-27",
+      "event_category": "failure",
+      "event_type": "scandal_penalty",
+      "event_description": "Arrested on suspicion of DUI after rollover near Florida home",
+      "event_significance": 2,
+      "evidence_text": "Arrested on suspicion of DUI after his Land Rover clipped a truck and rolled.",
+      "evidence_urls": [
+        "https://www.foxsports.com/articles/golf/tiger-woods-a-timeline-of-significant-moments-on-and-off-the-golf-course"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-04-steffi-graf",
+      "event_date": "1982-10",
+      "event_category": "career_change",
+      "event_type": "debut",
+      "event_description": "Professional debut at Filderstadt, age 13",
+      "event_significance": 2,
+      "evidence_text": "Pro debut October 1982 in Filderstadt, Germany.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Steffi_Graf",
+        "https://www.espn.com/classic/biography/s/Graf_Steffi.html"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-04-steffi-graf",
+      "event_date": "1987-06",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "First Grand Slam: French Open",
+      "event_significance": 3,
+      "evidence_text": "Won her first Grand Slam title at the 1987 French Open.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Steffi_Graf",
+        "https://www.espn.com/classic/biography/s/Graf_Steffi.html"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-04-steffi-graf",
+      "event_date": "1987-08-17",
+      "event_category": "achievement",
+      "event_type": "world_no1",
+      "event_description": "Became world No. 1",
+      "event_significance": 2,
+      "evidence_text": "Reached world No. 1 ranking on 17 August 1987.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Steffi_Graf"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-04-steffi-graf",
+      "event_date": "1988",
+      "event_category": "achievement",
+      "event_type": "olympic_gold",
+      "event_description": "Golden Slam: all four majors plus Seoul Olympic gold",
+      "event_significance": 3,
+      "evidence_text": "First player to win all four majors and Olympic gold in one calendar year.",
+      "evidence_urls": [
+        "https://www.ebsco.com/research-starters/history/graf-wins-golden-grand-slam",
+        "https://www.olympedia.org/athletes/124",
+        "https://en.wikipedia.org/wiki/Steffi_Graf"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-04-steffi-graf",
+      "event_date": "1990",
+      "event_category": "failure",
+      "event_type": "defeat_final",
+      "event_description": "Lost French Open and US Open finals; tabloid scandal about father",
+      "event_significance": 2,
+      "evidence_text": "Lost 1990 French Open final to Seles and US Open final to Sabatini.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Steffi_Graf"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-04-steffi-graf",
+      "event_date": "1992-08",
+      "event_category": "failure",
+      "event_type": "defeat_final",
+      "event_description": "Barcelona Olympic final loss to Capriati (silver)",
+      "event_significance": 2,
+      "evidence_text": "Lost the Barcelona Olympic singles final to Jennifer Capriati.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Steffi_Graf",
+        "https://www.olympedia.org/athletes/124"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-04-steffi-graf",
+      "event_date": "1995-08",
+      "event_category": "financial_event",
+      "event_type": "financial_loss",
+      "event_description": "Father/manager Peter Graf arrested for tax evasion on her earnings",
+      "event_significance": 2,
+      "evidence_text": "Father, her financial manager, arrested August 1995 for tax evasion.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Steffi_Graf",
+        "https://www.tennisnet.com/en/news/25-years-ago-peter-graf-is-arrested",
+        "https://www.espn.com/classic/biography/s/Graf_Steffi.html"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-04-steffi-graf",
+      "event_date": "1997-01-27",
+      "event_category": "failure",
+      "event_type": "scandal_penalty",
+      "event_description": "Father sentenced to 45 months; her own case dropped after paying a fine",
+      "event_significance": 2,
+      "evidence_text": "Mannheim court sentenced Peter Graf to 3 years 9 months, January 27, 1997.",
+      "evidence_urls": [
+        "https://www.tennisnet.com/en/news/25-years-ago-peter-graf-is-arrested",
+        "https://en.wikipedia.org/wiki/Steffi_Graf"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-04-steffi-graf",
+      "event_date": "1997-06",
+      "event_category": "health_event",
+      "event_type": "surgery",
+      "event_description": "Reconstructive left knee surgery, months out",
+      "event_significance": 3,
+      "evidence_text": "Reconstructive knee surgery in Vienna about a week after the 1997 French Open.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Steffi_Graf"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-04-steffi-graf",
+      "event_date": "1999-06",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "22nd and last Grand Slam: French Open",
+      "event_significance": 3,
+      "evidence_text": "Won the 1999 French Open.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Steffi_Graf",
+        "https://www.cbsnews.com/news/steffi-graf-calls-it-quits"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-04-steffi-graf",
+      "event_date": "1999-08-13",
+      "event_category": "retirement",
+      "event_type": "retirement",
+      "event_description": "Announced retirement at age 30",
+      "event_significance": 3,
+      "evidence_text": "Announced retirement 13 August 1999 after a San Diego loss.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Steffi_Graf",
+        "https://www.cbsnews.com/news/steffi-graf-calls-it-quits"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-04-steffi-graf",
+      "event_date": "2001-10-22",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Married Andre Agassi in Las Vegas",
+      "event_significance": 2,
+      "evidence_text": "Married October 22, 2001, at their Las Vegas home.",
+      "evidence_urls": [
+        "https://www.aol.com/andre-agassi-steffi-graf-tennis-220000524.html",
+        "https://en.wikipedia.org/wiki/Steffi_Graf"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-04-steffi-graf",
+      "event_date": "2001-10-26",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Son Jaden Gil born",
+      "event_significance": 2,
+      "evidence_text": "Son Jaden Gil born October 26, 2001, three weeks premature.",
+      "evidence_urls": [
+        "https://digitalhit.com/news/main/2001/10/28/son-for-graf-and-agassi",
+        "https://www.aol.com/andre-agassi-steffi-graf-tennis-220000524.html"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-04-steffi-graf",
+      "event_date": "2003-10-03",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Daughter Jaz Elle born",
+      "event_significance": 2,
+      "evidence_text": "Daughter Jaz Elle born October 3, 2003.",
+      "evidence_urls": [
+        "https://www.aol.com/andre-agassi-steffi-graf-tennis-220000524.html"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-05-diego-maradona",
+      "event_date": "1976-10-20",
+      "event_category": "career_change",
+      "event_type": "debut",
+      "event_description": "Professional debut for Argentinos Juniors",
+      "event_significance": 2,
+      "evidence_text": "First top-flight appearance October 20, 1976, for Argentinos Juniors.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Diego_Maradona",
+        "https://worldsoccertalk.com/2020/11/25/diego-maradona-a-life-in-10-key-dates/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-05-diego-maradona",
+      "event_date": "1978",
+      "event_category": "failure",
+      "event_type": "omitted_squad",
+      "event_description": "Left out of Argentina's 1978 World Cup squad",
+      "event_significance": 2,
+      "evidence_text": "Omitted from Argentina's 1978 World Cup squad.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Diego_Maradona"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-05-diego-maradona",
+      "event_date": "1982",
+      "event_category": "career_change",
+      "event_type": "transfer",
+      "event_description": "World-record transfer to Barcelona (£5M)",
+      "event_significance": 2,
+      "evidence_text": "Moved to Barcelona in 1982 for about £5 million.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Diego_Maradona"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-05-diego-maradona",
+      "event_date": "1983-09-24",
+      "event_category": "health_event",
+      "event_type": "injury",
+      "event_description": "Ankle broken by Andoni Goikoetxea tackle",
+      "event_significance": 3,
+      "evidence_text": "Ankle broken by Goikoetxea on 24 September 1983.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Diego_Maradona"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-05-diego-maradona",
+      "event_date": "1984-07-05",
+      "event_category": "career_change",
+      "event_type": "transfer",
+      "event_description": "Record transfer to Napoli (£6.9M)",
+      "event_significance": 2,
+      "evidence_text": "Joined Napoli for £6.9 million; presented 5 July 1984.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Diego_Maradona",
+        "https://worldsoccertalk.com/2020/11/25/diego-maradona-a-life-in-10-key-dates/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-05-diego-maradona",
+      "event_date": "1986-06-29",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "Captained Argentina to World Cup title",
+      "event_significance": 3,
+      "evidence_text": "Lifted the 1986 World Cup as captain; Argentina beat West Germany 3–2.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Diego_Maradona",
+        "https://worldsoccertalk.com/2020/11/25/diego-maradona-a-life-in-10-key-dates/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-05-diego-maradona",
+      "event_date": "1987-05",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "Napoli's first Serie A title (1986-87)",
+      "event_significance": 2,
+      "evidence_text": "Led Napoli to Serie A titles in 1987 and 1990.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Diego_Maradona",
+        "https://www.freepressjournal.in/sports/diego-maradona-passes-away-at-60-remembering-the-argentine-legends-football-career"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-05-diego-maradona",
+      "event_date": "1989-11",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Married Claudia Villafañe in Buenos Aires",
+      "event_significance": 2,
+      "evidence_text": "Married Claudia Villafañe in 1989 in Buenos Aires.",
+      "evidence_urls": [
+        "https://www.republicworld.com/sports/football/who-is-diego-maradonas-ex-wife-claudia-villafane-how-many-kids-did-maradona-have",
+        "https://www.thelist.com/285303/what-you-didnt-know-about-diego-maradonas-ex-wife/"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-05-diego-maradona",
+      "event_date": "1990-07-08",
+      "event_category": "failure",
+      "event_type": "defeat_final",
+      "event_description": "Lost 1990 World Cup final to West Germany",
+      "event_significance": 2,
+      "evidence_text": "Argentina lost the 1990 final 1–0 to West Germany.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Diego_Maradona"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-05-diego-maradona",
+      "event_date": "1991",
+      "event_category": "failure",
+      "event_type": "ban",
+      "event_description": "15-month ban for cocaine; left Napoli",
+      "event_significance": 3,
+      "evidence_text": "Banned for 15 months in 1991 after testing positive for cocaine.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Diego_Maradona"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-05-diego-maradona",
+      "event_date": "1994-06",
+      "event_category": "failure",
+      "event_type": "ban",
+      "event_description": "Sent home from 1994 World Cup for ephedrine",
+      "event_significance": 3,
+      "evidence_text": "Expelled from the 1994 World Cup after two games for ephedrine.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Diego_Maradona",
+        "https://worldsoccertalk.com/2020/11/25/diego-maradona-a-life-in-10-key-dates/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-05-diego-maradona",
+      "event_date": "1997-10",
+      "event_category": "retirement",
+      "event_type": "retirement",
+      "event_description": "Retired at 37 after another failed drug test",
+      "event_significance": 3,
+      "evidence_text": "Announced retirement in 1997, aged 37, after another failed drugs test.",
+      "evidence_urls": [
+        "https://www.thestar.com.my/news/world/2020/11/26/timeline-of-argentine-football-legend-maradona039s-life",
+        "https://en.wikipedia.org/wiki/Diego_Maradona"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-05-diego-maradona",
+      "event_date": "2003",
+      "event_category": "relationship_event",
+      "event_type": "divorce",
+      "event_description": "Separated/divorced from Claudia Villafañe (2003-2004)",
+      "event_significance": 2,
+      "evidence_text": "Couple decided to separate in 2003 after years of marriage; divorce filed 2004.",
+      "evidence_urls": [
+        "https://www.thelist.com/285303/what-you-didnt-know-about-diego-maradonas-ex-wife/"
+      ],
+      "evidence_confidence": "unverified"
+    },
+    {
+      "person_id": "sports-05-diego-maradona",
+      "event_date": "2008-10",
+      "event_category": "career_change",
+      "event_type": "new_team",
+      "event_description": "Appointed Argentina national team coach (to 2010)",
+      "event_significance": 2,
+      "evidence_text": "Coached Argentina's national team from 2008 to 2010.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Diego_Maradona"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-05-diego-maradona",
+      "event_date": "2020-11-03",
+      "event_category": "health_event",
+      "event_type": "surgery",
+      "event_description": "Brain surgery for subdural hematoma; died 2020-11-25",
+      "event_significance": 3,
+      "evidence_text": "Surgery for a subdural hematoma on Nov 3, 2020; died November 25.",
+      "evidence_urls": [
+        "https://www.aljazeera.com/sports/2020/11/3/football-star-maradona-to-undergo-brain-surgery",
+        "https://www.si.com/soccer/2020/11/04/diego-maradona-brain-surgery-argentina"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-06-roger-federer",
+      "event_date": "1998",
+      "event_category": "career_change",
+      "event_type": "debut",
+      "event_description": "Turned professional",
+      "event_significance": 2,
+      "evidence_text": "Turned professional in 1998.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Roger_Federer",
+        "https://itv.com/news/2022-09-23/24-years-and-103-titles-a-closer-look-at-roger-federers-career"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-06-roger-federer",
+      "event_date": "2003-07",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "First Grand Slam: Wimbledon",
+      "event_significance": 3,
+      "evidence_text": "First Grand Slam title came at Wimbledon in 2003.",
+      "evidence_urls": [
+        "https://www.khaleejtimes.com/sports/tennis/look-roger-federers-journey-to-the-top-of-the-mens-game",
+        "https://en.wikipedia.org/wiki/Roger_Federer"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-06-roger-federer",
+      "event_date": "2004-02-02",
+      "event_category": "achievement",
+      "event_type": "world_no1",
+      "event_description": "Became world No. 1",
+      "event_significance": 2,
+      "evidence_text": "Reached world No. 1 on 2 February 2004.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Roger_Federer"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-06-roger-federer",
+      "event_date": "2008",
+      "event_category": "health_event",
+      "event_type": "illness",
+      "event_description": "Mononucleosis in 2008 season",
+      "event_significance": 2,
+      "evidence_text": "Suffered from mononucleosis in 2008.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Roger_Federer"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-06-roger-federer",
+      "event_date": "2008-07",
+      "event_category": "failure",
+      "event_type": "defeat_final",
+      "event_description": "Lost Wimbledon final to Rafael Nadal",
+      "event_significance": 2,
+      "evidence_text": "Lost the 2008 Wimbledon final to Nadal.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Roger_Federer",
+        "https://olympics.com/en/news/roger-federer-five-career-defining-matches"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-06-roger-federer",
+      "event_date": "2008-08",
+      "event_category": "achievement",
+      "event_type": "olympic_gold",
+      "event_description": "Beijing Olympic doubles gold (with Wawrinka)",
+      "event_significance": 3,
+      "evidence_text": "Won Olympic doubles gold at Beijing 2008.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Roger_Federer"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-06-roger-federer",
+      "event_date": "2009-04",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Married Mirka Vavrinec in Basel",
+      "event_significance": 2,
+      "evidence_text": "Marries Mirka Vavrinec in Basel, shortly before the claycourt season, 2009.",
+      "evidence_urls": [
+        "https://supersport.com/tennis/atp/news/7d953e4f-a903-4673-8322-8b959a9765f3/key-dates-from-roger-federer-s-historic-career"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-06-roger-federer",
+      "event_date": "2009-06",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "French Open win completing career Grand Slam",
+      "event_significance": 3,
+      "evidence_text": "Won the 2009 French Open, completing the career Grand Slam.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Roger_Federer",
+        "https://www.eurosport.com/tennis/roger-federer-s-career-defining-moments-beating-pete-sampras-at-wimbledon-career-grand-slam-at-frenc_sto9145335/story.shtml"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-06-roger-federer",
+      "event_date": "2009-07-23",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Twin daughters Myla and Charlene born",
+      "event_significance": 2,
+      "evidence_text": "Became father of twin girls on July 23, 2009.",
+      "evidence_urls": [
+        "https://www.swissinfo.ch/eng/roger-federer-becomes-father-of-twin-girls/7523386"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-06-roger-federer",
+      "event_date": "2014-05-06",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Twin sons Leo and Lenny born",
+      "event_significance": 2,
+      "evidence_text": "Announced Leo and Lenny 'were born this evening', May 6, 2014.",
+      "evidence_urls": [
+        "https://time.com/90515/roger-federer-twins-again",
+        "https://www.thenewdaily.com.au/sport/2014/05/07/federer-announces-birth-twin-boys/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-06-roger-federer",
+      "event_date": "2016-02",
+      "event_category": "health_event",
+      "event_type": "surgery",
+      "event_description": "Left knee surgery; season cut short (half-year out)",
+      "event_significance": 3,
+      "evidence_text": "Left knee surgery in February 2016 limited him to seven tournaments.",
+      "evidence_urls": [
+        "https://supersport.com/tennis/atp/news/7d953e4f-a903-4673-8322-8b959a9765f3/key-dates-from-roger-federer-s-historic-career",
+        "https://en.wikipedia.org/wiki/Roger_Federer"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-06-roger-federer",
+      "event_date": "2017-01",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "Australian Open comeback title (18th major) at 35",
+      "event_significance": 3,
+      "evidence_text": "Wins 2017 Australian Open, 18th Slam, second-oldest Slam champion at 35.",
+      "evidence_urls": [
+        "https://supersport.com/tennis/atp/news/7d953e4f-a903-4673-8322-8b959a9765f3/key-dates-from-roger-federer-s-historic-career",
+        "https://en.wikipedia.org/wiki/Roger_Federer"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-06-roger-federer",
+      "event_date": "2020",
+      "event_category": "health_event",
+      "event_type": "surgery",
+      "event_description": "Two knee surgeries in 2020 (third after Wimbledon 2021)",
+      "event_significance": 3,
+      "evidence_text": "Undergoes two knee surgeries in 2020; third operation after Wimbledon 2021.",
+      "evidence_urls": [
+        "https://supersport.com/tennis/atp/news/7d953e4f-a903-4673-8322-8b959a9765f3/key-dates-from-roger-federer-s-historic-career",
+        "https://www.atptour.com/en/news/roger-federer-retirement-legacy-story"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-06-roger-federer",
+      "event_date": "2022-09-23",
+      "event_category": "retirement",
+      "event_type": "retirement",
+      "event_description": "Final match at Laver Cup, retired",
+      "event_significance": 3,
+      "evidence_text": "Lost Laver Cup doubles with Nadal in his final ATP event, September 2022.",
+      "evidence_urls": [
+        "https://www.atptour.com/en/news/roger-federer-retirement-legacy-story",
+        "https://itv.com/news/2022-09-23/24-years-and-103-titles-a-closer-look-at-roger-federers-career"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-07-serena-williams",
+      "event_date": "1995-10",
+      "event_category": "career_change",
+      "event_type": "debut",
+      "event_description": "Pro debut at Bell Challenge, Quebec",
+      "event_significance": 2,
+      "evidence_text": "Pro debut October 1995 at the Bell Challenge in Quebec.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Serena_Williams",
+        "https://wtatennis.com/news/2772210/1995-1999-the-beginning-of-a-memorable-career"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-07-serena-williams",
+      "event_date": "1999-09-12",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "First Grand Slam: US Open",
+      "event_significance": 3,
+      "evidence_text": "Won first Grand Slam singles title at the US Open, September 12, 1999.",
+      "evidence_urls": [
+        "https://www.wral.com/archive/17271795/",
+        "https://en.wikipedia.org/wiki/Serena_Williams"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-07-serena-williams",
+      "event_date": "2000-09",
+      "event_category": "achievement",
+      "event_type": "olympic_gold",
+      "event_description": "Sydney Olympic doubles gold with Venus",
+      "event_significance": 3,
+      "evidence_text": "Won doubles gold with Venus at Sydney 2000.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Serena_Williams"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-07-serena-williams",
+      "event_date": "2003-01",
+      "event_category": "achievement",
+      "event_type": "record",
+      "event_description": "'Serena Slam' (four straight majors) completed at Australian Open",
+      "event_significance": 3,
+      "evidence_text": "Won four consecutive majors, 2002 French Open through 2003 Australian Open.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Serena_Williams",
+        "https://www.aljazeera.com/sports/2022/9/3/timeline-serena-williams-career"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-07-serena-williams",
+      "event_date": "2003-08-01",
+      "event_category": "health_event",
+      "event_type": "surgery",
+      "event_description": "Left knee tendon surgery; months out",
+      "event_significance": 2,
+      "evidence_text": "Surgery on a partially torn left knee tendon, August 1, 2003.",
+      "evidence_urls": [
+        "https://www.wral.com/archive/17271795/",
+        "https://en.wikipedia.org/wiki/Serena_Williams"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-07-serena-williams",
+      "event_date": "2009-09-12",
+      "event_category": "failure",
+      "event_type": "scandal_penalty",
+      "event_description": "US Open semifinal outburst; record fine and probation",
+      "event_significance": 2,
+      "evidence_text": "Fined record $82,500 and two years' probation after outburst at a line judge.",
+      "evidence_urls": [
+        "https://www.wral.com/archive/17271795/",
+        "https://en.wikipedia.org/wiki/Serena_Williams"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-07-serena-williams",
+      "event_date": "2010-07-07",
+      "event_category": "health_event",
+      "event_type": "injury",
+      "event_description": "Foot cut on broken glass; two surgeries",
+      "event_significance": 2,
+      "evidence_text": "Stepped on broken glass in Munich; foot tendon surgeries in July and October.",
+      "evidence_urls": [
+        "https://www.wral.com/archive/17271795/",
+        "https://en.wikipedia.org/wiki/Serena_Williams"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-07-serena-williams",
+      "event_date": "2011-02",
+      "event_category": "health_event",
+      "event_type": "illness",
+      "event_description": "Pulmonary embolism, emergency treatment",
+      "event_significance": 3,
+      "evidence_text": "Emergency treatment for hematoma linked to pulmonary embolism, February 2011.",
+      "evidence_urls": [
+        "https://www.wral.com/archive/17271795/",
+        "https://en.wikipedia.org/wiki/Serena_Williams"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-07-serena-williams",
+      "event_date": "2012-08",
+      "event_category": "achievement",
+      "event_type": "olympic_gold",
+      "event_description": "London Olympic singles and doubles gold",
+      "event_significance": 3,
+      "evidence_text": "Won singles and doubles gold at London 2012.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Serena_Williams",
+        "https://www.wral.com/archive/17271795/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-07-serena-williams",
+      "event_date": "2017-01",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "Australian Open (23rd major) while pregnant",
+      "event_significance": 3,
+      "evidence_text": "Won 23rd Grand Slam, then announced she was pregnant during the tournament.",
+      "evidence_urls": [
+        "https://www.aljazeera.com/sports/2022/9/3/timeline-serena-williams-career",
+        "https://en.wikipedia.org/wiki/Serena_Williams"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-07-serena-williams",
+      "event_date": "2017-09-01",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Daughter Olympia born; emergency C-section and blood clots",
+      "event_significance": 2,
+      "evidence_text": "Gave birth September 1, 2017; emergency C-section and blood clots followed.",
+      "evidence_urls": [
+        "https://www.wral.com/archive/17271795/"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-07-serena-williams",
+      "event_date": "2017-11-16",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Married Alexis Ohanian",
+      "event_significance": 2,
+      "evidence_text": "November 16, 2017: Marries Alexis Ohanian.",
+      "evidence_urls": [
+        "https://www.wral.com/archive/17271795/"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-07-serena-williams",
+      "event_date": "2018-09-08",
+      "event_category": "failure",
+      "event_type": "defeat_final",
+      "event_description": "Lost US Open final to Naomi Osaka amid umpire dispute",
+      "event_significance": 2,
+      "evidence_text": "Lost the 2018 US Open final to Osaka, marred by disputes with the umpire.",
+      "evidence_urls": [
+        "https://www.aljazeera.com/sports/2022/9/3/timeline-serena-williams-career"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-07-serena-williams",
+      "event_date": "2022-09-02",
+      "event_category": "retirement",
+      "event_type": "retirement",
+      "event_description": "Retirement ('evolving away') after US Open third-round loss",
+      "event_significance": 3,
+      "evidence_text": "Announced retirement plans in a magazine; lost US Open third round, ending 26-year career.",
+      "evidence_urls": [
+        "https://www.aljazeera.com/sports/2022/9/3/timeline-serena-williams-career",
+        "https://en.wikipedia.org/wiki/Serena_Williams"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-07-serena-williams",
+      "event_date": "2026-06-21",
+      "event_category": "career_change",
+      "event_type": "comeback",
+      "event_description": "Comeback: accepted Wimbledon 2026 singles wild card at 44",
+      "event_significance": 2,
+      "evidence_text": "Accepted Wimbledon singles wild card announced June 21, 2026, at age 44.",
+      "evidence_urls": [
+        "https://www.wtatennis.com/news/4523474/serena-williams-to-return-to-singles-at-wimbledon-after-accepting-wild-card",
+        "https://www.aljazeera.com/amp/sports/2026/6/21/serena-williams-to-play-womens-singles-at-wimbledon-as-wildcard-entrant"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-08-michael-phelps",
+      "event_date": "2000-09",
+      "event_category": "career_change",
+      "event_type": "debut",
+      "event_description": "Olympic debut at Sydney, age 15",
+      "event_significance": 2,
+      "evidence_text": "Competed at the 2000 Summer Olympics at age 15.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Phelps"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-08-michael-phelps",
+      "event_date": "2001-03-30",
+      "event_category": "achievement",
+      "event_type": "record",
+      "event_description": "First world record (200m butterfly), youngest male WR holder",
+      "event_significance": 2,
+      "evidence_text": "First world record March 30, 2001, 200m butterfly at World Championship Trials.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Phelps"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-08-michael-phelps",
+      "event_date": "2004-08",
+      "event_category": "achievement",
+      "event_type": "olympic_gold",
+      "event_description": "Six golds at Athens 2004",
+      "event_significance": 3,
+      "evidence_text": "Won six gold medals at the 2004 Athens Olympics.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Phelps",
+        "https://www.foxnews.com/sports/the-definitive-michael-phelps-bio-all-you-need-to-know-about-the-greatest-olympian-ever.amp"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-08-michael-phelps",
+      "event_date": "2004-11",
+      "event_category": "failure",
+      "event_type": "scandal_penalty",
+      "event_description": "First DUI arrest at 19; 18 months probation",
+      "event_significance": 2,
+      "evidence_text": "Arrested for drunk driving in 2004 at age 19; 18 months' probation.",
+      "evidence_urls": [
+        "https://www.sportskeeda.com/swimming/michael-phelps-suspended-6-months-usa-swimming",
+        "https://www.foxnews.com/sports/the-definitive-michael-phelps-bio-all-you-need-to-know-about-the-greatest-olympian-ever.amp"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-08-michael-phelps",
+      "event_date": "2008-08-17",
+      "event_category": "achievement",
+      "event_type": "olympic_gold",
+      "event_description": "Record eight golds at Beijing 2008",
+      "event_significance": 3,
+      "evidence_text": "Eighth Beijing gold in medley relay broke Spitz's record of seven.",
+      "evidence_urls": [
+        "https://www.npr.org/2008/08/17/93671607/phelps-turns-legend-with-8th-beijing-gold",
+        "https://olympics.com/en/video/michael-phelps-record-eight-gold-medals-in-beijing"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-08-michael-phelps",
+      "event_date": "2009-02",
+      "event_category": "failure",
+      "event_type": "suspension",
+      "event_description": "Marijuana pipe photo; 3-month USA Swimming suspension",
+      "event_significance": 2,
+      "evidence_text": "Photo with marijuana pipe published; USA Swimming suspended him three months.",
+      "evidence_urls": [
+        "https://www.sportskeeda.com/swimming/michael-phelps-suspended-6-months-usa-swimming",
+        "https://www.foxnews.com/sports/the-definitive-michael-phelps-bio-all-you-need-to-know-about-the-greatest-olympian-ever.amp"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-08-michael-phelps",
+      "event_date": "2012-08",
+      "event_category": "retirement",
+      "event_type": "retirement",
+      "event_description": "Retired after London 2012 (4 golds, most decorated Olympian)",
+      "event_significance": 3,
+      "evidence_text": "Announced retirement after the London Games, returned within months.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Phelps",
+        "https://medium.com/capa-team/micheal-phelps-profile-scandal-can-not-deny-an-olympic-legend-a133fc6ccead"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-08-michael-phelps",
+      "event_date": "2014-04",
+      "event_category": "career_change",
+      "event_type": "comeback",
+      "event_description": "Returned to competition",
+      "event_significance": 2,
+      "evidence_text": "Comeback to competitive swimming in April 2014.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Phelps"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-08-michael-phelps",
+      "event_date": "2014-09-30",
+      "event_category": "failure",
+      "event_type": "suspension",
+      "event_description": "Second DUI; 6-month suspension, removed from 2015 Worlds team; sought treatment",
+      "event_significance": 3,
+      "evidence_text": "Second DUI arrest; pleaded guilty December 2014; suspended and dropped from 2015 Worlds team.",
+      "evidence_urls": [
+        "https://www.npr.org/sections/thetwo-way/2014/12/19/371916403/michael-phelps-pleads-guilty-to-dui",
+        "https://bleacherreport.com/articles/2222678-michael-phelps-suspended-latest-details-comments-and-reaction"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-08-michael-phelps",
+      "event_date": "2016-05-05",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Son Boomer born",
+      "event_significance": 2,
+      "evidence_text": "Son Boomer born a little over a month before the June wedding.",
+      "evidence_urls": [
+        "https://www.cbsnews.com/news/michael-phelps-secretly-got-married-in-june",
+        "https://nbcsports.com/olympics/news/michael-phelps-nicole-johnson-married-wedding-june"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-08-michael-phelps",
+      "event_date": "2016-06-13",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Secretly married Nicole Johnson in Paradise Valley, Arizona",
+      "event_significance": 2,
+      "evidence_text": "Married Nicole Johnson June 13, 2016, per Arizona marriage record.",
+      "evidence_urls": [
+        "https://www.cbsnews.com/news/michael-phelps-secretly-got-married-in-june",
+        "https://abc7.com/post/michael-phelps-nicole-johnson-secretly-married-in-june/1575518/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-08-michael-phelps",
+      "event_date": "2016-08",
+      "event_category": "achievement",
+      "event_type": "olympic_gold",
+      "event_description": "Five golds and one silver at Rio 2016",
+      "event_significance": 3,
+      "evidence_text": "Won five golds and one silver at the 2016 Rio Olympics.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Phelps"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-08-michael-phelps",
+      "event_date": "2016-08-12",
+      "event_category": "retirement",
+      "event_type": "retirement",
+      "event_description": "Final retirement after Rio",
+      "event_significance": 3,
+      "evidence_text": "Second retirement announced August 12, 2016.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Phelps",
+        "https://medium.com/capa-team/micheal-phelps-profile-scandal-can-not-deny-an-olympic-legend-a133fc6ccead"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-09-kim-yuna",
+      "event_date": "2006-12",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "First senior Grand Prix Final title (St. Petersburg)",
+      "event_significance": 2,
+      "evidence_text": "Won the 2006–07 Grand Prix Final in St. Petersburg in her senior debut season.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Yuna_Kim"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-09-kim-yuna",
+      "event_date": "2007-01",
+      "event_category": "health_event",
+      "event_type": "injury",
+      "event_description": "Lumbar disc herniation; withdrew from national championships",
+      "event_significance": 2,
+      "evidence_text": "Diagnosed January 2007 with early lumbar disc herniation; withdrew from nationals.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Yuna_Kim"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-09-kim-yuna",
+      "event_date": "2008-02",
+      "event_category": "health_event",
+      "event_type": "injury",
+      "event_description": "Chronic hip pain; missed Four Continents",
+      "event_significance": 1,
+      "evidence_text": "Chronic hip pain kept her out of the 2008 Four Continents Championships.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Yuna_Kim"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-09-kim-yuna",
+      "event_date": "2009-03",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "World Champion (Los Angeles), first woman over 200 points",
+      "event_significance": 3,
+      "evidence_text": "Won 2009 Worlds in Los Angeles with record total 207.71.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Yuna_Kim",
+        "https://www.britannica.com/biography/Kim-Yu-Na"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-09-kim-yuna",
+      "event_date": "2010-02-25",
+      "event_category": "achievement",
+      "event_type": "olympic_gold",
+      "event_description": "Vancouver Olympic gold with world-record 228.56",
+      "event_significance": 3,
+      "evidence_text": "Won Vancouver gold with world-record total of 228.56 points.",
+      "evidence_urls": [
+        "https://olympics.com/en/news/yuna-kim-and-her-life-changing-vancouver-2010-gold",
+        "https://en.wikipedia.org/wiki/Yuna_Kim"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-09-kim-yuna",
+      "event_date": "2011-04",
+      "event_category": "failure",
+      "event_type": "defeat_final",
+      "event_description": "World Championships silver (Moscow) behind Miki Ando",
+      "event_significance": 1,
+      "evidence_text": "Took silver at 2011 Worlds in Moscow with 194.50 points.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Yuna_Kim"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-09-kim-yuna",
+      "event_date": "2011-10-18",
+      "event_category": "retirement",
+      "event_type": "hiatus",
+      "event_description": "Announced sitting out 2011-12 season",
+      "event_significance": 2,
+      "evidence_text": "Announced October 18, 2011 she would sit out the 2011–12 season.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Yuna_Kim"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-09-kim-yuna",
+      "event_date": "2012-07",
+      "event_category": "career_change",
+      "event_type": "comeback",
+      "event_description": "Announced return aiming at Sochi 2014",
+      "event_significance": 2,
+      "evidence_text": "Announced intent to return to competition in July 2012.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Yuna_Kim"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-09-kim-yuna",
+      "event_date": "2013-03",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "Second World title (London, Ontario)",
+      "event_significance": 3,
+      "evidence_text": "Won the 2013 World Championships in London.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Yuna_Kim",
+        "https://www.britannica.com/biography/Kim-Yu-Na"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-09-kim-yuna",
+      "event_date": "2014-02-20",
+      "event_category": "failure",
+      "event_type": "defeat_final",
+      "event_description": "Sochi Olympic silver behind Sotnikova; Korean protest rejected",
+      "event_significance": 3,
+      "evidence_text": "Upset by Russia's Adelina Sotnikova, finishing with silver at Sochi.",
+      "evidence_urls": [
+        "https://www.washingtontimes.com/news/2014/feb/20/olympic-silver-medal-at-end-of-yuna-kims-career/",
+        "https://www.britannica.com/biography/Kim-Yu-Na"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-09-kim-yuna",
+      "event_date": "2014-02",
+      "event_category": "retirement",
+      "event_type": "retirement",
+      "event_description": "Retired from competition after Sochi (age 23)",
+      "event_significance": 3,
+      "evidence_text": "Confirmed at age 23 she will retire after the Sochi Games.",
+      "evidence_urls": [
+        "https://www.nbcsports.com/olympics/news/yuna-kim-announces-retirement-after-sochi-silver",
+        "https://www.koreatimes.co.kr/sports/20140506/kim-yu-na-hangs-up-skates"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-09-kim-yuna",
+      "event_date": "2022-10-22",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Married singer Ko Woo-rim in Seoul",
+      "event_significance": 2,
+      "evidence_text": "Private wedding with singer Ko Woo-rim in Seoul, October 22, 2022.",
+      "evidence_urls": [
+        "https://www.asiae.co.kr/en/article/2022102208224122539",
+        "https://www.koreatimes.co.kr/amp/lifestyle/people-events/20220725/koreas-figure-skating-icon-kim-yuna-to-wed-singer-ko-woo-rim"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-10-park-ji-sung",
+      "event_date": "2000-06-24",
+      "event_category": "career_change",
+      "event_type": "debut",
+      "event_description": "Pro debut with Kyoto Purple Sanga (J-League)",
+      "event_significance": 2,
+      "evidence_text": "Signed with Kyoto Purple Sanga May 2000; debut 24 June 2000.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Park_Ji-sung"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-10-park-ji-sung",
+      "event_date": "2002-06-14",
+      "event_category": "achievement",
+      "event_type": "landmark_goal",
+      "event_description": "Winning goal vs Portugal at 2002 World Cup; Korea reached semifinal",
+      "event_significance": 3,
+      "evidence_text": "Scored in the 70th minute against Portugal at the 2002 World Cup.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Park_Ji-sung"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-10-park-ji-sung",
+      "event_date": "2003-02-07",
+      "event_category": "career_change",
+      "event_type": "transfer",
+      "event_description": "Moved to PSV Eindhoven",
+      "event_significance": 2,
+      "evidence_text": "Arrived in Eindhoven 7 February 2003; Eredivisie debut next day.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Park_Ji-sung"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-10-park-ji-sung",
+      "event_date": "2005-07",
+      "event_category": "career_change",
+      "event_type": "transfer",
+      "event_description": "Transfer to Manchester United (~£4M)",
+      "event_significance": 2,
+      "evidence_text": "PSV agreed reported £4 million fee; transfer completed July 2005.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Park_Ji-sung",
+        "https://www.washingtontimes.com/news/2014/may/14/park-ji-sung-announces-retirement-at-age-33/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-10-park-ji-sung",
+      "event_date": "2007-04",
+      "event_category": "health_event",
+      "event_type": "surgery",
+      "event_description": "Right knee cartilage surgery; out about eight-nine months",
+      "event_significance": 3,
+      "evidence_text": "Knee surgery in 2007 kept him out for eight months.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Park_Ji-sung",
+        "https://www.washingtontimes.com/news/2014/may/14/park-ji-sung-announces-retirement-at-age-33/"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-10-park-ji-sung",
+      "event_date": "2008-05",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "Premier League title; United won Champions League but he was left out of final squad",
+      "event_significance": 2,
+      "evidence_text": "Won 2007–08 Premier League; left out of the Champions League final squad.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Park_Ji-sung"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-10-park-ji-sung",
+      "event_date": "2009-05-27",
+      "event_category": "failure",
+      "event_type": "defeat_final",
+      "event_description": "Lost Champions League final to Barcelona (first Asian to play in a final)",
+      "event_significance": 2,
+      "evidence_text": "Lost the Champions League final 2–0 to Barcelona on 27 May 2009.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Park_Ji-sung"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-10-park-ji-sung",
+      "event_date": "2011-01-31",
+      "event_category": "retirement",
+      "event_type": "retirement",
+      "event_description": "Retired from international football",
+      "event_significance": 2,
+      "evidence_text": "Announced international retirement 31 January 2011, after the Asian Cup.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Park_Ji-sung"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-10-park-ji-sung",
+      "event_date": "2011-05",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "Fourth Premier League title (2010-11)",
+      "event_significance": 2,
+      "evidence_text": "Won four Premier League titles, including 2010–11.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Park_Ji-sung"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-10-park-ji-sung",
+      "event_date": "2011-05-28",
+      "event_category": "failure",
+      "event_type": "defeat_final",
+      "event_description": "Lost Champions League final to Barcelona at Wembley",
+      "event_significance": 2,
+      "evidence_text": "Lost 3–1 to Barcelona at Wembley on 28 May 2011.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Park_Ji-sung"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-10-park-ji-sung",
+      "event_date": "2012-07-09",
+      "event_category": "career_change",
+      "event_type": "transfer",
+      "event_description": "Joined Queens Park Rangers",
+      "event_significance": 2,
+      "evidence_text": "Joined QPR 9 July 2012 on a two-year contract.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Park_Ji-sung"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-10-park-ji-sung",
+      "event_date": "2013-08-08",
+      "event_category": "career_change",
+      "event_type": "new_team",
+      "event_description": "Loan back to PSV Eindhoven",
+      "event_significance": 1,
+      "evidence_text": "Returned to PSV on season-long loan 8 August 2013.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Park_Ji-sung"
+      ],
+      "evidence_confidence": "medium"
+    },
+    {
+      "person_id": "sports-10-park-ji-sung",
+      "event_date": "2014-05-14",
+      "event_category": "retirement",
+      "event_type": "retirement",
+      "event_description": "Retired from football due to right knee",
+      "event_significance": 3,
+      "evidence_text": "Said his knee won't hold up another season; retired at 33.",
+      "evidence_urls": [
+        "https://www.washingtontimes.com/news/2014/may/14/park-ji-sung-announces-retirement-at-age-33/",
+        "https://www.koreatimes.co.kr/amp/southkorea/20140514/park-ji-sung-retires"
+      ],
+      "evidence_confidence": "high"
+    },
+    {
+      "person_id": "sports-10-park-ji-sung",
+      "event_date": "2014-07-27",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Married former SBS announcer Kim Min-ji",
+      "event_significance": 2,
+      "evidence_text": "Planned to marry former SBS announcer Kim Min-ji on July 27 in Seoul.",
+      "evidence_urls": [
+        "https://www.washingtontimes.com/news/2014/may/14/park-ji-sung-announces-retirement-at-age-33/",
+        "https://www.koreajoongangdaily.com/korea/retired-footballer-park-jisung-weds/10045712"
+      ],
+      "evidence_confidence": "high"
+    }
+  ]
+}

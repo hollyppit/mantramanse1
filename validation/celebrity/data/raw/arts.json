@@ -1,0 +1,2014 @@
+{
+ "group": "arts",
+ "collected_at": "2026-11-25",
+ "persons": [
+  {
+   "id": "arts-01-robert-downey-jr",
+   "name": "Robert Downey Jr.",
+   "name_ko": "로버트 다우니 주니어",
+   "gender": "M",
+   "birth_date": "1965-04-04",
+   "birth_time": "13:10",
+   "birth_time_confidence": "reported",
+   "birth_time_source": "https://www.astro.com/astro-databank/Downey,_Robert_Jr. (Rodden A, \"From memory\", collector March; EST UTC-5)",
+   "birth_place": {
+    "city": "Manhattan, New York",
+    "country": "United States",
+    "lon": -73.983,
+    "tz": "America/New_York"
+   },
+   "profession": "arts",
+   "profession_detail": "actor",
+   "death_date": null,
+   "source_urls": [
+    "https://www.astro.com/astro-databank/Downey,_Robert_Jr.",
+    "https://en.wikipedia.org/wiki/Robert_Downey_Jr."
+   ]
+  },
+  {
+   "id": "arts-02-britney-spears",
+   "name": "Britney Spears",
+   "name_ko": "브리트니 스피어스",
+   "gender": "F",
+   "birth_date": "1981-12-02",
+   "birth_time": "01:30",
+   "birth_time_confidence": "reported",
+   "birth_time_source": "https://www.astro.com/astro-databank/Spears,_Britney (Rodden A, \"From memory\", collector Clifford; CST UTC-6)",
+   "birth_place": {
+    "city": "McComb, Mississippi",
+    "country": "United States",
+    "lon": -90.45,
+    "tz": "America/Chicago"
+   },
+   "profession": "arts",
+   "profession_detail": "pop singer",
+   "death_date": null,
+   "source_urls": [
+    "https://www.astro.com/astro-databank/Spears,_Britney",
+    "https://en.wikipedia.org/wiki/Britney_Spears"
+   ]
+  },
+  {
+   "id": "arts-03-whitney-houston",
+   "name": "Whitney Houston",
+   "name_ko": "휘트니 휴스턴",
+   "gender": "F",
+   "birth_date": "1963-08-09",
+   "birth_time": "20:55",
+   "birth_time_confidence": "verified",
+   "birth_time_source": "https://www.astro.com/astro-databank/Houston,_Whitney (Rodden AA, \"BC/BR in hand\", collector Farmer; EDT UTC-4)",
+   "birth_place": {
+    "city": "Newark, New Jersey",
+    "country": "United States",
+    "lon": -74.167,
+    "tz": "America/New_York"
+   },
+   "profession": "arts",
+   "profession_detail": "singer, actress",
+   "death_date": "2012-02-11",
+   "source_urls": [
+    "https://www.astro.com/astro-databank/Houston,_Whitney",
+    "https://en.wikipedia.org/wiki/Whitney_Houston"
+   ]
+  },
+  {
+   "id": "arts-04-elvis-presley",
+   "name": "Elvis Presley",
+   "name_ko": "엘비스 프레슬리",
+   "gender": "M",
+   "birth_date": "1935-01-08",
+   "birth_time": "04:35",
+   "birth_time_confidence": "verified",
+   "birth_time_source": "https://www.astro.com/astro-databank/Presley,_Elvis (Rodden AA, \"BC/BR in hand\", collector Rodden; CST UTC-6)",
+   "birth_place": {
+    "city": "Tupelo, Mississippi",
+    "country": "United States",
+    "lon": -88.7,
+    "tz": "America/Chicago"
+   },
+   "profession": "arts",
+   "profession_detail": "singer, actor",
+   "death_date": "1977-08-16",
+   "source_urls": [
+    "https://www.astro.com/astro-databank/Presley,_Elvis",
+    "https://en.wikipedia.org/wiki/Elvis_Presley"
+   ]
+  },
+  {
+   "id": "arts-05-marilyn-monroe",
+   "name": "Marilyn Monroe",
+   "name_ko": "마릴린 먼로",
+   "gender": "F",
+   "birth_date": "1926-06-01",
+   "birth_time": "09:30",
+   "birth_time_confidence": "verified",
+   "birth_time_source": "https://www.astro.com/astro-databank/Monroe,_Marilyn (Rodden AA, \"BC/BR in hand\", collector Rodden; PST UTC-8)",
+   "birth_place": {
+    "city": "Los Angeles, California",
+    "country": "United States",
+    "lon": -118.25,
+    "tz": "America/Los_Angeles"
+   },
+   "profession": "arts",
+   "profession_detail": "actress",
+   "death_date": "1962-08-04",
+   "source_urls": [
+    "https://www.astro.com/astro-databank/Monroe,_Marilyn",
+    "https://en.wikipedia.org/wiki/Marilyn_Monroe"
+   ]
+  },
+  {
+   "id": "arts-06-madonna",
+   "name": "Madonna",
+   "name_ko": "마돈나",
+   "gender": "F",
+   "birth_date": "1958-08-16",
+   "birth_time": "07:05",
+   "birth_time_confidence": "verified",
+   "birth_time_source": "https://www.astro.com/astro-databank/Madonna (Rodden AA, \"Quoted BC/BR\", collector Grady; ADB zone EST UTC-5 standard time, not DST)",
+   "birth_place": {
+    "city": "Bay City, Michigan",
+    "country": "United States",
+    "lon": -83.883,
+    "tz": "America/Detroit"
+   },
+   "profession": "arts",
+   "profession_detail": "singer, songwriter, actress",
+   "death_date": null,
+   "source_urls": [
+    "https://www.astro.com/astro-databank/Madonna",
+    "https://en.wikipedia.org/wiki/Madonna"
+   ]
+  },
+  {
+   "id": "arts-07-stephen-king",
+   "name": "Stephen King",
+   "name_ko": "스티븐 킹",
+   "gender": "M",
+   "birth_date": "1947-09-21",
+   "birth_time": "01:30",
+   "birth_time_confidence": "reported",
+   "birth_time_source": "https://www.astro.com/astro-databank/King,_Stephen (Rodden A, \"From memory\", collector Rodden; EDT UTC-4)",
+   "birth_place": {
+    "city": "Portland, Maine",
+    "country": "United States",
+    "lon": -70.25,
+    "tz": "America/New_York"
+   },
+   "profession": "arts",
+   "profession_detail": "novelist",
+   "death_date": null,
+   "source_urls": [
+    "https://www.astro.com/astro-databank/King,_Stephen",
+    "https://en.wikipedia.org/wiki/Stephen_King"
+   ]
+  },
+  {
+   "id": "arts-08-steven-spielberg",
+   "name": "Steven Spielberg",
+   "name_ko": "스티븐 스필버그",
+   "gender": "M",
+   "birth_date": "1946-12-18",
+   "birth_time": "18:16",
+   "birth_time_confidence": "verified",
+   "birth_time_source": "https://www.astro.com/astro-databank/Spielberg,_Steven (Rodden AA, \"BC/BR in hand\", collector Rodden; EST UTC-5)",
+   "birth_place": {
+    "city": "Cincinnati, Ohio",
+    "country": "United States",
+    "lon": -84.45,
+    "tz": "America/New_York"
+   },
+   "profession": "arts",
+   "profession_detail": "film director, producer",
+   "death_date": null,
+   "source_urls": [
+    "https://www.astro.com/astro-databank/Spielberg,_Steven",
+    "https://en.wikipedia.org/wiki/Steven_Spielberg"
+   ]
+  },
+  {
+   "id": "arts-09-youn-yuh-jung",
+   "name": "Youn Yuh-jung",
+   "name_ko": "윤여정",
+   "gender": "F",
+   "birth_date": "1947-06-19",
+   "birth_time": null,
+   "birth_time_confidence": "unknown",
+   "birth_time_source": null,
+   "birth_place": {
+    "city": "unverified (commonly reported Kaesong; not confirmed in cited sources)",
+    "country": "Korea",
+    "lon": 126.55,
+    "tz": "Asia/Seoul"
+   },
+   "profession": "arts",
+   "profession_detail": "actress",
+   "death_date": null,
+   "source_urls": [
+    "https://en.wikipedia.org/wiki/Youn_Yuh-jung",
+    "https://ko.wikipedia.org/wiki/%EC%9C%A4%EC%97%AC%EC%A0%95"
+   ]
+  },
+  {
+   "id": "arts-10-bong-joon-ho",
+   "name": "Bong Joon Ho",
+   "name_ko": "봉준호",
+   "gender": "M",
+   "birth_date": "1969-09-14",
+   "birth_time": null,
+   "birth_time_confidence": "unknown",
+   "birth_time_source": null,
+   "birth_place": {
+    "city": "Daegu (Bongdeok-dong)",
+    "country": "South Korea",
+    "lon": 128.6,
+    "tz": "Asia/Seoul"
+   },
+   "profession": "arts",
+   "profession_detail": "film director, screenwriter",
+   "death_date": null,
+   "source_urls": [
+    "https://en.wikipedia.org/wiki/Bong_Joon_Ho"
+   ]
+  }
+ ],
+ "events": [
+  {
+   "person_id": "arts-01-robert-downey-jr",
+   "event_date": "1985",
+   "event_category": "career_change",
+   "event_type": "tv_cast_member",
+   "event_description": "Joins Saturday Night Live cast",
+   "event_significance": 1,
+   "evidence_text": "Downey joined the Saturday Night Live cast in 1985.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Robert_Downey_Jr."
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-01-robert-downey-jr",
+   "event_date": "1992-05-29",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Marries Deborah Falconer",
+   "event_significance": 2,
+   "evidence_text": "Married Deborah Falconer on May 29, 1992.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Robert_Downey_Jr."
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-01-robert-downey-jr",
+   "event_date": "1993-03",
+   "event_category": "achievement",
+   "event_type": "major_nomination",
+   "event_description": "Chaplin: Academy Award Best Actor nomination and BAFTA Best Actor win",
+   "event_significance": 2,
+   "evidence_text": "Chaplin (1992) earned him the BAFTA for Best Actor and an Academy Award nomination.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Robert_Downey_Jr.",
+    "https://abc7.com/post/robert-downey-jr-oscars-2024-oppenheimer-oscar/14491118/"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-01-robert-downey-jr",
+   "event_date": "1993-09",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "Son Indio born (with Falconer)",
+   "event_significance": 1,
+   "evidence_text": "Son with Falconer born September 1993.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Robert_Downey_Jr."
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-01-robert-downey-jr",
+   "event_date": "1996-06",
+   "event_category": "failure",
+   "event_type": "legal_penalty",
+   "event_description": "Arrested for drug possession on Sunset Boulevard; start of repeated arrests",
+   "event_significance": 2,
+   "evidence_text": "Arrested June 1996 for drug possession; third drug arrest within a month by July 1996.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Robert_Downey_Jr.",
+    "https://www.astro.com/astro-databank/Downey,_Robert_Jr."
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-01-robert-downey-jr",
+   "event_date": "1999-08-05",
+   "event_category": "failure",
+   "event_type": "legal_penalty",
+   "event_description": "Sentenced to three years in state prison (Corcoran) for probation violation",
+   "event_significance": 3,
+   "evidence_text": "Judge sentenced Downey to three years in prison for violating probation by missing drug tests.",
+   "evidence_urls": [
+    "https://archive.seattletimes.com/archive/19990806/2975873/robert-downey-jr-gets-three-year-prison-sentence",
+    "https://www.npr.org/1999/08/05/1054968/robert-downey-jr",
+    "https://en.wikipedia.org/wiki/Robert_Downey_Jr."
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-01-robert-downey-jr",
+   "event_date": "2001-01",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "Golden Globe for Ally McBeal (supporting TV actor)",
+   "event_significance": 2,
+   "evidence_text": "Joined Ally McBeal in 2000, earning a Golden Globe for his performance.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Robert_Downey_Jr.",
+    "https://www.foxnews.com/story/robert-downey-jr-fired-from-ally-mcbeal-after-another-arrest"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-01-robert-downey-jr",
+   "event_date": "2001-04-24",
+   "event_category": "failure",
+   "event_type": "contract_terminated",
+   "event_description": "Arrested in Culver City and fired from Ally McBeal",
+   "event_significance": 3,
+   "evidence_text": "David E. Kelley fired Downey and rewrote the finale after his April 2001 Culver City arrest.",
+   "evidence_urls": [
+    "https://www.foxnews.com/story/robert-downey-jr-fired-from-ally-mcbeal-after-another-arrest",
+    "https://abcnews.go.com/Entertainment/story?id=106145"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-01-robert-downey-jr",
+   "event_date": "2004",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Divorce from Deborah Falconer finalized",
+   "event_significance": 2,
+   "evidence_text": "Divorce from Falconer was finalized in 2004.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Robert_Downey_Jr."
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-01-robert-downey-jr",
+   "event_date": "2005-08-27",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Marries producer Susan Levin",
+   "event_significance": 2,
+   "evidence_text": "Married Susan Levin on August 27, 2005.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Robert_Downey_Jr."
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-01-robert-downey-jr",
+   "event_date": "2008-05-02",
+   "event_category": "career_change",
+   "event_type": "comeback",
+   "event_description": "Iron Man released; career revival as MCU lead",
+   "event_significance": 3,
+   "evidence_text": "Downey revitalized his career starring as Iron Man, beginning with Iron Man (2008).",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Robert_Downey_Jr."
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-01-robert-downey-jr",
+   "event_date": "2010-01",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "Golden Globe Best Actor (Musical/Comedy) for Sherlock Holmes",
+   "event_significance": 2,
+   "evidence_text": "Sherlock Holmes won Downey the Golden Globe for Best Actor – Musical or Comedy.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Robert_Downey_Jr."
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-01-robert-downey-jr",
+   "event_date": "2013",
+   "event_category": "financial_event",
+   "event_type": "financial_gain",
+   "event_description": "Named Forbes highest-paid actor (2013–2015)",
+   "event_significance": 2,
+   "evidence_text": "Forbes named him highest-paid actor in 2013, 2014 and 2015, earning $75–80 million.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Robert_Downey_Jr."
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-01-robert-downey-jr",
+   "event_date": "2015-12",
+   "event_category": "achievement",
+   "event_type": "legal_pardon",
+   "event_description": "Pardoned by California Governor Jerry Brown for past drug convictions",
+   "event_significance": 1,
+   "evidence_text": "In December 2015 he was one of 91 people pardoned by Governor Jerry Brown.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Robert_Downey_Jr."
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-01-robert-downey-jr",
+   "event_date": "2024-03-10",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "Academy Award Best Supporting Actor for Oppenheimer (first Oscar)",
+   "event_significance": 3,
+   "evidence_text": "Downey won his first Oscar, Best Supporting Actor, for playing Lewis Strauss in Oppenheimer.",
+   "evidence_urls": [
+    "https://abc7.com/post/robert-downey-jr-oscars-2024-oppenheimer-oscar/14491118/",
+    "https://www.nme.com/news/film/robert-downey-jr-wins-first-oscar-speech-3599274",
+    "https://en.wikipedia.org/wiki/Robert_Downey_Jr."
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-02-britney-spears",
+   "event_date": "1992-12",
+   "event_category": "career_change",
+   "event_type": "debut",
+   "event_description": "Joins The All-New Mickey Mouse Club",
+   "event_significance": 1,
+   "evidence_text": "Joined The All-New Mickey Mouse Club in December 1992.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Britney_Spears"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-02-britney-spears",
+   "event_date": "1999-01",
+   "event_category": "achievement",
+   "event_type": "hit_release",
+   "event_description": "Debut album ...Baby One More Time released",
+   "event_significance": 3,
+   "evidence_text": "Debut single released 1998 and debut album January 1999 launched her career.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Britney_Spears"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-02-britney-spears",
+   "event_date": "2004-10-06",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Legally marries Kevin Federline",
+   "event_significance": 2,
+   "evidence_text": "Wedding ceremony September 18, legal marriage to Federline October 6, 2004.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Britney_Spears"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-02-britney-spears",
+   "event_date": "2005-02",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "First Grammy: Best Dance Recording for \"Toxic\"",
+   "event_significance": 2,
+   "evidence_text": "\"Toxic\" won Spears her first Grammy for Best Dance Recording.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Britney_Spears"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-02-britney-spears",
+   "event_date": "2005-09",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "First son Sean Preston born",
+   "event_significance": 1,
+   "evidence_text": "First son born September 2005.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Britney_Spears"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-02-britney-spears",
+   "event_date": "2006-11",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Files for divorce from Federline (finalized July 2007)",
+   "event_significance": 2,
+   "evidence_text": "Spears filed for divorce from Federline, citing irreconcilable differences; finalized July 2007.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Britney_Spears"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-02-britney-spears",
+   "event_date": "2007-02",
+   "event_category": "health_event",
+   "event_type": "mental_health_crisis",
+   "event_description": "Rehab stay and public head-shaving breakdown",
+   "event_significance": 2,
+   "evidence_text": "She shaved her head with electric clippers at a Tarzana salon in February 2007.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Britney_Spears"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-02-britney-spears",
+   "event_date": "2007-09",
+   "event_category": "failure",
+   "event_type": "flop",
+   "event_description": "\"Gimme More\" MTV VMA performance widely panned",
+   "event_significance": 2,
+   "evidence_text": "Her September 2007 VMA \"Gimme More\" performance was widely panned.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Britney_Spears"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-02-britney-spears",
+   "event_date": "2008-02-01",
+   "event_category": "health_event",
+   "event_type": "psychiatric_hospitalization",
+   "event_description": "Psychiatric hold followed by court-ordered temporary conservatorship under her father",
+   "event_significance": 3,
+   "evidence_text": "Father named temporary conservator a day after she was taken to a psychiatric hospital.",
+   "evidence_urls": [
+    "https://www2.ljworld.com/news/2008/feb/02/spears_father_given_temporary_control/",
+    "https://www.billboard.com/pro/britney-spears-conservatorship-timeline/"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-02-britney-spears",
+   "event_date": "2008-12",
+   "event_category": "career_change",
+   "event_type": "comeback",
+   "event_description": "Album Circus released after conservatorship made indefinite",
+   "event_significance": 2,
+   "evidence_text": "Circus released December 2008, two months after conservatorship was extended indefinitely.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Britney_Spears"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-02-britney-spears",
+   "event_date": "2013-12-27",
+   "event_category": "achievement",
+   "event_type": "acclaimed_work",
+   "event_description": "Las Vegas residency Britney: Piece of Me begins (later extended)",
+   "event_significance": 2,
+   "evidence_text": "Piece of Me residency began December 27, 2013; extended two years in 2014.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Britney_Spears"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-02-britney-spears",
+   "event_date": "2019-01-04",
+   "event_category": "retirement",
+   "event_type": "hiatus",
+   "event_description": "Announces indefinite work hiatus, cancels Domination residency",
+   "event_significance": 3,
+   "evidence_text": "Spears announced an indefinite work hiatus, putting her Las Vegas residency on hold.",
+   "evidence_urls": [
+    "https://www.grammy.com/news/britney-spears-announces-indefinite-work-hiatus-including-upcoming-vegas-residency",
+    "https://cbsnews.com/amp/news/britney-spears-in-las-vegas-britney-spears-announces-indefinite-work-hiatus-cancels-new-vegas-show-due-to-fathers-health"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-02-britney-spears",
+   "event_date": "2021-11-12",
+   "event_category": "career_change",
+   "event_type": "conservatorship_ended",
+   "event_description": "Judge terminates 13-year conservatorship",
+   "event_significance": 3,
+   "evidence_text": "Judge Brenda Penny ruled the conservatorship of Britney Jean Spears is no longer required.",
+   "evidence_urls": [
+    "https://www.pbs.org/newshour/arts/judge-dissolves-britney-spears-conservatorship",
+    "https://www.aljazeera.com/news/2021/11/12/us-judge-dissolves-britney-spears-14-year-conservatorship"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-02-britney-spears",
+   "event_date": "2022",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Marries Sam Asghari",
+   "event_significance": 2,
+   "evidence_text": "Married Sam Asghari in 2022.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Britney_Spears"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-02-britney-spears",
+   "event_date": "2024",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Divorce from Sam Asghari",
+   "event_significance": 2,
+   "evidence_text": "Marriage to Asghari ended in divorce in 2024.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Britney_Spears"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-03-whitney-houston",
+   "event_date": "1983-06",
+   "event_category": "career_change",
+   "event_type": "debut",
+   "event_description": "National TV debut on The Merv Griffin Show",
+   "event_significance": 1,
+   "evidence_text": "Introduced nationally in June 1983 performing \"Home\" on The Merv Griffin Show.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Whitney_Houston"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-03-whitney-houston",
+   "event_date": "1985-02-14",
+   "event_category": "achievement",
+   "event_type": "hit_release",
+   "event_description": "Debut album Whitney Houston released (best-selling album of 1986)",
+   "event_significance": 3,
+   "evidence_text": "Her debut album was released February 14, 1985 and was the best-selling album the next year.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Whitney_Houston"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-03-whitney-houston",
+   "event_date": "1986-02",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "First Grammy: Best Female Pop Vocal for \"Saving All My Love for You\"",
+   "event_significance": 2,
+   "evidence_text": "First Grammy in 1986 for \"Saving All My Love for You\".",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Whitney_Houston"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-03-whitney-houston",
+   "event_date": "1992-07-18",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Marries Bobby Brown",
+   "event_significance": 2,
+   "evidence_text": "After a three-year courtship, the two were married on July 18, 1992.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Whitney_Houston"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-03-whitney-houston",
+   "event_date": "1992-11",
+   "event_category": "achievement",
+   "event_type": "box_office_success",
+   "event_description": "The Bodyguard film and soundtrack (best-selling soundtrack of all time)",
+   "event_significance": 3,
+   "evidence_text": "The Bodyguard remains the best-selling soundtrack of all time, over 45 million units.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Whitney_Houston"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-03-whitney-houston",
+   "event_date": "1993-03-04",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "Daughter Bobbi Kristina Brown born",
+   "event_significance": 1,
+   "evidence_text": "Gave birth to daughter Bobbi Kristina Brown on March 4, 1993.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Whitney_Houston"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-03-whitney-houston",
+   "event_date": "1994-03-01",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "Grammy Album of the Year and Record of the Year (The Bodyguard)",
+   "event_significance": 3,
+   "evidence_text": "Houston won 1994 Album of the Year for The Bodyguard soundtrack.",
+   "evidence_urls": [
+    "https://www.grammy.com/awards/categories/album-of-the-year/1994/",
+    "https://www.deseret.com/1994/3/2/19094859/36th-annual-grammy-award-winners/"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-03-whitney-houston",
+   "event_date": "2000-01-11",
+   "event_category": "failure",
+   "event_type": "scandal_penalty",
+   "event_description": "Marijuana found in her bag at Kona airport, Hawaii",
+   "event_significance": 2,
+   "evidence_text": "Airport security discovered half an ounce of marijuana in her handbag on January 11, 2000.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Whitney_Houston"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-03-whitney-houston",
+   "event_date": "2000-03",
+   "event_category": "failure",
+   "event_type": "contract_terminated",
+   "event_description": "Dropped from Academy Awards performance by Burt Bacharach",
+   "event_significance": 2,
+   "evidence_text": "Houston was fired from her Academy Awards performance by musical director Burt Bacharach.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Whitney_Houston"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-03-whitney-houston",
+   "event_date": "2001",
+   "event_category": "financial_event",
+   "event_type": "financial_gain",
+   "event_description": "Arista contract renewed for $100 million",
+   "event_significance": 2,
+   "evidence_text": "Her Arista Records contract was renewed for $100 million in 2001.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Whitney_Houston"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-03-whitney-houston",
+   "event_date": "2002-12",
+   "event_category": "failure",
+   "event_type": "career_decline",
+   "event_description": "Just Whitney released amid drug-use stories; image tarnished",
+   "event_significance": 2,
+   "evidence_text": "Drug use and a tumultuous marriage tarnished her image, overshadowing Just Whitney (2002).",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Whitney_Houston"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-03-whitney-houston",
+   "event_date": "2007-04-24",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Divorce from Bobby Brown granted",
+   "event_significance": 2,
+   "evidence_text": "The divorce was granted on April 24, 2007.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Whitney_Houston"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-03-whitney-houston",
+   "event_date": "2009",
+   "event_category": "career_change",
+   "event_type": "comeback",
+   "event_description": "Comeback album I Look to You",
+   "event_significance": 2,
+   "evidence_text": "Released I Look to You in 2009.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Whitney_Houston"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-03-whitney-houston",
+   "event_date": "2011-05",
+   "event_category": "health_event",
+   "event_type": "rehab",
+   "event_description": "Re-enters rehabilitation for drug and alcohol problems",
+   "event_significance": 2,
+   "evidence_text": "In May 2011 Houston enrolled in rehabilitation again for drug and alcohol problems.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Whitney_Houston"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-03-whitney-houston",
+   "event_date": "2012-02-11",
+   "event_category": "health_event",
+   "event_type": "death",
+   "event_description": "Accidental drowning at Beverly Hilton; heart disease and cocaine contributing",
+   "event_significance": 3,
+   "evidence_text": "Coroner ruled accidental drowning, with heart disease and cocaine use contributing.",
+   "evidence_urls": [
+    "https://www.npr.org/sections/thetwo-way/2012/03/22/149174735/coroner-whitney-houstons-death-ruled-accidental-drowning",
+    "https://www.hollywoodreporter.com/music/music-news/whitney-houston-death-autopsy-coroners-report-cocaine-drug-spoon-308301"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-04-elvis-presley",
+   "event_date": "1954-07-05",
+   "event_category": "career_change",
+   "event_type": "debut",
+   "event_description": "Sun Records session produces \"That's All Right\"",
+   "event_significance": 3,
+   "evidence_text": "The July 5, 1954 Sun session produced \"That's All Right\".",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Elvis_Presley"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-04-elvis-presley",
+   "event_date": "1955-11-21",
+   "event_category": "career_change",
+   "event_type": "label_change",
+   "event_description": "Contract bought by RCA Victor for $40,000",
+   "event_significance": 2,
+   "evidence_text": "RCA Victor bought his contract on November 21, 1955 for $40,000.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Elvis_Presley"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-04-elvis-presley",
+   "event_date": "1956-01-27",
+   "event_category": "achievement",
+   "event_type": "hit_release",
+   "event_description": "\"Heartbreak Hotel\" released; national breakthrough",
+   "event_significance": 3,
+   "evidence_text": "\"Heartbreak Hotel\" single released January 27, 1956.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Elvis_Presley"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-04-elvis-presley",
+   "event_date": "1956-09-09",
+   "event_category": "achievement",
+   "event_type": "acclaimed_work",
+   "event_description": "First Ed Sullivan Show appearance",
+   "event_significance": 2,
+   "evidence_text": "First Ed Sullivan Show appearance on September 9, 1956.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Elvis_Presley"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-04-elvis-presley",
+   "event_date": "1958-03-24",
+   "event_category": "retirement",
+   "event_type": "hiatus",
+   "event_description": "Drafted into US Army; career paused until 1960",
+   "event_significance": 2,
+   "evidence_text": "On March 24, 1958, Presley was drafted into the United States Army.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Elvis_Presley"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-04-elvis-presley",
+   "event_date": "1960-03-05",
+   "event_category": "career_change",
+   "event_type": "comeback",
+   "event_description": "Honorably discharged; returns to music and films",
+   "event_significance": 1,
+   "evidence_text": "Returned to the US March 2, 1960 and was honorably discharged three days later.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Elvis_Presley"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-04-elvis-presley",
+   "event_date": "1967-05-01",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Marries Priscilla Beaulieu in Las Vegas",
+   "event_significance": 2,
+   "evidence_text": "They married on May 1, 1967 at the Aladdin Hotel in Las Vegas.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Elvis_Presley"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-04-elvis-presley",
+   "event_date": "1968-02-01",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "Daughter Lisa Marie born",
+   "event_significance": 1,
+   "evidence_text": "Only child Lisa Marie born February 1, 1968, while unhappy with his career.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Elvis_Presley"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-04-elvis-presley",
+   "event_date": "1968-12-03",
+   "event_category": "career_change",
+   "event_type": "comeback",
+   "event_description": "NBC '68 Comeback Special airs, reviving career",
+   "event_significance": 3,
+   "evidence_text": "The NBC special aired December 3, 1968 and revitalized his career.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Elvis_Presley",
+    "https://ultimateclassicrock.com/elvis-presley-68-comeback-special-airs/"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-04-elvis-presley",
+   "event_date": "1969-07-31",
+   "event_category": "achievement",
+   "event_type": "acclaimed_work",
+   "event_description": "Begins Las Vegas International Hotel engagement (57 shows)",
+   "event_significance": 2,
+   "evidence_text": "International Hotel booked Presley for fifty-seven shows beginning July 31, 1969.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Elvis_Presley"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-04-elvis-presley",
+   "event_date": "1973-01-14",
+   "event_category": "achievement",
+   "event_type": "acclaimed_work",
+   "event_description": "Aloha from Hawaii broadcast live via satellite",
+   "event_significance": 2,
+   "evidence_text": "Aloha from Hawaii aired live via satellite on January 14, 1973.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Elvis_Presley"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-04-elvis-presley",
+   "event_date": "1973-10-09",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Divorce from Priscilla finalized",
+   "event_significance": 2,
+   "evidence_text": "Presley's divorce settlement was finalized on October 9, 1973.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Elvis_Presley"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-04-elvis-presley",
+   "event_date": "1973",
+   "event_category": "health_event",
+   "event_type": "addiction_hospitalization",
+   "event_description": "Hospitalized from effects of pethidine addiction (late 1973)",
+   "event_significance": 2,
+   "evidence_text": "In late 1973 he was hospitalized from the effects of a pethidine addiction.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Elvis_Presley"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-04-elvis-presley",
+   "event_date": "1977-08-16",
+   "event_category": "health_event",
+   "event_type": "death",
+   "event_description": "Dies at Graceland, aged 42",
+   "event_significance": 3,
+   "evidence_text": "Found unconscious at Graceland and pronounced dead August 16, 1977.",
+   "evidence_urls": [
+    "https://www.history.com/this-day-in-history/elvis-presley-dies",
+    "https://en.wikipedia.org/wiki/Elvis_Presley"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-05-marilyn-monroe",
+   "event_date": "1942-06-19",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Marries James Dougherty at 16",
+   "event_significance": 2,
+   "evidence_text": "Married James Dougherty on June 19, 1942.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marilyn_Monroe"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-05-marilyn-monroe",
+   "event_date": "1946-08",
+   "event_category": "career_change",
+   "event_type": "debut",
+   "event_description": "Signs Fox contract; adopts name Marilyn Monroe",
+   "event_significance": 3,
+   "evidence_text": "Fox contract began August 1946 and she took the name Marilyn Monroe.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marilyn_Monroe"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-05-marilyn-monroe",
+   "event_date": "1946-09",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Divorces James Dougherty",
+   "event_significance": 2,
+   "evidence_text": "Divorced Dougherty in September 1946.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marilyn_Monroe"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-05-marilyn-monroe",
+   "event_date": "1953",
+   "event_category": "achievement",
+   "event_type": "box_office_success",
+   "event_description": "Niagara, Gentlemen Prefer Blondes, How to Marry a Millionaire make her a top star",
+   "event_significance": 3,
+   "evidence_text": "Starred in Niagara, Gentlemen Prefer Blondes and How to Marry a Millionaire in 1953.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marilyn_Monroe"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-05-marilyn-monroe",
+   "event_date": "1954-01",
+   "event_category": "failure",
+   "event_type": "contract_suspension",
+   "event_description": "Suspended by Fox for refusing The Girl in Pink Tights",
+   "event_significance": 2,
+   "evidence_text": "In January 1954 Fox suspended Monroe when she refused to shoot another musical comedy.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marilyn_Monroe"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-05-marilyn-monroe",
+   "event_date": "1954-01-14",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Marries Joe DiMaggio",
+   "event_significance": 2,
+   "evidence_text": "Married Joe DiMaggio on January 14, 1954 in San Francisco.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marilyn_Monroe"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-05-marilyn-monroe",
+   "event_date": "1954-10",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Files for divorce from DiMaggio (final 1955)",
+   "event_significance": 2,
+   "evidence_text": "Filed for divorce from DiMaggio in October 1954.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marilyn_Monroe"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-05-marilyn-monroe",
+   "event_date": "1956-06-29",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Marries Arthur Miller",
+   "event_significance": 2,
+   "evidence_text": "Married Arthur Miller June 29, 1956 in White Plains, New York.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marilyn_Monroe"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-05-marilyn-monroe",
+   "event_date": "1957",
+   "event_category": "health_event",
+   "event_type": "ectopic_pregnancy",
+   "event_description": "Ectopic pregnancy (mid-1957), miscarriage a year later",
+   "event_significance": 2,
+   "evidence_text": "She had an ectopic pregnancy in mid-1957 and a miscarriage a year later.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marilyn_Monroe"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-05-marilyn-monroe",
+   "event_date": "1960-03",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "Golden Globe Best Actress (Comedy) for Some Like It Hot",
+   "event_significance": 2,
+   "evidence_text": "She won a Golden Globe for Some Like It Hot, a critical and commercial success.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marilyn_Monroe"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-05-marilyn-monroe",
+   "event_date": "1961-01",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Mexican divorce from Arthur Miller",
+   "event_significance": 2,
+   "evidence_text": "She obtained a Mexican divorce from Miller in January 1961.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marilyn_Monroe"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-05-marilyn-monroe",
+   "event_date": "1961-02",
+   "event_category": "failure",
+   "event_type": "flop",
+   "event_description": "The Misfits released and fails at box office",
+   "event_significance": 2,
+   "evidence_text": "The Misfits was released the following month, failing at the box office.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marilyn_Monroe"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-05-marilyn-monroe",
+   "event_date": "1961",
+   "event_category": "health_event",
+   "event_type": "psychiatric_hospitalization",
+   "event_description": "Admitted to Payne Whitney Psychiatric Clinic",
+   "event_significance": 2,
+   "evidence_text": "She admitted herself to the Payne Whitney Psychiatric Clinic and was placed in a locked ward.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marilyn_Monroe"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-05-marilyn-monroe",
+   "event_date": "1962-06",
+   "event_category": "failure",
+   "event_type": "contract_terminated",
+   "event_description": "Fired from Something's Got to Give and sued for $750,000",
+   "event_significance": 3,
+   "evidence_text": "On June 7, Fox fired Monroe and sued her for $750,000.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marilyn_Monroe",
+    "https://en.wikipedia.org/wiki/Something%27s_Got_to_Give"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-05-marilyn-monroe",
+   "event_date": "1962-08-04",
+   "event_category": "health_event",
+   "event_type": "death",
+   "event_description": "Dies of barbiturate overdose at home, aged 36",
+   "event_significance": 3,
+   "evidence_text": "On August 4, 1962, Monroe died at age 36 of a barbiturate overdose.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marilyn_Monroe",
+    "https://en.wikipedia.org/wiki/Death_of_Marilyn_Monroe"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-06-madonna",
+   "event_date": "1983-07",
+   "event_category": "career_change",
+   "event_type": "debut",
+   "event_description": "Debut album Madonna (Sire Records)",
+   "event_significance": 3,
+   "evidence_text": "She rose to fame with her debut album, Madonna (1983).",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Madonna"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-06-madonna",
+   "event_date": "1984-11-12",
+   "event_category": "achievement",
+   "event_type": "hit_release",
+   "event_description": "Like a Virgin released; first US number-one album",
+   "event_significance": 3,
+   "evidence_text": "Like a Virgin released November 12, 1984, her first number-one album in the US.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Madonna"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-06-madonna",
+   "event_date": "1985-08-16",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Marries Sean Penn",
+   "event_significance": 2,
+   "evidence_text": "She married actor Sean Penn on her twenty-seventh birthday in 1985.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Madonna"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-06-madonna",
+   "event_date": "1989-01-05",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Files for divorce from Sean Penn",
+   "event_significance": 2,
+   "evidence_text": "Madonna filed for divorce on January 5, 1989.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Madonna"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-06-madonna",
+   "event_date": "1989-04",
+   "event_category": "failure",
+   "event_type": "contract_terminated",
+   "event_description": "Pepsi pulls commercial and ends sponsorship over \"Like a Prayer\" video",
+   "event_significance": 2,
+   "evidence_text": "Pepsi withdrew the commercial and terminated her sponsorship after religious groups protested.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Madonna",
+    "https://www.cbsnews.com/news/madonna-pepsi-commercial-canceled-1989-like-a-prayer"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-06-madonna",
+   "event_date": "1993",
+   "event_category": "failure",
+   "event_type": "flop",
+   "event_description": "Body of Evidence and Dangerous Game poorly received",
+   "event_significance": 2,
+   "evidence_text": "Her 1993 films Body of Evidence and Dangerous Game were poorly received.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Madonna"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-06-madonna",
+   "event_date": "1996-10-14",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "Daughter Lourdes born",
+   "event_significance": 1,
+   "evidence_text": "Gave birth to daughter Lourdes on October 14, 1996.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Madonna"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-06-madonna",
+   "event_date": "1997-01",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "Golden Globe Best Actress for Evita",
+   "event_significance": 2,
+   "evidence_text": "She won the Golden Globe for Best Actress for portraying Eva Perón in Evita.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Madonna"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-06-madonna",
+   "event_date": "2000-08-11",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "Son Rocco born (complications from placenta praevia)",
+   "event_significance": 1,
+   "evidence_text": "Son Rocco born August 11, 2000, with complications due to placenta praevia.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Madonna"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-06-madonna",
+   "event_date": "2000-12-22",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Marries Guy Ritchie at Skibo Castle",
+   "event_significance": 2,
+   "evidence_text": "Madonna married Ritchie the day after the christening, at Skibo Castle.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Madonna"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-06-madonna",
+   "event_date": "2002",
+   "event_category": "failure",
+   "event_type": "flop",
+   "event_description": "Swept Away critical and commercial failure",
+   "event_significance": 2,
+   "evidence_text": "After the failure of Swept Away (2002) she vowed never to act in another film.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Madonna"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-06-madonna",
+   "event_date": "2007-10",
+   "event_category": "financial_event",
+   "event_type": "financial_gain",
+   "event_description": "Signs 10-year, $120 million 360 deal with Live Nation",
+   "event_significance": 2,
+   "evidence_text": "Signed a ten-year, $120 million 360 deal with Live Nation.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Madonna"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-06-madonna",
+   "event_date": "2008",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Divorce from Guy Ritchie",
+   "event_significance": 2,
+   "evidence_text": "Infobox lists marriage to Guy Ritchie ending in divorce in 2008.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Madonna"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-06-madonna",
+   "event_date": "2023-06-24",
+   "event_category": "health_event",
+   "event_type": "illness",
+   "event_description": "Serious bacterial infection, several days in ICU; tour postponed",
+   "event_significance": 2,
+   "evidence_text": "Manager said she developed a serious bacterial infection leading to a several-day ICU stay.",
+   "evidence_urls": [
+    "https://www.npr.org/2023/06/28/1184907749/madonna-tour-infection",
+    "https://www.cbsnews.com/news/madonna-bacterial-infection-icu-hospitalized-tour-postponed/"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-06-madonna",
+   "event_date": "2024-05",
+   "event_category": "achievement",
+   "event_type": "acclaimed_work",
+   "event_description": "Free Copacabana Beach concert draws 1.6 million (record)",
+   "event_significance": 2,
+   "evidence_text": "Free Copacabana concert drew 1.6 million, the largest standalone concert record.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Madonna"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-07-stephen-king",
+   "event_date": "1971",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Marries Tabitha Spruce",
+   "event_significance": 2,
+   "evidence_text": "King and Spruce wed in 1971.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Stephen_King"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-07-stephen-king",
+   "event_date": "1974",
+   "event_category": "career_change",
+   "event_type": "debut",
+   "event_description": "Debut novel Carrie published by Doubleday",
+   "event_significance": 3,
+   "evidence_text": "His debut, Carrie (1974), established him in horror.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Stephen_King"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-07-stephen-king",
+   "event_date": "1977",
+   "event_category": "achievement",
+   "event_type": "acclaimed_work",
+   "event_description": "The Shining published",
+   "event_significance": 2,
+   "evidence_text": "Stanley Hotel visit provided the basis for The Shining (1977).",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Stephen_King"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-07-stephen-king",
+   "event_date": "1982",
+   "event_category": "career_change",
+   "event_type": "genre_switch",
+   "event_description": "Different Seasons, first major departure from horror",
+   "event_significance": 1,
+   "evidence_text": "Different Seasons (1982) was his first major departure from the genre.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Stephen_King"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-07-stephen-king",
+   "event_date": "1986",
+   "event_category": "career_change",
+   "event_type": "directing_debut",
+   "event_description": "Directorial debut Maximum Overdrive",
+   "event_significance": 1,
+   "evidence_text": "In 1986, King made his directorial debut with Maximum Overdrive.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Stephen_King"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-07-stephen-king",
+   "event_date": "1987",
+   "event_category": "health_event",
+   "event_type": "addiction_treatment",
+   "event_description": "Family intervention for alcohol/drug addiction; enters treatment",
+   "event_significance": 2,
+   "evidence_text": "King dealt with addiction through the 1980s; Tabitha staged an intervention and he sought treatment.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Stephen_King"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-07-stephen-king",
+   "event_date": "1999-06-19",
+   "event_category": "health_event",
+   "event_type": "accident",
+   "event_description": "Struck by a minivan while walking in Maine; severe injuries",
+   "event_significance": 3,
+   "evidence_text": "King was struck from behind by a Dodge Caravan; collapsed lung, broken hip, leg fractures.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Stephen_King",
+    "https://abcnews.go.com/Entertainment/story?id=115390",
+    "https://www.npr.org/2001/06/22/1124785/novelist-stephen-king"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-07-stephen-king",
+   "event_date": "2003-11",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "National Book Foundation Medal for Distinguished Contribution to American Letters",
+   "event_significance": 2,
+   "evidence_text": "He received the 2003 Medal for Distinguished Contribution to American Letters.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Stephen_King"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-07-stephen-king",
+   "event_date": "2007",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "Mystery Writers of America Grand Master Award",
+   "event_significance": 1,
+   "evidence_text": "He received the 2007 Grand Master Award from the Mystery Writers of America.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Stephen_King"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-07-stephen-king",
+   "event_date": "2015-09-10",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "2014 National Medal of Arts presented by President Obama",
+   "event_significance": 2,
+   "evidence_text": "King received the 2014 National Medal of Arts from President Obama at the White House.",
+   "evidence_urls": [
+    "https://www.npr.org/sections/thetwo-way/2015/09/10/439200712/a-medal-for-a-king-and-for-many-of-americas-greatest-living-artists",
+    "https://www.arts.gov/news/press-releases/2015/president-obama-award-2014-national-medals-arts"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-08-steven-spielberg",
+   "event_date": "1971",
+   "event_category": "career_change",
+   "event_type": "directing_debut",
+   "event_description": "Directorial debut Duel (TV film)",
+   "event_significance": 3,
+   "evidence_text": "Starting in television, Spielberg made his directorial debut with Duel (1971).",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Steven_Spielberg"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-08-steven-spielberg",
+   "event_date": "1975",
+   "event_category": "achievement",
+   "event_type": "box_office_success",
+   "event_description": "Jaws sets domestic box-office record",
+   "event_significance": 3,
+   "evidence_text": "Against expectations, Jaws set the domestic box-office record, making him a household name.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Steven_Spielberg"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-08-steven-spielberg",
+   "event_date": "1979",
+   "event_category": "failure",
+   "event_type": "critical_failure",
+   "event_description": "1941 disliked by critics and studio heads",
+   "event_significance": 1,
+   "evidence_text": "1941 grossed $92 million but most critics and the studio heads disliked it.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Steven_Spielberg",
+    "https://en.wikipedia.org/wiki/1941_(film)"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-08-steven-spielberg",
+   "event_date": "1982",
+   "event_category": "achievement",
+   "event_type": "box_office_success",
+   "event_description": "E.T. the Extra-Terrestrial",
+   "event_significance": 2,
+   "evidence_text": "He became a household name with Jaws, Close Encounters and E.T.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Steven_Spielberg"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-08-steven-spielberg",
+   "event_date": "1985-11",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Marries Amy Irving",
+   "event_significance": 2,
+   "evidence_text": "Spielberg and Irving renewed their romance in 1984 and married in November 1985.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Steven_Spielberg"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-08-steven-spielberg",
+   "event_date": "1989-04",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Divorce from Amy Irving",
+   "event_significance": 2,
+   "evidence_text": "In 1989 the couple divorced; settlement is one of the most expensive in history.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Steven_Spielberg",
+    "https://hellomagazine.com/brides/823914/steven-spielberg-unconventional-relationship-ex-wife-amy-irving-100m-divorce"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-08-steven-spielberg",
+   "event_date": "1989",
+   "event_category": "financial_event",
+   "event_type": "financial_loss",
+   "event_description": "Divorce settlement reportedly about $100 million",
+   "event_significance": 2,
+   "evidence_text": "Irving reportedly received about $100 million in the divorce settlement.",
+   "evidence_urls": [
+    "https://hellomagazine.com/brides/823914/steven-spielberg-unconventional-relationship-ex-wife-amy-irving-100m-divorce",
+    "https://en.wikipedia.org/wiki/Steven_Spielberg"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-08-steven-spielberg",
+   "event_date": "1991-10-12",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Marries Kate Capshaw",
+   "event_significance": 2,
+   "evidence_text": "They married on October 12, 1991.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Steven_Spielberg"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-08-steven-spielberg",
+   "event_date": "1993-06",
+   "event_category": "achievement",
+   "event_type": "box_office_success",
+   "event_description": "Jurassic Park becomes highest-grossing film at the time",
+   "event_significance": 3,
+   "evidence_text": "Jurassic Park (1993) became the highest-grossing film at the time.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Steven_Spielberg"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-08-steven-spielberg",
+   "event_date": "1994-03-21",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "Schindler's List wins Best Picture; first Best Director Oscar",
+   "event_significance": 3,
+   "evidence_text": "Schindler's List won seven Academy Awards, including Best Picture and his first Best Director.",
+   "evidence_urls": [
+    "https://www.oscars.org/oscars/ceremonies/1994/memorable-moments",
+    "https://en.wikipedia.org/wiki/Steven_Spielberg"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-08-steven-spielberg",
+   "event_date": "1994",
+   "event_category": "career_change",
+   "event_type": "studio_founding",
+   "event_description": "Co-founds DreamWorks with Katzenberg and Geffen",
+   "event_significance": 2,
+   "evidence_text": "In 1994 he set up DreamWorks with Jeffrey Katzenberg and David Geffen.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Steven_Spielberg"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-08-steven-spielberg",
+   "event_date": "1995",
+   "event_category": "achievement",
+   "event_type": "lifetime_award",
+   "event_description": "AFI Life Achievement Award",
+   "event_significance": 2,
+   "evidence_text": "He received the AFI Life Achievement Award in 1995.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Steven_Spielberg"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-08-steven-spielberg",
+   "event_date": "1999-03-21",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "Second Best Director Oscar for Saving Private Ryan",
+   "event_significance": 3,
+   "evidence_text": "Schindler's List and Saving Private Ryan both won him the Academy Award for Best Director.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Steven_Spielberg"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-08-steven-spielberg",
+   "event_date": "2016-07-01",
+   "event_category": "failure",
+   "event_type": "flop",
+   "event_description": "The BFG box-office failure",
+   "event_significance": 2,
+   "evidence_text": "The BFG was a box office failure, grossing $199 million against a $140 million budget.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/The_BFG_(2016_film)"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-08-steven-spielberg",
+   "event_date": "2021-12",
+   "event_category": "failure",
+   "event_type": "flop",
+   "event_description": "West Side Story box-office bomb",
+   "event_significance": 2,
+   "evidence_text": "West Side Story grossed $76 million against a $100 million budget, a box-office bomb.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/West_Side_Story_(2021_film)"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-09-youn-yuh-jung",
+   "event_date": "1967",
+   "event_category": "career_change",
+   "event_type": "debut",
+   "event_description": "TV acting debut in Mister Gom after TBC audition",
+   "event_significance": 2,
+   "evidence_text": "Youn made her acting debut in the television drama Mister Gom in 1967.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Youn_Yuh-jung"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-09-youn-yuh-jung",
+   "event_date": "1971",
+   "event_category": "achievement",
+   "event_type": "acclaimed_work",
+   "event_description": "Film debut Woman of Fire: Blue Dragon and Sitges Best Actress",
+   "event_significance": 3,
+   "evidence_text": "Won Best Actress at the Blue Dragon Film Awards for her debut in Woman of Fire.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Youn_Yuh-jung"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-09-youn-yuh-jung",
+   "event_date": "1974",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Marries singer Jo Young-nam (some sources say 1975)",
+   "event_significance": 2,
+   "evidence_text": "The couple married in 1974 and have two sons.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Youn_Yuh-jung",
+    "https://www.koreatimes.co.kr/entertainment/films/20210426/once-a-needs-driven-actor-gets-global-spotlight"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-09-youn-yuh-jung",
+   "event_date": "1975",
+   "event_category": "retirement",
+   "event_type": "retirement",
+   "event_description": "Retires from acting at career peak and emigrates to the US",
+   "event_significance": 2,
+   "evidence_text": "At the peak of her career, Youn married and retired from acting to immigrate to the US.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Youn_Yuh-jung"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-09-youn-yuh-jung",
+   "event_date": "1984",
+   "event_category": "career_change",
+   "event_type": "comeback",
+   "event_description": "Returns to Korea and gradually rebuilds acting career",
+   "event_significance": 2,
+   "evidence_text": "After returning to Korea in 1984 she gradually rebuilt her career.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Youn_Yuh-jung",
+    "https://www.koreatimes.co.kr/entertainment/films/20210426/once-a-needs-driven-actor-gets-global-spotlight"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-09-youn-yuh-jung",
+   "event_date": "1987",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Divorces Jo Young-nam; works to support two sons",
+   "event_significance": 2,
+   "evidence_text": "Youn returned to Korea in 1984 and divorced Jo in 1987.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Youn_Yuh-jung",
+    "https://www.koreatimes.co.kr/entertainment/films/20210426/once-a-needs-driven-actor-gets-global-spotlight"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-09-youn-yuh-jung",
+   "event_date": "2010",
+   "event_category": "achievement",
+   "event_type": "acclaimed_work",
+   "event_description": "The Housemaid; reputation as \"Godmother of Chungmu-ro\"",
+   "event_significance": 1,
+   "evidence_text": "Cemented her reputation in the 2000s with films such as The Housemaid (2010).",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Youn_Yuh-jung"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-09-youn-yuh-jung",
+   "event_date": "2021-04",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "SAG and BAFTA supporting actress awards for Minari",
+   "event_significance": 2,
+   "evidence_text": "First Korean actress to win SAG and BAFTA supporting actress awards.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Youn_Yuh-jung"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-09-youn-yuh-jung",
+   "event_date": "2021-04-25",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "Academy Award Best Supporting Actress for Minari (first Korean)",
+   "event_significance": 3,
+   "evidence_text": "Youn Yuh-jung is first Korean to win the Oscar for best supporting actress.",
+   "evidence_urls": [
+    "https://www.npr.org/sections/live-updates-oscars-2021/2021/04/25/989638064/youn-yuh-jung-is-first-korean-to-win-oscar-for-best-supporting-actress",
+    "https://www.koreatimes.co.kr/entertainment/films/20210426/youn-yuh-jung-of-minari-wins-oscar-for-best-supporting-actress"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-09-youn-yuh-jung",
+   "event_date": "2022",
+   "event_category": "career_change",
+   "event_type": "international_project",
+   "event_description": "Apple TV+ series Pachinko (2022–2024)",
+   "event_significance": 1,
+   "evidence_text": "She appeared in international productions such as Apple TV+ series Pachinko (2022–2024).",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Youn_Yuh-jung"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-10-bong-joon-ho",
+   "event_date": "2000",
+   "event_category": "career_change",
+   "event_type": "directing_debut",
+   "event_description": "Feature debut Barking Dogs Never Bite",
+   "event_significance": 3,
+   "evidence_text": "Feature directorial debut, the dark comedy Barking Dogs Never Bite (2000).",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Bong_Joon_Ho"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-10-bong-joon-ho",
+   "event_date": "2003",
+   "event_category": "achievement",
+   "event_type": "box_office_success",
+   "event_description": "Memories of Murder sells over five million tickets",
+   "event_significance": 3,
+   "evidence_text": "Word of mouth drove the film to sell over five million tickets, rescuing Sidus.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Bong_Joon_Ho"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-10-bong-joon-ho",
+   "event_date": "2006",
+   "event_category": "achievement",
+   "event_type": "box_office_success",
+   "event_description": "The Host becomes highest-grossing South Korean film",
+   "event_significance": 3,
+   "evidence_text": "It became the highest-grossing South Korean film of all time.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/The_Host_(2006_film)",
+    "https://en.wikipedia.org/wiki/Bong_Joon_Ho"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-10-bong-joon-ho",
+   "event_date": "2009",
+   "event_category": "achievement",
+   "event_type": "acclaimed_work",
+   "event_description": "Mother",
+   "event_significance": 1,
+   "evidence_text": "Fourth feature film Mother (2009).",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Bong_Joon_Ho"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-10-bong-joon-ho",
+   "event_date": "2013",
+   "event_category": "career_change",
+   "event_type": "english_language_debut",
+   "event_description": "Snowpiercer, English-language debut and Hollywood co-production",
+   "event_significance": 2,
+   "evidence_text": "Snowpiercer (2013) served as his English-language debut.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Bong_Joon_Ho"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-10-bong-joon-ho",
+   "event_date": "2017-05",
+   "event_category": "career_change",
+   "event_type": "streaming_production",
+   "event_description": "Okja competes at Cannes amid Netflix controversy",
+   "event_significance": 1,
+   "evidence_text": "Okja premiered at 2017 Cannes and sparked controversy for being produced by Netflix.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Bong_Joon_Ho"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "arts-10-bong-joon-ho",
+   "event_date": "2017",
+   "event_category": "failure",
+   "event_type": "government_blacklist",
+   "event_description": "Revealed as named on government artist blacklist (Lee/Park administrations)",
+   "event_significance": 2,
+   "evidence_text": "Administrations deemed The Host leftist and included Bong on a leftist blacklist.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Bong_Joon_Ho",
+    "https://www.businesslive.co.za/bd/life/arts-and-entertainment/2017-05-17-south-koreas-bong-goes-from-blacklist-to-blockbuster/"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-10-bong-joon-ho",
+   "event_date": "2019-05-25",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "Parasite wins Palme d'Or (first Korean film)",
+   "event_significance": 3,
+   "evidence_text": "Parasite earned the Palme d'Or, a first for a South Korean film; jury unanimous.",
+   "evidence_urls": [
+    "https://www.rogerebert.com/festivals/cannes-2019-bong-joon-ho-wins-palme-dor-for-parasite",
+    "https://www.voanews.com/amp/korean-director-wins-cannes-top-prize/4932545.html",
+    "https://en.wikipedia.org/wiki/Bong_Joon_Ho"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-10-bong-joon-ho",
+   "event_date": "2020-02-09",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "Parasite wins Best Picture, Director, Original Screenplay, International Feature",
+   "event_significance": 3,
+   "evidence_text": "Parasite became the first non-English-language film to win Best Picture.",
+   "evidence_urls": [
+    "https://www.pbs.org/newshour/arts/parasite-becomes-first-non-english-language-film-to-win-best-picture-oscar",
+    "https://www.cbsnews.com/news/oscars-2020-parasite-makes-history-as-first-foreign-film-to-win-best-picture-academy-award-today-2020-02-09"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "arts-10-bong-joon-ho",
+   "event_date": "2025-03",
+   "event_category": "failure",
+   "event_type": "flop",
+   "event_description": "Mickey 17 grosses $133.5M against $118M budget; not immediately profitable",
+   "event_significance": 2,
+   "evidence_text": "Grossed $133.5 million against a $118 million budget; projected not immediately profitable.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Mickey_17"
+   ],
+   "evidence_confidence": "medium"
+  }
+ ]
+}

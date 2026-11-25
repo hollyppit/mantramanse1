@@ -1,0 +1,4 @@
+{
+  "_note": "출처가 명시한 값으로 원본을 보정한다. 결과를 보기 전(계산 전)에만 추가하고, 이유를 함께 적는다. merge.cjs 가 적용하고 QUALITY.md 에 남긴다.",
+  "arts-06-madonna": { "set": { "birth_place.tz": "Etc/GMT+5" }, "reason": "Astro-Databank 가 출생 시각을 EST(UTC−5, 표준시)로 기록 — America/Detroit 의 1958년 8월 시차 대신 출처의 시차를 그대로 씀(수집자 보고)" }
+}

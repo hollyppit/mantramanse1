@@ -1,0 +1,1883 @@
+{
+ "group": "business",
+ "collected_at": "2026-11-25",
+ "persons": [
+  {
+   "id": "business-01-steve-jobs",
+   "name": "Steve Jobs",
+   "name_ko": "스티브 잡스",
+   "gender": "M",
+   "birth_date": "1955-02-24",
+   "birth_time": "19:15",
+   "birth_time_confidence": "verified",
+   "birth_time_source": "https://www.astro.com/astro-databank/Jobs,_Steve (Rodden AA, BC/BR in hand)",
+   "birth_place": {
+    "city": "San Francisco",
+    "country": "United States",
+    "lon": -122.4167,
+    "tz": "America/Los_Angeles"
+   },
+   "profession": "business",
+   "profession_detail": "Technology; co-founder/CEO of Apple, CEO of NeXT, chairman of Pixar",
+   "death_date": "2011-10-05",
+   "source_urls": [
+    "https://www.astro.com/astro-databank/Jobs,_Steve",
+    "https://en.wikipedia.org/wiki/Steve_Jobs"
+   ]
+  },
+  {
+   "id": "business-02-bill-gates",
+   "name": "Bill Gates",
+   "name_ko": "빌 게이츠",
+   "gender": "M",
+   "birth_date": "1955-10-28",
+   "birth_time": "22:00",
+   "birth_time_confidence": "reported",
+   "birth_time_source": "https://www.astro.com/astro-databank/Gates,_Bill (Rodden A, from memory)",
+   "birth_place": {
+    "city": "Seattle",
+    "country": "United States",
+    "lon": -122.3333,
+    "tz": "America/Los_Angeles"
+   },
+   "profession": "business",
+   "profession_detail": "Software; co-founder/CEO of Microsoft, philanthropist",
+   "death_date": null,
+   "source_urls": [
+    "https://www.astro.com/astro-databank/Gates,_Bill",
+    "https://en.wikipedia.org/wiki/Bill_Gates"
+   ]
+  },
+  {
+   "id": "business-03-warren-buffett",
+   "name": "Warren Buffett",
+   "name_ko": "워런 버핏",
+   "gender": "M",
+   "birth_date": "1930-08-30",
+   "birth_time": "15:00",
+   "birth_time_confidence": "reported",
+   "birth_time_source": "https://www.astro.com/astro-databank/Buffett,_Warren (Rodden A, from memory)",
+   "birth_place": {
+    "city": "Omaha",
+    "country": "United States",
+    "lon": -95.9333,
+    "tz": "America/Chicago"
+   },
+   "profession": "business",
+   "profession_detail": "Investing; chairman/CEO of Berkshire Hathaway",
+   "death_date": null,
+   "source_urls": [
+    "https://www.astro.com/astro-databank/Buffett,_Warren",
+    "https://en.wikipedia.org/wiki/Warren_Buffett"
+   ]
+  },
+  {
+   "id": "business-04-martha-stewart",
+   "name": "Martha Stewart",
+   "name_ko": "마사 스튜어트",
+   "gender": "F",
+   "birth_date": "1941-08-03",
+   "birth_time": "13:33",
+   "birth_time_confidence": "verified",
+   "birth_time_source": "https://www.astro.com/astro-databank/Stewart,_Martha (Rodden AA, BC/BR in hand; EDT)",
+   "birth_place": {
+    "city": "Jersey City",
+    "country": "United States",
+    "lon": -74.0833,
+    "tz": "America/New_York"
+   },
+   "profession": "business",
+   "profession_detail": "Media/lifestyle; founder of Martha Stewart Living Omnimedia",
+   "death_date": null,
+   "source_urls": [
+    "https://www.astro.com/astro-databank/Stewart,_Martha",
+    "https://en.wikipedia.org/wiki/Martha_Stewart"
+   ]
+  },
+  {
+   "id": "business-05-lee-iacocca",
+   "name": "Lee Iacocca",
+   "name_ko": "리 아이아코카",
+   "gender": "M",
+   "birth_date": "1924-10-15",
+   "birth_time": "17:00",
+   "birth_time_confidence": "verified",
+   "birth_time_source": "https://www.astro.com/astro-databank/Iacocca,_Lee (Rodden AA, BC/BR in hand)",
+   "birth_place": {
+    "city": "Allentown",
+    "country": "United States",
+    "lon": -75.4833,
+    "tz": "America/New_York"
+   },
+   "profession": "business",
+   "profession_detail": "Automotive; president of Ford, chairman/CEO of Chrysler",
+   "death_date": "2019-07-02",
+   "source_urls": [
+    "https://www.astro.com/astro-databank/Iacocca,_Lee",
+    "https://en.wikipedia.org/wiki/Lee_Iacocca"
+   ]
+  },
+  {
+   "id": "business-06-richard-branson",
+   "name": "Richard Branson",
+   "name_ko": "리처드 브랜슨",
+   "gender": "M",
+   "birth_date": "1950-07-18",
+   "birth_time": "07:00",
+   "birth_time_confidence": "reported",
+   "birth_time_source": "https://www.astro.com/astro-databank/Branson,_Richard (Rodden A, from memory; GDT)",
+   "birth_place": {
+    "city": "Blackheath, London",
+    "country": "United Kingdom",
+    "lon": 0.0167,
+    "tz": "Europe/London"
+   },
+   "profession": "business",
+   "profession_detail": "Conglomerate; founder of Virgin Group (records, airlines, space)",
+   "death_date": null,
+   "source_urls": [
+    "https://www.astro.com/astro-databank/Branson,_Richard",
+    "https://en.wikipedia.org/wiki/Richard_Branson"
+   ]
+  },
+  {
+   "id": "business-07-rupert-murdoch",
+   "name": "Rupert Murdoch",
+   "name_ko": "루퍼트 머독",
+   "gender": "M",
+   "birth_date": "1931-03-11",
+   "birth_time": "23:59",
+   "birth_time_confidence": "reported",
+   "birth_time_source": "https://www.astro.com/astro-databank/Murdoch,_Rupert (Rodden A, news report)",
+   "birth_place": {
+    "city": "Melbourne",
+    "country": "Australia",
+    "lon": 144.9667,
+    "tz": "Australia/Melbourne"
+   },
+   "profession": "business",
+   "profession_detail": "Media; founder/chairman of News Corp and Fox Corp",
+   "death_date": null,
+   "source_urls": [
+    "https://www.astro.com/astro-databank/Murdoch,_Rupert",
+    "https://en.wikipedia.org/wiki/Rupert_Murdoch"
+   ]
+  },
+  {
+   "id": "business-08-bernard-arnault",
+   "name": "Bernard Arnault",
+   "name_ko": "베르나르 아르노",
+   "gender": "M",
+   "birth_date": "1949-03-05",
+   "birth_time": "17:00",
+   "birth_time_confidence": "verified",
+   "birth_time_source": "https://www.astro.com/astro-databank/Arnault,_Bernard (Rodden AA, BC/BR in hand)",
+   "birth_place": {
+    "city": "Roubaix",
+    "country": "France",
+    "lon": 3.1667,
+    "tz": "Europe/Paris"
+   },
+   "profession": "business",
+   "profession_detail": "Luxury goods; chairman/CEO of LVMH",
+   "death_date": null,
+   "source_urls": [
+    "https://www.astro.com/astro-databank/Arnault,_Bernard",
+    "https://en.wikipedia.org/wiki/Bernard_Arnault"
+   ]
+  },
+  {
+   "id": "business-09-elon-musk",
+   "name": "Elon Musk",
+   "name_ko": "일론 머스크",
+   "gender": "M",
+   "birth_date": "1971-06-28",
+   "birth_time": null,
+   "birth_time_confidence": "unknown",
+   "birth_time_source": "https://www.astro.com/astro-databank/Musk,_Elon lists 07:30 but Rodden B (bio/autobiography) - not used",
+   "birth_place": {
+    "city": "Pretoria",
+    "country": "South Africa",
+    "lon": 28.1667,
+    "tz": "Africa/Johannesburg"
+   },
+   "profession": "business",
+   "profession_detail": "Technology; founder of Zip2, X.com/PayPal, SpaceX; CEO of Tesla",
+   "death_date": null,
+   "source_urls": [
+    "https://www.astro.com/astro-databank/Musk,_Elon",
+    "https://en.wikipedia.org/wiki/Elon_Musk"
+   ]
+  },
+  {
+   "id": "business-10-lee-kun-hee",
+   "name": "Lee Kun-hee",
+   "name_ko": "이건희",
+   "gender": "M",
+   "birth_date": "1942-01-09",
+   "birth_time": null,
+   "birth_time_confidence": "unknown",
+   "birth_time_source": null,
+   "birth_place": {
+    "city": "Daegu",
+    "country": "South Korea",
+    "lon": 128.6014,
+    "tz": "Asia/Seoul"
+   },
+   "profession": "business",
+   "profession_detail": "Conglomerate; chairman of Samsung Group",
+   "death_date": "2020-10-25",
+   "source_urls": [
+    "https://en.wikipedia.org/wiki/Lee_Kun-hee",
+    "https://www.britannica.com/biography/Lee-Kun-Hee"
+   ]
+  }
+ ],
+ "events": [
+  {
+   "person_id": "business-01-steve-jobs",
+   "event_date": "1976-04-01",
+   "event_category": "career_change",
+   "event_type": "founding",
+   "event_description": "워즈니악과 애플 컴퓨터 공동 창업",
+   "event_significance": 3,
+   "evidence_text": "Jobs and Wozniak founded Apple Computer Company as a partnership on April 1, 1976.",
+   "evidence_urls": [
+    "http://edition.cnn.com/2010/TECH/web/06/24/apple.forgotten.founder/index.html",
+    "https://en.wikipedia.org/wiki/Steve_Jobs"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-01-steve-jobs",
+   "event_date": "1978-05-17",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "첫딸 리사 브레넌 출생",
+   "event_significance": 1,
+   "evidence_text": "Chrisann Brennan gave birth to Lisa Brennan on May 17, 1978.",
+   "evidence_urls": [
+    "https://www.theguardian.com/technology/2013/oct/15/steve-jobs-chrisann-brennan-memoir-apple"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-01-steve-jobs",
+   "event_date": "1980-12",
+   "event_category": "financial_event",
+   "event_type": "financial_gain",
+   "event_description": "애플 기업공개로 백만장자",
+   "event_significance": 3,
+   "evidence_text": "Apple went public and made Jobs a millionaire.",
+   "evidence_urls": [
+    "http://content.time.com/time/magazine/article/0,9171,953633,00.html",
+    "https://en.wikipedia.org/wiki/Steve_Jobs"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-01-steve-jobs",
+   "event_date": "1985-09",
+   "event_category": "failure",
+   "event_type": "ousted",
+   "event_description": "스컬리·이사회와 권력 다툼 끝에 애플에서 밀려남",
+   "event_significance": 3,
+   "evidence_text": "In 1985 Jobs departed Apple after a long power struggle with the board and CEO John Sculley.",
+   "evidence_urls": [
+    "https://www.bloomberg.com/news/articles/2011-10-06/steve-jobs-the-wilderness-1985-1997",
+    "https://www.cultofmac.com/apple-history/steve-jobs-leaves-and-rejoins-apple"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-01-steve-jobs",
+   "event_date": "1985",
+   "event_category": "career_change",
+   "event_type": "founding",
+   "event_description": "넥스트(NeXT) 창업",
+   "event_significance": 2,
+   "evidence_text": "That same year Jobs took some Apple employees with him to found NeXT.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Steve_Jobs",
+    "https://www.techradar.com/computing/40-years-ago-steve-jobs-was-fired-from-apple-but-it-made-macs-better-than-ever"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-01-steve-jobs",
+   "event_date": "1986",
+   "event_category": "career_change",
+   "event_type": "new_venture",
+   "event_description": "루카스필름 그래픽 부문(픽사) 인수",
+   "event_significance": 2,
+   "evidence_text": "In 1986 Jobs bought Pixar, the computer-graphics unit of Lucasfilm, for about $10 million.",
+   "evidence_urls": [
+    "https://www.infoworld.com/article/2309242/steve-jobs-a-look-back-at-his-career.html"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-01-steve-jobs",
+   "event_date": "1991-03-18",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "로린 파월과 요세미티에서 결혼",
+   "event_significance": 2,
+   "evidence_text": "They married on March 18, 1991, in a Buddhist ceremony at the Ahwahnee Hotel, Yosemite.",
+   "evidence_urls": [
+    "https://money.cnn.com/2008/03/02/news/companies/elkind_jobs.fortune/index2.htm"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-01-steve-jobs",
+   "event_date": "1995-11",
+   "event_category": "achievement",
+   "event_type": "company_success",
+   "event_description": "픽사 토이 스토리 흥행·평단 성공",
+   "event_significance": 2,
+   "evidence_text": "Toy Story (1995), with Jobs as executive producer, brought financial success and critical acclaim.",
+   "evidence_urls": [
+    "https://www.latimes.com/archives/la-xpm-1995-10-24-fi-60492-story.html",
+    "https://www.hollywoodreporter.com/news/pixar-brave-steve-jobs-tribute-329832"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-01-steve-jobs",
+   "event_date": "1997-09",
+   "event_category": "career_change",
+   "event_type": "new_ceo_role",
+   "event_description": "넥스트 인수 뒤 애플 임시 CEO로 복귀",
+   "event_significance": 3,
+   "evidence_text": "Jobs returned to Apple as CEO after Apple acquired NeXT; he styled himself \"iCEO\".",
+   "evidence_urls": [
+    "https://www.eweek.com/de/mobile/eweek-at-30-steve-jobs-returns-in-1997-to-revive-a-moribund-apple/",
+    "https://www.sfgate.com/business/article/macworld-expo-permanent-jobs-apple-ceo-3270603.php"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-01-steve-jobs",
+   "event_date": "2007-01-09",
+   "event_category": "achievement",
+   "event_type": "product_launch_success",
+   "event_description": "아이폰 발표",
+   "event_significance": 2,
+   "evidence_text": "Apple introduced iPhone, combining phone, iPod and internet device, at Macworld 2007.",
+   "evidence_urls": [
+    "https://www.apple.com/newsroom/2007/01/09Apple-Reinvents-the-Phone-with-iPhone/",
+    "https://en.wikipedia.org/wiki/Steve_Jobs"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-01-steve-jobs",
+   "event_date": "2004-07",
+   "event_category": "health_event",
+   "event_type": "surgery",
+   "event_description": "췌장 신경내분비종양 휘플 수술",
+   "event_significance": 3,
+   "evidence_text": "He underwent a pancreaticoduodenectomy (\"Whipple procedure\") that appeared to remove the tumor.",
+   "evidence_urls": [
+    "https://www.theguardian.com/technology/2011/oct/21/steve-jobs-cancer-surgery-regret",
+    "https://abcnews.com/Technology/steve-jobs-treatment-biographer-jobs-delayed-surgery-pancreatic/story?id=14781250"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-01-steve-jobs",
+   "event_date": "2009-03",
+   "event_category": "health_event",
+   "event_type": "surgery",
+   "event_description": "멤피스에서 간 이식 수술",
+   "event_significance": 3,
+   "evidence_text": "Jobs had a liver transplant at Methodist University Hospital Transplant Institute in Memphis.",
+   "evidence_urls": [
+    "http://www.cnn.com/2009/US/06/23/steve.jobs.liver.transplant/index.html"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-01-steve-jobs",
+   "event_date": "2011-01-17",
+   "event_category": "health_event",
+   "event_type": "illness",
+   "event_description": "건강 문제로 두 번째 병가",
+   "event_significance": 2,
+   "evidence_text": "Apple announced Jobs had been granted another medical leave to focus on his health.",
+   "evidence_urls": [
+    "https://www.nytimes.com/2011/01/18/technology/18apple.html",
+    "http://www.appleinsider.com/articles/11/01/17/steve_jobs_to_take_medical_leave_of_absence_but_remain_apple_ceo.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-01-steve-jobs",
+   "event_date": "2011-08-24",
+   "event_category": "retirement",
+   "event_type": "stepped_down",
+   "event_description": "애플 CEO 사임",
+   "event_significance": 3,
+   "evidence_text": "On August 24, 2011, Jobs announced his resignation as Apple CEO in a letter to the board.",
+   "evidence_urls": [
+    "https://www.apple.com/newsroom/2011/08/24Letter-from-Steve-Jobs/",
+    "https://www.apple.com/pr/library/2011/08/24Steve-Jobs-Resigns-as-CEO-of-Apple.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-02-bill-gates",
+   "event_date": "1975-04-04",
+   "event_category": "career_change",
+   "event_type": "founding",
+   "event_description": "폴 앨런과 마이크로소프트 창업",
+   "event_significance": 3,
+   "evidence_text": "Gates and Allen established Microsoft on April 4, 1975, with Gates as CEO.",
+   "evidence_urls": [
+    "https://news.bbc.co.uk/2/hi/business/5085630.stm",
+    "https://money.cnn.com/magazines/fortune/fortune_archive/1995/10/02/206528/index.htm"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-02-bill-gates",
+   "event_date": "1980",
+   "event_category": "achievement",
+   "event_type": "market_leadership",
+   "event_description": "IBM PC 운영체제 계약",
+   "event_significance": 2,
+   "evidence_text": "IBM approached Microsoft about software for its upcoming personal computer.",
+   "evidence_urls": [
+    "https://www.forbes.com/forbes/2002/1223/258_print.html",
+    "https://en.wikipedia.org/wiki/Bill_Gates"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-02-bill-gates",
+   "event_date": "1986-03-13",
+   "event_category": "financial_event",
+   "event_type": "financial_gain",
+   "event_description": "마이크로소프트 기업공개",
+   "event_significance": 3,
+   "evidence_text": "When Microsoft went public in 1986, Gates retained 44.9% ownership; billionaire by 1987.",
+   "evidence_urls": [
+    "https://www.reuters.com/article/rbssTechMediaTelecomNews/idUSN1748882920080917",
+    "https://finance.yahoo.com/news/history-microsoft-company-timeline-facts-011053736.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-02-bill-gates",
+   "event_date": "1994-01-01",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "멀린다 프렌치와 하와이 라나이에서 결혼",
+   "event_significance": 2,
+   "evidence_text": "They married on January 1, 1994, on the Manele golf course on Lanai, Hawaii.",
+   "evidence_urls": [
+    "https://www.bbc.com/news/world-us-canada-56975466",
+    "https://www.forbes.com/sites/christinaliao/2017/07/31/bill-gates-wedding-manele-golf-course-four-seasons-resort-lanai/"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-02-bill-gates",
+   "event_date": "1995-08-24",
+   "event_category": "achievement",
+   "event_type": "product_launch_success",
+   "event_description": "윈도 95 출시",
+   "event_significance": 2,
+   "evidence_text": "The company released Windows 95 on August 24, 1995.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Microsoft"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-02-bill-gates",
+   "event_date": "2000-01-13",
+   "event_category": "career_change",
+   "event_type": "resigned_role",
+   "event_description": "CEO를 발머에게 넘기고 최고소프트웨어설계자로",
+   "event_significance": 2,
+   "evidence_text": "On January 13, 2000, Gates handed over the CEO position to Steve Ballmer.",
+   "evidence_urls": [
+    "https://news.bbc.co.uk/2/hi/business/5085630.stm",
+    "https://www.bbc.co.uk/news/business-37724557"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-02-bill-gates",
+   "event_date": "2000-06-07",
+   "event_category": "failure",
+   "event_type": "legal_penalty",
+   "event_description": "반독점 1심 판결에서 회사 분할 명령(2001 항소심에서 파기)",
+   "event_significance": 2,
+   "evidence_text": "District court found Microsoft violated antitrust law and ordered a breakup; reversed on appeal in 2001.",
+   "evidence_urls": [
+    "https://www.justice.gov/atr/memorandum-opinion-us-v-microsoft-corp",
+    "https://law.justia.com/cases/federal/appellate-courts/F3/253/34/576095/"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-02-bill-gates",
+   "event_date": "2008-06-27",
+   "event_category": "retirement",
+   "event_type": "stepped_down",
+   "event_description": "마이크로소프트 상근 업무에서 물러남",
+   "event_significance": 3,
+   "evidence_text": "Gates's transition from day-to-day duties was completed on June 27, 2008.",
+   "evidence_urls": [
+    "http://www.microsoft.com/presspass/press/2006/jun06/06-15CorpNewsPR.mspx",
+    "https://en.wikipedia.org/wiki/Bill_Gates"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-02-bill-gates",
+   "event_date": "2014-02-04",
+   "event_category": "career_change",
+   "event_type": "resigned_role",
+   "event_description": "이사회 의장에서 물러나 기술 고문으로",
+   "event_significance": 2,
+   "evidence_text": "Microsoft named Satya Nadella CEO; Gates left the chairman role to become technology adviser.",
+   "evidence_urls": [
+    "https://news.microsoft.com/2014/02/04/microsoft-board-names-satya-nadella-as-ceo/"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-02-bill-gates",
+   "event_date": "2020-03-13",
+   "event_category": "career_change",
+   "event_type": "resigned_role",
+   "event_description": "마이크로소프트·버크셔 이사회에서 사임",
+   "event_significance": 2,
+   "evidence_text": "In March 2020 Microsoft announced Gates would leave its board and Berkshire Hathaway's.",
+   "evidence_urls": [
+    "https://www.cnbc.com/2020/03/13/bill-gates-leaves-microsoft-board.html",
+    "https://www.wsj.com/articles/microsoft-directors-decided-bill-gates-needed-to-leave-board-due-to-prior-relationship-with-staffer-11621205803"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-02-bill-gates",
+   "event_date": "2021-05-03",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "27년 결혼 끝에 이혼 발표(8월 확정)",
+   "event_significance": 2,
+   "evidence_text": "On May 3, 2021, Bill and Melinda Gates announced their decision to divorce after 27 years.",
+   "evidence_urls": [
+    "https://www.bbc.com/news/world-us-canada-56975466",
+    "https://www.nytimes.com/2021/05/16/business/bill-melinda-gates-divorce-epstein.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-03-warren-buffett",
+   "event_date": "1952",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "수전 톰프슨과 결혼",
+   "event_significance": 2,
+   "evidence_text": "In 1952 Buffett married Susan at Dundee Presbyterian Church.",
+   "evidence_urls": [
+    "https://www.washingtonpost.com/wp-dyn/articles/A26094-2004Jul29.html"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-03-warren-buffett",
+   "event_date": "1956",
+   "event_category": "career_change",
+   "event_type": "founding",
+   "event_description": "버핏 파트너십 설립",
+   "event_significance": 2,
+   "evidence_text": "He created Buffett Partnership Ltd. in 1956.",
+   "evidence_urls": [
+    "https://www.cnn.com/2014/06/11/us/charlie-munger-fast-facts/index.html",
+    "https://en.wikipedia.org/wiki/Warren_Buffett"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-03-warren-buffett",
+   "event_date": "1965",
+   "event_category": "career_change",
+   "event_type": "new_ceo_role",
+   "event_description": "버크셔 해서웨이 경영권 확보",
+   "event_significance": 3,
+   "evidence_text": "In 1965 his partnerships aggressively bought Berkshire; it became a conglomerate under Buffett.",
+   "evidence_urls": [
+    "https://www.wsj.com/finance/investing/read-the-wsjs-early-coverage-of-warren-buffett-01b09b9c",
+    "https://www.cnbc.com/2010/10/18/cnbc-transcript-warren-buffetts-200b-berkshire-blunder-and-the-valuable-lesson-he-learned.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-03-warren-buffett",
+   "event_date": "1991-08",
+   "event_category": "career_change",
+   "event_type": "new_ceo_role",
+   "event_description": "국채 입찰 스캔들 뒤 살로몬 임시 회장",
+   "event_significance": 2,
+   "evidence_text": "In 1991 he became interim chairman of Salomon Brothers after a trading scandal.",
+   "evidence_urls": [
+    "https://www.c-span.org/video/?21029-1/securities-trading-investigation",
+    "https://www.ksl.com/article/51625772/warren-buffetts-road-to-investing-glory"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-03-warren-buffett",
+   "event_date": "2006-08-30",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "76세 생일에 애스트리드 멩크스와 재혼",
+   "event_significance": 2,
+   "evidence_text": "On his 76th birthday, Buffett married his longtime companion Astrid Menks.",
+   "evidence_urls": [
+    "https://www.nytimes.com/2006/09/01/business/01buffett.html",
+    "https://www.cbsnews.com/news/wedding-bells-for-warren-buffett/"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-03-warren-buffett",
+   "event_date": "2009-11",
+   "event_category": "achievement",
+   "event_type": "major_acquisition",
+   "event_description": "BNSF 철도 인수(최대 거래)",
+   "event_significance": 2,
+   "evidence_text": "Buffett agreed to buy the rest of BNSF railway in his biggest deal.",
+   "evidence_urls": [
+    "https://www.reuters.com/article/business/buffett-buying-burlington-rail-in-his-biggest-deal-idUSTRE5A22A7/",
+    "https://www.nytimes.com/2009/11/04/business/04deal.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-03-warren-buffett",
+   "event_date": "2012-04-11",
+   "event_category": "health_event",
+   "event_type": "illness",
+   "event_description": "1기 전립선암 진단·방사선 치료",
+   "event_significance": 2,
+   "evidence_text": "On April 11, 2012, Buffett was diagnosed with stage I prostate cancer.",
+   "evidence_urls": [
+    "https://www.bbc.co.uk/news/world-us-canada-17751171",
+    "http://www.businessinsider.com/warren-buffett-cancer-treatment-2012-9"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-03-warren-buffett",
+   "event_date": "2019-02",
+   "event_category": "financial_event",
+   "event_type": "financial_loss",
+   "event_description": "크래프트 하인즈 과대 지불 인정·대규모 상각",
+   "event_significance": 2,
+   "evidence_text": "In 2019 Buffett said Berkshire overpaid for Kraft Heinz.",
+   "evidence_urls": [
+    "https://www.reuters.com/article/business/warren-buffett-says-berkshire-overpaid-for-kraft-heinz-idUSKCN1QE1EV/"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-03-warren-buffett",
+   "event_date": "2025-05-03",
+   "event_category": "retirement",
+   "event_type": "retirement",
+   "event_description": "연말 CEO 은퇴·그레그 에이블 승계 발표",
+   "event_significance": 3,
+   "evidence_text": "Buffett asked the board to appoint Greg Abel to succeed him as CEO by year-end.",
+   "evidence_urls": [
+    "https://berkshirehathaway.com/news/may0525.pdf",
+    "https://www.ft.com/content/2d8a6430-574b-4941-a120-f9e204639948"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-04-martha-stewart",
+   "event_date": "1961-07",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "앤드루 스튜어트와 결혼",
+   "event_significance": 2,
+   "evidence_text": "She met Andrew Stewart and they married in July 1961.",
+   "evidence_urls": [
+    "http://www.cbsnews.com/htdocs/troubled_companies/imclone/html/timeline_martha.html",
+    "http://www.vanityfair.com/news/2001/09/martha-stewart-200109"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-04-martha-stewart",
+   "event_date": "1967",
+   "event_category": "career_change",
+   "event_type": "new_career",
+   "event_description": "주식 중개인으로 두 번째 직업",
+   "event_significance": 1,
+   "evidence_text": "In 1967 Martha Stewart began a second career as a stockbroker.",
+   "evidence_urls": [
+    "http://www.people.com/people/archive/article/0,,20101736,00.html"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-04-martha-stewart",
+   "event_date": "1982-12-13",
+   "event_category": "achievement",
+   "event_type": "product_launch_success",
+   "event_description": "첫 책 Entertaining 출간",
+   "event_significance": 2,
+   "evidence_text": "Her first book, Entertaining, was published December 13, 1982.",
+   "evidence_urls": [
+    "http://www.people.com/people/archive/article/0,,20101736,00.html",
+    "https://www.publishersweekly.com/pw/print/19971110/26148-pw-a-look-back-at-gnomes.html"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-04-martha-stewart",
+   "event_date": "1990",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "앤드루 스튜어트와 이혼(1987 별거)",
+   "event_significance": 2,
+   "evidence_text": "Andrew and Martha Stewart separated in 1987 and divorced in 1990.",
+   "evidence_urls": [
+    "http://www.people.com/people/archive/article/0,,20101736,00.html"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-04-martha-stewart",
+   "event_date": "1997",
+   "event_category": "career_change",
+   "event_type": "founding",
+   "event_description": "마사 스튜어트 리빙 옴니미디어 출범",
+   "event_significance": 3,
+   "evidence_text": "She founded Martha Stewart Living Omnimedia, focused on home and hospitality.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Martha_Stewart_Living_Omnimedia",
+    "https://abcnews.com/Technology/story?id=3015841&page=1"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-04-martha-stewart",
+   "event_date": "1999-10-19",
+   "event_category": "financial_event",
+   "event_type": "financial_gain",
+   "event_description": "MSLO 뉴욕증시 상장, 첫 자수성가 여성 억만장자",
+   "event_significance": 3,
+   "evidence_text": "MSLO listed on the NYSE October 19, 1999; shares jumped, making Stewart a billionaire.",
+   "evidence_urls": [
+    "https://money.cnn.com/2005/10/31/news/newsmakers/stewart_fortune_111405/",
+    "https://www.nytimes.com/2004/03/21/weekinreview/page-two-march-14-20-martha-stewart-majority-shareholder.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-04-martha-stewart",
+   "event_date": "2003-06-04",
+   "event_category": "career_change",
+   "event_type": "resigned_role",
+   "event_description": "기소 직후 CEO·회장직 사임",
+   "event_significance": 2,
+   "evidence_text": "On June 4, 2003, Stewart was indicted on nine counts and stepped down as CEO.",
+   "evidence_urls": [
+    "https://money.cnn.com/2004/03/05/news/companies/martha_verdict/"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-04-martha-stewart",
+   "event_date": "2004-03-05",
+   "event_category": "failure",
+   "event_type": "legal_penalty",
+   "event_description": "임클론 사건 사법방해 등 유죄 평결",
+   "event_significance": 3,
+   "evidence_text": "Stewart was found guilty in March 2004 of conspiracy, obstruction and false statements.",
+   "evidence_urls": [
+    "https://money.cnn.com/2004/03/05/news/companies/martha_verdict/",
+    "https://www.nbcnews.com/id/wbna11495938"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-04-martha-stewart",
+   "event_date": "2004-10-08",
+   "event_category": "failure",
+   "event_type": "legal_penalty",
+   "event_description": "앨더슨 연방교도소 수감(5개월)",
+   "event_significance": 3,
+   "evidence_text": "Stewart reported to FPC Alderson for her prison sentence on October 8, 2004.",
+   "evidence_urls": [
+    "http://www.bop.gov/news/press/press_releases/ipaprmsarrival.pdf",
+    "https://www.nytimes.com/2004/09/30/business/martha-stewart-assigned-to-prison-in-west-virginia.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-04-martha-stewart",
+   "event_date": "2005-09",
+   "event_category": "achievement",
+   "event_type": "company_success",
+   "event_description": "출소 후 새 TV 쇼 두 편으로 복귀",
+   "event_significance": 2,
+   "evidence_text": "The Martha Stewart Show and The Apprentice: Martha Stewart both premiered in September 2005.",
+   "evidence_urls": [
+    "https://www.forbes.com/2005/11/14/martha-stewart-apprentice-cx_vc_1114autofacescan10.html"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-04-martha-stewart",
+   "event_date": "2006-08",
+   "event_category": "financial_event",
+   "event_type": "financial_loss",
+   "event_description": "SEC 내부자거래 민사 합의(벌금·임원 금지)",
+   "event_significance": 1,
+   "evidence_text": "Stewart settled SEC insider trading charges, agreeing to penalties and an officer bar.",
+   "evidence_urls": [
+    "https://www.sec.gov/litigation/litreleases/2006/lr19794.htm"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-04-martha-stewart",
+   "event_date": "2015-12-04",
+   "event_category": "financial_event",
+   "event_type": "financial_gain",
+   "event_description": "MSLO를 시퀀셜 브랜즈에 매각",
+   "event_significance": 2,
+   "evidence_text": "Sequential Brands Group completed its acquisition of MSLO on December 4, 2015.",
+   "evidence_urls": [
+    "http://www.prnewswire.com/news-releases/martha-stewart-living-omnimedia-announces-closing-of-merger-with-sequential-brands-group-300188338.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-05-lee-iacocca",
+   "event_date": "1964-04",
+   "event_category": "achievement",
+   "event_type": "product_launch_success",
+   "event_description": "포드 머스탱 개발·출시",
+   "event_significance": 3,
+   "evidence_text": "Iacocca developed the Ford Mustang at Ford in the 1960s.",
+   "evidence_urls": [
+    "https://www.nytimes.com/2019/07/02/obituaries/lee-iacocca-dead.html",
+    "https://www.nytimes.com/2005/07/19/business/19auto.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-05-lee-iacocca",
+   "event_date": "1970-12",
+   "event_category": "career_change",
+   "event_type": "new_ceo_role",
+   "event_description": "포드 자동차 사장 취임",
+   "event_significance": 2,
+   "evidence_text": "He eventually became president of the Ford Motor Company but clashed with Henry Ford II.",
+   "evidence_urls": [
+    "https://www.latimes.com/archives/la-xpm-1990-03-02-fi-1691-story.html",
+    "https://en.wikipedia.org/wiki/Lee_Iacocca"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-05-lee-iacocca",
+   "event_date": "1978-07-13",
+   "event_category": "failure",
+   "event_type": "ousted",
+   "event_description": "헨리 포드 2세에 의해 해고",
+   "event_significance": 3,
+   "evidence_text": "On July 13, 1978, Iacocca was fired from Ford despite a $2 billion annual profit.",
+   "evidence_urls": [
+    "https://www.latimes.com/archives/la-xpm-1990-03-02-fi-1691-story.html",
+    "https://www.nytimes.com/2019/07/02/obituaries/lee-iacocca-dead.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-05-lee-iacocca",
+   "event_date": "1978-11",
+   "event_category": "career_change",
+   "event_type": "new_ceo_role",
+   "event_description": "파산 위기 크라이슬러 사장 취임(1979 회장)",
+   "event_significance": 3,
+   "evidence_text": "He was president of Chrysler from 1978 to 1991 and chairman and CEO from 1979.",
+   "evidence_urls": [
+    "https://www.nytimes.com/2019/07/02/obituaries/lee-iacocca-dead.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-05-lee-iacocca",
+   "event_date": "1982-05",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "자유의 여신상 복원 재단 위원장 임명",
+   "event_significance": 1,
+   "evidence_text": "In 1982 Reagan appointed Iacocca to head the Statue of Liberty-Ellis Island Foundation.",
+   "evidence_urls": [
+    "https://www.nytimes.com/1982/05/19/nyregion/notes-on-people-iacocca-to-head-drive-to-restore-landmarks.html"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-05-lee-iacocca",
+   "event_date": "1983",
+   "event_category": "achievement",
+   "event_type": "company_success",
+   "event_description": "정부 보증 대출 7년 조기 상환",
+   "event_significance": 3,
+   "evidence_text": "Chrysler turned around quickly and repaid the government-backed loans seven years early.",
+   "evidence_urls": [
+    "http://www.foxnews.com/story/0,2933,476344,00.html",
+    "https://en.wikipedia.org/wiki/Lee_Iacocca"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-05-lee-iacocca",
+   "event_date": "1983-11",
+   "event_category": "achievement",
+   "event_type": "product_launch_success",
+   "event_description": "미니밴 출시, 25년간 판매 1위",
+   "event_significance": 2,
+   "evidence_text": "Chrysler introduced the minivan in late 1983; it led industry sales for 25 years.",
+   "evidence_urls": [
+    "http://www.foxnews.com/story/0,2933,476344,00.html"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-05-lee-iacocca",
+   "event_date": "1992-12-31",
+   "event_category": "retirement",
+   "event_type": "retirement",
+   "event_description": "크라이슬러 회장·CEO 은퇴",
+   "event_significance": 3,
+   "evidence_text": "Iacocca retired as president, CEO and chairman of Chrysler at the end of 1992.",
+   "evidence_urls": [
+    "https://money.cnn.com/magazines/fortune/fortune_archive/1992/04/20/76315/index.htm",
+    "https://www.nytimes.com/2019/07/02/obituaries/lee-iacocca-dead.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-05-lee-iacocca",
+   "event_date": "1995",
+   "event_category": "failure",
+   "event_type": "venture_failed",
+   "event_description": "커코리언의 크라이슬러 적대적 인수 시도 실패",
+   "event_significance": 2,
+   "evidence_text": "In 1995 Iacocca helped Kirk Kerkorian attempt a hostile takeover of Chrysler, which failed.",
+   "evidence_urls": [
+    "http://www.detnews.com/specialreports/2002/iacocca/a08-442452.htm"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-05-lee-iacocca",
+   "event_date": "1997-09",
+   "event_category": "career_change",
+   "event_type": "new_venture",
+   "event_description": "전기자전거 회사 창업",
+   "event_significance": 1,
+   "evidence_text": "Iacocca founded a company to develop and market electric bikes.",
+   "evidence_urls": [
+    "https://www.nytimes.com/1997/09/21/business/investing-it-a-bet-on-electric-bikes-or-at-least-on-lee-iacocca.html"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-06-richard-branson",
+   "event_date": "1968-01",
+   "event_category": "career_change",
+   "event_type": "founding",
+   "event_description": "잡지 Student 창간",
+   "event_significance": 2,
+   "evidence_text": "The first issue of Student appeared in January 1968.",
+   "evidence_urls": [
+    "http://www.businessinsider.com/richard-branson-fails-virgin-companies-that-went-bust-2012-4?op=1",
+    "https://en.wikipedia.org/wiki/Richard_Branson"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-06-richard-branson",
+   "event_date": "1972",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "크리스틴 토마시와 첫 결혼",
+   "event_significance": 2,
+   "evidence_text": "In 1972 Branson married Kristen Tomassi.",
+   "evidence_urls": [
+    "https://www.newyorker.com/magazine/2007/05/14/bransons-luck"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-06-richard-branson",
+   "event_date": "1973",
+   "event_category": "achievement",
+   "event_type": "company_success",
+   "event_description": "버진 레코드 첫 음반 튜블러 벨스 대히트",
+   "event_significance": 3,
+   "evidence_text": "Tubular Bells (1973) was Virgin Records' first release and a chart-topping best-seller.",
+   "evidence_urls": [
+    "http://www.biography.com/people/richard-branson-9224520",
+    "https://www.bbc.co.uk/programmes/b03cw8g0"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-06-richard-branson",
+   "event_date": "1984",
+   "event_category": "career_change",
+   "event_type": "new_venture",
+   "event_description": "버진 애틀랜틱 항공 설립",
+   "event_significance": 3,
+   "evidence_text": "The airline was established in 1984, with Branson taking it on as Virgin Atlantic.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Virgin_Atlantic",
+    "https://www.independent.co.uk/life-style/poker-5578159.html"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-06-richard-branson",
+   "event_date": "1989",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "조앤 템플먼과 네커섬에서 결혼",
+   "event_significance": 2,
+   "evidence_text": "Branson and Joan Templeman married on Necker Island in 1989.",
+   "evidence_urls": [
+    "https://www.travelandleisure.com/travel-tips/celebrity-travel/richard-branson-shares-romance-tips",
+    "https://www.virgin.com/news/65-things-youve-always-wanted-to-know-about-richard-branson"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-06-richard-branson",
+   "event_date": "1992",
+   "event_category": "financial_event",
+   "event_type": "financial_gain",
+   "event_description": "버진 레코드를 손 EMI에 매각",
+   "event_significance": 3,
+   "evidence_text": "Virgin Records was sold to Thorn EMI in 1992.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Virgin_Records",
+    "https://virgin.com/about-virgin/latest/introducing-virgin-music-label-and-artist-services"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-06-richard-branson",
+   "event_date": "1999",
+   "event_category": "career_change",
+   "event_type": "new_venture",
+   "event_description": "버진 모바일 출범",
+   "event_significance": 2,
+   "evidence_text": "Branson launched Virgin Mobile in 1999 and Virgin Blue in Australia in 2000.",
+   "evidence_urls": [
+    "https://news.bbc.co.uk/1/hi/special_report/1999/12/99/new_years_honours/584131.stm"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-06-richard-branson",
+   "event_date": "2000-03",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "기업가 정신 공로로 기사 작위",
+   "event_significance": 2,
+   "evidence_text": "In March 2000 Branson was knighted for \"services to entrepreneurship\".",
+   "evidence_urls": [
+    "https://news.bbc.co.uk/2/hi/uk_news/695511.stm",
+    "https://www.thegazette.co.uk/London/issue/55710/supplement/"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-06-richard-branson",
+   "event_date": "2004",
+   "event_category": "career_change",
+   "event_type": "new_venture",
+   "event_description": "우주관광 회사 버진 갤럭틱 설립",
+   "event_significance": 2,
+   "evidence_text": "A deal created space-tourism company Virgin Galactic, licensing SpaceShipOne technology.",
+   "evidence_urls": [
+    "http://www.spacenews.com/article/features/38109profile-sir-richard-branson-founder-virgin-galactic"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-06-richard-branson",
+   "event_date": "2014-10-31",
+   "event_category": "failure",
+   "event_type": "major_product_failure",
+   "event_description": "스페이스십투 시험비행 추락(조종사 1명 사망)",
+   "event_significance": 2,
+   "evidence_text": "VSS Enterprise, a SpaceShipTwo test vehicle, crashed on October 31, 2014.",
+   "evidence_urls": [
+    "https://www.nytimes.com/2014/11/01/science/virgin-galactics-spaceshiptwo-crashes-during-test-flight.html",
+    "https://www.wired.com/2014/10/virgin-galactic-boondoggle/"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-06-richard-branson",
+   "event_date": "2020-04-21",
+   "event_category": "financial_event",
+   "event_type": "financial_loss",
+   "event_description": "코로나로 버진 오스트레일리아 법정관리",
+   "event_significance": 3,
+   "evidence_text": "Virgin Australia Holdings entered voluntary administration in April 2020 amid COVID-19.",
+   "evidence_urls": [
+    "https://newsroom.virginaustralia.com/release/virgin-australia-enters-voluntary-administration",
+    "https://www.bbc.com/news/business-52354865"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-06-richard-branson",
+   "event_date": "2021-07-11",
+   "event_category": "achievement",
+   "event_type": "company_success",
+   "event_description": "자사 우주선으로 우주 경계 비행",
+   "event_significance": 2,
+   "evidence_text": "On 11 July 2021 Branson flew to the edge of space aboard Virgin Galactic's craft.",
+   "evidence_urls": [
+    "https://www.nytimes.com/2021/07/11/science/richard-branson-virgin-galactic-space.html",
+    "https://www.cnn.com/2021/07/09/tech/richard-branson-virgin-galactic-space-flight-walkup-scn/index.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-06-richard-branson",
+   "event_date": "2023-04-04",
+   "event_category": "financial_event",
+   "event_type": "financial_loss",
+   "event_description": "버진 오빗 파산 신청",
+   "event_significance": 2,
+   "evidence_text": "Branson's Virgin Orbit filed for Chapter 11 bankruptcy.",
+   "evidence_urls": [
+    "https://www.reuters.com/business/aerospace-defense/bransons-virgin-orbit-files-bankruptcy-2023-04-04/",
+    "https://www.bbc.com/news/business-65172594"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-07-rupert-murdoch",
+   "event_date": "1953",
+   "event_category": "career_change",
+   "event_type": "new_ceo_role",
+   "event_description": "부친 사망 후 애들레이드 The News 경영 승계",
+   "event_significance": 3,
+   "evidence_text": "After his father died in 1952 he took over running The News, a small Adelaide paper.",
+   "evidence_urls": [
+    "http://news.bbc.co.uk/2/hi/world/analysis/61122.stm"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-07-rupert-murdoch",
+   "event_date": "1969",
+   "event_category": "achievement",
+   "event_type": "major_acquisition",
+   "event_description": "영국 News of the World·The Sun 인수",
+   "event_significance": 2,
+   "evidence_text": "He expanded into the UK in 1969, taking over the News of the World, then The Sun.",
+   "evidence_urls": [
+    "http://news.bbc.co.uk/2/hi/world/analysis/61122.stm"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-07-rupert-murdoch",
+   "event_date": "1985",
+   "event_category": "achievement",
+   "event_type": "major_acquisition",
+   "event_description": "20세기 폭스 인수·미국 시민권 취득",
+   "event_significance": 2,
+   "evidence_text": "News Corporation acquired Twentieth Century Fox (1985); Murdoch became a US citizen in 1985.",
+   "evidence_urls": [
+    "http://news.bbc.co.uk/2/hi/world/analysis/61122.stm",
+    "https://en.wikipedia.org/wiki/Rupert_Murdoch"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-07-rupert-murdoch",
+   "event_date": "1990",
+   "event_category": "financial_event",
+   "event_type": "financial_loss",
+   "event_description": "부채 약 70억 달러로 뉴스코프 파산 위기",
+   "event_significance": 3,
+   "evidence_text": "By the late eighties News Corporation had built up debts of about $7 billion.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Rupert_Murdoch",
+    "https://www.latimes.com/archives/la-xpm-1996-07-18-fi-25297-story.html"
+   ],
+   "evidence_confidence": "unverified"
+  },
+  {
+   "person_id": "business-07-rupert-murdoch",
+   "event_date": "1999-06",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "두 번째 부인 애나와 이혼(12억 달러 합의)",
+   "event_significance": 2,
+   "evidence_text": "They divorced in June 1999; Anna Murdoch received a settlement of US$1.2 billion.",
+   "evidence_urls": [
+    "https://www.theguardian.com/media/2022/jun/22/the-merry-wives-of-rupert-murdoch-marriage-to-jerry-hall-is-reportedly-over",
+    "https://www.irishexaminer.com/business/arid-20160545.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-07-rupert-murdoch",
+   "event_date": "1999-06-25",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "웬디 덩과 결혼",
+   "event_significance": 2,
+   "evidence_text": "Murdoch married Wendi Deng in 1999, weeks after his divorce.",
+   "evidence_urls": [
+    "https://www.theguardian.com/media/2022/jun/22/the-merry-wives-of-rupert-murdoch-marriage-to-jerry-hall-is-reportedly-over"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-07-rupert-murdoch",
+   "event_date": "2000-04",
+   "event_category": "health_event",
+   "event_type": "illness",
+   "event_description": "저등급 전립선암 진단·치료",
+   "event_significance": 2,
+   "evidence_text": "Murdoch was diagnosed with a low-grade form of prostate cancer during a routine check.",
+   "evidence_urls": [
+    "https://www.scmp.com/article/314325/rupert-murdoch-diagnosed-prostate-cancer",
+    "https://www.britannica.com/biography/Rupert-Murdoch"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-07-rupert-murdoch",
+   "event_date": "2007",
+   "event_category": "achievement",
+   "event_type": "major_acquisition",
+   "event_description": "다우존스(월스트리트저널) 인수",
+   "event_significance": 2,
+   "evidence_text": "His News Corporation acquired The Wall Street Journal in 2007.",
+   "evidence_urls": [
+    "http://news.bbc.co.uk/2/hi/world/analysis/61122.stm"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-07-rupert-murdoch",
+   "event_date": "2011-07-10",
+   "event_category": "failure",
+   "event_type": "major_product_failure",
+   "event_description": "전화 해킹 스캔들로 News of the World 폐간",
+   "event_significance": 3,
+   "evidence_text": "The paper printed its final edition on 10 July 2011 after phone-hacking revelations.",
+   "evidence_urls": [
+    "http://www.cnn.com/2011/WORLD/europe/07/10/uk.phonehacking/index.html",
+    "https://www.bbc.co.uk/news/uk-politics-14148658"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-07-rupert-murdoch",
+   "event_date": "2013-06",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "웬디 덩과 이혼 신청",
+   "event_significance": 2,
+   "evidence_text": "A News Corp spokesperson confirmed Murdoch filed for divorce from Deng in New York.",
+   "evidence_urls": [
+    "https://world.time.com/2013/06/14/rupert-and-wendi-the-rise-and-fall-of-a-media-couple/slide/born-again-rupert/",
+    "https://en.wikipedia.org/wiki/Rupert_Murdoch"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-07-rupert-murdoch",
+   "event_date": "2016-03-04",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "제리 홀과 런던에서 결혼",
+   "event_significance": 2,
+   "evidence_text": "On 4 March 2016 Murdoch and Jerry Hall were married in London.",
+   "evidence_urls": [
+    "https://www.smh.com.au/entertainment/celebrity/rupert-murdoch-and-jerry-hall-announce-engagement-20160112-gm40nm.html",
+    "https://news.yahoo.com/rupert-murdoch-marries-jerry-hall-london-135358442.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-07-rupert-murdoch",
+   "event_date": "2019-03-20",
+   "event_category": "financial_event",
+   "event_type": "financial_gain",
+   "event_description": "21세기 폭스 자산을 디즈니에 매각 완료",
+   "event_significance": 3,
+   "evidence_text": "Regulatory clearance allowed Disney's acquisition of 21st Century Fox to complete in March 2019.",
+   "evidence_urls": [
+    "https://variety.com/2019/biz/news/disney-21st-century-fox-brazil-approval-sports-1203150861/",
+    "https://en.wikipedia.org/wiki/Acquisition_of_21st_Century_Fox_by_Disney"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-07-rupert-murdoch",
+   "event_date": "2022-06",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "제리 홀과 이혼",
+   "event_significance": 2,
+   "evidence_text": "Murdoch's marriage to Jerry Hall was reported over in June 2022.",
+   "evidence_urls": [
+    "https://www.theguardian.com/media/2022/jun/22/rupert-murdoch-jerry-hall-divorce-report"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-07-rupert-murdoch",
+   "event_date": "2023-04-18",
+   "event_category": "financial_event",
+   "event_type": "financial_loss",
+   "event_description": "폭스뉴스, 도미니언에 7억8750만 달러 명예훼손 합의금",
+   "event_significance": 2,
+   "evidence_text": "Fox agreed to pay Dominion $787.5 million to settle the defamation case.",
+   "evidence_urls": [
+    "https://www.nytimes.com/live/2023/04/18/business/fox-news-dominion-trial-settlement/the-787-5-million-deal-is-one-of-the-largest-defamation-settlements-in-us-history",
+    "https://deadline.com/2023/04/fox-news-dominion-settlement-tax-deductible-1235330714/"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-07-rupert-murdoch",
+   "event_date": "2023-09-21",
+   "event_category": "retirement",
+   "event_type": "stepped_down",
+   "event_description": "폭스·뉴스코프 회장직 사퇴 발표",
+   "event_significance": 3,
+   "evidence_text": "In 2023 Murdoch announced he would step down as chairman of Fox Corp. and News Corp.",
+   "evidence_urls": [
+    "https://www.cnn.com/2023/09/21/business/gallery/rupert-murdoch/index.html",
+    "https://en.wikipedia.org/wiki/Rupert_Murdoch"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-08-bernard-arnault",
+   "event_date": "1973",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "안 드와브랭과 결혼",
+   "event_significance": 2,
+   "evidence_text": "In 1973 Arnault married Anne Dewavrin; they had Delphine and Antoine.",
+   "evidence_urls": [
+    "https://www.france24.com/en/20200122-bernard-arnault-france-s-wolf-in-cashmere-billionaire"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-08-bernard-arnault",
+   "event_date": "1978",
+   "event_category": "career_change",
+   "event_type": "new_ceo_role",
+   "event_description": "부친 회사 페레-사비넬 사장",
+   "event_significance": 1,
+   "evidence_text": "He was president of Ferret-Savinel from 1978 to 1984.",
+   "evidence_urls": [
+    "https://www.forbes.com/sites/forbeswealthteam/article/behind-the-billions-bernard-arnault/"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-08-bernard-arnault",
+   "event_date": "1984",
+   "event_category": "achievement",
+   "event_type": "major_acquisition",
+   "event_description": "디올을 보유한 부삭 그룹 인수",
+   "event_significance": 3,
+   "evidence_text": "In 1984 Arnault took over Boussac Saint-Frères, the conglomerate that owned Christian Dior.",
+   "evidence_urls": [
+    "https://www.france24.com/en/20200122-bernard-arnault-france-s-wolf-in-cashmere-billionaire",
+    "https://www.nytimes.com/2007/11/20/style/20iht-web-1120-luxarnault.8408399.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-08-bernard-arnault",
+   "event_date": "1989-01",
+   "event_category": "achievement",
+   "event_type": "major_acquisition",
+   "event_description": "LVMH 경영권 장악(회장 취임)",
+   "event_significance": 3,
+   "evidence_text": "In January 1989 he spent another $500 million to control 43.5% of LVMH's shares.",
+   "evidence_urls": [
+    "https://www.nytimes.com/1989/12/17/magazine/a-luxury-fight-to-the-finish.html",
+    "https://www.nytimes.com/2020/10/30/business/bernard-arnault-lvmh-tiffany-battle.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-08-bernard-arnault",
+   "event_date": "1990",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "첫 부인과 별거·이혼",
+   "event_significance": 2,
+   "evidence_text": "Arnault and Anne Dewavrin separated in 1990; he remarried in 1991.",
+   "evidence_urls": [
+    "https://www.france24.com/en/20200122-bernard-arnault-france-s-wolf-in-cashmere-billionaire"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-08-bernard-arnault",
+   "event_date": "1991",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "피아니스트 엘렌 메르시에와 재혼",
+   "event_significance": 2,
+   "evidence_text": "In 1991 he married Hélène Mercier, a Canadian-born concert pianist.",
+   "evidence_urls": [
+    "https://www.france24.com/en/20200122-bernard-arnault-france-s-wolf-in-cashmere-billionaire",
+    "https://people.com/all-about-bernard-arnault-children-8385121"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-08-bernard-arnault",
+   "event_date": "2001-09",
+   "event_category": "failure",
+   "event_type": "venture_failed",
+   "event_description": "구찌 인수전에서 피노(PPR)에 패배",
+   "event_significance": 2,
+   "evidence_text": "Pinault won the long battle with LVMH to control Gucci Group.",
+   "evidence_urls": [
+    "https://www.nytimes.com/2001/09/11/business/pinault-wins-long-battle-to-control-gucci-group.html",
+    "https://www.independent.co.uk/news/business/lvmh-trumps-pinault-in-battle-for-future-of-gucci-1081816.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-08-bernard-arnault",
+   "event_date": "2013-06-25",
+   "event_category": "financial_event",
+   "event_type": "financial_loss",
+   "event_description": "에르메스 지분 은밀 매집으로 AMF 800만 유로 제재",
+   "event_significance": 2,
+   "evidence_text": "The AMF Enforcement Committee imposed an 8 million euro penalty on LVMH over Hermès stake-building.",
+   "evidence_urls": [
+    "https://www.hsfkramer.com/notes/fsrandcorpcrime/2013-07/french-amfs-e8m-fine-for-lvmhs-disclosure-failures-that-concealed-stakebuilding-in-hermes",
+    "https://www.business-standard.com/article/reuters/lvmh-fined-8-million-euros-over-hermes-stake-building-113070101131_1.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-08-bernard-arnault",
+   "event_date": "2021-01",
+   "event_category": "achievement",
+   "event_type": "major_acquisition",
+   "event_description": "티파니 인수 완료",
+   "event_significance": 2,
+   "evidence_text": "LVMH completed the purchase of Tiffany in January 2021.",
+   "evidence_urls": [
+    "https://www.reuters.com/article/us-lvmh-tiffany-changes-focus/more-carats-and-sparkle-how-lvmh-plans-to-change-tiffany-idUSKBN29V0JH",
+    "https://www.nytimes.com/2020/10/30/business/bernard-arnault-lvmh-tiffany-battle.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-08-bernard-arnault",
+   "event_date": "2021-12",
+   "event_category": "failure",
+   "event_type": "legal_penalty",
+   "event_description": "스카르치니 첩보 사건 LVMH 1000만 유로 합의",
+   "event_significance": 2,
+   "evidence_text": "LVMH settled a probe into ex-spy chief Squarcini spying for the company.",
+   "evidence_urls": [
+    "https://www.ft.com/content/1688b150-49b8-45f7-8b00-b37d3e518675"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-08-bernard-arnault",
+   "event_date": "2023-04-04",
+   "event_category": "achievement",
+   "event_type": "market_leadership",
+   "event_description": "포브스 세계 부호 1위(프랑스인 최초)",
+   "event_significance": 3,
+   "evidence_text": "Forbes named Arnault the world's richest person with $211 billion.",
+   "evidence_urls": [
+    "https://www.thenationalnews.com/business/money/2023/04/05/bernard-arnault-crowned-the-worlds-richest-person-in-2023",
+    "https://www.africanews.com/2023/04/12/bernard-arnault-is-now-the-worlds-richest-person-forbes/"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-09-elon-musk",
+   "event_date": "1995",
+   "event_category": "career_change",
+   "event_type": "founding",
+   "event_description": "동생과 Zip2 창업",
+   "event_significance": 2,
+   "evidence_text": "In 1995 Musk, his brother Kimbal and Greg Kouri founded Zip2.",
+   "evidence_urls": [
+    "https://www.cnbc.com/2018/06/19/how-elon-musk-founded-zip2-with-his-brother-kimbal.html",
+    "https://www.britannica.com/money/Zip2"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-09-elon-musk",
+   "event_date": "1999-02",
+   "event_category": "financial_event",
+   "event_type": "financial_gain",
+   "event_description": "컴팩이 Zip2를 3억700만 달러에 인수",
+   "event_significance": 2,
+   "evidence_text": "Compaq acquired Zip2 for $307 million in cash in February 1999.",
+   "evidence_urls": [
+    "https://www.britannica.com/money/Zip2",
+    "https://www.cnbc.com/2018/06/19/how-elon-musk-founded-zip2-with-his-brother-kimbal.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-09-elon-musk",
+   "event_date": "1999",
+   "event_category": "career_change",
+   "event_type": "founding",
+   "event_description": "온라인 금융 X.com 공동 창업",
+   "event_significance": 2,
+   "evidence_text": "In 1999 Musk co-founded X.com, an online financial services company.",
+   "evidence_urls": [
+    "https://www.cnbc.com/2018/06/19/how-elon-musk-founded-zip2-with-his-brother-kimbal.html"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-09-elon-musk",
+   "event_date": "2000-09",
+   "event_category": "failure",
+   "event_type": "ousted",
+   "event_description": "신혼여행 중 이사회가 X.com(페이팔) CEO에서 해임",
+   "event_significance": 3,
+   "evidence_text": "Musk was removed as CEO in September 2000 while away; Thiel replaced him.",
+   "evidence_urls": [
+    "https://www.snopes.com/fact-check/was-elon-musk-fired-from-paypal/",
+    "https://www.foxbusiness.com/markets/elon-musk-dethroned-peter-thiel-coup-led-paypal-mafia"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-09-elon-musk",
+   "event_date": "2002",
+   "event_category": "financial_event",
+   "event_type": "financial_gain",
+   "event_description": "이베이가 페이팔을 15억 달러에 인수, 최대 주주로 큰 수익",
+   "event_significance": 3,
+   "evidence_text": "In 2002 eBay acquired PayPal for $1.5 billion; Musk was the largest shareholder.",
+   "evidence_urls": [
+    "https://www.sec.gov/Archives/edgar/data/1103415/000091205702009834/a2073071z10-k405.htm",
+    "https://www.ft.com/content/86432398-4897-11e4-9d04-00144feab7de"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-09-elon-musk",
+   "event_date": "2002-05",
+   "event_category": "career_change",
+   "event_type": "founding",
+   "event_description": "스페이스X 창업",
+   "event_significance": 3,
+   "evidence_text": "Musk founded SpaceX in May 2002 and became CEO and chief engineer.",
+   "evidence_urls": [
+    "https://www.bloomberg.com/graphics/2015-elon-musk-spacex/",
+    "https://www.nytimes.com/2006/02/05/business/yourmoney/05rocket.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-09-elon-musk",
+   "event_date": "2006-03",
+   "event_category": "failure",
+   "event_type": "major_product_failure",
+   "event_description": "팰컨1 첫 발사 실패(이후 2회 더 실패)",
+   "event_significance": 2,
+   "evidence_text": "SpaceX's first Falcon 1 launch in 2006 failed to reach orbit.",
+   "evidence_urls": [
+    "https://spacenews.com/griffin-reiterates-commitment-commercial-services/",
+    "https://en.wikipedia.org/wiki/Elon_Musk"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-09-elon-musk",
+   "event_date": "2008-06",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "첫 부인 저스틴과 이혼",
+   "event_significance": 2,
+   "evidence_text": "Musk filed for divorce from Justine in June 2008.",
+   "evidence_urls": [
+    "https://www.ibtimes.com/spacexs-elon-musk-once-married-divorced-actress-twice-3194912",
+    "https://www.yahoo.com/entertainment/elon-musks-ex-wife-justine-153325158.html"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-09-elon-musk",
+   "event_date": "2008-09",
+   "event_category": "achievement",
+   "event_type": "product_launch_success",
+   "event_description": "팰컨1 궤도 진입 성공, 연말 NASA 16억 달러 계약",
+   "event_significance": 3,
+   "evidence_text": "SpaceX launched Falcon 1 into orbit in 2008, then won a $1.6 billion NASA contract.",
+   "evidence_urls": [
+    "https://www.nasa.gov/exploration/news/COTS_selection.html",
+    "https://graphics.reuters.com/SPACE-EXPLORATION-SPACEX/010091Q82NF/index.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-09-elon-musk",
+   "event_date": "2008-10",
+   "event_category": "career_change",
+   "event_type": "new_ceo_role",
+   "event_description": "테슬라 CEO 취임",
+   "event_significance": 2,
+   "evidence_text": "Musk succeeded Drori as Tesla CEO in October 2008.",
+   "evidence_urls": [
+    "https://www.cnet.com/news/tesla-ceo-steps-down-as-possible-delays-loom/"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-09-elon-musk",
+   "event_date": "2010",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "탈룰라 라일리와 결혼",
+   "event_significance": 2,
+   "evidence_text": "Musk married Talulah Riley in 2010 at Dornoch Cathedral, Scotland.",
+   "evidence_urls": [
+    "https://www.theguardian.com/technology/2016/mar/21/elon-musk-talulah-riley-file-divorce-second-marriage"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-09-elon-musk",
+   "event_date": "2010-06-29",
+   "event_category": "financial_event",
+   "event_type": "financial_gain",
+   "event_description": "테슬라 나스닥 상장",
+   "event_significance": 3,
+   "evidence_text": "On June 29, 2010, Tesla went public, the first US carmaker IPO since 1956.",
+   "evidence_urls": [
+    "https://www.bloomberg.com/news/articles/2010-06-29/tesla-motors-raises-226-million-in-first-ipo-of-u-s-carmaker-in-54-years",
+    "https://www.marketwatch.com/story/tesla-motors-revs-up-244-million-ipo-2010-06-28"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-09-elon-musk",
+   "event_date": "2018-09-29",
+   "event_category": "failure",
+   "event_type": "legal_penalty",
+   "event_description": "\"자금 확보\" 트윗으로 SEC 합의, 벌금 2천만 달러·의장 사임",
+   "event_significance": 2,
+   "evidence_text": "Settlement required Musk to step down as chairman and pay a $20 million penalty.",
+   "evidence_urls": [
+    "https://www.sec.gov/news/press-release/2018-226",
+    "https://www.npr.org/2018/09/29/653014733/elon-musk-settles-with-sec-agrees-to-step-down-as-tesla-chairman"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-09-elon-musk",
+   "event_date": "2022-10-27",
+   "event_category": "achievement",
+   "event_type": "major_acquisition",
+   "event_description": "트위터 인수 완료",
+   "event_significance": 2,
+   "evidence_text": "Musk bought Twitter on October 27, 2022.",
+   "evidence_urls": [
+    "https://www.bbc.com/news/business-60979656",
+    "https://www.theguardian.com/technology/2022/apr/25/timeline-elon-musks-history-twitter"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-10-lee-kun-hee",
+   "event_date": "1967",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "홍라희와 결혼",
+   "event_significance": 2,
+   "evidence_text": "Lee Kun-hee was married to Hong Ra-hee, daughter of JoongAng Ilbo chair Hong Jin-ki.",
+   "evidence_urls": [
+    "http://www.koreaherald.com/view.php?ud=20110329000654"
+   ],
+   "evidence_confidence": "unverified"
+  },
+  {
+   "person_id": "business-10-lee-kun-hee",
+   "event_date": "1987-12",
+   "event_category": "career_change",
+   "event_type": "new_ceo_role",
+   "event_description": "부친 별세 후 삼성그룹 회장 취임",
+   "event_significance": 3,
+   "evidence_text": "Lee served as chair of Samsung from 1987 to 2008 and from 2010 until 2020.",
+   "evidence_urls": [
+    "https://www.forbes.com/profile/lee-kun-hee/",
+    "https://www.britannica.com/biography/Lee-Kun-Hee"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-10-lee-kun-hee",
+   "event_date": "1993-06",
+   "event_category": "career_change",
+   "event_type": "restructuring",
+   "event_description": "프랑크푸르트 신경영 선언(\"마누라·자식 빼고 다 바꿔라\")",
+   "event_significance": 2,
+   "evidence_text": "In 1993 he gathered executives in Frankfurt and demanded change: \"except your wife and kids\".",
+   "evidence_urls": [
+    "https://www.theverge.com/2012/11/30/3709688/samsung-25-years-lee-kun-hee",
+    "http://www.independent.co.uk/news/business/analysis-and-features/the-business-onlee-kun-hee-chairman-samsung-2367402.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-10-lee-kun-hee",
+   "event_date": "1995",
+   "event_category": "career_change",
+   "event_type": "new_venture",
+   "event_description": "삼성자동차 설립",
+   "event_significance": 2,
+   "evidence_text": "Lee decided to create a new carmaker, Samsung Motors.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Renault_Korea",
+    "https://www.nytimes.com/1992/06/13/business/company-news-samsung-planning-commercial-vehicles-venture.html"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-10-lee-kun-hee",
+   "event_date": "1996-08",
+   "event_category": "failure",
+   "event_type": "legal_penalty",
+   "event_description": "노태우 비자금(뇌물) 사건 유죄·집행유예(후에 사면)",
+   "event_significance": 2,
+   "evidence_text": "He was convicted in 1996 on corruption charges but later pardoned.",
+   "evidence_urls": [
+    "https://www.forbes.com/profile/lee-kun-hee/",
+    "https://en.wikipedia.org/wiki/Lee_Kun-hee"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-10-lee-kun-hee",
+   "event_date": "2000-09",
+   "event_category": "failure",
+   "event_type": "venture_failed",
+   "event_description": "외환위기 뒤 법정관리 삼성자동차를 르노에 매각",
+   "event_significance": 2,
+   "evidence_text": "Renault bought a 70% stake in Samsung Motors for US$560 million in September 2000.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Renault_Korea",
+    "http://article.joins.com/news/article/article.asp?total_id=783368&ctg=11"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-10-lee-kun-hee",
+   "event_date": "2008-04-21",
+   "event_category": "career_change",
+   "event_type": "resigned_role",
+   "event_description": "특검 수사 책임지고 회장직 사퇴",
+   "event_significance": 3,
+   "evidence_text": "On 21 April 2008 he resigned, saying he had caused troubles to the nation.",
+   "evidence_urls": [
+    "http://english.hani.co.kr/arti/english_edition/e_national/281425.html",
+    "http://www.iht.com/articles/2008/01/14/business/samsung.php"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-10-lee-kun-hee",
+   "event_date": "2008-07-16",
+   "event_category": "failure",
+   "event_type": "legal_penalty",
+   "event_description": "조세포탈 유죄, 벌금·징역 3년 집행유예",
+   "event_significance": 3,
+   "evidence_text": "Seoul court found Lee guilty of financial wrongdoing and tax evasion; suspended sentence.",
+   "evidence_urls": [
+    "https://www.theverge.com/2012/11/30/3709688/samsung-25-years-lee-kun-hee",
+    "https://www.nytimes.com/2018/10/05/world/asia/lee-myung-bak-south-korea-convicted.html"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-10-lee-kun-hee",
+   "event_date": "2010-03-24",
+   "event_category": "career_change",
+   "event_type": "new_ceo_role",
+   "event_description": "특별사면(2009-12-29) 후 삼성전자 회장 복귀",
+   "event_significance": 2,
+   "evidence_text": "On 24 March 2010 Lee announced his return to Samsung Electronics as its chair.",
+   "evidence_urls": [
+    "https://www.koreatimes.co.kr/www/tech/2019/05/693_62923.html",
+    "https://www.britannica.com/biography/Lee-Kun-Hee"
+   ],
+   "evidence_confidence": "high"
+  },
+  {
+   "person_id": "business-10-lee-kun-hee",
+   "event_date": "2012-11",
+   "event_category": "achievement",
+   "event_type": "market_leadership",
+   "event_description": "삼성전자 세계 최대 휴대폰·메모리 업체로",
+   "event_significance": 2,
+   "evidence_text": "Under Lee Samsung became one of the world's largest electronics makers.",
+   "evidence_urls": [
+    "https://www.theverge.com/2012/11/30/3709688/samsung-25-years-lee-kun-hee",
+    "https://www.forbes.com/profile/lee-kun-hee/"
+   ],
+   "evidence_confidence": "medium"
+  },
+  {
+   "person_id": "business-10-lee-kun-hee",
+   "event_date": "2014-05",
+   "event_category": "health_event",
+   "event_type": "illness",
+   "event_description": "급성 심근경색으로 쓰러져 와병",
+   "event_significance": 3,
+   "evidence_text": "In 2014 he suffered an incapacitating heart attack; his son became de facto leader.",
+   "evidence_urls": [
+    "https://www.bloomberg.com/news/articles/2020-10-25/samsung-electronics-says-chairman-lee-kun-hee-has-died",
+    "https://www.britannica.com/biography/Lee-Kun-Hee"
+   ],
+   "evidence_confidence": "high"
+  }
+ ]
+}

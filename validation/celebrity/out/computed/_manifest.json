@@ -1,0 +1,8 @@
+{
+ "computedAt": "2026-11-25T13:27:53.647Z",
+ "engineHash": "2d586294046803fe",
+ "personsHash": "a8c9426df83a9a85",
+ "nullCount": 200,
+ "persons": 30,
+ "note": "사건 데이터를 읽지 않고 계산함(가드)"
+}
