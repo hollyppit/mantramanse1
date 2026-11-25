@@ -616,7 +616,7 @@
   });
   $('#v-home').addEventListener('change', function (e) { if (e.target.id === 'xAuto' && S.xp) { S.xp.auto = e.target.checked; xpSave(); } });
   var loveCompatP=null;
-  function loveCompatScript(){if(R.LoveCompat)return Promise.resolve();return loveCompatP||(loveCompatP=new Promise(function(ok){var s=document.createElement('script');s.src='love-compat.js?v=20261125-apt';s.onload=ok;s.onerror=ok;setTimeout(ok,4000);document.head.appendChild(s);}));}
+  function loveCompatScript(){if(R.LoveCompat)return Promise.resolve();return loveCompatP||(loveCompatP=new Promise(function(ok){var s=document.createElement('script');s.src='love-compat.js?v=20261125-group';s.onload=ok;s.onerror=ok;setTimeout(ok,4000);document.head.appendChild(s);}));}
   async function beginReader() {
     if(!PREVIEW && R.Editorial && !S.editorialLoaded){
       S.editorialLoaded=true;

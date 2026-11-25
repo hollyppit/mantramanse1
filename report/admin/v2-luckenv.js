@@ -95,6 +95,10 @@
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>여러 명 궁합(무리 궁합)</b> — 현재: <b style="color:' + (fl && fl.groupCompat ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.groupCompat ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leGC"' + (fl ? '' : ' disabled') + '>' + (fl && fl.groupCompat ? '여러 명 궁합 끄기' : '여러 명 궁합 켜기') + '</button><a class="btn" href="/?mantraFlags=groupCompat" target="_blank" rel="noopener">미리보기 주소</a></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 만세력 <b>궁합 탭</b> 위에 “두 사람 / 여러 명” 전환이 생깁니다. 여러 명을 고르면 나와 최근 본 사람 중 3~6명을 함께 놓고 관계 지도(모든 두 사람 조합의 궁합 점수)·기운 방향(누가 누구를 받쳐 주고 누구의 기준이 무겁게 느껴지는지)·무리의 오행 균형·이어 주는 사람·앞으로 12달 함께 좋은 달과 예민한 달을 보여 줍니다. 두 사람 궁합 계산을 그대로 모아 보는 표시 전용이며, 다른 사람 생년월일은 지금처럼 그 기기에만 저장됩니다.</p></div>';
+    // 인연운 궁합 장 여러 명 보기(2026-11-25, love-compat.js·love-group-view.js·/api/love-compat a:group)
+    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>인연운 궁합 장 여러 명 보기</b> — 현재: <b style="color:' + (fl && fl.loveGroup ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.loveGroup ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leLG"' + (fl ? '' : ' disabled') + '>' + (fl && fl.loveGroup ? '여러 명 보기 끄기' : '여러 명 보기 켜기') + '</button></div>' +
+      '<p class="muted" style="margin:8px 0 0">켜면 운명의 타임라인 <b>인연운 심화</b> 마지막 장 “그 사람과 나의 궁합” 위에 “두 사람 / 여러 명” 전환이 생깁니다. 나와 이 장의 최근 본 사람 중 3~6명을 골라 만세력 여러 명 궁합과 같은 계산(관계 지도·기운 방향·오행 균형·이어 주는 사람·함께 좋은 달)을 서버에서 보여 줍니다. 인연운 심화 보유 기간에만 열리고, 한 번 보면 하루 10회 중 1회만 줄어듭니다(관계 네 가지는 한 번에 계산). 꺼져 있어도 관리자 로그인 상태에서는 미리 볼 수 있습니다.</p></div>';
     // 뚜렷한 신호 자동 알림(2026-11-18, luck-alerts.js): 만세력 상단(9분야)에만 — 운명의 타임라인 알림은 2026-11-20 제거
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>뚜렷한 신호 자동 알림</b> — 현재: <b style="color:' + (fl && fl.luckAlerts ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.luckAlerts ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leAL"' + (fl ? '' : ' disabled') + '>' + (fl && fl.luckAlerts ? '자동 알림 끄기' : '자동 알림 켜기') + '</button><a class="btn" href="/?mantraFlags=luckAlerts" target="_blank" rel="noopener">미리보기 주소</a></div>' +
@@ -222,6 +226,11 @@
       var v = !(S.flags && S.flags.groupCompat);
       if (v && !confirm('만세력 궁합 탭의 여러 명 궁합을 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
       putFlags({ flags: { groupCompat: v } }, v ? '여러 명 궁합을 켰습니다(약 1분 안에 반영)' : '여러 명 궁합을 껐습니다(약 1분 안에 반영)');
+    };
+    $('#leLG').onclick = function () {   // 인연운 궁합 장 여러 명 보기 스위치(love-compat.js)
+      var v = !(S.flags && S.flags.loveGroup);
+      if (v && !confirm('인연운 심화 궁합 장의 여러 명 보기를 구매자 모두에게 공개합니다.\n켜시겠습니까?')) return;
+      putFlags({ flags: { loveGroup: v } }, v ? '여러 명 보기를 켰습니다(약 1분 안에 반영)' : '여러 명 보기를 껐습니다(약 1분 안에 반영)');
     };
     $('#leAPT').onclick = function () {   // 특기·적성 탭 스위치(aptitude.js)
       var v = !(S.flags && S.flags.aptitude);

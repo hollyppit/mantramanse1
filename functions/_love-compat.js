@@ -9,6 +9,9 @@ import '../engine.js';
 import '../compat-pair.js';
 import '../compat-day.js';
 import '../amhap.js';
+import '../luck-grade.js';
+import '../luck-element-theme.js';
+import '../compat-group.js';
 import { kstDay, cleanDevice } from './_deep-quota.js';
 
 export const CHAPTER_ID = 'timeline_love_compat';
@@ -70,6 +73,23 @@ export function evaluateAll(chA, chB, names, { dayCompat = false } = {}) {
     } finally { G.MANTRA_FLAGS = prev; }
   } catch (e) { day = null; }
   return { names: nm, gz: { a: gz(chA.pillars.day), b: gz(chB.pillars.day) }, hourKnown: { a: !!chA.pillars.hour, b: !!chB.pillars.hour }, views, partPlain: Pair.PART_PLAIN || {}, amhap, amhapNote: Amhap.NOTE, day };
+}
+
+// ── 여러 명 궁합(2026-11-25, compat-group.js — 만세력 궁합 탭 '여러 명'과 같은 계산). 관계 네 가지를 한 번에 돌려 관계를 바꿔도 횟수를 다시 쓰지 않는다.
+//   people: [{ ch, name, role }] (나를 넣으면 me:true). 달별 흐름은 관계와 무관해 한 번만 돌려준다. 스위치 loveGroup(KV luckenv:flags, 기본 꺼짐)
+export const GROUP_MIN = 3, GROUP_MAX = 6;
+export function cleanGroupMeta(p) { const roles = (G.GroupCompat && G.GroupCompat.ROLES) || {}; return { name: str(p && p.name, 12), role: p && typeof p.role === 'string' && Object.prototype.hasOwnProperty.call(roles, p.role) ? p.role : '' }; }
+export function evaluateGroup(people, { now = Date.now() } = {}) {
+  const { M } = engines(), GC = G.GroupCompat;
+  const views = {}; let months = null;
+  RELS.forEach(rel => {
+    const r = GC.evaluate(M, people, rel, { now });
+    if (!r.ok) throw Object.assign(new Error(r.error), { code: 'group-input' });
+    const o = JSON.parse(JSON.stringify(r));   // pairResult(함수)는 빠진다
+    if (!months) months = o.months; delete o.months;
+    views[rel] = o;
+  });
+  return { version: GC.VERSION, views, months, band: GC.BAND, arrowCap: GC.ARROW.cap };
 }
 
 // ── 하루 횟수(사용자당 LIMIT)

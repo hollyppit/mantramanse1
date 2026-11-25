@@ -26,7 +26,12 @@
   }
 
   // ───────── 장 만들기·끼우기 ─────────
-  var S = { me: null, name: '', gender: 'M', chapter: null, status: null, statusP: null, inp: null, res: null, rel: 'lover', editing: true, busy: false, err: '', locked: null, list: [] };
+  var S = { me: null, name: '', gender: 'M', chapter: null, status: null, statusP: null, inp: null, res: null, rel: 'lover', editing: true, busy: false, err: '', locked: null, list: [], mode: 'pair' };
+  // 여러 명 보기(2026-11-25, 스위치 loveGroup — 서버 status.group 이 true 일 때만 전환 단추가 보인다). 고른 사람·역할은 이 기기에만 저장
+  var GROUP_KEY = 'mt_love_compat_group', VIEW_SRC = '/report/v2/love-group-view.js?v=20261125-2';
+  var GS = (function () { var d = {}; try { d = JSON.parse(store.get(GROUP_KEY) || '{}') || {}; } catch (e) { } return { me: d.me !== false, sel: Array.isArray(d.sel) ? d.sel.filter(function (x) { return typeof x === 'string'; }) : [], roles: d.roles && typeof d.roles === 'object' ? d.roles : {}, rel: REL[d.rel] ? d.rel : 'family', res: null, editing: true, busy: false, err: '', adding: false, more: false }; })();
+  function gSave() { store.set(GROUP_KEY, JSON.stringify({ me: GS.me, sel: GS.sel, roles: GS.roles, rel: GS.rel })); }
+  var groupOn = function () { return !!(S.status && S.status.group); };
   function meOf(ch) {
     var i = (ch && ch.input) || {}, o = {};
     ['year', 'month', 'day', 'hour', 'minute', 'calendar', 'leap', 'gender', 'lon', 'tz', 'timeMode', 'jasi', 'sinsalBase', 'model', 'school', 'combinationMode', 'climatePalaceMode'].forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; });
@@ -100,7 +105,8 @@
       '<div class="lc-row"><div class="lc-f"><span>태어난 시각</span><div class="lc-sel">' + sel('hour', 0, 23, i.hour, '시') + sel('minute', 0, 59, i.minute, '분') + '</div></div><label class="lc-ck"><input type="checkbox" data-f="hourUnknown"' + (i.hourUnknown ? ' checked' : '') + '> 시간 모름</label></div>' +
       '<div class="lc-row"><label class="lc-f"><span>출생지</span><select data-f="city">' + CITIES.map(function (c) { return '<option value="' + c[0] + '"' + (c[0] === i.city ? ' selected' : '') + '>' + c[0] + '</option>'; }).join('') + '</select></label></div>' +
       '<p class="lc-note">시간 계산 기준(진태양시·자시 등)은 내 사주와 같은 설정을 씁니다. 시간을 모르면 시주 없이 비교합니다. 상대 정보는 이 기기에만 저장돼요.</p>' +
-      '<div class="lc-go"><button type="submit" class="btn lc-btn lc-primary"' + (S.busy || out ? ' disabled' : '') + '>' + (S.busy ? '두 사주를 맞대어 보는 중…' : '궁합 보기') + '</button>' + (S.err || out ? '<span class="lc-err" role="alert">' + esc(S.err || ERR['daily-limit']) + '</span>' : '') + '</div></form>';
+      (GS.adding ? '<div class="lc-go"><button type="submit" class="btn lc-btn lc-primary">목록에 추가</button><button type="button" class="btn lc-btn" data-lc="gcancel">취소</button><span class="lc-muted">추가만 하고 횟수는 쓰지 않아요</span></div></form>' :
+      '<div class="lc-go"><button type="submit" class="btn lc-btn lc-primary"' + (S.busy || out ? ' disabled' : '') + '>' + (S.busy ? '두 사주를 맞대어 보는 중…' : '궁합 보기') + '</button>' + (S.err || out ? '<span class="lc-err" role="alert">' + esc(S.err || ERR['daily-limit']) + '</span>' : '') + '</div></form>');
   }
   function readForm(form) {
     var i = S.inp || (S.inp = defaults()), g = function (k) { return form.querySelector('[data-f="' + k + '"]'); };
@@ -109,7 +115,63 @@
     i.hourUnknown = !!(g('hourUnknown') && g('hourUnknown').checked); i.leap = i.calendar === 'lunar' && !!(g('leap') && g('leap').checked);
     if (g('city')) { i.city = g('city').value; var c = CITIES.filter(function (x) { return x[0] === i.city; })[0]; i.lon = c ? c[1] : 126.98; }
   }
+  // 여러 명 보기에서 '새 사람 입력': 서버를 부르지 않고(횟수 차감 없음) 최근 본 사람에 저장한 뒤 고른 목록에 넣는다
+  function addToGroup() {
+    var i = S.inp, y = new Date().getFullYear();
+    if (!(i.year >= ((root.Manse && root.Manse.MIN_Y) || 1900) && i.year <= y && i.month >= 1 && i.month <= 12 && i.day >= 1 && i.day <= 31)) { S.err = ERR['bad-date'] || '생년월일을 확인해 주세요.'; paint(); return; }
+    var rec = Object.assign({}, i); S.list = [rec].concat(S.list.filter(function (x) { return keyOf(x) !== keyOf(rec); })).slice(0, 8); saveList(S.list);
+    if (GS.sel.indexOf(keyOf(rec)) < 0) GS.sel.push(keyOf(rec));
+    GS.adding = false; GS.err = ''; S.err = ''; S.mode = 'group'; gSave(); paint(); scrollTop();
+  }
+  function gPeople() { var keys = {}; S.list.forEach(function (x) { keys[keyOf(x)] = x; }); return GS.sel.filter(function (k) { return keys[k]; }).map(function (k) { return keys[k]; }); }
+  function gCount() { return gPeople().length + (GS.me ? 1 : 0); }
+  function gSubmit() {
+    if (GS.busy) return;
+    var ppl = gPeople(), n = ppl.length + (GS.me ? 1 : 0);
+    if (n < 3 || n > 6) { GS.err = '3~6명을 골라 주세요. 지금 ' + n + '명이에요.'; paint(); return; }
+    GS.err = ''; GS.busy = true; paint(); viewScript();
+    var people = ppl.map(function (x) { return { name: x.name || (x.year + '년생'), role: GS.roles[keyOf(x)] || '', year: x.year, month: x.month, day: x.day, hour: x.hour, minute: x.minute, hourUnknown: !!x.hourUnknown, calendar: x.calendar, leap: !!x.leap, gender: x.gender, lon: x.lon, tz: x.tz }; });
+    post({ a: 'group', includeMe: GS.me, people: people }).then(function (d) {
+      GS.busy = false;
+      if (d && d.quota && S.status) S.status.quota = d.quota;
+      if (d && d.ok) { GS.res = d.result; GS.editing = false; GS.more = false; track('love_compat_group_view'); }
+      else if (d && (d.status === 401 || d.status === 402)) { S.locked = d.locked && d.locked.reason || 'purchase'; }
+      else GS.err = (d && (ERR[d.error] || d.message)) || '여러 명 궁합을 보지 못했어요. 잠시 후 다시 시도해 주세요.';
+      paint(); if (!GS.editing) scrollTop();
+    }).catch(function () { GS.busy = false; GS.err = '연결이 불안정해요. 잠시 후 다시 시도해 주세요.'; paint(); });
+  }
+  var viewP = null;
+  function viewScript() {
+    if (R.LoveGroupView || !root.document) return Promise.resolve();
+    return viewP || (viewP = new Promise(function (ok) { var s = root.document.createElement('script'); s.src = VIEW_SRC; s.onload = function () { styleGroup(); ok(); paint(); }; s.onerror = function () { viewP = null; ok(); }; root.document.head.appendChild(s); }));
+  }
+  function styleGroup() { var d = root.document; if (!d || !R.LoveGroupView || d.getElementById('lg-style')) return; var s = d.createElement('style'); s.id = 'lg-style'; s.textContent = R.LoveGroupView.css(); d.head.appendChild(s); }
+  function modeSeg() { return groupOn() && !GS.adding ? '<div class="lc-seg lg-mode" role="group" aria-label="궁합 방식"><button type="button" data-lc="mode-pair" aria-pressed="' + (S.mode !== 'group') + '">두 사람</button><button type="button" data-lc="mode-group" aria-pressed="' + (S.mode === 'group') + '">여러 명</button></div>' : ''; }
+  var ROLE_OPTS = [['', '역할 없음'], ['parent', '부모'], ['child', '자녀'], ['spouse', '배우자'], ['sibling', '형제·자매'], ['grand', '조부모'], ['grandchild', '손주'], ['relative', '친척']];
+  function groupPickHtml() {
+    var fam = GS.rel === 'family', n = gCount(), q = S.status && S.status.quota, out = q && !q.unlimited && q.left <= 0, bad = n < 3 || n > 6;
+    var row = function (key, name, sub, on, me) {
+      return '<div class="lg-pick' + (on ? ' on' : '') + '"><label><input type="checkbox" ' + (me ? 'data-lc-gme' : 'data-lc-gsel="' + esc(key) + '"') + (on ? ' checked' : '') + '><b>' + esc(name) + '</b><span>' + esc(sub) + '</span></label>' +
+        (fam && on && !me ? '<select data-lc-grole="' + esc(key) + '" aria-label="' + esc(name) + ' 역할">' + ROLE_OPTS.map(function (o) { return '<option value="' + o[0] + '"' + ((GS.roles[key] || '') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>' : '') + '</div>';
+    };
+    var seg = '<div class="lc-seg" role="group" aria-label="관계">' + Object.keys(REL).map(function (k) { return '<button type="button" data-lc-gset="' + k + '" aria-pressed="' + (GS.rel === k) + '">' + REL[k] + '</button>'; }).join('') + '</div>';
+    return '<div class="lc-intro"><p>가족·직장·친구처럼 <b>3~6명</b>이 함께 있을 때 누가 누구와 잘 맞물리고, 누가 무리를 이어 주는지, 언제 함께 움직이면 좋은지 보여 드려요. 한 번 보면 오늘 남은 횟수가 <b>1회</b>만 줄어요.</p>' + quotaLine() + '</div>' +
+      '<div class="lc-form"><div class="lc-f"><span>어떤 사이인가요?</span>' + seg + '</div>' +
+      '<div>' + row('me', S.name || '나', '내 사주', GS.me, true) + S.list.map(function (x) { var k = keyOf(x); return row(k, x.name || (x.year + '년생'), x.year + '.' + x.month + '.' + x.day + ' · ' + (x.gender === 'M' ? '남' : '여'), GS.sel.indexOf(k) >= 0, false); }).join('') + '</div>' +
+      (S.list.length ? '' : '<p class="lc-muted">아직 저장된 사람이 없어요. 아래 ‘새 사람 입력’으로 함께 볼 사람을 넣어 주세요.</p>') +
+      '<div class="lc-go"><button type="button" class="btn lc-btn" data-lc="gadd">+ 새 사람 입력</button><span class="lc-muted">최근 본 사람은 8명까지 저장돼요' + (fam ? ' · 가족이면 부모·자녀 같은 역할을 고를 수 있어요(표시용)' : '') + '</span></div>' +
+      '<div class="lc-go"><button type="button" class="btn lc-btn lc-primary" data-lc="ggo"' + (GS.busy || out || bad ? ' disabled' : '') + '>' + (GS.busy ? '여러 사주를 맞대어 보는 중…' : '여러 명 궁합 보기') + '</button><span class="' + (bad ? 'lc-err' : 'lc-muted') + '">' + n + '명 골랐어요 · 3~6명</span>' + (GS.err || out ? '<span class="lc-err" role="alert">' + esc(GS.err || ERR['daily-limit']) + '</span>' : '') + '</div></div>' +
+      (GS.res ? '<p><button type="button" class="btn lc-btn" data-lc="gback">지난 결과 다시 보기</button></p>' : '');
+  }
+  function groupHtml() {
+    if (GS.res && !GS.editing) {
+      if (!R.LoveGroupView) { viewScript(); return '<p class="lc-muted">결과 화면을 불러오는 중…</p>'; }
+      try { return R.LoveGroupView.html(GS.res, GS.rel, { quota: quotaLine(), moreArrows: GS.more }); } catch (e) { return '<p class="lc-err">결과를 그리지 못했어요. 다시 시도해 주세요.</p>'; }
+    }
+    return groupPickHtml();
+  }
   function submit() {
+    if (GS.adding) { addToGroup(); return; }
     if (S.busy) return;
     var i = S.inp; S.err = ''; S.busy = true; paint();
     post({ a: 'run', partner: i, partnerName: i.name }).then(function (d) {
@@ -269,8 +331,10 @@
   function rootHtml() {
     if (!S.me) return '<p class="lc-muted">사주 정보를 불러오는 중…</p>';
     if (S.locked) return lockHtml();
-    if (S.res && !S.editing) return resultHtml();
-    return '<div class="lc-intro"><p>상대의 생년월일을 넣으면 만세력 궁합과 같은 기준으로 <b>점수·한눈에 정리·서로에게 주는 것·간지 관계·숨은 인연(암합)</b>까지 바로 보여 드려요. 인연운 심화를 보유한 동안 상대를 바꿔 가며 볼 수 있어요.</p>' + quotaLine() + '</div>' + formHtml() + (S.res ? '<p><button type="button" class="btn lc-btn" data-lc="back">지난 결과 다시 보기</button></p>' : '');
+    if (groupOn() && S.mode === 'group' && !GS.adding) return modeSeg() + groupHtml();
+    if (GS.adding) return '<div class="lc-intro"><p><b>여러 명 궁합에 넣을 사람</b>을 입력해 주세요. 저장만 하고 횟수는 쓰지 않아요.</p></div>' + formHtml();
+    if (S.res && !S.editing) return modeSeg() + resultHtml();
+    return modeSeg() + '<div class="lc-intro"><p>상대의 생년월일을 넣으면 만세력 궁합과 같은 기준으로 <b>점수·한눈에 정리·서로에게 주는 것·간지 관계·숨은 인연(암합)</b>까지 바로 보여 드려요. 인연운 심화를 보유한 동안 상대를 바꿔 가며 볼 수 있어요.</p>' + quotaLine() + '</div>' + formHtml() + (S.res ? '<p><button type="button" class="btn lc-btn" data-lc="back">지난 결과 다시 보기</button></p>' : '');
   }
   function paint() {
     if (!root.document) return;
@@ -293,17 +357,32 @@
     if (root.document.body) start(); else root.addEventListener('DOMContentLoaded', start);
     root.document.addEventListener('click', onClick, true);
     root.document.addEventListener('submit', function (e) { var f = e.target && e.target.closest && e.target.closest('[data-lc-form]'); if (!f) return; e.preventDefault(); readForm(f); submit(); }, true);
-    root.document.addEventListener('change', function (e) { var f = e.target && e.target.closest && e.target.closest('[data-lc-form]'); if (f) readForm(f); }, true);
+    root.document.addEventListener('change', function (e) {
+      var t = e.target; if (!t || !t.closest || !t.closest('[data-lc-root]')) return;
+      if (t.hasAttribute('data-lc-gme')) { GS.me = !!t.checked; GS.err = ''; gSave(); paint(); return; }
+      if (t.hasAttribute('data-lc-gsel')) { var k = t.getAttribute('data-lc-gsel'); GS.sel = GS.sel.filter(function (x) { return x !== k; }); if (t.checked) GS.sel.push(k); GS.err = ''; gSave(); paint(); return; }
+      if (t.hasAttribute('data-lc-grole')) { GS.roles[t.getAttribute('data-lc-grole')] = t.value; gSave(); return; }
+      var f = t.closest('[data-lc-form]'); if (f) readForm(f);
+    }, true);
   }
   function onClick(e) {
-    var t = e.target && e.target.closest && e.target.closest('[data-lc],[data-lc-set],[data-lc-rel],[data-lc-pick],[data-lc-del]'); if (!t || !t.closest('[data-lc-root]')) return;
+    var t = e.target && e.target.closest && e.target.closest('[data-lc],[data-lc-set],[data-lc-rel],[data-lc-pick],[data-lc-del],[data-lc-gset],[data-lc-grel]'); if (!t || !t.closest('[data-lc-root]')) return;
     e.preventDefault(); e.stopPropagation();
     var f = t.closest('[data-lc-root]').querySelector('[data-lc-form]'); if (f) readForm(f);
     if (t.hasAttribute('data-lc-set')) { var kv = t.getAttribute('data-lc-set').split(':'); S.inp[kv[0]] = kv[1]; if (kv[0] === 'calendar' && kv[1] !== 'lunar') S.inp.leap = false; paint(); return; }
     if (t.hasAttribute('data-lc-rel')) { S.rel = t.getAttribute('data-lc-rel'); if (S.inp) S.inp.rel = S.rel; paint(); return; }
     if (t.hasAttribute('data-lc-pick')) { var p = S.list[+t.getAttribute('data-lc-pick')]; if (p) { S.inp = Object.assign(defaults(), p); S.err = ''; } paint(); return; }
     if (t.hasAttribute('data-lc-del')) { S.list.splice(+t.getAttribute('data-lc-del'), 1); saveList(S.list); paint(); return; }
+    if (t.hasAttribute('data-lc-gset')) { GS.rel = t.getAttribute('data-lc-gset'); gSave(); paint(); return; }
+    if (t.hasAttribute('data-lc-grel')) { GS.rel = t.getAttribute('data-lc-grel'); gSave(); paint(); return; }   // 결과 화면: 관계 네 가지는 이미 계산돼 있어 횟수를 다시 쓰지 않는다
     var a = t.getAttribute('data-lc');
+    if (a === 'mode-pair' || a === 'mode-group') { S.mode = a === 'mode-group' ? 'group' : 'pair'; if (S.mode === 'group') viewScript(); paint(); return; }
+    if (a === 'gadd') { GS.adding = true; S.inp = defaults(); S.err = ''; paint(); scrollTop(); return; }
+    if (a === 'gcancel') { GS.adding = false; S.err = ''; S.mode = 'group'; paint(); return; }
+    if (a === 'ggo') { gSubmit(); return; }
+    if (a === 'gedit') { GS.editing = true; GS.err = ''; paint(); scrollTop(); return; }
+    if (a === 'gback') { GS.editing = false; paint(); scrollTop(); return; }
+    if (a === 'garrows') { GS.more = !GS.more; paint(); return; }
     if (a === 'edit') { S.editing = true; S.err = ''; paint(); scrollTop(); }
     else if (a === 'back') { S.editing = false; paint(); scrollTop(); }
     else if (a === 'buy' && R.Paywall && S.chapter) { try { R.Paywall.show(S.chapter, { worldName: '인연운 심화' }); } catch (err) { } }
