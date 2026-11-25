@@ -27,7 +27,9 @@
     seasonOK: ['왕', '상'],        // 득령(월령에서 왕·상)
     plusKeys: ['season', 'overlap', 'top', 'deepRoot'],   // 보탬 조건(같은 무게로 개수만 센다)
     intactFirst: true,            // 합·충으로 묶이지 않은 후보를 먼저
-    hourKeepAll: true,            // 시간 모름: 12시진 모두에서 첫 무기가 남아야 잠정 확정
+    hourKeepAll: true,            // (strict 모드에서만) 12시진 모두에서 첫 무기가 남아야 잠정 확정
+    hourMode: 'provisional',      // 시간 모름(2026-11-26 사용자 결정): 'provisional' = 년·월·일 세 기둥으로 판정하고 12시진 유지 비율을 신뢰도·안내에 반영 / 'strict' = 예전처럼 다 유지돼야만 확정
+    hourKeepMid: 9,               // provisional: 12시진 중 이 수 이상 유지되면 신뢰도 '보통', 미만이면 '약함'(75%)
     hourVariants: [[0, 40], [2, 0], [4, 0], [6, 0], [8, 0], [10, 0], [12, 0], [14, 0], [16, 0], [18, 0], [20, 0], [22, 0]],   // 시진 12개(한국 시각 → 보정 후 각 시진 안쪽)
   };
   var mod = function (a, n) { return ((a % n) + n) % n; };
@@ -155,8 +157,9 @@
   }
 
   // 신뢰도 = 내부 판정 근거가 얼마나 한결같이 갖춰졌는가(명리 정확도·성공 가능성이 아니다)
-  function confidenceOf(w, hourKnown, status) {
+  function confidenceOf(w, hourKnown, status, hc, O) {
     if (status === 'undetermined' || status === 'complex') return 'low';
+    if (!hourKnown && hc && hc.keepFirst != null && hc.keepFirst < (O ? O.hourKeepMid : 9)) return 'low';   // 시간 모름: 시진에 따라 자주 바뀌면 약함
     if (!w.cond.intact || w.plusN === 0) return 'low';
     if (w.plusN >= 2 && hourKnown) return 'high';
     return 'mid';
@@ -169,13 +172,15 @@
     var j = judge(M, ch, O), hourKnown = ch.hourKnown !== false && !!ch.pillars.hour, hc = null, status = j.status;
     if (!hourKnown) {
       hc = hourCheck(M, ch, j, O);
-      // 3기둥 판정의 첫 무기가 12시진 모두에서 무기로 남으면 '잠정 확정', 하나라도 빠지거나 3기둥에 무기가 없으면 '미확정'(근거 부족)
-      var need = O.hourKeepAll ? (hc ? hc.variants : 99) : Math.ceil((hc ? hc.variants : 12) * 0.75);
-      if (!hc || status === 'none' || status === 'complex' || hc.keepFirst < need) status = 'undetermined';
+      if (O.hourMode === 'strict') {   // 예전 규칙(비교용): 3기둥 판정의 첫 무기가 12시진 모두에서 남아야 확정, 아니면 미확정
+        var need = O.hourKeepAll ? (hc ? hc.variants : 99) : Math.ceil((hc ? hc.variants : 12) * 0.75);
+        if (!hc || status === 'none' || status === 'complex' || hc.keepFirst < need) status = 'undetermined';
+      }
+      // provisional(기본): 시주 근거 없이 세 기둥으로 판정한 결과를 그대로 쓰고(잠정), 12시진 유지 비율은 신뢰도·안내 문장에만 반영
     }
     var u = ch.unified || {}, pct = ch.weights.pct, top = j.order[0], roles = u.roles || {};
     var wEls = j.weapons.map(function (w) { return w.el; });
-    j.weapons.forEach(function (w) { w.role = String(roles[w.el] || '').replace(/^조건부 /, ''); w.confidence = confidenceOf(w, hourKnown, status); });
+    j.weapons.forEach(function (w) { w.role = String(roles[w.el] || '').replace(/^조건부 /, ''); w.confidence = confidenceOf(w, hourKnown, status, hc, O); });
     j.complex.forEach(function (w) { w.role = String(roles[w.el] || '').replace(/^조건부 /, ''); w.confidence = 'low'; });
     var P = ch.pillars, dEl = M.stemEl(P.day.s), dbg = mod(M.stemEl(M.mainHidden(P.day.b)) - dEl, 5);
     var res = {
@@ -190,7 +195,7 @@
       // 일주 간여지동(지시문 2-2 C): 일간과 일지가 같은 오행인지, 일지 정기가 일간을 돕는지(비겁·인성)
       dayPillar: { gz: M.STEM[P.day.s] + M.BR[P.day.b], ganyeo: M.BR_EL[P.day.b] === dEl, branchTG: M.tenGod(P.day.s, M.mainHidden(P.day.b)), helps: dbg === 0 || dbg === 4 },
       jong: u.mode === 'jong',
-      hourCheck: hc,
+      hourCheck: hc, provisional: !hourKnown && status !== 'undetermined', hourKeep: hc && hc.keepFirst != null ? { keep: hc.keepFirst, of: hc.variants } : null,
       exceptions: [],
     };
     var weak = /신약|태약|극약/.test(res.strength.zone);

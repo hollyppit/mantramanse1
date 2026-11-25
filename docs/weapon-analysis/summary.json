@@ -141,9 +141,9 @@
  },
  "nohour": {
   "status": {
-   "undetermined": 191,
-   "single": 104,
-   "dual": 5
+   "single": 202,
+   "dual": 60,
+   "none": 38
   },
   "keepFirst": {
    "2": 1,
@@ -545,26 +545,6 @@
     "strongest": "금 68.4% (주무기 아님: shaky)",
     "yong": "금",
     "strength": "극왕 88.6%"
-   }
-  ],
-  "status-undetermined": [
-   {
-    "chart": "1950-1-1 시간 모름",
-    "cand": "토",
-    "keepFirst": "8/12",
-    "withHour": "single:토"
-   },
-   {
-    "chart": "1971-4-6 시간 모름",
-    "cand": "금·수",
-    "keepFirst": "10/12",
-    "withHour": "dual:수·금"
-   },
-   {
-    "chart": "1985-2-28 시간 모름",
-    "cand": "토·목",
-    "keepFirst": "10/12",
-    "withHour": "dual:토·목"
    }
   ]
  }

@@ -20307,7 +20307,7 @@
  "nohour": [
   {
    "i": 0,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "single:토",
    "keepFirst": 8
@@ -20328,7 +20328,7 @@
   },
   {
    "i": 3,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "금·수",
    "withHour": "dual:수·금",
    "keepFirst": 10
@@ -20342,14 +20342,14 @@
   },
   {
    "i": 5,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "토·목",
    "withHour": "dual:토·목",
    "keepFirst": 10
   },
   {
    "i": 6,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "화·수",
    "withHour": "single:금",
    "keepFirst": 8
@@ -20363,7 +20363,7 @@
   },
   {
    "i": 8,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:수",
    "keepFirst": null
@@ -20377,7 +20377,7 @@
   },
   {
    "i": 10,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "single:토",
    "keepFirst": 6
@@ -20412,7 +20412,7 @@
   },
   {
    "i": 15,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "dual:목·금",
    "keepFirst": null
@@ -20426,7 +20426,7 @@
   },
   {
    "i": 17,
-   "status": "undetermined",
+   "status": "single",
    "cand": "화",
    "withHour": "single:수",
    "keepFirst": 7
@@ -20440,7 +20440,7 @@
   },
   {
    "i": 19,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:목",
    "keepFirst": 10
@@ -20454,21 +20454,21 @@
   },
   {
    "i": 21,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:토",
    "keepFirst": null
   },
   {
    "i": 22,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "single:목",
    "keepFirst": 11
   },
   {
    "i": 23,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:금",
    "keepFirst": 8
@@ -20482,14 +20482,14 @@
   },
   {
    "i": 25,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:수",
    "keepFirst": 10
   },
   {
    "i": 26,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:토",
    "keepFirst": 6
@@ -20503,14 +20503,14 @@
   },
   {
    "i": 28,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "금·화",
    "withHour": "dual:금·화",
    "keepFirst": 11
   },
   {
    "i": 29,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "목·토",
    "withHour": "dual:목·화",
    "keepFirst": 10
@@ -20524,35 +20524,35 @@
   },
   {
    "i": 31,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "수·금",
    "withHour": "dual:수·금",
    "keepFirst": 11
   },
   {
    "i": 32,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "dual:수·토",
    "keepFirst": 9
   },
   {
    "i": 33,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "토·금",
    "withHour": "single:토",
    "keepFirst": 11
   },
   {
    "i": 34,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "single:토",
    "keepFirst": 8
   },
   {
    "i": 35,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "dual:금·목",
    "keepFirst": 10
@@ -20580,7 +20580,7 @@
   },
   {
    "i": 39,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:수",
    "keepFirst": 10
@@ -20594,7 +20594,7 @@
   },
   {
    "i": 41,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "dual:금·수",
    "keepFirst": 10
@@ -20608,28 +20608,28 @@
   },
   {
    "i": 43,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "none:",
    "keepFirst": null
   },
   {
    "i": 44,
-   "status": "undetermined",
+   "status": "single",
    "cand": "화",
    "withHour": "single:화",
    "keepFirst": 8
   },
   {
    "i": 45,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "화·금",
    "withHour": "single:토",
    "keepFirst": 7
   },
   {
    "i": 46,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:수",
    "keepFirst": null
@@ -20650,21 +20650,21 @@
   },
   {
    "i": 49,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "dual:토·수",
    "keepFirst": 11
   },
   {
    "i": 50,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:목",
    "keepFirst": null
   },
   {
    "i": 51,
-   "status": "undetermined",
+   "status": "single",
    "cand": "화",
    "withHour": "single:토",
    "keepFirst": 4
@@ -20678,7 +20678,7 @@
   },
   {
    "i": 53,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:금",
    "keepFirst": 8
@@ -20692,28 +20692,28 @@
   },
   {
    "i": 55,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:금",
    "keepFirst": null
   },
   {
    "i": 56,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "single:수",
    "keepFirst": 4
   },
   {
    "i": 57,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "single:목",
    "keepFirst": 11
   },
   {
    "i": 58,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "none:",
    "keepFirst": null
@@ -20727,14 +20727,14 @@
   },
   {
    "i": 60,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "single:목",
    "keepFirst": 3
   },
   {
    "i": 61,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "화·수",
    "withHour": "single:수",
    "keepFirst": 7
@@ -20755,7 +20755,7 @@
   },
   {
    "i": 64,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:토",
    "keepFirst": 3
@@ -20769,21 +20769,21 @@
   },
   {
    "i": 66,
-   "status": "undetermined",
+   "status": "single",
    "cand": "화",
    "withHour": "single:화",
    "keepFirst": 10
   },
   {
    "i": 67,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:수",
    "keepFirst": null
   },
   {
    "i": 68,
-   "status": "undetermined",
+   "status": "single",
    "cand": "화",
    "withHour": "single:수",
    "keepFirst": 11
@@ -20797,14 +20797,14 @@
   },
   {
    "i": 70,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "dual:토·금",
    "keepFirst": 6
   },
   {
    "i": 71,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "토·수",
    "withHour": "dual:토·수",
    "keepFirst": 11
@@ -20825,7 +20825,7 @@
   },
   {
    "i": 74,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "dual:수·목",
    "keepFirst": 11
@@ -20839,28 +20839,28 @@
   },
   {
    "i": 76,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "dual:화·토",
    "keepFirst": 11
   },
   {
    "i": 77,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "목·화",
    "withHour": "dual:목·화",
    "keepFirst": 11
   },
   {
    "i": 78,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:금",
    "keepFirst": null
   },
   {
    "i": 79,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:수",
    "keepFirst": 10
@@ -20874,28 +20874,28 @@
   },
   {
    "i": 81,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "dual:금·토",
    "keepFirst": 11
   },
   {
    "i": 82,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "목·화",
    "withHour": "single:목",
    "keepFirst": 9
   },
   {
    "i": 83,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:금",
    "keepFirst": 9
   },
   {
    "i": 84,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:수",
    "keepFirst": 11
@@ -20916,7 +20916,7 @@
   },
   {
    "i": 87,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "토·목",
    "withHour": "single:토",
    "keepFirst": 10
@@ -20930,7 +20930,7 @@
   },
   {
    "i": 89,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "목·토",
    "withHour": "single:목",
    "keepFirst": 10
@@ -20958,7 +20958,7 @@
   },
   {
    "i": 93,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "토·화",
    "withHour": "dual:토·화",
    "keepFirst": 11
@@ -20979,7 +20979,7 @@
   },
   {
    "i": 96,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:금",
    "keepFirst": 11
@@ -21000,63 +21000,63 @@
   },
   {
    "i": 99,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:토",
    "keepFirst": 5
   },
   {
    "i": 100,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:화",
    "keepFirst": 9
   },
   {
    "i": 101,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "화·수",
    "withHour": "single:토",
    "keepFirst": 8
   },
   {
    "i": 102,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:금",
    "keepFirst": null
   },
   {
    "i": 103,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:금",
    "keepFirst": 5
   },
   {
    "i": 104,
-   "status": "undetermined",
+   "status": "single",
    "cand": "화",
    "withHour": "dual:화·수",
    "keepFirst": 9
   },
   {
    "i": 105,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:토",
    "keepFirst": 10
   },
   {
    "i": 106,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "none:",
    "keepFirst": 6
   },
   {
    "i": 107,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "none:",
    "keepFirst": null
@@ -21077,14 +21077,14 @@
   },
   {
    "i": 110,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "화·금",
    "withHour": "dual:화·금",
    "keepFirst": 10
   },
   {
    "i": 111,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:화",
    "keepFirst": null
@@ -21098,7 +21098,7 @@
   },
   {
    "i": 113,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:금",
    "keepFirst": null
@@ -21126,7 +21126,7 @@
   },
   {
    "i": 117,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "토·목",
    "withHour": "dual:토·목",
    "keepFirst": 6
@@ -21140,42 +21140,42 @@
   },
   {
    "i": 119,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "금·토",
    "withHour": "dual:금·토",
    "keepFirst": 10
   },
   {
    "i": 120,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:목",
    "keepFirst": null
   },
   {
    "i": 121,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "화·수",
    "withHour": "dual:화·수",
    "keepFirst": 8
   },
   {
    "i": 122,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "토·목",
    "withHour": "dual:목·토",
    "keepFirst": 11
   },
   {
    "i": 123,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:토",
    "keepFirst": 2
   },
   {
    "i": 124,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:금",
    "keepFirst": 11
@@ -21189,14 +21189,14 @@
   },
   {
    "i": 126,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "화·수",
    "withHour": "single:토",
    "keepFirst": 10
   },
   {
    "i": 127,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "none:",
    "keepFirst": null
@@ -21210,14 +21210,14 @@
   },
   {
    "i": 129,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:수",
    "keepFirst": 11
   },
   {
    "i": 130,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "single:토",
    "keepFirst": 6
@@ -21238,7 +21238,7 @@
   },
   {
    "i": 133,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "single:화",
    "keepFirst": 5
@@ -21266,56 +21266,56 @@
   },
   {
    "i": 137,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "화·목",
    "withHour": "dual:화·목",
    "keepFirst": 10
   },
   {
    "i": 138,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "dual:금·목",
    "keepFirst": 4
   },
   {
    "i": 139,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "토·목",
    "withHour": "dual:목·토",
    "keepFirst": 11
   },
   {
    "i": 140,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "none:",
    "keepFirst": 6
   },
   {
    "i": 141,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "수·금",
    "withHour": "dual:토·금",
    "keepFirst": 9
   },
   {
    "i": 142,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "목·화",
    "withHour": "dual:목·화",
    "keepFirst": 10
   },
   {
    "i": 143,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:토",
    "keepFirst": 11
   },
   {
    "i": 144,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "수·화",
    "withHour": "dual:수·토",
    "keepFirst": 9
@@ -21329,7 +21329,7 @@
   },
   {
    "i": 146,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "수·금",
    "withHour": "single:수",
    "keepFirst": 11
@@ -21350,14 +21350,14 @@
   },
   {
    "i": 149,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "dual:목·수",
    "keepFirst": 9
   },
   {
    "i": 150,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:수",
    "keepFirst": null
@@ -21378,35 +21378,35 @@
   },
   {
    "i": 153,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "none:",
    "keepFirst": null
   },
   {
    "i": 154,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "목·수",
    "withHour": "dual:목·수",
    "keepFirst": 8
   },
   {
    "i": 155,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:금",
    "keepFirst": 8
   },
   {
    "i": 156,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:금",
    "keepFirst": 7
   },
   {
    "i": 157,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:금",
    "keepFirst": 8
@@ -21420,21 +21420,21 @@
   },
   {
    "i": 159,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "dual:화·수",
    "keepFirst": 7
   },
   {
    "i": 160,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:수",
    "keepFirst": 9
   },
   {
    "i": 161,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "화·수",
    "withHour": "single:토",
    "keepFirst": 9
@@ -21455,21 +21455,21 @@
   },
   {
    "i": 164,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "화·토",
    "withHour": "single:토",
    "keepFirst": 11
   },
   {
    "i": 165,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "금·화",
    "withHour": "single:화",
    "keepFirst": 7
   },
   {
    "i": 166,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:금",
    "keepFirst": null
@@ -21497,28 +21497,28 @@
   },
   {
    "i": 170,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "목·화",
    "withHour": "single:화",
    "keepFirst": 10
   },
   {
    "i": 171,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "수·목",
    "withHour": "dual:수·목",
    "keepFirst": 10
   },
   {
    "i": 172,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:수",
    "keepFirst": 11
   },
   {
    "i": 173,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "none:",
    "keepFirst": null
@@ -21532,21 +21532,21 @@
   },
   {
    "i": 175,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "single:토",
    "keepFirst": 9
   },
   {
    "i": 176,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "single:토",
    "keepFirst": 5
   },
   {
    "i": 177,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "single:토",
    "keepFirst": 9
@@ -21560,7 +21560,7 @@
   },
   {
    "i": 179,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "금·수",
    "withHour": "dual:금·수",
    "keepFirst": 10
@@ -21574,21 +21574,21 @@
   },
   {
    "i": 181,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:목",
    "keepFirst": null
   },
   {
    "i": 182,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "single:목",
    "keepFirst": 6
   },
   {
    "i": 183,
-   "status": "undetermined",
+   "status": "single",
    "cand": "화",
    "withHour": "single:화",
    "keepFirst": 6
@@ -21602,7 +21602,7 @@
   },
   {
    "i": 185,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "dual:수·토",
    "keepFirst": null
@@ -21616,28 +21616,28 @@
   },
   {
    "i": 187,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "dual:목·토",
    "keepFirst": null
   },
   {
    "i": 188,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "dual:토·수",
    "keepFirst": 6
   },
   {
    "i": 189,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "금·수",
    "withHour": "single:금",
    "keepFirst": 10
   },
   {
    "i": 190,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:화",
    "keepFirst": null
@@ -21651,7 +21651,7 @@
   },
   {
    "i": 192,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "목·수",
    "withHour": "dual:목·수",
    "keepFirst": 10
@@ -21665,21 +21665,21 @@
   },
   {
    "i": 194,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "single:토",
    "keepFirst": 9
   },
   {
    "i": 195,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "single:토",
    "keepFirst": 10
   },
   {
    "i": 196,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "수·토",
    "withHour": "single:토",
    "keepFirst": 9
@@ -21693,28 +21693,28 @@
   },
   {
    "i": 198,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:토",
    "keepFirst": null
   },
   {
    "i": 199,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "수·토",
    "withHour": "dual:수·토",
    "keepFirst": 9
   },
   {
    "i": 200,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "single:수",
    "keepFirst": 9
   },
   {
    "i": 201,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:금",
    "keepFirst": 11
@@ -21728,28 +21728,28 @@
   },
   {
    "i": 203,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:수",
    "keepFirst": null
   },
   {
    "i": 204,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:토",
    "keepFirst": 8
   },
   {
    "i": 205,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:토",
    "keepFirst": null
   },
   {
    "i": 206,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:금",
    "keepFirst": 10
@@ -21763,7 +21763,7 @@
   },
   {
    "i": 208,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "none:",
    "keepFirst": null
@@ -21777,7 +21777,7 @@
   },
   {
    "i": 210,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:금",
    "keepFirst": 10
@@ -21791,7 +21791,7 @@
   },
   {
    "i": 212,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "single:토",
    "keepFirst": 6
@@ -21812,56 +21812,56 @@
   },
   {
    "i": 215,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:토",
    "keepFirst": 8
   },
   {
    "i": 216,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "금·화",
    "withHour": "single:금",
    "keepFirst": 4
   },
   {
    "i": 217,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:수",
    "keepFirst": 10
   },
   {
    "i": 218,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "single:목",
    "keepFirst": 8
   },
   {
    "i": 219,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "목·토",
    "withHour": "dual:목·토",
    "keepFirst": 10
   },
   {
    "i": 220,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "dual:금·목",
    "keepFirst": 11
   },
   {
    "i": 221,
-   "status": "undetermined",
+   "status": "single",
    "cand": "화",
    "withHour": "single:화",
    "keepFirst": 10
   },
   {
    "i": 222,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:토",
    "keepFirst": null
@@ -21875,21 +21875,21 @@
   },
   {
    "i": 224,
-   "status": "undetermined",
+   "status": "single",
    "cand": "화",
    "withHour": "dual:수·토",
    "keepFirst": 5
   },
   {
    "i": 225,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "none:",
    "keepFirst": null
   },
   {
    "i": 226,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "dual:목·수",
    "keepFirst": 11
@@ -21917,28 +21917,28 @@
   },
   {
    "i": 230,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "화·목",
    "withHour": "single:수",
    "keepFirst": 5
   },
   {
    "i": 231,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "수·목",
    "withHour": "dual:수·목",
    "keepFirst": 11
   },
   {
    "i": 232,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "수·토",
    "withHour": "single:토",
    "keepFirst": 8
   },
   {
    "i": 233,
-   "status": "undetermined",
+   "status": "single",
    "cand": "화",
    "withHour": "single:금",
    "keepFirst": 7
@@ -21952,7 +21952,7 @@
   },
   {
    "i": 235,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "single:토",
    "keepFirst": 7
@@ -21966,28 +21966,28 @@
   },
   {
    "i": 237,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "토·수",
    "withHour": "single:금",
    "keepFirst": 7
   },
   {
    "i": 238,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "화·금",
    "withHour": "dual:금·화",
    "keepFirst": 6
   },
   {
    "i": 239,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:수",
    "keepFirst": 10
   },
   {
    "i": 240,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "토·화",
    "withHour": "single:토",
    "keepFirst": 11
@@ -22001,14 +22001,14 @@
   },
   {
    "i": 242,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:목",
    "keepFirst": null
   },
   {
    "i": 243,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:목",
    "keepFirst": null
@@ -22022,7 +22022,7 @@
   },
   {
    "i": 245,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "single:토",
    "keepFirst": 6
@@ -22050,7 +22050,7 @@
   },
   {
    "i": 249,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "dual:토·수",
    "keepFirst": 11
@@ -22064,56 +22064,56 @@
   },
   {
    "i": 251,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "토·수",
    "withHour": "single:토",
    "keepFirst": 10
   },
   {
    "i": 252,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:화",
    "keepFirst": 9
   },
   {
    "i": 253,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:목",
    "keepFirst": null
   },
   {
    "i": 254,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:토",
    "keepFirst": 6
   },
   {
    "i": 255,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "dual:목·금",
    "keepFirst": 8
   },
   {
    "i": 256,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "single:수",
    "keepFirst": 8
   },
   {
    "i": 257,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "토·화",
    "withHour": "single:토",
    "keepFirst": 9
   },
   {
    "i": 258,
-   "status": "undetermined",
+   "status": "single",
    "cand": "화",
    "withHour": "dual:화·목",
    "keepFirst": 10
@@ -22127,7 +22127,7 @@
   },
   {
    "i": 260,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "none:",
    "keepFirst": 5
@@ -22141,21 +22141,21 @@
   },
   {
    "i": 262,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "none:",
    "keepFirst": null
   },
   {
    "i": 263,
-   "status": "undetermined",
+   "status": "single",
    "cand": "화",
    "withHour": "single:화",
    "keepFirst": 11
   },
   {
    "i": 264,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:수",
    "keepFirst": 10
@@ -22176,14 +22176,14 @@
   },
   {
    "i": 267,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "토·목",
    "withHour": "single:토",
    "keepFirst": 11
   },
   {
    "i": 268,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "dual:토·화",
    "keepFirst": null
@@ -22197,7 +22197,7 @@
   },
   {
    "i": 270,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:수",
    "keepFirst": null
@@ -22211,14 +22211,14 @@
   },
   {
    "i": 272,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "dual:토·목",
    "keepFirst": 9
   },
   {
    "i": 273,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:금",
    "keepFirst": 11
@@ -22232,21 +22232,21 @@
   },
   {
    "i": 275,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "single:토",
    "keepFirst": null
   },
   {
    "i": 276,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "dual:금·수",
    "keepFirst": 9
   },
   {
    "i": 277,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "single:목",
    "keepFirst": 9
@@ -22260,7 +22260,7 @@
   },
   {
    "i": 279,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "토·화",
    "withHour": "dual:토·화",
    "keepFirst": 11
@@ -22274,7 +22274,7 @@
   },
   {
    "i": 281,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:수",
    "keepFirst": 8
@@ -22288,21 +22288,21 @@
   },
   {
    "i": 283,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "single:토",
    "keepFirst": 6
   },
   {
    "i": 284,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "화·토",
    "withHour": "dual:화·토",
    "keepFirst": 11
   },
   {
    "i": 285,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "목·화",
    "withHour": "dual:목·화",
    "keepFirst": 10
@@ -22316,7 +22316,7 @@
   },
   {
    "i": 287,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "토·수",
    "withHour": "single:토",
    "keepFirst": 11
@@ -22330,14 +22330,14 @@
   },
   {
    "i": 289,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "dual:토·수",
    "keepFirst": 8
   },
   {
    "i": 290,
-   "status": "undetermined",
+   "status": "none",
    "cand": "",
    "withHour": "none:",
    "keepFirst": null
@@ -22351,21 +22351,21 @@
   },
   {
    "i": 292,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:수",
    "keepFirst": 11
   },
   {
    "i": 293,
-   "status": "undetermined",
+   "status": "single",
    "cand": "토",
    "withHour": "dual:토·목",
    "keepFirst": 6
   },
   {
    "i": 294,
-   "status": "undetermined",
+   "status": "single",
    "cand": "수",
    "withHour": "single:수",
    "keepFirst": 9
@@ -22379,21 +22379,21 @@
   },
   {
    "i": 296,
-   "status": "undetermined",
+   "status": "dual",
    "cand": "화·목",
    "withHour": "single:목",
    "keepFirst": 8
   },
   {
    "i": 297,
-   "status": "undetermined",
+   "status": "single",
    "cand": "목",
    "withHour": "single:목",
    "keepFirst": 11
   },
   {
    "i": 298,
-   "status": "undetermined",
+   "status": "single",
    "cand": "금",
    "withHour": "single:토",
    "keepFirst": 8

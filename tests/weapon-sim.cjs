@@ -96,7 +96,10 @@ dev.forEach((inp, i) => T('nohour#' + i, () => {
   const q = { ...inp, hour: null, minute: null }; const { ch, A } = check(q, i, 'nohour');
   assert.equal(A.hourKnown, false); assert.ok(A.exceptions.includes('hour-unknown'));
   assert.ok(A.hourCheck && A.hourCheck.variants === 12, '시진 12개 점검');
-  if (A.status !== 'undetermined') assert.equal(A.hourCheck.keepFirst, 12, '잠정 확정은 12시진 모두 유지일 때만');
+  // 2026-11-26: 시간 모름도 세 기둥으로 판정(잠정) — 미확정으로 빼지 않고, 12시진 유지 수는 신뢰도·안내에만
+  assert.notEqual(A.status, 'undetermined', '시간 모름도 판정'); assert.ok(A.provisional, '잠정 판정 표시');
+  if (A.weapons.length) { assert.ok(A.hourKeep && A.hourKeep.of === 12, '유지 수'); if (A.hourKeep.keep < 9) assert.equal(A.weapons[0].confidence, 'low', '자주 바뀌면 신뢰도 약함'); }
+  const st = W.analyze(M, ch, { hourMode: 'strict' }); if (st.status !== 'undetermined') assert.equal(st.hourCheck.keepFirst, 12, '예전 엄격 규칙 유지');
   inc(stat.nohour.status, A.status); inc(stat.nohour.keepFirst, A.hourCheck.keepFirst == null ? 'none' : A.hourCheck.keepFirst);
   const full = results[i]; nohour.push({ i, status: A.status, cand: A.candidates.map(e => EL_K[e]).join('·'), withHour: full ? full.status + ':' + full.weapons.map(w => w.el).join('·') : '', keepFirst: A.hourCheck.keepFirst });
   if (A.status === 'undetermined') ex('status-undetermined', { chart: `${inp.year}-${inp.month}-${inp.day} 시간 모름`, cand: A.candidates.map(e => EL_K[e]).join('·') || '—', keepFirst: A.hourCheck.keepFirst + '/12', withHour: nohour[nohour.length - 1].withHour });

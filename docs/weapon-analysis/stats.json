@@ -188,6 +188,11 @@
    "undetermined": 98,
    "single": 156,
    "dual": 46
+  },
+  "provisional": {
+   "single": 202,
+   "dual": 60,
+   "none": 38
   }
  },
  "overlap": {

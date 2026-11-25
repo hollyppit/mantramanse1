@@ -184,7 +184,8 @@
     body += '<h4>' + esc('과잉 작용 시 주의점') + '</h4><p>' + esc(wd.el[w.el].overLine + ' ' + d.self.distort[g]) + (/기신|구신/.test(w.role || '') ? esc(' 이 명식에선 주무기가 균형상 이미 많은 쪽(' + w.role + ')이라 더 주의가 필요해요.') : '') + '</p>';
     body += '<h4>' + esc('장기적인 발현 환경') + '</h4><p>' + esc(fitLine(B, w) + ' ' + d.self.grow[g]) + '</p>';   // 강약과 주무기의 관계 + 십성별 키우는 환경
     body += timingBlock(B, 'self', use, w);
-    var mi = (A.yong ? (A.yong.isWeapon ? wd.yongRel.same : /기신|구신/.test(w.role || '') ? wd.yongRel.gisin : wd.yongRel.other) + ' ' : '') + fill(d.selfFoot.conf, { c: wd.confidence[w.confidence].replace('판정 근거 ', '') });
+    var hk = A.provisional && A.hourKeep, pv = hk ? (hk.keep >= hk.of ? wd.statusNote.provisional : wd.statusNote.provisionalSome.replace('{k}', hk.keep)) + ' ' : '';   // 시간 모름: 종합풀이에만 한 번
+    var mi = pv + (A.yong ? (A.yong.isWeapon ? wd.yongRel.same : /기신|구신/.test(w.role || '') ? wd.yongRel.gisin : wd.yongRel.other) + ' ' : '') + fill(d.selfFoot.conf, { c: wd.confidence[w.confidence].replace('판정 근거 ', '') });
     return sec('나의 핵심 주무기', lead, body, mi);
   }
   function wealthBlock(B, use) {
@@ -194,10 +195,17 @@
     var lead = esc('경제활동에서 쓰는 주무기는 ') + '<b>' + esc(EL_K[w.el] + ' · ' + wd.el[w.el].title) + '</b>' + esc('이에요. ' + d.wealth.relation[g]);
     var body = '';
     if (use.power) body += '<p>' + esc(fill(d.wealth.jaeLine, { el: EL_K[jEl] + '(' + EL_H[jEl] + ')', pct: jf.pct, state: d.wealth.jaeState[st], w: EL_K[w.el] })) + '</p>';
+    // 2판(2026-11-26): 주무기 십성 × 재성 실제 세력(또는 강약) + 엔진이 성립으로 판정한 재물 구조
+    var W2 = d.wealth2, zone = B.A.strength.zone, zk = /신약|태약|극약/.test(zone) ? 'weak' : /신강|태강|극왕/.test(zone) ? 'strong' : 'even';
+    var jl = jf.pct >= 20 ? 'strong' : jf.pct < 10 ? 'weak' : null, rm = W2.relMod[g];
+    var relX = g === 2 ? rm[zk + 'Body'] : jl ? fill(rm[jl], { pct: jf.pct }) : '';
+    var pats = ((B.ch.patterns && B.ch.patterns.list) || []).filter(function (p) { return W2.pattern[p.name] && p.status !== '불성립'; }).map(function (p) { return W2.pattern[p.name]; });
+    if (relX || pats.length) body += '<p>' + esc([relX].concat(pats.slice(0, 1)).filter(Boolean).join(' ')) + '</p>';
     body += '<h4>' + esc('수익 창출 방식') + '</h4><p>' + esc(d.wealth.mode[g] + '이 이 주무기와 결이 맞아요.') + '</p>';
-    body += '<h4>' + esc('경제활동에서의 강점') + '</h4><p>' + esc(d.wealth.edge[g] + (ws[1] ? ' 보조 주무기 ' + EL_K[ws[1].el] + '(' + ws[1].groupName + ')은(는) ' + d.wealth.mode[ws[1].group].split(' — ')[0] + '를 곁가지로 열어 줘요.' : '')) + '</p>';
+    body += '<h4>' + esc('사업·직장·투자에서의 강점') + '</h4><p>' + esc(d.wealth.edge[g] + (ws[1] ? ' 보조 주무기 ' + EL_K[ws[1].el] + '(' + ws[1].groupName + ')' + (bat(ws[1].groupName) ? '은' : '는') + ' ' + d.wealth.mode[ws[1].group].split(' — ')[0] + '를 곁가지로 열어 줘요.' : '')) + '</p><ul class="dp-ul">' + W2.arena[g].map(function (t, i) { return '<li><b>' + esc(W2.arenaK[i]) + '</b> — ' + esc(t) + '</li>'; }).join('') + '</ul>';
     body += timingBlock(B, 'wealth', use, w);
-    body += '<h4>' + esc('재물활동에서 주의할 점') + '</h4><p>' + esc(d.wealth.caution[g] + ' (' + wd.el[w.el].over + ')') + '</p>';
+    body += '<h4>' + esc('재물활동에서 주의할 점') + '</h4><p>' + esc(d.wealth.caution[g] + ' ' + fill(W2.overTail, { o: wd.el[w.el].over.replace(' · ', '·') })) + '</p>';
+    body += '<h4>' + esc('장기적인 재물 전략') + '</h4><p>' + esc(W2.strat[g] + ', ' + W2.stratMod[zk]) + '</p>';
     return sec('경제활동의 주무기', lead, body, '주무기의 정체와 형성 근거는 종합풀이 “나의 타고난 강점과 약점”에서 풀었어요. 수익을 약속하는 풀이가 아니라, 돈을 다룰 때 힘이 실리는 방식을 읽은 거예요.');
   }
   function careerBlock(B, use) {
@@ -277,9 +285,10 @@
     var onL = pick(isOn), both = use.favor ? pick(function (r) { return isOn(r) && r.favor && r.favor.k === 'good'; }) : [], over = use.favor ? pick(function (r) { return isOn(r) && r.favor && r.favor.k === 'care'; }) : [], low = pick(function (r) { return r && r.best && /hit|trim/.test(r.best.level); });
     var lim = function (a) { return a.slice(0, 4).join(', ') + (a.length > 4 ? ' 외 ' + (a.length - 4) + '구간' : ''); };
     var T = g[topic] || g.self, lines = [];
-    lines.push(onL.length ? fill(T.on, { list: lim(onL), s: strong }) : fill(T.none, { s: strong }));
+    var allOver = onL.length && over.length === onL.length && !both.length;   // 켜지는 구간이 모두 조심이면 같은 목록을 두 번 말하지 않는다
+    lines.push(allOver ? fill(T.allOver, { list: lim(onL) }) : onL.length ? fill(T.on, { list: lim(onL), s: strong }) : fill(T.none, { s: strong }));
     if (both.length) lines.push(fill(T.both, { list: lim(both) }));
-    if (over.length) lines.push(fill(T.over, { list: lim(over) }));
+    if (over.length && !allOver) lines.push(fill(T.over, { list: lim(over) }));
     if (low.length) lines.push(fill(T.low, { list: lim(low) }));
     var leg = '선 = 주무기 활성도(' + EL_K[w.el] + ' · ' + WD().el[w.el].title + ')' + (use.favor ? ' · 아래 띠 = ' + favName + '(초록 좋음·회색 무난·주황 조심)' : '') + ' · 점 색 = 그 시기 천간의 오행 · 두 값은 합치지 않아요';
     return sec(fill(g.cap[scope], { t: TOPIC_K[topic] }), esc(fill(T.lead[scope] || T.lead.seun, { s: strong })), svgChart(G, use) + '<p class="dp-mi">' + esc(leg) + '</p><ul class="dp-ul">' + lines.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>', '');
@@ -314,7 +323,7 @@
   function loadDeps() {
     if (W() && WD()) return Promise.resolve();
     var DOC = root.document; if (!DOC) return Promise.resolve();
-    return ['/weapon-data.js?v=20261126-wc', '/weapon.js?v=20261126-wc'].reduce(function (p, src) { return p.then(function () { return new Promise(function (ok) { var s = DOC.createElement('script'); s.src = src; s.async = false; s.onload = ok; s.onerror = ok; DOC.head.appendChild(s); }); }); }, Promise.resolve());
+    return ['/weapon-data.js?v=20261126-hr', '/weapon.js?v=20261126-hr'].reduce(function (p, src) { return p.then(function () { return new Promise(function (ok) { var s = DOC.createElement('script'); s.src = src; s.async = false; s.onload = ok; s.onerror = ok; DOC.head.appendChild(s); }); }); }, Promise.resolve());
   }
   function ready() {
     if (readyP) return readyP;

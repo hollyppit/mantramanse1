@@ -44,8 +44,8 @@ out.sensitivity = Object.entries(VARIANTS).map(([name, o]) => {
 });
 // 시간 모름 규칙: 12/12 유지 vs 9/12(75%) 유지
 const nh = dev.map(inp => M.compute({ ...inp, hour: null, minute: null }));
-const strict = nh.map(ch => W.analyze(M, ch)), loose = nh.map(ch => W.analyze(M, ch, { hourKeepAll: false }));
-out.hourRule = { strict: {}, loose: {} }; strict.forEach(A => inc(out.hourRule.strict, A.status)); loose.forEach(A => inc(out.hourRule.loose, A.status));
+const strict = nh.map(ch => W.analyze(M, ch, { hourMode: 'strict' })), loose = nh.map(ch => W.analyze(M, ch, { hourMode: 'strict', hourKeepAll: false })), prov = nh.map(ch => W.analyze(M, ch));
+out.hourRule = { strict: {}, loose: {}, provisional: {} }; strict.forEach(A => inc(out.hourRule.strict, A.status)); loose.forEach(A => inc(out.hourRule.loose, A.status)); prov.forEach(A => inc(out.hourRule.provisional, A.status));
 
 // 병존·간여지동 실제 영향
 const ov = { weaponsWithOverlap: 0, weapons: 0, overlapOnlyPlus: 0, elementsWithByeongjon: 0, byeongjonNotCore: 0, ganyeoPillars: 0, ganyeoWeapon: 0, dayGanyeo: 0, dayGanyeoWeak: 0, dayGanyeoWeaponIsDayEl: 0 };

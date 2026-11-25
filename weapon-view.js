@@ -67,7 +67,7 @@
   }
   function extraNotes(ch, A, o, part) {
     var d = D(), E = o.E, out = [];
-    if (A.status !== 'undetermined' && A.status !== 'none' && A.status !== 'complex' && !A.hourKnown) out.push(d.statusNote.provisional);
+    if (A.provisional) { var hk = A.hourKeep; out.push(A.weapons.length && hk ? (hk.keep >= hk.of ? d.statusNote.provisional : d.statusNote.provisionalSome.replace('{k}', hk.keep)) : d.statusNote.provisionalNone); }   // 시간 모름: 세 기둥 잠정 판정 + 12시진 유지 수
     if (d.statusNote[A.status]) out.push(d.statusNote[A.status]);
     if (A.status === 'undetermined' && A.hourCheck) out.push('시진 12개를 넣어 보면 첫 후보가 주무기로 남는 경우가 ' + (A.hourCheck.keepFirst == null ? 0 : A.hourCheck.keepFirst) + '/' + A.hourCheck.variants + '이에요.');
     if (A.strongest && !A.strongest.isWeapon && A.weapons.length) out.push(d.strongestRel.replace('{top}', EL_K[A.strongest.el] + '(' + A.strongest.pct + '%)').replace('{why}', d.strongestWhy[A.strongest.why] || ''));

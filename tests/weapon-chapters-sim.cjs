@@ -65,7 +65,7 @@ function runOne(inp, i, tag) {
     stat.linkedSeun = (stat.linkedSeun || 0) + n;
     WC.TOPICS.forEach(t => { stat.topicShown[t]++; stat.avgChars[t] += txt(out[t]).length; });
   }
-  if (tag === 'nohour') { assert.ok(!/시간 |시지 |시주 /.test(WC.TOPICS.map(t => txt(out[t])).join(' ').replace(/태어난 시간|시간을 몰라/g, '')), '7 시간 모름에 시주 근거'); if (!sure) stat.nohour.selfNote++; else stat.nohour.others++; }
+  if (tag === 'nohour') { assert.ok(!/(시간|시지|시주) [一-鿿]/.test(WC.TOPICS.map(t => txt(out[t])).join(' ')), '7 시간 모름에 시주 근거(실제 시주 글자, 안내 문장 제외)'); if (!sure) stat.nohour.selfNote++; else stat.nohour.others++; }
   return { A, out };
 }
 dev.forEach((inp, i) => T('dev#' + i, () => { const { A, out } = runOne(inp, i, 'main'); stat.status[A.status] = (stat.status[A.status] || 0) + 1; results.push({ i, chart: `${inp.year}-${inp.month}-${inp.day} ${inp.hour}시 ${inp.gender}`, status: A.status, weapon: A.weapons.map(w => EL_K[w.el] + '(' + w.groupName + ')').join('·'), shown: Object.keys(out).filter(t => out[t]), chars: Object.fromEntries(Object.entries(out).map(([t, h]) => [t, txt(h).length])) }); }));
