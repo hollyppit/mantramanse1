@@ -183,6 +183,8 @@
   function luck(M, ch, opt) {
     var A = get(M, ch); if (!A) return ''; var o = opts(opt), E = o.E, d = D(), Wm = W(); opt = opt || {};
     var L = list(A);
+    var part = opt && opt.part || 'all';   // 'summary'(지금의 운 아래 요약) · 'daeun'·'seun'·'wolun'(각 그래프 카드 아래) · 'all'(예전 한 장)
+    if (!L.length && part !== 'all' && part !== 'summary') return '';
     if (!L.length) return '<section class="card wp" id="weapon-luck" data-wp="' + E(sigOf(A)) + '"><div class="card-h"><h2>주무기 발현 타이밍</h2></div><p class="wp-head">' + E(headOf(A)) + '</p>' + extraNotes(ch, A, o, 'luck') + '<p class="wp-note">주무기로 서 있는 힘이 없어 운별 발현 타이밍은 그리지 않았어요. 위 흐름 그래프의 좋음·무난·조심은 그대로 참고하면 돼요.</p></section>';
     var now = opt.now || Date.now(), curY = opt.curY, wolY = opt.wolY || curY;
     var tl = Wm.timeline(M, ch, { fromY: curY, years: 10, wolY: wolY }); if (!tl) return '';
@@ -195,9 +197,17 @@
       return '<p class="wp-sec">' + E(secT) + '</p>' + chart(rows, labs, nowIdx) + '<div class="wp-row">' + rows.map(function (r, i) { return cell(r, labs[i], subs[i], i === nowIdx, 'wpd-' + row + '-' + i, row); }).join('') + '</div>' +
         rows.map(function (r, i) { return r ? detail('wpd-' + row + '-' + i, row, r, labs[i], E) : ''; }).join('');
     };
+    // 그래프 카드 아래에 붙는 한 단위(대운·세운·월운) — 같은 판정, 같은 칸·상세 카드
+    var short = '<div class="wp-leg"><span><span class="wp-a on2">강하게 켜짐</span><span class="wp-a on1">켜짐</span><span class="wp-a sup">받쳐 줌</span><span class="wp-a qt">조용함</span><span class="wp-a hit">눌림</span><span class="wp-a trm">정리</span></span><span>점 줄 = 주무기 활성도 · 아래 띠 = 위 그래프와 같은 흐름 등급(합치지 않아요) · 칸을 누르면 설명</span></div>';
+    var PART = { daeun: ['d', tl.daeun, dLab, du.map(function (x) { return x.startYear + '~'; }), curDi, '대운마다 주무기가 켜지는 정도'], seun: ['s', tl.seun, sLab, tl.seun.map(function (r) { return r.age ? r.age + '세' : ''; }), tl.seun.findIndex(function (r) { return r.year === curY; }), curY + '~' + (curY + 9) + '년 주무기가 켜지는 정도'], wolun: ['w', tl.wolun, wLab, tl.wolun.map(function (r) { return r.termName; }), curWi, wolY + '년 달마다 주무기가 켜지는 정도'] };
+    if (PART[part]) { var p = PART[part]; return '<div class="wp wp-part wp-e' + L[0].el + '" id="weapon-luck-' + part + '" data-wp="' + E(sigOf(A)) + '" style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)"><h3 style="margin:0;font-size:.95rem">주무기 발현 · ' + E(p[5]) + ' <span class="wp-note" style="font-weight:400">' + E(names) + '</span></h3>' + short + block(p[0], p[1], p[2], p[3], p[4], '').replace('<p class="wp-sec"></p>', '') + '</div>'; }
     var cur = tl.daeun[curDi] || null, picks = tl.seun.filter(function (r) { return r && r.best && /strong|on|shaky/.test(r.best.level); }).slice(0, 3);
     var line = function (when, r) { return '<li><span class="when">' + E(when) + '</span> — 활성도 <b>' + E(r.best.levelK) + '</b> · 흐름 ' + E(r.favor ? r.favor.n : '—') + '<br>' + E(d.combo[r.read]) + '</li>'; };
     var lines = (cur ? [line('지금 대운 ' + cur.gz, cur)] : []).concat(picks.map(function (r) { return line(r.year + '년 ' + r.gz, r); }));
+    if (part === 'summary') return '<section class="card wp" id="weapon-luck" data-wp="' + E(sigOf(A)) + '"><div class="card-h"><h2>주무기 발현 타이밍</h2><span class="note">' + E(names) + '</span></div>' +
+      '<p class="wp-note">' + E(d.twoAxes) + (A.status === 'undetermined' ? ' 태어난 시간을 몰라 세 기둥 기준 후보로 봤어요.' : A.status === 'complex' ? ' 복합형이라 후보 중 가장 잘 켜지는 쪽을 보여 줘요.' : '') + ' 대운·세운·월운 그래프 카드마다 맨 아래에 그 단위의 주무기 줄이 있어요.</p>' + legend +
+      (lines.length ? '<p class="wp-sec">가까운 시기 읽기</p><ul class="wp-dl">' + lines.join('') + '</ul>' : '') +
+      '<p class="wp-note">' + E(d.disclaimer) + ' 특정 날짜의 성패를 예측하지 않아요.</p></section>';
     return '<section class="card wp" id="weapon-luck" data-wp="' + E(sigOf(A)) + '"><div class="card-h"><h2>주무기 발현 타이밍</h2><span class="note">' + E(names) + '</span></div>' +
       '<p class="wp-note">' + E(d.twoAxes) + (A.status === 'undetermined' ? ' 태어난 시간을 몰라 세 기둥 기준 후보로 봤어요.' : A.status === 'complex' ? ' 복합형이라 후보 중 가장 잘 켜지는 쪽을 보여 줘요.' : '') + ' 칸을 누르면 그 시기 설명이 열려요.</p>' + legend +
       block('d', tl.daeun, dLab, du.map(function (x) { return x.startYear + '~'; }), curDi, '대운 · 10년 발현 환경') +

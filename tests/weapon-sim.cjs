@@ -45,7 +45,10 @@ function check(inp, idx, tag) {
   if (A.weapons.length === 2) assert.ok(A.weapons[0].plusN >= A.weapons[1].plusN || A.weapons[0].cond.intact > A.weapons[1].cond.intact, '순위 규칙');
   // 네 탭
   const o = { esc: s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]), now: Date.UTC(2026, 10, 26), curY: CUR_Y, wolY: CUR_Y };
-  const H = { wonguk: V.wonguk(M, ch, o), ohaeng: V.ohaeng(M, ch, o), apt: V.apt(M, ch, o), luck: V.luck(M, ch, o) };
+  const H = { wonguk: V.wonguk(M, ch, o), ohaeng: V.ohaeng(M, ch, o), apt: V.apt(M, ch, o), luck: V.luck(M, ch, o), luckSummary: V.luck(M, ch, { ...o, part: 'summary' }) };
+  // 운세 흐름 탭은 2026-11-26부터 요약(지금의 운 아래) + 대운·세운·월운 그래프 카드 아래 세 조각으로 나뉜다 — 무기가 있으면 세 조각도 같은 판정
+  if (A.candidates.length) ['daeun', 'seun', 'wolun'].forEach(p => { H['luck-' + p] = V.luck(M, ch, { ...o, part: p }); assert.ok(H['luck-' + p].includes('id="weapon-luck-' + p + '"'), p + ' 조각'); });
+  else ['daeun', 'seun', 'wolun'].forEach(p => assert.equal(V.luck(M, ch, { ...o, part: p }), '', p + ' 조각은 무기 없으면 빈 값'));
   const sig = V.sigOf(A);
   Object.entries(H).forEach(([k, h]) => { assert.ok(h, k + ' 화면 비어 있음'); const m = /data-wp="([^"]*)"/.exec(h); assert.ok(m, k + ' data-wp'); assert.equal(m[1], sig, k + ' 탭 판정 불일치'); assert.ok(!BAN.test(htmlTxt(h)), k + ' 금지 표현: ' + (htmlTxt(h).match(BAN) || [])[0]); });
   // 운별
