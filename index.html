@@ -11425,8 +11425,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     leapFix(i);
     i.city = g('pf-city').value; applyPlace(i, null);
   }
-  function prSubmit() {
-    prRead();
+  function prSubmit(fromForm = true) {
+    if (fromForm) prRead();   // 최근 본 사람·여러 명에서 불러올 때는 화면 입력칸(이전 값)을 읽지 않는다 — 읽으면 불러온 생년월일이 입력칸 값으로 덮인다(2026-11-26 수정)
     const i = PR.inp, n = (v, a, b, name) => { const x = String(v).trim() === '' ? NaN : Number(v); if (!Number.isInteger(x) || x < a || x > b) throw new Error(`${name}을(를) ${a}~${b} 사이로 입력하세요`); };
     try {
       n(i.year, M.MIN_Y, M.MAX_Y - 1, '년'); n(i.month, 1, 12, '월'); n(i.day, 1, 31, '일');
@@ -12025,7 +12025,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (pa) {
       const [a, v] = pa.dataset.pact.split(':');
       if (a === 'edit') { PR.editing = true; PR.err = null; render(); return; }
-      if (a === 'load') { const x = PR.list[+v]; if (x) { PR.inp = Object.assign(prDefault(), x); PR.rel = x.rel || PR.rel; delete PR.inp.rel; prSubmit(); } return; }
+      if (a === 'load') { const x = PR.list[+v]; if (x) { PR.inp = Object.assign(prDefault(), x); PR.rel = x.rel || PR.rel; delete PR.inp.rel; prSubmit(false); } return; }
       if (a === 'del') { PR.list.splice(+v, 1); prSaveList(PR.list); render(); return; }
     }
     const ga = t.closest('[data-gact]');   // 여러 명 궁합
@@ -12037,7 +12037,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (a === 'go') { grSubmit(); return; }
       if (a === 'edit') { GR.res = null; GR.err = null; render(); return; }
       if (a === 'arrows') { GR.moreArrows = !GR.moreArrows; render(); return; }
-      if (a === 'pair') { const x = PR.list.find(r => prKey(r) === v); if (x) { PR.mode = 'pair'; PR.inp = Object.assign(prDefault(), x); delete PR.inp.rel; prSubmit(); } return; }
+      if (a === 'pair') { const x = PR.list.find(r => prKey(r) === v); if (x) { PR.mode = 'pair'; PR.inp = Object.assign(prDefault(), x); delete PR.inp.rel; prSubmit(false); } return; }
     }
   });
 
