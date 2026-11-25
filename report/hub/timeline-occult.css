@@ -194,7 +194,7 @@ html.theme-mist #hub #tq.tq-simple .tq-hero::after{
     linear-gradient(180deg, rgba(29,26,23,.78) 0%, rgba(29,26,23,.45) 50%, rgba(227,221,208,.8) 90%, #E3DDD0 100%);
 }
 html.theme-mist #hub #tq.tq-simple .tq-hero .kick{ text-shadow: 0 1px 8px rgba(0,0,0,.8); }
-@media (min-width: 721px){ #hub #tq.tq-simple .tq-fcs{ grid-template-columns: repeat(4, minmax(0, 1fr)); } #hub #tq.tq-simple .tq-fcs .tq-ny{ grid-column: auto !important; } }
+@media (min-width: 721px){ #hub #tq.tq-simple .tq-fcs{ grid-template-columns: repeat(2, minmax(0, 1fr)); } #hub #tq.tq-simple .tq-fcs .tq-ny{ grid-column: auto !important; } }
 /* 좁은 화면: 부적 띠가 머리 글자를 가리지 않게 숨기고, 근거·상세 링크는 단추 상자 없이 */
 @media (max-width: 560px){ html.theme-mist #hub #tq.tq-simple .tq-bu{ display: none; } }
 html.theme-mist #hub #tq.tq-simple .tq-card-acts .tq-lnk{ background: transparent !important; border: 0 !important; box-shadow: none !important; padding-left: 0; text-decoration: underline; text-underline-offset: 3px; }
@@ -223,3 +223,32 @@ html.theme-mist #hub #tq.tq-simple .tq-card-acts .tq-lnk{ background: transparen
   #hub #tq.tq-simple .tq-glance{ gap: 8px; }
   #hub #tq.tq-simple .tq-ten, #hub #tq.tq-simple .tq-metric.compact{ padding: 10px !important; }
 }
+
+/* ════════ 2026-11-26 2차 · 읽기 우선 ════════ */
+/* 글 폭: 넓은 화면에서도 한 줄이 너무 길지 않게(한글 한 줄 약 40자) */
+body.tq-wide:has(#tq.tq-simple) #hub #screen{ max-width: 860px; }
+/* 본문 글자: 16px · 줄 간격 1.8 · 먹색, 보조 글자도 14.5px 이상·충분한 대비 */
+#hub #tq.tq-simple :is(.tq-copy, .tq-gl-h, .tq-unit-line, .lv-qr, .tq-line, .tq-trait, .tq-fc p, .tq-today p){ font-size: 16px; line-height: 1.8; }
+#hub #tq.tq-simple :is(.tq-sub, .tq-unit-d, .tq-sech p, .tq-gl-d, .tq-gl-w){ font-size: 14.5px; line-height: 1.7; }
+#hub #tq.tq-simple .tq-card h3{ font-size: 1.2rem; line-height: 1.5; margin-bottom: 10px; }
+#hub #tq.tq-simple .tq-card h3 small{ display: block; margin-top: 4px; font-size: .82rem; font-weight: 500; }
+#hub #tq.tq-simple .tq-sech h2{ font-size: clamp(1.35rem, 3.4vw, 1.65rem); }
+#hub #tq.tq-simple .tq-body > * + *{ margin-top: 14px; }
+/* 일주 사진이 없으면 '한눈에 보는 나'를 한 단으로 */
+#hub #tq.tq-simple #tq-glance:has(> .tq-ava:not(.on)){ display: block; }
+
+html.theme-mist #hub #tq.tq-simple{ --ink-2: #3E3832; --ink-3: #5F574E; }
+html.theme-mist #hub #tq.tq-simple :is(.tq-sub, .tq-unit-d, .tq-sech p, .tq-gl-d){ color: #5F574E !important; }
+html.theme-mist #hub #tq.tq-simple :is(.tq-copy, .tq-gl-h, .lv-qr, .tq-unit-line){ color: var(--oc-muk) !important; }
+/* 색 줄이기: 단위(10년·1년·1달)는 작은 표와 왼쪽 띠로만, 바탕 물빛은 걷는다 */
+html.theme-mist #hub #tq.tq-simple .tq-unit-line{ background: rgba(29,26,23,.05) !important; border-left: 3px solid var(--oc-ju); border-radius: 2px; padding: 10px 14px; }
+html.theme-mist #hub #tq.tq-simple .lv-q{ background: rgba(255,252,245,.7) !important; }
+
+/* 테마 통일: 화면 바깥·머리줄까지 한지와 먹으로(회청색 안개 걷기) */
+html.theme-mist:has(#tq.tq-simple){ background: #E3DDD0; }
+html.theme-mist body:has(#tq.tq-simple) #hub{ background: transparent !important; }
+html.theme-mist body:has(#tq.tq-simple) > .top{ background: rgba(29,26,23,.92) !important; border-bottom: 1px solid rgba(163,48,31,.45) !important; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+html.theme-mist body:has(#tq.tq-simple) > .top :is(a, b, span, .brand, .tb){ color: #EDE5D2 !important; }
+html.theme-mist body:has(#tq.tq-simple) > .top :is(a.btn, button){ background: transparent !important; color: #EDE5D2 !important; border: 1px solid rgba(237,229,210,.45) !important; }
+#hub #tq.tq-simple .tq-fc p{ font-size: 15px; line-height: 1.65; }   /* 무료 카드 한 줄 설명은 두 줄까지 */
+#hub #tq.tq-simple .lv-qr + .lv-qr{ margin-top: 8px !important; }   /* 한눈에 보기 줄 사이 숨 쉴 틈 */
