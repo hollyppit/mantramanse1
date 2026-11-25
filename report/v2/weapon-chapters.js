@@ -183,7 +183,7 @@
     var body = '';
     if (use.power || use.rootExp || use.overlap) body += '<h4>' + esc('주무기의 형성 근거') + '</h4>' + formationPlain(B, w, use);   // 2판: 실제 글자·자리를 쉬운 문장으로
     if (use.tenGod) body += '<h4>' + esc('강점이 발현되는 방식') + '</h4><p>' + esc(EL_K[w.el] + ' 기운이 ' + w.groupName + '(' + wd.group[g].way + ')으로 드러나요. ' + wd.elGroup[w.el][g] + '이 이 명식의 쓰는 방식이에요.' + (w.type && wd.typeNote ? ' ' + wd.typeNote[w.type] : '') + (w.tgs.length ? ' 천간에 드러난 ' + J.은(w.tgs.join('·')) + ' ' + w.tgs.map(function (t) { return wd.tg[t]; }).join(', ') + '으로 읽혀요.' : '')) + '</p>';
-    if (ws[1]) { var v = ws[1]; body += '<h4>' + esc('보조 주무기와의 결합') + '</h4><p>' + esc('보조 주무기는 ' + wTitle(v) + '(' + v.groupName + ')이에요. ' + wd.group[g].short + '에 ' + J.이(wd.group[v.group].short) + ' 붙어, ' + wd.elGroup[v.el][v.group] + '이 주무기를 옆에서 받쳐 줘요.') + '</p>'; }
+    if (ws[1]) { var v = ws[1]; body += v.link ? '<h4>' + esc('주무기의 힘을 이어 받는 보조 역량') + '</h4><p>' + esc('보조 역량은 ' + wTitle(v) + '(' + v.groupName + ')이에요. 주무기가 낳는 힘을 이어 받는 ' + v.link.name + ' 구조라, ' + wd.elGroup[v.el][v.group] + '으로 주무기의 결과를 현실로 옮겨요.') + '</p>' : '<h4>' + esc('보조 주무기와의 결합') + '</h4><p>' + esc('보조 주무기는 ' + wTitle(v) + '(' + v.groupName + ')이에요. ' + wd.group[g].short + '에 ' + J.이(wd.group[v.group].short) + ' 붙어, ' + wd.elGroup[v.el][v.group] + '이 주무기를 옆에서 받쳐 줘요.') + '</p>'; }   // 6판: 생으로 이어지는 2순위는 '보조 역량'
     // 3판: 능력의 발현 조합(짝 십성) — 같은 십성이라도 짝에 따라 드러나는 형태가 다르다
     var ps = w.partners || [], GNV = ['비겁', '식상', '재성', '관성', '인성'], pk = function (a, b) { return Math.min(a, b) + '-' + Math.max(a, b); };
     if (use.tenGod) {
@@ -212,7 +212,7 @@
     if (relX || pats.length) body += '<p>' + esc([relX].concat(pats.slice(0, 1)).filter(Boolean).join(' ')) + '</p>';
     var wps = (w.partners || []).filter(function (p) { return p.tone !== 'bad'; }), pkw = function (a, b) { return Math.min(a, b) + '-' + Math.max(a, b); }, mlist = wps.map(function (p) { var P = wd.pair[pkw(g, p.group)]; return P ? P.name + ': ' + P.money : ''; }).filter(Boolean);
     body += '<h4>' + esc('수익 창출 방식') + '</h4><p>' + esc(d.wealth.mode[g] + '이 이 주무기와 결이 맞아요.' + (mlist.length ? ' 능력 조합으로 보면 — ' + mlist.join(' / ') : '')) + '</p>';
-    body += '<h4>' + esc('사업·직장·투자에서의 강점') + '</h4><p>' + esc(d.wealth.edge[g] + (ws[1] ? ' 보조 주무기 ' + EL_K[ws[1].el] + '(' + ws[1].groupName + ')' + (bat(ws[1].groupName) ? '은' : '는') + ' ' + d.wealth.mode[ws[1].group].split(' — ')[0] + '를 곁가지로 열어 줘요.' : '')) + '</p><ul class="dp-ul">' + W2.arena[g].map(function (t, i) { return '<li><b>' + esc(W2.arenaK[i]) + '</b> — ' + esc(t) + '</li>'; }).join('') + '</ul>';
+    body += '<h4>' + esc('사업·직장·투자에서의 강점') + '</h4><p>' + esc(d.wealth.edge[g] + (ws[1] ? (ws[1].link ? ' 보조 역량 ' : ' 보조 주무기 ') + EL_K[ws[1].el] + '(' + ws[1].groupName + ')' + (bat(ws[1].groupName) ? '은' : '는') + ' ' + d.wealth.mode[ws[1].group].split(' — ')[0] + '를 곁가지로 열어 줘요.' : '')) + '</p><ul class="dp-ul">' + W2.arena[g].map(function (t, i) { return '<li><b>' + esc(W2.arenaK[i]) + '</b> — ' + esc(t) + '</li>'; }).join('') + '</ul>';
     body += timingBlock(B, 'wealth', use, w);
     body += '<h4>' + esc('재물활동에서 주의할 점') + '</h4><p>' + esc(d.wealth.caution[g] + ' ' + fill(W2.overTail, { o: wd.el[w.el].over.replace(' · ', '·') })) + '</p>';
     body += '<h4>' + esc('장기적인 재물 전략') + '</h4><p>' + esc(W2.strat[g] + ', ' + W2.stratMod[zk]) + '</p>';
@@ -283,7 +283,7 @@
     var body = '<h4>' + esc('주무기 강화 루틴') + '</h4><ul class="dp-ul">' + d.remedy.grow[g].map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
     var rp = (w.partners || []).filter(function (p) { return p.tone !== 'bad' && p.group !== g; })[0];
     if (rp && use.tenGod) body += '<p>' + esc(fill(d.remedy.partnerGrow, { p: GN[rp.group], r: d.remedy.grow[rp.group][0] })) + '</p>';   // 3판: 짝 능력을 함께 키우는 루틴
-    if (ws[1]) body += '<h4>' + esc('보조 주무기 활용') + '</h4><p>' + esc('주무기가 막힐 땐 보조 주무기 ' + EL_K[ws[1].el] + '(' + ws[1].groupName + ') 쪽 루틴 — “' + d.remedy.grow[ws[1].group][0] + '” — 으로 우회하세요.') + '</p>';
+    if (ws[1]) body += ws[1].link ? '<h4>' + esc('보조 역량 활용') + '</h4><p>' + esc('주무기로 만든 것을 보조 역량 ' + EL_K[ws[1].el] + '(' + ws[1].groupName + ') 쪽 루틴 — “' + d.remedy.grow[ws[1].group][0] + '” — 으로 이어 가세요.') + '</p>' : '<h4>' + esc('보조 주무기 활용') + '</h4><p>' + esc('주무기가 막힐 땐 보조 주무기 ' + EL_K[ws[1].el] + '(' + ws[1].groupName + ') 쪽 루틴 — “' + d.remedy.grow[ws[1].group][0] + '” — 으로 우회하세요.') + '</p>';
     body += '<h4>' + esc('과잉 성향 조절') + '</h4><p>' + esc(d.remedy.calm[g] + '을(를) 하나 정해 두세요.' + (/기신|구신/.test(w.role || '') ? ' 주무기가 이 명식에서 이미 많은 힘(' + w.role + ')이라 조절 규칙이 특히 중요해요.' : '')) + '</p>';
     if (A.yong && use.tenGod) { var yg = (A.yong.el - dEl + 5) % 5; if (yg !== g) body += '<h4>' + esc('부족한 기능 보완') + '</h4><p>' + esc(d.remedy.lack[yg] + ' (균형에 필요한 기운: ' + EL_K[A.yong.el] + ' · ' + GN[yg] + ')') + '</p>'; }
     body += timingBlock(B, 'remedy', use, w);

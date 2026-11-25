@@ -13,7 +13,7 @@
   var esc0 = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var W = function () { return G.MantraWeapon; }, D = function () { return G.MantraWeaponData; };
   var EC = ['var(--wood,#2FA866)', 'var(--fire,#E5533D)', 'var(--earth,#C99A3B)', 'var(--metal,#8E9AAF)', 'var(--water,#3B6FD8)'];
-  var CSS = '.wp{display:grid;gap:10px}.wp-u{border-radius:6px;padding:1px 4px;font-size:.68rem;border:1px solid var(--line);color:var(--ink-2)}.wp-u.u-good,.wp-u.u-good2{border-color:#2f7bd6;color:#1d5aa6}.wp-u.u-adj{border-color:#c9a227;color:#8a6d0f}.wp-u.u-bad{border-color:#b04a8a;color:#8a2f68}.wp-mix{font-size:.86rem;font-weight:600;color:var(--ink);margin:2px 0 4px!important}.wp-act{font-size:.84rem;margin-top:4px!important;color:var(--ink)}.wp-core{font-size:.9rem;line-height:1.65;margin:2px 0 6px!important;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,var(--wc,#888) 10%,var(--surface,#fff))}.wp-core b{color:var(--ink)}.wp-cb{border-top:1px solid var(--line);padding:6px 0 2px}.wp-ct{font-size:.78rem!important;font-weight:700;color:var(--ink-3);margin:0 0 2px!important}.wp-cn{display:inline-block;min-width:1.4em;color:var(--wi,var(--ink-2))}.wp-kind{border-radius:6px;padding:1px 6px;font-size:.78rem;background:var(--surface-2);color:var(--ink)}.wp-kind.k-boost{background:var(--wi,#555);color:#fff}.wp-kind.k-assist{border:1px solid var(--wc,#888);background:transparent}.wp-kind.k-limit{text-decoration:underline dotted}.wp-plan{font-size:.84rem;margin-top:4px!important;color:var(--ink)}.wp-det .wp-ev li{margin:1px 0}.wp p{margin:0;line-height:1.65}.wp-head{font-weight:800;font-size:1rem;line-height:1.55}' +
+  var CSS = '.wp{display:grid;gap:10px}.wp-cross{border-top:1px dashed var(--line);padding-top:8px;margin-top:4px}.wp-tri{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;margin:6px 0}.wp-tc{flex:1 1 150px;border:1px solid var(--line);border-radius:10px;padding:6px 8px;display:flex;flex-direction:column;gap:2px;font-size:.82rem}.wp-tc.m{border-color:var(--wc,#888);background:color-mix(in srgb,var(--wc,#888) 10%,var(--surface,#fff))}.wp-arr{align-self:center;color:var(--ink-3)}.wp-fl{border-radius:6px;padding:0 5px;font-size:.7rem;font-weight:700;border:1px solid var(--line)}.wp-fl.review{border-color:#c0392b;color:#c0392b}.wp-fl.check{border-color:#c9a227;color:#8a6d0f}.wp-fl.note{color:var(--ink-3)}.wp-u{border-radius:6px;padding:1px 4px;font-size:.68rem;border:1px solid var(--line);color:var(--ink-2)}.wp-u.u-good,.wp-u.u-good2{border-color:#2f7bd6;color:#1d5aa6}.wp-u.u-adj{border-color:#c9a227;color:#8a6d0f}.wp-u.u-bad{border-color:#b04a8a;color:#8a2f68}.wp-mix{font-size:.86rem;font-weight:600;color:var(--ink);margin:2px 0 4px!important}.wp-act{font-size:.84rem;margin-top:4px!important;color:var(--ink)}.wp-core{font-size:.9rem;line-height:1.65;margin:2px 0 6px!important;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,var(--wc,#888) 10%,var(--surface,#fff))}.wp-core b{color:var(--ink)}.wp-cb{border-top:1px solid var(--line);padding:6px 0 2px}.wp-ct{font-size:.78rem!important;font-weight:700;color:var(--ink-3);margin:0 0 2px!important}.wp-cn{display:inline-block;min-width:1.4em;color:var(--wi,var(--ink-2))}.wp-kind{border-radius:6px;padding:1px 6px;font-size:.78rem;background:var(--surface-2);color:var(--ink)}.wp-kind.k-boost{background:var(--wi,#555);color:#fff}.wp-kind.k-assist{border:1px solid var(--wc,#888);background:transparent}.wp-kind.k-limit{text-decoration:underline dotted}.wp-plan{font-size:.84rem;margin-top:4px!important;color:var(--ink)}.wp-det .wp-ev li{margin:1px 0}.wp p{margin:0;line-height:1.65}.wp-head{font-weight:800;font-size:1rem;line-height:1.55}' +
     '.wp-e0{--wc:var(--wood,#2FA866);--wi:var(--wood-ink,#17744B)}.wp-e1{--wc:var(--fire,#E5533D);--wi:var(--fire-ink,#B1321F)}.wp-e2{--wc:var(--earth,#C99A3B);--wi:var(--earth-ink,#8A6418)}.wp-e3{--wc:var(--metal,#8E9AAF);--wi:var(--metal-ink,#56627A)}.wp-e4{--wc:var(--water,#3B6FD8);--wi:var(--water-ink,#234A9A)}' +
     '.wp-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}' +
     '.wp-it{border:1px solid var(--line);border-left:4px solid var(--wc);border-radius:12px;padding:11px 13px;background:var(--surface);display:grid;gap:6px}' +
@@ -49,12 +49,13 @@
   function get(M, ch) { var w = W(); if (!w || !D()) return null; var A; try { A = w.analyze(M, ch); } catch (e) { return null; } return A && A.ok ? A : null; }
   function list(A) { return A.weapons.length ? A.weapons : A.complex; }
   function title(w) { return EL_K[w.el] + '(' + EL_H[w.el] + ') — ' + D().el[w.el].title; }
-  function rankLabel(A, w, i) { var d = D(); return A.status === 'complex' ? '복합 후보' : A.status === 'undetermined' ? '유력 후보' : (i === 0 && A.label === '잠정 주무기') ? '잠정 주무기' : d.rank[i] || d.rank[1]; }
-  function headOf(A) { var d = D(); if (A.label === '잠정 주무기' && A.status !== 'undetermined') return d.status.provisionalHead; return (A.label === '주무기 미확정' && A.status !== 'none' && A.status !== 'complex' ? '주무기 미확정 · ' : '') + (d.status[A.status] || ''); }
+  function rankLabel(A, w, i) { var d = D(); if (w && w.link && A.status === 'dual') return '보조 역량'; return A.status === 'complex' ? '복합 후보' : A.status === 'undetermined' ? '유력 후보' : (i === 0 && A.label === '잠정 주무기') ? '잠정 주무기' : d.rank[i] || d.rank[1]; }
+  function headOf(A) { var d = D(); if (A.status === 'dual' && A.weapons[1] && A.weapons[1].link && d.status.dualLink && A.label !== '잠정 주무기') return d.status.dualLink; if (A.label === '잠정 주무기' && A.status !== 'undetermined') return d.status.provisionalHead; return (A.label === '주무기 미확정' && A.status !== 'none' && A.status !== 'complex' ? '주무기 미확정 · ' : '') + (d.status[A.status] || ''); }
   // 십신 작용(기존 십성 작용 엔진 ten-god-roles.js 의 유형, 표시만)
   var _tgr = typeof WeakMap === 'function' ? new WeakMap() : null;
   function tgAct(M, ch, g) { var T = G.MantraTenGodRoles; if (!T || !T.analyze) return null; var r = _tgr && _tgr.get(ch); if (!r) { try { r = T.analyze(M, ch); } catch (e) { r = null; } if (_tgr && r) _tgr.set(ch, r); } var x = r && r.groups && r.groups[g]; return x && x.main ? x.main : null; }
 
+  var GNV0 = ['비겁', '식상', '재성', '관성', '인성'], jo2 = function (w) { var c = String(w).charCodeAt(String(w).length - 1) - 0xAC00; return c >= 0 && c <= 11171 && c % 28 !== 0 ? '이' : '가'; };
   // 무기 한 개 카드 — part: 'origin'(원국: 형성 근거) | 'apt'(적성: 활용 방향)
   function item(A, w, i, o, part, M, ch) {
     var d = D(), E = o.E, dl = d.el[w.el], gl = d.group[w.group], ta = M && ch ? tgAct(M, ch, w.group) : null, yk = A.yong ? EL_K[A.yong.el] : '';
@@ -62,6 +63,8 @@
     var h = '<div class="wp-it wp-e' + w.el + '"><span class="wp-rk">' + E(rankLabel(A, w, i)) + '</span><div class="wp-n"><span class="wp-hj">' + EL_H[w.el] + '</span>' + E(title(w)) + '</div><div class="wp-n" style="font-weight:600">' + tags + '</div>' +
       '<div class="wp-kw">' + dl.strengths.map(function (k) { return '<span>' + E(k) + '</span>'; }).join('') + '</div>' +
       '<p><span class="wp-lb">발현 방식</span>' + E(EL_K[w.el] + ' + ' + w.groupName + ': ' + d.elGroup[w.el][w.group]) + '</p>' +
+      (w.link ? '<p class="wp-s"><span class="wp-lb">보조 역량</span>' + E(EL_K[w.link.from] + '(' + GNV0[w.link.fromGroup] + ')' + jo2(EL_K[w.link.from]) + ' 낳는 힘을 이어 받는 쪽이에요(' + w.link.name + '). 따로 서는 무기라기보다 주무기의 결과를 현실로 옮기는 역량이에요.') + '</p>' : '') +
+      (w.path === 'branch' ? '<p class="wp-s"><span class="wp-lb">지지 중심</span>' + E('천간에 드러나지 않았지만 월령과 지지에서 주도하는 힘이에요. 겉으로 내세우기보다 안에서 꾸준히 작동해요.' + ((w.sameBranches || []).length ? ' 지지에서 작용하는 십성: ' + w.sameBranches.map(function (b) { return b.ch + '(' + b.main + ' ' + b.mainTg + ')'; }).join(' · ') : '')) + '</p>' : '') +
       (w.tgs.length ? '<p class="wp-s"><span class="wp-lb">드러난 십성</span>' + E(w.tgs.map(function (t) { return t + ' — ' + d.tg[t]; }).join(' · ')) + '</p>' : '') +
       (ta ? '<p class="wp-s"><span class="wp-lb">십신 작용</span>' + E(w.groupName + ' — ' + ta.name + (ta.why ? '(' + ta.why + ')' : '')) + '</p>' : '') +
       (w.type ? '<p class="wp-note"><span class="wp-lb">유형</span>' + E(d.typeNote[w.type]) + '</p>' : '') +
@@ -125,11 +128,40 @@
   }
 
   // ── 원국 탭: 나의 타고난 주무기(형성 근거만) ──
+  // 7판 세 탭 판정 연결 카드(원국·오행·강약·주무기) — weapon.js crossCheck 결과만 읽는다
+  function crossCard(M, ch, A, o) {
+    var Wm = W(), d = D(), C = d.cross; if (!Wm.crossCheck || !C) return '';
+    var X = null; try { X = Wm.crossCheck(M, ch, A); } catch (e) { X = null; } if (!X || X.level === 'none' || X.main == null) return '';
+    var E = o.E, GNs = ['비겁', '식상', '재성', '관성', '인성'], FN = (d.card && d.card.fn) || GNs, dEl = M.stemEl(ch.pillars.day.s);
+    var nmE = function (el) { var g = mod5(el - dEl); return EL_K[el] + '(' + GNs[g] + ')'; };
+    var J = function (t) { return fixJ5(t); };
+    var mainW = A.weapons[0], wf = FN[mainW.group];
+    var fill = function (t, m) { return J(String(t).replace(/\{(\w+)\}/g, function (_, k) { return m[k] == null ? '' : m[k]; })); };
+    var tri = [];
+    if (X.base) tri.push(['base', X.base.el, X.base.group, X.base.act]);
+    tri.push(['main', mainW.el, mainW.group, '']);
+    if (X.support) tri.push(['support', X.support.el, X.support.group, X.support.act]);
+    var triH = '<div class="wp-tri">' + tri.map(function (t, i) { return (i ? '<span class="wp-arr">→</span>' : '') + '<div class="wp-tc wp-e' + t[1] + (t[0] === 'main' ? ' m' : '') + '"><span class="wp-lb">' + E(C.role[t[0]]) + '</span><b>' + E(nmE(t[1])) + '</b><span class="wp-note">' + E(fill(C.roleLine[t[0]], { X: nmE(t[1]), xf: FN[t[2]] })) + (t[3] ? ' (' + E(t[3]) + ')' : '') + '</span></div>'; }).join('') + '</div>';
+    var lines = X.links.map(function (l) {
+      var R = C.rel[l.kind], t;
+      if (l.kind === 'zone') { var drain = mainW.group >= 1 && mainW.group <= 3; t = l.extra.weak ? (drain ? R.weakDrain : R.weakHelp) : l.extra.strong ? (drain ? R.strongDrain : R.strongHelp) : R.mid; return '<li><b>' + E(l.label) + '</b> — ' + E(fill(t, { p: l.label.replace(/^일간 강약 /, ''), wg: mainW.groupName })) + '</li>'; }
+      t = R && R[l.rel]; if (!t) return '';
+      var extra = l.kind === 'top' ? ' ' + l.extra.pct + '%' : '';
+      return '<li><b>' + E(l.label + ': ' + nmE(l.el) + extra) + '</b> — ' + E(fill(t, { X: nmE(l.el), xf: FN[mod5(l.el - dEl)], wf: wf, p: l.label })) + '</li>';
+    }).filter(Boolean);
+    var fl = X.flags.length ? X.flags.map(function (f) { return '<li><span class="wp-fl ' + f.level + '">' + E(C.flagHead[f.level]) + '</span> ' + E(J(f.cause)) + '</li>'; }).join('') : '';
+    return '<div class="wp-cross"><p class="wp-sec">' + E(C.title) + '</p><p class="wp-note">' + E(C.lead) + '</p>' + triH +
+      '<ul class="wp-ev">' + lines.join('') + '</ul>' + (fl ? '<ul class="wp-ev wp-flags">' + fl + '</ul>' : '<p class="wp-note">✓ ' + E(C.allOk) + '</p>') + '</div>';
+  }
+  var mod5 = function (a) { return ((a % 5) + 5) % 5; };
+  var RD5 = { '甲': '갑', '乙': '을', '丙': '병', '丁': '정', '戊': '무', '己': '기', '庚': '경', '辛': '신', '壬': '임', '癸': '계' };
+  var fixJ5 = function (t) { var bt = function (ch) { ch = RD5[ch] || ch; var c = ch.charCodeAt(0) - 0xAC00; return c >= 0 && c <= 11171 ? c % 28 !== 0 : null; }; var pk = function (b, j) { return j[0] === '이' ? (b ? '이' : '가') : j[0] === '을' ? (b ? '을' : '를') : j[0] === '은' ? (b ? '은' : '는') : (b ? '과' : '와'); };
+    return String(t).replace(/(.)(\([^()]*\))(이\(가\)|을\(를\)|은\(는\)|과\(와\))/g, function (m, ch, par, j) { var b = bt(ch); return b == null ? m : ch + par + pk(b, j); }).replace(/(.)(이\(가\)|을\(를\)|은\(는\)|과\(와\))/g, function (m, ch, j) { var b = bt(ch); return b == null ? m : ch + pk(b, j); }); };
   function wonguk(M, ch, opt) {
     var A = get(M, ch); if (!A) return ''; var o = opts(opt), E = o.E, L = list(A);
     var body = L.length ? '<p class="wp-sec">A · 타고난 핵심 역량</p><div class="wp-list">' + L.map(function (w, i) { return item(A, w, i, o, 'origin', M, ch); }).join('') + '</div>' +
       '<p class="wp-sec">B · 능력의 발현 방식</p>' + L.map(function (w) { return secB(A, w, o); }).join('') +
-      '<p class="wp-sec">C · 능력의 활용 조건</p>' + L.map(function (w) { return secC(A, w, o); }).join('') : noneBody(A, E);
+      '<p class="wp-sec">C · 능력의 활용 조건</p>' + L.map(function (w) { return secC(A, w, o); }).join('') + crossCard(M, ch, A, o) : noneBody(A, E);
     var yl = yongLine(A);
     return '<section class="card wp" id="weapon-wonguk" data-wp="' + E(sigOf(A)) + '"><div class="card-h"><h2>나의 타고난 주무기</h2><span class="note">드러남 · 뿌리 · 세력 · 격국 구조로 본 힘</span></div>' +
       '<p class="wp-head">' + E(headOf(A)) + '</p>' + body + extraNotes(ch, A, o, 'origin') + (yl ? '<p class="wp-note">' + E(yl) + '</p>' : '') +
@@ -155,7 +187,8 @@
       '<p class="wp-note">' + E(d.distinguish.notTop) + '</p>' + (yl ? '<p class="wp-note">' + E(yl) + '</p>' : '') +
       (sum ? '<ul class="wp-dl">' + sum + '</ul>' : noneBody(A, E)) +
       '<div style="overflow-x:auto"><table class="wp-tb"><thead><tr><th>오행</th><th>세력</th><th title="지장간 빼고 천간·지지 겉글자만 센 개수">겉글자 간·지</th><th title="평균 몫 20% 이상">세력≥20%</th><th>' + T('투간', '투간') + '</th><th>' + T('통근', '통근') + '</th><th title="드러난 천간이 합·충으로 묶이지 않고 뿌리 자리가 충을 맞지 않음">온전함</th><th title="월령에서 왕·상">' + T('득령', '득령') + '</th><th>' + T('병존', '병존') + '</th><th>' + T('간여지동', '간여지동') + '</th><th title="정기 또는 월지 뿌리">깊은 뿌리</th><th title="월령 격국의 격 오행(성립·부분) 또는 켜진 상신">격국·상신</th><th>판정</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      '<p class="wp-note">' + E(d.distinguish.numbers) + ' 판정 순서: ① 세력 20% 이상 · 천간에 드러남 · 지지에 뿌리 — 셋 다 맞아야 후보(세력 10~20%라도 격국·상신 역할이 있으면 십신형 후보로 뒤에 둠) ② 합·충으로 묶이지 않은 후보 먼저 ③ 득령·병존/간여지동·깊은 뿌리·세력 1위·격국·상신을 같은 무게로 센 개수 ④ 같으면 세력 %(단, 2·3순위가 같은 개수면 보조 주무기를 두지 않아요). 가중치 점수는 쓰지 않아요.</p>' +
+      '<p class="wp-note">' + E(d.distinguish.numbers) + ' 판정 순서: ① 세력 20% 이상 · 천간에 드러남 · 지지에 뿌리, 또는 천간에 없어도 월령과 지지에서 주도하는 힘(지지 중심) — 후보(세력 10~20%라도 격국·상신 역할이 있으면 십신형 후보로 뒤에 둠) ② 합·충으로 묶이지 않은 후보 먼저 ③ 구조적 중요도: 월령(월지 정기)·격국이 가장 무겁고, 사령·실제 작용·세력 1위 다음, 병존·간여지동·깊은 뿌리는 가볍게(같은 사실은 한 번만, 투출 자체는 가점 없음) ④ 같으면 세력 % ⑤ 두 무기가 생으로 이어지면(예: 식신생재) 낳는 쪽을 주무기, 받는 쪽을 보조 역량으로.</p>' +
+      crossCard(M, ch, A, o) +
       '<details><summary class="wp-note">선정 기록 보기</summary><ul class="wp-ev">' + A.log.map(function (t) { return '<li>' + E(t) + '</li>'; }).join('') + '</ul></details>' +
       extraNotes(ch, A, o, 'ohaeng') + '<p class="wp-note">' + E(d.disclaimer) + '</p></section>';
   }

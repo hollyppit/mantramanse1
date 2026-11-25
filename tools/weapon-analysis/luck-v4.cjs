@@ -24,7 +24,8 @@ for (const inp0 of dev) for (const inp of [inp0, { ...inp0, hour: null }]) {
   const chart = `${inp.year}-${inp.month}-${inp.day} ${inp.hour == null ? '시간 모름' : inp.hour + '시'} ${inp.gender}`;
   try {
     const M = N.Manse, W = N.MantraWeapon, ch = M.compute(inp), A = W.analyze(M, ch), chO = O.Manse.compute(inp), AO = O.MantraWeapon.analyze(O.Manse, chO);
-    if (sig(A) !== sig(AO)) { out.changes.selection++; throw Error('주무기 선정이 바뀜 ' + sig(AO) + ' → ' + sig(A)); }
+    // 선정 불변 검사는 4·5판용(--same-selection). 6판(선정 보완) 이후엔 바뀐 수만 센다
+    if (sig(A) !== sig(AO)) { out.changes.selection++; if (process.argv.includes('--same-selection')) throw Error('주무기 선정이 바뀜 ' + sig(AO) + ' → ' + sig(A)); }
     const L = A.weapons.length ? A.weapons : A.complex; if (!L.length) continue;
     ch.daeun.list.forEach((p, i) => {
       const r = W.luck(M, ch, p, 'daeun'), ro = O.MantraWeapon.luck(O.Manse, chO, chO.daeun.list[i], 'daeun');
