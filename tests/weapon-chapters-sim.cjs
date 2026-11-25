@@ -30,14 +30,18 @@ T('SPEC 에 wp 조각 연결', () => { Object.keys(WC.DEFAULT_ROWS).forEach(id =
 // ── 본 검사 ──
 WC.on = true;
 const stat = { status: {}, topicShown: { self: 0, wealth: 0, career: 0, love: 0, remedy: 0 }, dupSentences: 0, dupExamples: [], buildShown: {}, avgChars: { self: 0, wealth: 0, career: 0, love: 0, remedy: 0 }, nohour: { selfNote: 0, others: 0 } };
-const rows = WC.DEFAULT_ROWS, TOPIC_ID = {}; Object.keys(rows).forEach(id => TOPIC_ID[rows[id].topic] = id);
+const rows = WC.DEFAULT_ROWS, TOPIC_ID = {}; Object.keys(rows).forEach(id => { if (rows[id].view !== 'graph') TOPIC_ID[rows[id].topic] = id; });
+const GRAPH_IDS = Object.keys(rows).filter(id => rows[id].view === 'graph');
 const HEAD = { self: '나의 핵심 주무기', wealth: '경제활동의 주무기', career: '직업적 주무기', love: '관계에서의 주무기', remedy: '주무기로 운을 쓰는 법' };
 const results = [];
 function runOne(inp, i, tag) {
   const ch = M.compute(inp), H = { M, ch, now, name: '' }, A = W.analyze(M, ch);
   const out = {}; WC.TOPICS.forEach(t => { out[t] = WC.preview(H, t, rows[TOPIC_ID[t]].use); });
+  const gout = {}; GRAPH_IDS.forEach(id => { gout[id] = WC.previewRow(H, rows[id]); });
   const sure = A.weapons.length && A.status !== 'undetermined' && A.status !== 'complex';
   // 6 없음·미확정
+  // 발현 그래프: 무기가 확정이면 그래프·요약, 아니면 생략. 그래프는 점수 숫자 없이 단계 눈금만
+  GRAPH_IDS.forEach(id => { const h = gout[id]; if (!sure) assert.equal(h, null, id + ' 그래프 생략'); else { assert.ok(h && /<svg/.test(h) && /주무기 발현 그래프/.test(h), id + ' 그래프'); const s = txt(h); assert.ok(!/undefined|NaN|\[object|null/.test(s), id + ' 빈 값'); assert.ok(!WC.BANNED.test(s), id + ' 금지 표현'); assert.ok(!/\d+점/.test(s), id + ' 점수 숫자'); stat.graphShown = (stat.graphShown || 0) + 1; } });
   if (!sure) { assert.ok(out.self && /주무기/.test(txt(out.self)), '종합 안내'); ['wealth', 'career', 'love', 'remedy'].forEach(t => assert.equal(out[t], null, t + ' 생략')); }
   else {
     const w = A.weapons[0];
@@ -51,7 +55,7 @@ function runOne(inp, i, tag) {
     // 형성 근거는 종합에만
     ['wealth', 'career', 'love', 'remedy'].forEach(t => assert.ok(!/투간|통근\)/.test(txt(out[t])) || t === 'self', t + ' 형성 근거 반복'));
     // 3 주제 사이 문장 중복
-    const seen = new Map(); WC.TOPICS.forEach(t => sentences(out[t]).forEach(x => { if (seen.has(x) && seen.get(x) !== t) { stat.dupSentences++; if (stat.dupExamples.length < 8) stat.dupExamples.push(seen.get(x) + '/' + t + ': ' + x); } else seen.set(x, t); }));
+    const seen = new Map(); [...WC.TOPICS.map(t => [t, out[t]]), ...GRAPH_IDS.map(id => [id, gout[id]])].forEach(([t, h]) => sentences(h).forEach(x => { if (seen.has(x) && seen.get(x) !== t) { stat.dupSentences++; if (stat.dupExamples.length < 8) stat.dupExamples.push(seen.get(x) + '/' + t + ': ' + x); } else seen.set(x, t); }));
     // 4·5 시기 연결과 두 축
     const tl = W.timeline(M, ch, { fromY: M.yearPillarAt(now).sajuYear, years: 10, wolY: M.yearPillarAt(now).sajuYear });
     let di = -1; tl.daeun.forEach((r, k) => { if (r.startMs <= now) di = k; });
@@ -98,13 +102,16 @@ T('문안 금지 표현', () => { const walk = o => typeof o === 'string' ? asse
     assert.ok(api.cleanRows({ timeline_creative_02: { topic: 'self' } }).error, '전생 장 거부');
     assert.ok(api.cleanRows({ timeline_self_25: { topic: 'health' } }).error, '없는 주제 거부');
     assert.ok(api.cleanRows({ timeline_self_25: { topic: 'self', use: { hack: true } } }).error, '없는 항목 거부');
+    assert.ok(api.cleanRows({ timeline_wealth_14: { topic: 'wealth', view: 'graph', scope: 'year' } }).error, '없는 그래프 범위 거부');
+    assert.ok(api.cleanRows({ timeline_wealth_14: { topic: 'wealth', view: 'chart' } }).error, '없는 형태 거부');
+    const gr = api.cleanRows({ timeline_wealth_14: { topic: 'wealth', view: 'graph', scope: 'seun', use: { activation: true } } }); assert.ok(gr.rows && gr.rows.timeline_wealth_14.view === 'graph' && gr.rows.timeline_wealth_14.scope === 'seun', '그래프 줄 저장');
     const store = {}, env = { ADMIN_PASSWORD: 'pw-test', GLOSSARY_KV: { get: async (k) => store[k] ? JSON.parse(store[k]) : null, put: async (k, v) => { store[k] = v; } } };
     const req = (m, body, auth) => new Request('https://x/api/weapon-links', { method: m, headers: { 'content-type': 'application/json', ...(auth ? { authorization: 'Bearer pw-test' } : {}) }, body: body ? JSON.stringify(body) : undefined });
     let r = await api.onRequestGet({ env }); let d = await r.json(); assert.equal(d.version, 0); assert.ok(!d.rows, '저장값 없으면 rows 없음');
     r = await api.onRequestPut({ request: req('PUT', { rows: WC.DEFAULT_ROWS }), env }); assert.equal(r.status, 401, '관리자만');
     r = await api.onRequestPut({ request: req('PUT', { rows: WC.DEFAULT_ROWS }, true), env }); d = await r.json(); assert.equal(r.status, 200); assert.equal(d.version, 1);
     r = await api.onRequestPut({ request: req('PUT', { rows: WC.DEFAULT_ROWS, expectVersion: 0 }, true), env }); assert.equal(r.status, 409, '버전 충돌');
-    r = await api.onRequestGet({ env }); d = await r.json(); assert.equal(Object.keys(d.rows).length, 5); assert.deepEqual(WC.sanitize(d).rows, WC.sanitize({ rows: WC.DEFAULT_ROWS }).rows, '화면 설정과 서버 저장값 일치');
+    r = await api.onRequestGet({ env }); d = await r.json(); assert.equal(Object.keys(d.rows).length, Object.keys(WC.DEFAULT_ROWS).length); assert.deepEqual(WC.sanitize(d).rows, WC.sanitize({ rows: WC.DEFAULT_ROWS }).rows, '화면 설정과 서버 저장값 일치');
   } catch (e) { fails++; console.log('✗ 10 서버 API —', e.message); }
   Object.keys(stat.avgChars).forEach(t => stat.avgChars[t] = stat.topicShown[t] ? Math.round(stat.avgChars[t] / stat.topicShown[t]) : 0);
   console.log(JSON.stringify(stat));

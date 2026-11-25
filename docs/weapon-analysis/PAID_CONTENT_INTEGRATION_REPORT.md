@@ -98,3 +98,21 @@ reading-feature.js build(c) → custom:'wp:장ID' → WeaponChapters.render → 
 
 새 파일: `report/v2/weapon-chapters.js` · `report/v2/weapon-chapters-data.js` · `functions/api/weapon-links.js` · `report/admin/v2-weapon-links.js` · `tests/weapon-chapters-sim.cjs` · 이 보고서 · `paid-content-300.json`
 수정: `report/v2/reading-feature.js`(1줄) · `report/v2/viewer.js`(2줄) · `report/v2/index.html`(스크립트 4개·꼬리표 2개) · `report/admin/v2-luckenv.js`(카드 자리·연결 2줄) · `report/admin/index.html`(스크립트 1개·꼬리표) · `functions/api/luck-flags.js`(스위치 이름 1개) · `weapon.js`(조사 함수·문구 2곳)
+
+## 10. 덧붙임 — 주무기 발현 그래프 (2026-11-26)
+
+이미 '시기'를 다루는 장 다섯 곳에 주무기 발현 그래프 블록을 붙였다(설정 `view:'graph'`, 범위 `scope`).
+
+| 장 | 질문 | 범위 | 아래 띠(유리도) |
+|---|---|---|---|
+| `timeline_self_20` | 전체 인생 흐름 | 평생 대운 | 전체 흐름 등급 |
+| `timeline_self_24` | 움직여야 될 때와 기다려야 할 때 | 앞으로 12달 월운 | 전체 흐름 등급 |
+| `timeline_wealth_14` | 재물운 타이밍 | 앞으로 10년 세운 | 재물 지수 등급(이 장 위 기존 그래프와 같은 엔진 지수) |
+| `timeline_career_14` | 커리어운 타이밍 | 앞으로 10년 세운 | 직업 지수 등급(없으면 전체 흐름) |
+| `timeline_love_14` | 인연운 타이밍 | 앞으로 10년 세운 | 인연 지수 등급 |
+
+- 모양: 기존 점수 막대와 헷갈리지 않게 **점수 숫자 없는 단계 선 그래프**(강하게 켜짐~눌림·정리) + 아래 등급 띠. 점 색은 그 시기 천간의 오행, 지금 시기는 크게 표시.
+- 그래프 아래 주제별 요약 4줄: 켜지는 시기 · 그중 흐름까지 좋은 시기 · 켜지지만 조심인 시기 · 눌리는 시기. 대운 요약은 지금부터 앞쪽만.
+- 같은 활성도라도 주제마다 띠(주제 지수)와 문장이 달라, 재물·커리어·인연 그래프가 서로 같은 그림으로 반복되지 않는다(문장 중복 0).
+- 관리자 카드에 '형태(풀이/발현 그래프)·범위(대운/세운 10년/월운 12달)' 선택 추가, 서버 검증(없는 형태·범위 거부) 추가.
+- 검증: `tests/weapon-chapters-sim.cjs` — 무기 확정 명식에서 다섯 그래프 모두 그림(1,980개), 무기 없음·미확정은 생략, 점수 숫자·빈 값·금지 표현 없음, 주제 사이 문장 중복 0.

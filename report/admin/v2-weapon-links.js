@@ -5,7 +5,7 @@
    · 사용: V2WeaponLinks.mount(el, { pw, flags, putFlags, msg }) */
 (function (G) {
   'use strict';
-  var DEPS = ['/luck-grade.js?v=20261125-strict', '/weapon-data.js?v=20261126-wc', '/weapon.js?v=20261126-wc', '/report/v2/weapon-chapters-data.js?v=20261126-wc', '/report/v2/weapon-chapters.js?v=20261126-wc'];
+  var DEPS = ['/luck-grade.js?v=20261125-strict', '/weapon-data.js?v=20261126-wc', '/weapon.js?v=20261126-wc', '/report/v2/weapon-chapters-data.js?v=20261126-wg', '/report/v2/weapon-chapters.js?v=20261126-wg'];
   var TOPIC_K = { self: '종합풀이', wealth: '재물운', career: '커리어운', love: '인연운', remedy: '개운법' };
   var USE_KEYS = ['first', 'second', 'power', 'overlap', 'rootExp', 'tenGod', 'daeun', 'seun', 'wolun', 'activation', 'favor'];
   var USE_S = { first: '1순위', second: '2순위', power: '세력', overlap: '병존·간여지동', rootExp: '통근·투간', tenGod: '십성', daeun: '대운', seun: '세운', wolun: '월운', activation: '활성도', favor: '유리도' };
@@ -23,10 +23,12 @@
     var fl = o.flags || null;
     function rowsHtml() {
       var ids = Object.keys(st.rows);
-      return '<div style="overflow-x:auto"><table class="tbl" style="font-size:.82rem;min-width:900px"><thead><tr><th>장 ID</th><th>주제(해석 템플릿)</th><th>사용</th>' + USE_KEYS.map(function (k) { return '<th>' + esc(USE_S[k]) + '</th>'; }).join('') + '<th></th></tr></thead><tbody>' +
+      return '<div style="overflow-x:auto"><table class="tbl" style="font-size:.82rem;min-width:1040px"><thead><tr><th>장 ID</th><th>주제(해석 템플릿)</th><th>형태</th><th>범위</th><th>사용</th>' + USE_KEYS.map(function (k) { return '<th>' + esc(USE_S[k]) + '</th>'; }).join('') + '<th></th></tr></thead><tbody>' +
         ids.map(function (id) {
           var r = st.rows[id];
           return '<tr data-id="' + esc(id) + '"><td><code>' + esc(id) + '</code></td><td><select data-k="topic">' + Object.keys(TOPIC_K).map(function (t) { return '<option value="' + t + '"' + (r.topic === t ? ' selected' : '') + '>' + TOPIC_K[t] + '</option>'; }).join('') + '</select></td>' +
+            '<td><select data-k="view"><option value="block"' + (r.view !== 'graph' ? ' selected' : '') + '>풀이</option><option value="graph"' + (r.view === 'graph' ? ' selected' : '') + '>발현 그래프</option></select></td>' +
+            '<td>' + (r.view === 'graph' ? '<select data-k="scope">' + [['daeun', '대운'], ['seun', '세운 10년'], ['wolun', '월운 12달']].map(function (x) { return '<option value="' + x[0] + '"' + (r.scope === x[0] ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select>' : '<span class="muted">—</span>') + '</td>' +
             '<td><input type="checkbox" data-k="on"' + (r.on ? ' checked' : '') + '></td>' + USE_KEYS.map(function (k) { return '<td style="text-align:center"><input type="checkbox" data-u="' + k + '"' + (r.use[k] ? ' checked' : '') + '></td>'; }).join('') +
             '<td><button class="btn" data-del="1">빼기</button></td></tr>';
         }).join('') + '</tbody></table></div>';
@@ -43,7 +45,7 @@
         '<div class="row" style="gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px"><input id="wlY" value="1990" style="width:70px">년 <input id="wlM" value="5" style="width:46px">월 <input id="wlD" value="17" style="width:46px">일 <input id="wlH" value="9" style="width:46px" placeholder="모름=빈칸">시 <select id="wlG"><option value="F">여</option><option value="M">남</option></select><select id="wlPick"></select><button class="btn" id="wlPrev">미리보기</button></div>' +
         '<div id="wlOut" style="margin-top:8px;padding:10px;border:1px dashed var(--line,#444);border-radius:8px;line-height:1.7;font-size:.9rem"></div></div>';
       var $ = function (s) { return el.querySelector(s); };
-      var pick = $('#wlPick'); if (pick && st.rows) pick.innerHTML = Object.keys(st.rows).map(function (id) { return '<option value="' + esc(id) + '">' + esc(id + ' · ' + TOPIC_K[st.rows[id].topic]) + '</option>'; }).join('');
+      var pick = $('#wlPick'); if (pick && st.rows) pick.innerHTML = Object.keys(st.rows).map(function (id) { return '<option value="' + esc(id) + '">' + esc(id + ' · ' + TOPIC_K[st.rows[id].topic] + (st.rows[id].view === 'graph' ? ' · 그래프' : '')) + '</option>'; }).join('');
       $('#wlFlag').onclick = function () {
         var v = !(fl && fl.weaponChapters);
         if (v && !confirm('운명의 타임라인 유료 장에 주무기 블록을 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
@@ -52,6 +54,8 @@
       el.querySelectorAll('tr[data-id]').forEach(function (tr) {
         var id = tr.getAttribute('data-id');
         tr.querySelector('[data-k="topic"]').onchange = function (e) { st.rows[id].topic = e.target.value; st.dirty = true; draw(); };
+        tr.querySelector('[data-k="view"]').onchange = function (e) { var r = st.rows[id]; if (e.target.value === 'graph') { r.view = 'graph'; r.scope = r.scope || 'seun'; r.use.activation = true; } else { delete r.view; delete r.scope; } st.dirty = true; draw(); };
+        var sc = tr.querySelector('[data-k="scope"]'); if (sc) sc.onchange = function (e) { st.rows[id].scope = e.target.value; st.dirty = true; draw(); };
         tr.querySelector('[data-k="on"]').onchange = function (e) { st.rows[id].on = e.target.checked; st.dirty = true; draw(); };
         tr.querySelectorAll('[data-u]').forEach(function (c) { c.onchange = function (e) { st.rows[id].use[c.getAttribute('data-u')] = e.target.checked; st.dirty = true; draw(); }; });
         tr.querySelector('[data-del]').onclick = function () { delete st.rows[id]; st.dirty = true; draw(); };
@@ -75,7 +79,7 @@
         var hh = ($('#wlH').value || '').trim(), inp = { year: +$('#wlY').value, month: +$('#wlM').value, day: +$('#wlD').value, hour: hh === '' ? null : +hh, minute: 0, gender: $('#wlG').value, calendar: 'solar' };
         var ch; try { ch = M.compute(inp); } catch (e) { out.textContent = '명식을 계산하지 못했어요: ' + e.message; return; }
         var id = $('#wlPick').value, r = st.rows[id]; if (!r) { out.textContent = '미리 볼 질문을 고르세요'; return; }
-        var h = w.preview({ M: M, ch: ch, now: Date.now(), name: '' }, r.topic, r.use);
+        var h = w.previewRow ? w.previewRow({ M: M, ch: ch, now: Date.now(), name: '' }, r) : w.preview({ M: M, ch: ch, now: Date.now(), name: '' }, r.topic, r.use);
         out.innerHTML = '<p class="muted" style="margin:0 0 6px">' + esc(id + ' · ' + TOPIC_K[r.topic] + (r.on ? '' : ' · (꺼진 질문 — 사용자에겐 안 보임)')) + '</p>' + (h || '<p class="muted">이 명식은 주무기가 없거나 미확정이라 이 주제에서는 블록이 생략돼요.</p>');
       };
     }

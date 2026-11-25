@@ -85,6 +85,101 @@
     "activation": true,
     "favor": true
    }
+  },
+  "timeline_self_20": {
+   "on": true,
+   "topic": "self",
+   "view": "graph",
+   "scope": "daeun",
+   "use": {
+    "first": true,
+    "second": true,
+    "power": false,
+    "overlap": false,
+    "rootExp": false,
+    "tenGod": false,
+    "daeun": true,
+    "seun": false,
+    "wolun": false,
+    "activation": true,
+    "favor": true
+   }
+  },
+  "timeline_self_24": {
+   "on": true,
+   "topic": "self",
+   "view": "graph",
+   "scope": "wolun",
+   "use": {
+    "first": true,
+    "second": true,
+    "power": false,
+    "overlap": false,
+    "rootExp": false,
+    "tenGod": false,
+    "daeun": false,
+    "seun": false,
+    "wolun": true,
+    "activation": true,
+    "favor": true
+   }
+  },
+  "timeline_wealth_14": {
+   "on": true,
+   "topic": "wealth",
+   "view": "graph",
+   "scope": "seun",
+   "use": {
+    "first": true,
+    "second": true,
+    "power": false,
+    "overlap": false,
+    "rootExp": false,
+    "tenGod": false,
+    "daeun": false,
+    "seun": true,
+    "wolun": false,
+    "activation": true,
+    "favor": true
+   }
+  },
+  "timeline_career_14": {
+   "on": true,
+   "topic": "career",
+   "view": "graph",
+   "scope": "seun",
+   "use": {
+    "first": true,
+    "second": true,
+    "power": false,
+    "overlap": false,
+    "rootExp": false,
+    "tenGod": false,
+    "daeun": false,
+    "seun": true,
+    "wolun": false,
+    "activation": true,
+    "favor": true
+   }
+  },
+  "timeline_love_14": {
+   "on": true,
+   "topic": "love",
+   "view": "graph",
+   "scope": "seun",
+   "use": {
+    "first": true,
+    "second": true,
+    "power": false,
+    "overlap": false,
+    "rootExp": false,
+    "tenGod": false,
+    "daeun": false,
+    "seun": true,
+    "wolun": false,
+    "activation": true,
+    "favor": true
+   }
   }
  },
  "stat": {
@@ -107,7 +202,12 @@
    "timeline_wealth_02": 30,
    "timeline_career_04": 30,
    "timeline_love_04": 30,
-   "timeline_self_37": 30
+   "timeline_self_37": 30,
+   "timeline_self_20": 30,
+   "timeline_self_24": 30,
+   "timeline_wealth_14": 30,
+   "timeline_career_14": 30,
+   "timeline_love_14": 30
   },
   "avgChars": {
    "self": 1669,
@@ -120,6 +220,7 @@
    "selfNote": 191,
    "others": 109
   },
+  "graphShown": 1980,
   "linkedSeun": 4518
  },
  "results": [

@@ -19,6 +19,7 @@
   var R = root.ReportV2 = root.ReportV2 || {};
   var VERSION = 'weapon-chapters-20261126-1';
   var TOPICS = ['self', 'wealth', 'career', 'love', 'remedy'], TOPIC_K = { self: '종합풀이', wealth: '재물운', career: '커리어운', love: '인연운', remedy: '개운법' };
+  var SCOPES = ['daeun', 'seun', 'wolun'], SCOPE_K = { daeun: '대운', seun: '세운', wolun: '월운' };
   var USE_KEYS = ['first', 'second', 'power', 'overlap', 'rootExp', 'tenGod', 'daeun', 'seun', 'wolun', 'activation', 'favor'];
   var USE_K = { first: '1순위 주무기', second: '2순위 주무기', power: '오행 세력', overlap: '병존·간여지동 근거', rootExp: '통근·투간 근거', tenGod: '십성 작용', daeun: '대운', seun: '세운', wolun: '월운', activation: '주무기 활성도', favor: '활용 유리도' };
   var BLOCKED = /^timeline_(health|creative)_|^timeline_self_(3[56]|h\d+)$/;   // 건강·사고수(health_*, self_35, 건강 상세 self_h1~6)·전생(creative_*, self_36) 장
@@ -32,6 +33,12 @@
     timeline_career_04: { on: true, topic: 'career', use: u(mix(ALL, { overlap: 0, rootExp: 0, daeun: 1, seun: 1, wolun: 1 })) },
     timeline_love_04: { on: true, topic: 'love', use: u(mix(ALL, { overlap: 0, rootExp: 0, power: 0, daeun: 1, seun: 1 })) },
     timeline_self_37: { on: true, topic: 'remedy', use: u(mix(ALL, { overlap: 0, rootExp: 0, daeun: 1, seun: 1, wolun: 1 })) },
+    // 발현 그래프(view:'graph', 2026-11-26) — 이미 '시기'를 다루는 장에 단계 선 그래프 + 흐름 등급 띠 + 주제별 요약. 범위(scope)는 대운·세운·월운 중 하나
+    timeline_self_20: { on: true, topic: 'self', view: 'graph', scope: 'daeun', use: u({ first: 1, second: 1, activation: 1, favor: 1, daeun: 1 }) },
+    timeline_self_24: { on: true, topic: 'self', view: 'graph', scope: 'wolun', use: u({ first: 1, second: 1, activation: 1, favor: 1, wolun: 1 }) },
+    timeline_wealth_14: { on: true, topic: 'wealth', view: 'graph', scope: 'seun', use: u({ first: 1, second: 1, activation: 1, favor: 1, seun: 1 }) },
+    timeline_career_14: { on: true, topic: 'career', view: 'graph', scope: 'seun', use: u({ first: 1, second: 1, activation: 1, favor: 1, seun: 1 }) },
+    timeline_love_14: { on: true, topic: 'love', view: 'graph', scope: 'seun', use: u({ first: 1, second: 1, activation: 1, favor: 1, seun: 1 }) },
   };
   var BANNED = /반드시|무조건|성공합니다|성공할 거예요|성공 확률|대박|보장|틀림없|천재|돈을 법니다|수익이 납니다|결혼합니다|결혼하게 됩니다|건강해집니다|병이|진단|월 \d+만/;
   var WD = function () { return root.MantraWeaponData; }, W = function () { return root.MantraWeapon; };
@@ -49,6 +56,7 @@
     Object.keys(d.rows).forEach(function (id) {
       var r = d.rows[id]; if (!/^timeline_[a-z]+_[\w]+$/.test(id) || BLOCKED.test(id) || !r || TOPICS.indexOf(r.topic) < 0) return;
       rows[id] = { on: r.on !== false, topic: r.topic, use: u(r.use) };
+      if (r.view === 'graph') { rows[id].view = 'graph'; rows[id].scope = SCOPES.indexOf(r.scope) >= 0 ? r.scope : 'seun'; }
     });
     return { version: Number.isInteger(d.version) ? d.version : 0, rows: rows };
   }
@@ -193,6 +201,54 @@
     body += timingBlock(B, 'remedy', use, w);
     return sec('주무기로 운을 쓰는 법', esc('색이나 물건보다 먼저, 주무기 ') + '<b>' + esc(EL_K[w.el] + '(' + w.groupName + ')') + '</b>' + esc('을(를) 생활에서 다루는 습관이 개운의 바탕이에요.'), body, '실천 항목은 예시예요. 내 생활에 맞는 것 하나만 골라 4주 해 보는 걸 권해요.');
   }
+  // ── 발현 그래프 블록(기존 점수 막대와 다른 모양: 단계 이름 눈금의 선 + 흐름 등급 띠, 점수 숫자 없음) ──
+  var EC = ['#4FB477', '#E5664F', '#D2A24C', '#B8C0CF', '#5B8DEF'], FAV_C = { good: '#5FBF9A', ok: 'rgba(255,255,255,.28)', care: '#FF9A3C' };
+  var LV_Y = { strong: 4, on: 3, shaky: 3, sup: 2, quiet: 1, trim: 0, hit: 0 };
+  function graphRows(B, scope) {
+    var tl = B.tl, M = B.M, ch = B.ch; if (!tl) return null;
+    if (scope === 'daeun') return { rows: tl.daeun, labs: tl.daeun.map(function (r) { return r.startAge + '세'; }), when: tl.daeun.map(function (r) { return r.startAge + '세 대운(' + r.startYear + '~)'; }), nowIdx: curIdx(tl.daeun, B.now) };
+    if (scope === 'seun') { var src = M.seunRange(ch, B.nowY, B.nowY + 9) || []; tl.seun.forEach(function (r, i) { if (r) r.src = src[i]; }); }
+    if (scope === 'seun') return { rows: tl.seun, labs: tl.seun.map(function (r) { return "'" + String(r.year).slice(2); }), when: tl.seun.map(function (r) { return r.year + '년'; }), nowIdx: tl.seun.findIndex(function (r) { return r.year === B.nowY; }) };
+    var all = [B.nowY, B.nowY + 1].reduce(function (a, y) { return a.concat((M.wolun(ch, y) || []).map(function (x) { var r = W().luck(M, ch, x, 'wolun'); if (r) { var k = new Date(x.startMs + 9 * 3600e3); r.src = x; r.startMs = x.startMs; r.month = k.getUTCMonth() + 1; r.y = k.getUTCFullYear(); } return r; })); }, []);
+    var ci = Math.max(0, curIdx(all, B.now)), rows = all.slice(ci, ci + 12);
+    return { rows: rows, labs: rows.map(function (r) { return r.month + '월'; }), when: rows.map(function (r) { return r.y + '년 ' + r.month + '월'; }), nowIdx: 0 };
+  }
+  function svgChart(G, use) {
+    var n = G.rows.length, CW = 44, LM = 62, top = 12, step = 15, H = use.favor ? 122 : 104, yOf = function (y) { return top + (4 - y) * step; }, wd = LM + n * CW, pts = [], dots = '', fav = '', xl = '';
+    G.rows.forEach(function (r, i) {
+      var a = r && r.best; if (!a) return; var x = LM + i * CW + CW / 2, y = yOf(LV_Y[a.level]), col = EC[Math.floor((r.s == null ? 0 : r.s) / 2)], hollow = a.level === 'shaky' || a.level === 'trim';
+      pts.push(x + ',' + y);
+      dots += '<circle cx="' + x + '" cy="' + y + '" r="' + (i === G.nowIdx ? 6 : 4.5) + '" fill="' + (hollow ? '#0d1122' : col) + '" stroke="' + col + '" stroke-width="2"' + (a.level === 'shaky' ? ' stroke-dasharray="2 2"' : '') + '><title>' + esc(G.when[i] + ' ' + r.gz + ' · ' + a.levelK + (r.favor ? ' · 흐름 ' + r.favor.n : '')) + '</title></circle>';
+      if (use.favor && r.favor) fav += '<rect x="' + (x - CW / 2 + 5) + '" y="' + (yOf(0) + 16) + '" width="' + (CW - 10) + '" height="6" rx="3" fill="' + FAV_C[r.favor.k] + '"/>';
+      xl += '<text x="' + x + '" y="' + (H - 3) + '" text-anchor="middle" font-size="10" fill="' + (i === G.nowIdx ? '#F3E3B5' : 'rgba(255,255,255,.55)') + '"' + (i === G.nowIdx ? ' font-weight="700"' : '') + '>' + esc(G.labs[i]) + '</text>';
+    });
+    var grid = [[4, '강하게 켜짐'], [3, '켜짐'], [2, '받쳐 줌'], [1, '조용함'], [0, '눌림·정리']].map(function (g) { var y = yOf(g[0]); return '<line x1="' + LM + '" x2="' + wd + '" y1="' + y + '" y2="' + y + '" stroke="rgba(255,255,255,.08)"/><text x="' + (LM - 5) + '" y="' + (y + 3) + '" text-anchor="end" font-size="9" fill="rgba(255,255,255,.5)">' + g[1] + '</text>'; }).join('');
+    var favL = use.favor ? '<text x="' + (LM - 5) + '" y="' + (yOf(0) + 22) + '" text-anchor="end" font-size="9" fill="rgba(255,255,255,.5)">흐름 등급</text>' : '';
+    return '<div style="overflow-x:auto;margin:8px 0"><svg viewBox="0 0 ' + wd + ' ' + H + '" style="display:block;width:100%;min-width:' + Math.round(wd * 0.8) + 'px;max-width:' + Math.round(wd * 1.35) + 'px" role="img" aria-label="주무기 활성도 단계 그래프">' + grid + favL + fav + '<polyline points="' + pts.join(' ') + '" fill="none" stroke="rgba(243,227,181,.75)" stroke-width="2"/>' + dots + xl + '</svg></div>';
+  }
+  function graphBlock(B, topic, scope, use) {
+    if (!B.sure || !B.tl) return null; var ws = pickWeapons(B, use); if (!ws.length || !use.activation) return null;
+    var G = graphRows(B, scope); if (!G || G.rows.filter(function (r) { return r && r.best; }).length < 3) return null;
+    // 띠(유리도): 재물·인연·커리어는 그 주제의 기존 지수 등급(이 장 위 시기 그래프와 같은 엔진 지수), 없으면 전체 흐름 등급. 활성도와 합치지 않는다
+    var LGm = root.MantraLuckGrade, lvl = scope === 'wolun' ? 'wolun' : 'seun', dk = { wealth: 'wealth', love: 'love', career: 'career' }[topic], favName = '그 시기 전체 흐름 등급';
+    if (dk && scope !== 'daeun' && LGm && LGm.metric && B.M.evaluateDomainLuck) {
+      var used = 0; G.rows = G.rows.map(function (r) { if (!r || !r.src) return r; var dd = null; try { dd = B.M.evaluateDomainLuck(B.ch, r.src, lvl); } catch (e) { dd = null; } var o = dd && dd[dk]; if (!o || !Number.isFinite(o.score)) return r; used++; var gg = LGm.metric(dk, o.score), c = {}; for (var k in r) c[k] = r[k]; c.favor = { k: gg.k, n: gg.n }; return c; });
+      if (used) favName = { wealth: '재물 지수 등급', love: '인연 지수 등급', career: '직업 지수 등급' }[dk] + '(이 장 위 시기 그래프와 같은 엔진 지수)';
+    }
+    var d = DD(), g = d.graph, w = ws[0], strong = WD().el[w.el].strengths.slice(0, 2).join('·');
+    var from = scope === 'daeun' ? Math.max(0, G.nowIdx) : 0;   // 요약은 지금부터 앞쪽만(그래프는 평생 전체)
+    var pick = function (f) { return G.rows.map(function (r, i) { return i >= from && f(r) ? G.when[i] : null; }).filter(Boolean); };
+    var isOn = function (r) { return r && r.best && /strong|on|shaky/.test(r.best.level); };
+    var onL = pick(isOn), both = use.favor ? pick(function (r) { return isOn(r) && r.favor && r.favor.k === 'good'; }) : [], over = use.favor ? pick(function (r) { return isOn(r) && r.favor && r.favor.k === 'care'; }) : [], low = pick(function (r) { return r && r.best && /hit|trim/.test(r.best.level); });
+    var lim = function (a) { return a.slice(0, 4).join(', ') + (a.length > 4 ? ' 외 ' + (a.length - 4) + '구간' : ''); };
+    var T = g[topic] || g.self, lines = [];
+    lines.push(onL.length ? fill(T.on, { list: lim(onL), s: strong }) : fill(T.none, { s: strong }));
+    if (both.length) lines.push(fill(T.both, { list: lim(both) }));
+    if (over.length) lines.push(fill(T.over, { list: lim(over) }));
+    if (low.length) lines.push(fill(T.low, { list: lim(low) }));
+    var leg = '선 = 주무기 활성도(' + EL_K[w.el] + ' · ' + WD().el[w.el].title + ')' + (use.favor ? ' · 아래 띠 = ' + favName + '(초록 좋음·회색 무난·주황 조심)' : '') + ' · 점 색 = 그 시기 천간의 오행 · 두 값은 합치지 않아요';
+    return sec(fill(g.cap[scope], { t: TOPIC_K[topic] }), esc(fill(T.lead[scope] || T.lead.seun, { s: strong })), svgChart(G, use) + '<p class="dp-mi">' + esc(leg) + '</p><ul class="dp-ul">' + lines.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>', '');
+  }
   var BUILD = { self: selfBlock, wealth: wealthBlock, career: careerBlock, love: loveBlock, remedy: remedyBlock };
 
   function has(custom) { return /^wp:/.test(String(custom || '')); }
@@ -200,12 +256,14 @@
     if (!API.on) return null;
     var cid = String(part.custom).slice(3), row = cfg.rows[cid] || cfg.rows[id]; if (!row || !row.on || BLOCKED.test(cid)) return null;
     var B = base(H); if (!B) return null;
-    var html = null; try { html = BUILD[row.topic](B, row.use); } catch (e) { html = null; }
+    var html = null; try { html = row.view === 'graph' ? graphBlock(B, row.topic, row.scope, row.use) : BUILD[row.topic](B, row.use); } catch (e) { html = null; }
     if (html && BANNED.test(html.replace(/<[^>]+>/g, ' '))) return null;
     return html;
   }
   // 관리자 미리보기·검사용: 장 ID 없이 주제·설정으로 바로 그린다
-  function preview(H, topic, use) { var B = base(H); if (!B || !BUILD[topic]) return null; return BUILD[topic](B, u(use || DEFAULT_ROWS[Object.keys(DEFAULT_ROWS).filter(function (k) { return DEFAULT_ROWS[k].topic === topic; })[0]].use)); }
+  // 관리자 미리보기: 설정 줄 하나(형태·범위 포함)로 그린다
+  function previewRow(H, row) { var B = base(H); if (!B || !row) return null; var c = sanitize({ rows: { timeline_x_preview: row } }), r = c && c.rows.timeline_x_preview; if (!r) return null; return r.view === 'graph' ? graphBlock(B, r.topic, r.scope, r.use) : BUILD[r.topic](B, r.use); }
+  function preview(H, topic, use) { var B = base(H); if (!B || !BUILD[topic]) return null; return BUILD[topic](B, u(use || DEFAULT_ROWS[Object.keys(DEFAULT_ROWS).filter(function (k) { return DEFAULT_ROWS[k].topic === topic && DEFAULT_ROWS[k].view !== 'graph'; })[0]].use)); }
 
   // ── 공개 스위치·설정 불러오기(aptitude-chapters.js 와 같은 방식) ──
   function localFlag() {
@@ -237,7 +295,7 @@
   if (R.ReadingFeature) inject();
 
   var API = { VERSION: VERSION, on: false, TOPICS: TOPICS, TOPIC_K: TOPIC_K, USE_KEYS: USE_KEYS, USE_K: USE_K, DEFAULT_ROWS: DEFAULT_ROWS, BLOCKED: BLOCKED, BANNED: BANNED,
-    has: has, render: render, preview: preview, setConfig: setConfig, rows: rowsOf, inject: inject, sanitize: sanitize, ready: ready, readyWithin: readyWithin, localFlag: localFlag };
+    has: has, render: render, preview: preview, previewRow: previewRow, SCOPES: SCOPES, setConfig: setConfig, rows: rowsOf, inject: inject, sanitize: sanitize, ready: ready, readyWithin: readyWithin, localFlag: localFlag };
   R.WeaponChapters = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
 })(typeof window !== 'undefined' ? window : globalThis);
