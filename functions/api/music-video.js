@@ -56,7 +56,8 @@ async function gate(request, env, world, sd) {
   const admin = isAdmin(request, env), viewAsFree = admin && (request.headers.get('x-view-as') || '') === 'free';
   if (admin && !viewAsFree) return { ok: true, admin: true };
   if (!(await flagOn(env))) return { ok: false, status: 404, error: 'off' };
-  const access = await worldAccess(env), a = access[world]; if (!a || !a.enabled || !a.paid) return { ok: false, status: 403, error: 'paid-topic-only' };
+  let access; try { access = await worldAccess(env, { strict: true }); } catch { return { ok: false, status: 503, error: 'commerce-unavailable' }; }   // 2026-11-26: KV 오류면 열지 않음
+  const a = access[world]; if (!a || !a.enabled || !a.paid) return { ok: false, status: 403, error: 'paid-topic-only' };
   const member = await memberOf(request, env); if (!member) return { ok: false, status: 401, error: 'login', locked: { world, reason: 'login' } };
   const key = await sajuKey(sd); let owned = [];
   try { owned = await ownedWorlds(env, member.id, key); } catch { return { ok: false, status: 503, error: 'commerce-unavailable' }; }
@@ -133,7 +134,7 @@ export async function onRequestPost({ request, env }) {
 
   const song = L.fromInputs(x), key = await sha256(JSON.stringify({ v: song.version, m: modelOf(env), lyrics: song.lyrics, style: song.style, d: song.sections.map(s => s.durationMs) }));
   // panels: 이 곡의 칸만(주인공 일주·성별·주제), fill: 빈 칸을 화면이 하나씩 채워 달라고 할 수 있는지
-  const reply = async r => json({ ok: true, key, song: publicSong(song, r), audio: '/api/music-video?a=' + key, panels: await getPanels(env, songPanelIds(song)), fill: imageReady(env), videosPending: await pendingVideos(env, songPanelIds(song)) });
+  const reply = async r => json({ ok: true, key, song: publicSong(song, r), audio: await audioUrl(env, key), panels: await getPanels(env, songPanelIds(song)), fill: imageReady(env), videosPending: await pendingVideos(env, songPanelIds(song)) });
   const rec = await env.GLOSSARY_KV.get(SONG(key), 'json');
   if (rec && rec.status === 'done') return reply(needSync(rec) ? await syncTiming(env, key, song, rec, null) : rec);   // 예전에 만든 곡도 처음 열 때 한 번 자막 시각을 맞춘다
   if (rec && rec.status === 'pending' && Date.now() - rec.at < PENDING_MS) return json({ ok: false, pending: true, key }, 202);
@@ -194,7 +195,7 @@ async function syncTiming(env, key, song, rec, bytes) {
 export async function onRequestGet({ request, env }) {
   const u = new URL(request.url);
   const a = u.searchParams.get('a');
-  if (a !== null) return audio(request, env, a);
+  if (a !== null) return (isAdmin(request, env) || await audioTokenOk(env, a, u.searchParams.get('e'), u.searchParams.get('t'))) ? audio(request, env, a) : new Response('not found', { status: 404, headers: { 'cache-control': 'no-store' } });
   if (u.searchParams.get('vt')) { if (!isAdmin(request, env)) return json({ error: 'unauthorized' }, 401); if (!L.parsePanelId(u.searchParams.get('vt'))) return json({ error: 'bad-slot' }, 400); return videoCheck(env, u.searchParams.get('vt')); }
   if (u.searchParams.get('admin')) {
     if (!isAdmin(request, env)) return json({ error: 'unauthorized' }, 401);
@@ -220,11 +221,26 @@ export async function onRequestGet({ request, env }) {
   return json({ error: 'not-found' }, 404);
 }
 
+// 2026-11-26 보안 2차: mp3 주소에 서명·만료(6시간)를 붙인다. 열쇠(sha256)는 공개 화면 코드로 계산할 수 있어, 서명이 없으면 산 적 없는 사람도 남의 노래를 받을 수 있었다.
+//   서명은 구매 확인(gate)을 통과한 POST 응답에서만 준다. 비밀값: MV_AUDIO_SECRET(없으면 ADMIN_PASSWORD). 둘 다 없으면 재생 불가(닫힌 쪽).
+const AUDIO_TTL = 6 * 3600;
+const audioSecret = env => String(env.MV_AUDIO_SECRET || env.ADMIN_PASSWORD || '');
+async function audioSig(env, k, e) {
+  const sec = audioSecret(env); if (!sec) return '';
+  const ck = await crypto.subtle.importKey('raw', new TextEncoder().encode('mv-audio:' + sec), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  return [...new Uint8Array(await crypto.subtle.sign('HMAC', ck, new TextEncoder().encode(k + '.' + e)))].slice(0, 16).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+export async function audioUrl(env, k, now = Date.now()) { const e = Math.floor(now / 1000) + AUDIO_TTL; return '/api/music-video?a=' + k + '&e=' + e + '&t=' + await audioSig(env, k, e); }
+export async function audioTokenOk(env, k, e, t, now = Date.now()) {
+  if (!KEY_RE.test(String(k || '')) || !/^\d{9,11}$/.test(String(e || '')) || !/^[0-9a-f]{32}$/.test(String(t || '')) || +e < now / 1000) return false;
+  const want = await audioSig(env, k, e); if (!want || want.length !== t.length) return false;
+  let d = 0; for (let i = 0; i < want.length; i++) d |= want.charCodeAt(i) ^ t.charCodeAt(i); return d === 0;
+}
 async function audio(request, env, k) {
   if (!KEY_RE.test(k) || !env.CLIPS_R2) return new Response('not found', { status: 404 });
   const key = 'mv-' + k + '.mp3', head = await env.CLIPS_R2.head(key); if (!head) return new Response('not found', { status: 404 });
   const size = head.size, m = /^bytes=(\d*)-(\d*)$/.exec(request.headers.get('range') || '');
-  const h = { 'content-type': 'audio/mpeg', 'accept-ranges': 'bytes', 'cache-control': 'public, max-age=86400' };
+  const h = { 'content-type': 'audio/mpeg', 'accept-ranges': 'bytes', 'cache-control': 'private, max-age=21600' };
   if (m && (m[1] || m[2])) {
     let start = m[1] ? +m[1] : Math.max(0, size - +m[2]), end = m[1] && m[2] ? Math.min(+m[2], size - 1) : size - 1;
     if (start >= size || start > end) return new Response(null, { status: 416, headers: { 'content-range': 'bytes */' + size } });

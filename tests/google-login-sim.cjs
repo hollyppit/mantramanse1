@@ -12,7 +12,7 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   const env = { GLOSSARY_KV: KV, GOOGLE_CLIENT_ID: 'g-id', GOOGLE_CLIENT_SECRET: 'g-secret', SUPABASE_URL: 'https://sb.test', SUPABASE_SERVICE_KEY: 'svc', SUPABASE_ANON_KEY: 'anon' };
   let users, identities, links, profile, calls;
   const reset = () => {
-    users = { old: { id: 'old', email: 'old@gmail.com' }, kakao: { id: 'kakao', email: 'same@gmail.com' } };
+    users = { old: { id: 'old', email: 'old@gmail.com', email_confirmed_at: '2026-11-01T00:00:00Z' }, kakao: { id: 'kakao', email: 'same@gmail.com', email_confirmed_at: '2026-11-01T00:00:00Z' } };
     identities = [{ user_id: 'old', provider: 'google', provider_id: '111111' }];
     links = {}; calls = [];
     profile = { sub: '111111', email: 'old@gmail.com', email_verified: true, name: '예전 회원' };
@@ -71,6 +71,9 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   // 인증 안 된 이메일은 이메일로 합치지 않음(새 회원도 만들지 않고 실패)
   reset(); profile = { sub: '555555', email: 'same@gmail.com', email_verified: false };
   x = await login(); ok(/google_login=fail/.test(x.back) && !links['555555'], '인증 안 된 이메일: 실패(남의 회원에 붙지 않음)');
+  // 2026-11-26 보안 2차: 기존 회원 쪽 이메일이 인증 안 됐으면(남이 내 이메일로 먼저 만든 계정) 구글 인증 이메일이어도 합치지 않는다
+  reset(); delete users.kakao.email_confirmed_at; profile = { sub: '666666', email: 'same@gmail.com', email_verified: true };
+  x = await login(); ok(/google_login=fail/.test(x.back) && !links['666666'] && !x.tokens, '기존 계정 이메일 미인증: 합치지 않음(사전 가로채기 방지)');
   // 코드 교환 실패·state 불일치
   reset(); x = await login('bad'); ok(/google_login=fail/.test(x.back) && !x.ck, '코드 교환 실패: 실패 표시');
   const s = await get(start, '/api/auth/google/start?next=/report/my/'); const sc = cookieOf(s, G.STATE_COOKIE).split(';')[0];

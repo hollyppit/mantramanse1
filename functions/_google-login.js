@@ -59,7 +59,13 @@ export async function memberForGoogle(env, prof) {
   if (rows.length) return rows[0].user_id;                                  // ② 연결표
   if (!prof.email || !prof.verified) throw new Error('google-email-unverified');
   const byEmail = await sbRest(env, 'rpc/commerce_user_by_email', { method: 'POST', body: JSON.stringify({ p_email: prof.email }) });
-  if (typeof byEmail === 'string' && byEmail) { await link(env, prof.sub, byEmail); return byEmail; }   // ③ 같은 인증 이메일
+  if (typeof byEmail === 'string' && byEmail) {   // ③ 같은 인증 이메일
+    // 2026-11-26 보안 2차: 기존 회원 쪽 이메일도 인증된 것일 때만 합친다. 남이 내 이메일로 (인증 없이) 먼저 만든 계정에 내 구글 로그인이 붙으면
+    //   그 사람이 내 구매·저장한 사주를 보게 된다(사전 가로채기). 인증 안 된 계정이면 합치지 않고 멈춘다(같은 이메일로 새로 만들 수도 없음).
+    const r = await authAdmin(env, 'users/' + encodeURIComponent(byEmail)); const u = r.ok ? await r.json().catch(() => null) : null;
+    if (!u || !u.email_confirmed_at || String(u.email || '').toLowerCase() !== prof.email.toLowerCase()) throw new Error('google-email-conflict');
+    await link(env, prof.sub, byEmail); return byEmail;
+  }
   const c = await authAdmin(env, 'users', { method: 'POST', body: JSON.stringify({ email: prof.email, email_confirm: true, user_metadata: { provider: 'google', name: prof.name || null, avatar_url: prof.picture }, app_metadata: { provider: 'google', providers: ['google'] } }) });
   const cj = await c.json().catch(() => null);
   if (!c.ok || !cj || !cj.id) throw new Error('supabase-create:' + c.status);

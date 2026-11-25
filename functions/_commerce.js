@@ -68,9 +68,10 @@ export async function memberOf(request, env) {
 }
 
 // ── 세계 유료 여부 · 무료 장
-export async function worldAccess(env) {
+// strict: 잠금 판정용(2026-11-26 보안 2차) — KV 를 읽다 오류가 나면 '전부 무료'로 열지 않고 오류를 던진다(호출한 쪽이 '잠시 뒤 다시'로 닫는다)
+export async function worldAccess(env, { strict = false } = {}) {
   const kv = kvOf(env); let saved = null;
-  try { saved = kv ? await kv.get(WORLDS_KEY, 'json') : null; } catch { saved = null; }
+  try { saved = kv ? await kv.get(WORLDS_KEY, 'json') : null; } catch (e) { if (strict) throw e; saved = null; }
   const out = {}; (saved && Array.isArray(saved.worlds) ? saved.worlds : []).forEach(w => { if (w && w.id) out[w.id] = { paid: w.access === 'paid', enabled: w.enabled !== false, name: w.name || '' }; });
   return out;
 }
@@ -114,7 +115,7 @@ export async function chapterGate(request, env, { topicId, chapterId, sd }) {
   if (isMonitor(request, env)) return { ok: true, world, monitor: true };
   const admin = isAdmin(request, env), viewAsFree = admin && (request.headers.get('x-view-as') || '') === 'free';
   if (admin && !viewAsFree) return { ok: true, world, admin: true };
-  const access = await worldAccess(env);
+  let access; try { access = await worldAccess(env, { strict: true }); } catch { return { ok: false, world, reason: 'unavailable' }; }
   if (!access[world] || !access[world].paid) return { ok: true, world };
   const free = await freeChapters(env);
   if (free[world] === chapterId) return { ok: true, world, free: true };

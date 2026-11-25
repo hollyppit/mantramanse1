@@ -38,7 +38,7 @@ assert.equal(eleven, 0);
 r = await call('POST', '/api/music-video', { sd, topic: 'self' }, admin); assert.equal(r.status, 200, JSON.stringify(r.j)); assert.equal(eleven, 1);
 assert.equal(lastBody.model_id, 'music_v2_5'); assert.equal(lastBody.composition_plan.chunks.length, 7); assert.equal(lastBody.composition_plan.chunks.reduce((a, c) => a + c.duration_ms, 0), 180000);
 assert(!JSON.stringify(lastBody).includes(String(sd.birth.solarY) + '년'), '생년이 외부로 나감');
-assert(r.j.song.sections.length === 7 && /^\/api\/music-video\?a=[0-9a-f]{64}$/.test(r.j.audio)); const key = r.j.key; assert(r2.has('mv-' + key + '.mp3'));
+assert(r.j.song.sections.length === 7 && /^\/api\/music-video\?a=[0-9a-f]{64}&e=\d+&t=[0-9a-f]{32}$/.test(r.j.audio)); const key = r.j.key, audioUrl = r.j.audio; assert(r2.has('mv-' + key + '.mp3'));
 // 4) 같은 사주·주제 → 캐시(외부 호출 없음). 브라우저가 가사를 보내도 무시
 r = await call('POST', '/api/music-video', { sd, topic: 'self', lyrics: '아무 가사' }, admin); assert.equal(r.status, 200); assert.equal(eleven, 1); assert.equal(r.j.key, key);
 // 5) 다른 주제는 다른 곡
@@ -63,9 +63,17 @@ assert.equal(kv.get('mv:count:' + new Date(Date.now() + 9 * 3600e3).toISOString(
 { const x = L.inputsOf(sd, 'career'), s = L.fromInputs(x); const enc = new TextEncoder(); const d = await crypto.subtle.digest('SHA-256', enc.encode(JSON.stringify({ v: s.version, m: 'music_v2_5', lyrics: s.lyrics, style: s.style, d: s.sections.map(q => q.durationMs) }))); const ck = [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, '0')).join('');
   kv.set('mv:song:' + ck, JSON.stringify({ status: 'pending', at: Date.now() })); r = await call('POST', '/api/music-video', { sd, topic: 'career' }, admin); assert.equal(r.status, 202); assert.equal(r.j.pending, true); assert.equal(eleven, 3); kv.delete('mv:song:' + ck); }
 // 9) 재생: 전체·Range·잘못된 열쇠
-r = await call('GET', '/api/music-video?a=' + key); assert.equal(r.status, 200); assert.equal(r.headers.get('content-type'), 'audio/mpeg'); assert.equal(r.txt.length, 4000);
-r = await call('GET', '/api/music-video?a=' + key, null, { range: 'bytes=100-199' }); assert.equal(r.status, 206); assert.equal(r.txt.length, 100); assert.equal(r.headers.get('content-range'), 'bytes 100-199/4000');
+r = await call('GET', audioUrl); assert.equal(r.status, 200); assert.equal(r.headers.get('content-type'), 'audio/mpeg'); assert.equal(r.txt.length, 4000);
+r = await call('GET', audioUrl, null, { range: 'bytes=100-199' }); assert.equal(r.status, 206); assert.equal(r.txt.length, 100); assert.equal(r.headers.get('content-range'), 'bytes 100-199/4000');
 r = await call('GET', '/api/music-video?a=../x'); assert.equal(r.status, 404);
+// 9-1) 2026-11-26 보안: 서명 없는 열쇠·바꾼 서명·만료·다른 노래 열쇠에 남의 서명은 404, 관리자는 서명 없이도 재생
+{ const u = new URL('http://x' + audioUrl), e = u.searchParams.get('e'), t = u.searchParams.get('t');
+  assert.equal((await call('GET', '/api/music-video?a=' + key)).status, 404, '서명 없음');
+  assert.equal((await call('GET', `/api/music-video?a=${key}&e=${e}&t=${(t[0] === 'a' ? 'b' : 'a') + t.slice(1)}`)).status, 404, '바꾼 서명');
+  assert.equal((await call('GET', `/api/music-video?a=${key}&e=${+e + 1}&t=${t}`)).status, 404, '만료 시각 바꿈');
+  assert.equal((await call('GET', `/api/music-video?a=${'0'.repeat(64)}&e=${e}&t=${t}`)).status, 404, '다른 열쇠');
+  const old = await mod.audioUrl(env, key, Date.now() - 7 * 3600e3); assert.equal((await call('GET', old)).status, 404, '6시간 지난 주소');
+  assert.equal((await call('GET', '/api/music-video?a=' + key, null, admin)).status, 200, '관리자는 서명 없이'); }
 // 10) 관리자 화면 정보·패널: 권한 없으면 401, 만들기·비우기·주제 칸
 r = await call('GET', '/api/music-video?admin=1'); assert.equal(r.status, 401);
 r = await call('GET', '/api/music-video?admin=1', null, admin); assert.equal(r.status, 200); assert.equal(r.j.day, '갑자'); assert(r.j.hero && r.j.hero.nameKo === '푸른 쥐'); assert.equal(r.j.configured.music, true); assert.equal(r.j.flag, true);

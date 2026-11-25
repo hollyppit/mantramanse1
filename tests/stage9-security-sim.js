@@ -80,10 +80,12 @@ const read = p => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
   for (const p of ['/community/', '/community/cm.js', '/gate/', '/report/admin/', '/report/admin/staff.html', '/api/community/me', '/api/account/consent']) {
     const h = wrap(p).headers; ok(h.get('x-content-type-options') === 'nosniff' && h.get('x-frame-options') === 'SAMEORIGIN' && /frame-ancestors 'self'/.test(h.get('content-security-policy') || '') && h.get('referrer-policy'), '보안 머리말: ' + p);
   }
-  for (const p of ['/report/', '/report/v2/', '/', '/api/commerce/access', '/communityx', '/api/communityfeed']) ok(!wrap(p).headers.get('x-frame-options'), '기존 서비스 경로는 그대로: ' + p);
+  // 2026-11-26 보안 2차: 결제 화면(/report/)·루트·나머지 API 에도 같은 머리말 + https 면 HSTS
+  for (const p of ['/report/', '/report/v2/', '/', '/api/commerce/access', '/communityx', '/api/communityfeed']) { const h = wrap(p).headers; ok(h.get('x-frame-options') === 'SAMEORIGIN' && h.get('x-content-type-options') === 'nosniff' && /^max-age=\d{7,}/.test(h.get('strict-transport-security') || ''), '모든 경로 보안 머리말·HSTS: ' + p); }
+  ok(!MW.withSecurity(new Request('http://localhost/report/'), new Response('x')).headers.get('strict-transport-security'), 'http(로컬)에는 HSTS 없음');
   const keep = wrap('/community/', new Response('x', { headers: { 'x-frame-options': 'DENY' } })); ok(keep.headers.get('x-frame-options') === 'DENY', '이미 있는 머리말은 덮어쓰지 않음');
   const redir = wrap('/community/', new Response(null, { status: 302, headers: { location: '/gate/' } })); ok(redir.status === 302 && redir.headers.get('location') === '/gate/', '되돌려 보내기 응답 유지');
-  const mwRes = await MW.onRequest({ request: new Request('https://x.test/report/v2/'), env: {}, next: () => new Response('own') }); ok((await mwRes.text()) === 'own' && !mwRes.headers.get('x-frame-options'), '미들웨어: 심층 분석 응답은 그대로');
+  const mwRes = await MW.onRequest({ request: new Request('https://x.test/report/v2/'), env: {}, next: () => new Response('own') }); ok((await mwRes.text()) === 'own' && mwRes.headers.get('x-frame-options') === 'SAMEORIGIN', '미들웨어: 심층 분석 응답 본문 그대로 + 보안 머리말');
 
   // ── 하루 한도(도배·봇)
   const day = new Date().toISOString().slice(0, 10);
