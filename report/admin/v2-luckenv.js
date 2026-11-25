@@ -90,7 +90,7 @@
     // 심리 솔루션(2026-11-25, psych.js): 만세력 새 탭 — 마음의 상처 결·시기별 스트레스·심리 상태·솔루션, 표시 전용
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>심리 솔루션</b> — 현재: <b style="color:' + (fl && fl.psych ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.psych ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leSY"' + (fl ? '' : ' disabled') + '>' + (fl && fl.psych ? '심리 솔루션 끄기' : '심리 솔루션 켜기') + '</button><a class="btn" href="/?mantraFlags=psych" target="_blank" rel="noopener">미리보기 주소</a></div>' +
-      '<p class="muted" style="margin:8px 0 0">켜면 만세력에 <b>심리 솔루션</b> 탭이 생깁니다: 한눈에 보기 → 잠재적 트라우마(명리 구조로 읽는 마음의 상처 패턴, 명식 전체로 고른 최대 5개) → 시기별 스트레스와 감정 상태(대운·교운기·곡선 → 세운 3년 → 월운) → 심리 솔루션(지금 시기·패턴별·용신 보완·도움 받을 곳). 입력 없이 읽기만 하는 화면이며, 엔진 결과를 바꾸지 않습니다.</p></div>';
+      '<p class="muted" style="margin:8px 0 0">켜면 만세력에 <b>심리 솔루션</b> 탭이 생깁니다: 한눈에 보기 → 잠재적 트라우마 진단(명리로 읽는 마음의 상처 결, 최대 3개) → 시기별 스트레스와 감정 해석(대운·교운기·곡선 → 세운 3년 → 월운) → 심리 솔루션(현대 심리학 기법 + 명리적 솔루션 종합 카드, 도움 받을 곳). 입력 없이 읽기만 하는 화면이며 엔진 결과를 바꾸지 않습니다.</p></div>';
     // 특기·적성(2026-11-25, aptitude.js): 만세력 새 탭 — 특기 5영역·적성 6분야·운동·스포츠 상세·최종 추천, 표시 전용
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>특기·적성 분석</b> — 현재: <b style="color:' + (fl && fl.aptitude ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.aptitude ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leAPT"' + (fl ? '' : ' disabled') + '>' + (fl && fl.aptitude ? '특기·적성 끄기' : '특기·적성 켜기') + '</button><a class="btn" href="/?mantraFlags=aptitude" target="_blank" rel="noopener">미리보기 주소</a></div>' +
