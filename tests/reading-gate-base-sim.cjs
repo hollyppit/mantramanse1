@@ -24,6 +24,11 @@ for (const p of ['engine.js', 'report/v2/saju-data.js']) vm.runInThisContext(fs.
   assert.ok([401, 402].includes(b.status), 'base 만 붙인 우회 요청도 잠김: ' + b.status + ' ' + JSON.stringify(b.body).slice(0, 120));
   assert.equal(b.body.locked && b.body.locked.world, world, '잠금 세계가 본문 계약의 세계');
   assert.ok(!b.body.result, '본문이 오지 않음');
+  // 2-1) 통과 권한(관리자)이면 빠른 잠금·본문 계약 잠금 모두 통과해 본문을 받는다
+  env.ADMIN_PASSWORD = 'admin-pass-0123456789';
+  const adm = await serveReviewed({ env, request: new Request('https://x/api/movingtoon-reading', { method: 'POST', headers: { authorization: 'Bearer ' + env.ADMIN_PASSWORD }, body: JSON.stringify({ sd, chapter: { id: target.id, title: target.title, paragraphs: [{ id: '0', text: '검사용 문장입니다. 잠금 판정만 확인합니다.' }] } }) }) });
+  assert.equal(adm.status, 200, '통과 권한이면 본문');
+  delete env.ADMIN_PASSWORD;
   // 3) 무료로 바꾸면 같은 요청이 잠기지 않는다(잠금 판정이 실제로 세계 설정을 따름)
   memory.set('worlds:config', JSON.stringify({ worlds: [] }));
   const c = await statusOf({ id: 'x', title: 'x', base: target.legacyIds[0] });
