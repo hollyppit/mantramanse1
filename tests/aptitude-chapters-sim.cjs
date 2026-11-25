@@ -68,6 +68,25 @@ for (let i = 0; i < N; i++) {
   assert.ok(rep.chapters.every((x, k) => x.no === k + 1), '장 번호');
   n++;
 }
+// 두 사람 활동 궁합(pair·pairHtml): 공통 분야는 둘 다 '드러남' 이상, 함께 할 활동은 실제 세부 분야·혼자 하는 활동 제외, 역할·축은 실제 값
+{ let pairs = 0, withActs = 0;
+  for (let i = 0; i < 120; i++) {
+    const a = M.compute({ year: 1960 + (i * 7) % 45, month: 1 + (i * 5) % 12, day: 1 + (i * 11) % 28, hour: (i * 3) % 24, minute: 0, gender: 'F', calendar: 'solar' });
+    const b = M.compute({ year: 1958 + (i * 13) % 47, month: 1 + (i * 7) % 12, day: 1 + (i * 3) % 28, hour: i % 9 ? (i * 5) % 24 : null, minute: 0, gender: 'M', calendar: 'solar' });
+    const p = AC.pair(M, a, b, '나', i % 2 ? '민준' : '서윤'), ra = A.build(M, a), rb = A.build(M, b);
+    assert.ok(p && p.names[0] === '나', '두 사람 결과');
+    p.common.forEach(cm => { const x = ra.fields.find(f => f.id === cm.id), y = rb.fields.find(f => f.id === cm.id); assert.ok(x.level !== 'lo' && y.level !== 'lo', '공통 분야는 둘 다 드러남 이상'); });
+    assert.ok(p.acts.length <= 3 && p.acts.every(x => !D.PAIR_SKIP.includes(x.id)), '함께 할 활동 3개 이하·혼자 하는 활동 제외');
+    p.roles.forEach(r => { const x = ra.talents.find(t => t.id === r.id), y = rb.talents.find(t => t.id === r.id); assert.ok((x.level === 'hi' && y.level === 'lo') || (y.level === 'hi' && x.level === 'lo'), '역할은 한쪽 뚜렷·한쪽 은은'); });
+    p.axes.forEach(ax => assert.ok(!/\{|undefined/.test(ax.text), '축 문장 빈칸: ' + ax.text));
+    const h = AC.pairHtml(M, a, b, '나', '민준'), t = h.replace(/<[^>]+>/g, ' ');
+    assert.ok(/두 사람이 함께 하면 좋은 활동/.test(h) && h.includes(D.PAIR_NOTE), '카드');
+    assert.ok(!BAN.test(t) && !/를을|을를|은는 |는은 /.test(t), '카드 금지 표현·조사: ' + ((t.match(BAN) || [''])[0]));
+    pairs++; if (p.acts.length) withActs++;
+  }
+  assert.equal(AC.pair(M, null, null), null, '명식 없으면 null');
+  console.log('두 사람 활동 궁합 ' + pairs + '쌍 통과(함께 할 활동 있음 ' + withActs + '쌍)');
+}
 // 연결 블록: 스위치 꺼짐이면 없음, 켜짐이면 장 제목으로 이어 줌
 { const ch = M.compute({ year: 1990, month: 3, day: 15, hour: 14, minute: 30, gender: 'F', calendar: 'solar' });
   AC.on = false; assert.equal(AC.block({ M, ch }, 'work'), null, '꺼지면 블록 없음');
@@ -77,8 +96,9 @@ for (let i = 0; i < N; i++) {
 // 화면 연결: viewer·reading-feature·derived-chapters·스위치
 const read = f => fs.readFileSync(path.join(root, f), 'utf8');
 assert.ok(/R\.AptChapters\.readyWithin\(2500\)\)S\.rep=R\.AptChapters\.add\(/.test(read('report/v2/viewer.js')), 'viewer 연결');
-assert.ok(/custom==='apt'/.test(read('report/v2/reading-feature.js')) && /\['timeline_career_01',\{custom:'apt',kind:'work'\}\],\['timeline_wealth_02',\{custom:'apt',kind:'money'\}\],\['timeline_wealth_03',\{custom:'apt',kind:'spend'\}\]/.test(read('report/v2/reading-feature.js')), '연결 블록 자리');
+assert.ok(/custom==='apt'/.test(read('report/v2/reading-feature.js')) && /\['timeline_career_01',\{custom:'apt',kind:'work'\}\],\['timeline_wealth_02',\{custom:'apt',kind:'money'\}\],\['timeline_wealth_03',\{custom:'apt',kind:'spend'\}\],\['timeline_self_27',\{custom:'apt',kind:'meet'\}\]/.test(read('report/v2/reading-feature.js')), '연결 블록 자리');
 assert.ok(/aptitude-chapters\.js\?v=/.test(read('report/v2/index.html')) && /\/aptitude\.js\?v=/.test(read('report/v2/index.html')), '사용자 화면이 모듈을 불러옴');
 assert.ok(/'aptChapters'/.test(read('functions/api/luck-flags.js')) && /aptChapters: false/.test(read('feature-flags.js')) && /id="leAC"/.test(read('report/admin/v2-luckenv.js')), '스위치·관리자');
+assert.ok(/aptPairCard\(Rr\) \+ evidence/.test(read('report/v2/love-compat.js')) && /S\.resInp = Object\.assign\(\{\}, i\)/.test(read('report/v2/love-compat.js')), '궁합 장 연결');
 console.log('특기·적성 장 통과 — 사주 ' + n + '개(20세 미만 ' + kids + '개), 장 제목 문장 ' + Object.keys(titles).length + '종, 부업 문단 ' + side + '개, 재물 블록 돈 구조 ' + moneyN + '·지출 ' + spendN + '개');
 console.log('재충전 활동 분포', Object.entries(recharge).sort((a, b) => b[1] - a[1]).map(x => x[0] + ' ' + x[1]).join(' · '));

@@ -3,6 +3,7 @@
    · 커리어운 심화 '내 특기가 일에서 무기가 되는 방식'(timeline_career_talent): '내 재능의 값'(timeline_career_02) 바로 뒤
    · 커리어운 심화 '일 밖에서 날을 세우는 법 — 재충전과 사이드 프로젝트'(timeline_career_recharge): '앞으로 10년 일의 흐름 그래프'(timeline_career_14) 바로 뒤
    · 연결 블록: '일하는 방식 성향'(timeline_career_01)에 짧은 요약(reading-feature.js custom:'apt'). 'rest' 블록은 재충전 장이 '커리어 날을 세우는 습관' 바로 앞에 오고 그 장은 블록 목록(SPEC)에 없어 붙이지 않는다
+   · 인연(2026-11-25): 궁합 장 '그 사람과 나의 궁합'(love-compat.js) 결과에 '두 사람이 함께 하면 좋은 활동'(pairHtml) · 종합풀이 '인연이 열리는 곳 · 순위'(timeline_self_27) 끝 '활동으로 넓히는 만남 자리'(meet)
    · 재물운 심화 블록(2026-11-25): '이렇게 벌면 편해요'(timeline_wealth_02) 끝 '특기가 돈이 되는 구조'(20세 미만 제외)·'돈이 새는 자리 점검'(timeline_wealth_03) 끝 '취미에 나가는 돈 점검'
    · 표시 전용: /aptitude.js(MantraAptitude.build) · engine careerProfile 결과만 읽는다. AI·DB 문안·새 점수 없음. 문안은 aptitude-chapters-data.js
    · 20세 미만은 진로·동아리 말로 바꾼다. 실력·수입·건강을 단정하지 않는다(tests/aptitude-chapters-sim.cjs 금지 표현 검사).
@@ -11,7 +12,7 @@
 (function (root) {
   'use strict';
   var R = root.ReportV2 = root.ReportV2 || {};
-  var VERSION = 'aptitude-chapters-20261125-2';
+  var VERSION = 'aptitude-chapters-20261125-3';
   var IDS = { self: 'timeline_self_talent', work: 'timeline_career_talent', rest: 'timeline_career_recharge' };
   var TITLES = { timeline_self_talent: '내 손이 먼저 가는 일 — 특기와 끌리는 활동', timeline_career_talent: '내 특기가 일에서 무기가 되는 방식', timeline_career_recharge: '일 밖에서 날을 세우는 법 — 재충전과 사이드 프로젝트' };
   var TOPIC = { timeline_self_talent: 'self', timeline_career_talent: 'career', timeline_career_recharge: 'career' };
@@ -213,7 +214,63 @@
     }
     if (kind === 'money') return moneyBlock(C);
     if (kind === 'spend') return spendBlock(C);
+    if (kind === 'meet') return meetBlock(C);
     return null;
+  }
+  // 종합풀이 '인연이 열리는 곳 · 순위'(timeline_self_27) 끝: 활동으로 넓히는 만남 자리
+  function meetBlock(C) {
+    var D = DD(), ax = C.r.sport.axes.filter(function (a) { return a.id === 'solo_team'; })[0], side = ax && ax.ok ? ax.side : 'bal';
+    var soc = C.r.fields.filter(function (x) { return x.id === 'social'; })[0];
+    var subs = D.MEET_IDS.map(function (id) { return C.subs[id]; }).filter(Boolean).sort(function (a, b) { return (b.sub.score - a.sub.score) || (a.sub.id < b.sub.id ? -1 : 1); }).slice(0, 3);
+    if (!subs.length) return null;
+    return '<section class="dp-embed dp dp-apt"><div class="cap">활동으로 넓히는 만남 자리</div><p class="lead">' + esc(D.MEET_SIDE[side] || D.MEET_SIDE.bal) + '</p>' +
+      '<div class="dp-tags">' + subs.map(function (x) { return '<span class="dp-chip">' + esc(x.sub.name + ' · ' + x.sub.ex[0]) + '</span>'; }).join('') + '</div>' +
+      '<p class="dp-mi">' + esc((soc && soc.ok ? '사회·교류형은 ' + soc.levelK + '이에요. ' : '') + D.MEET_TIP) + '</p></section>';
+  }
+
+  // ───────── 인연운 궁합 장(love-compat.js) '두 사람이 함께 하면 좋은 활동' ─────────
+  //   pair(M, chA, chB, nameA, nameB) → { common, roles, axes, acts } · pairHtml(...) → 궁합 결과 카드(lc-card) HTML
+  function pair(M, chA, chB, nameA, nameB) {
+    var A = APT(); if (!A || !chA || !chB) return null;
+    var ra = A.build(M, chA), rb = A.build(M, chB); if (!ra || !ra.ok || !rb || !rb.ok) return null;
+    var D = DD(), na = nameA || '나', nb = nameB || '그 사람';
+    var fb = {}; rb.fields.forEach(function (x) { fb[x.id] = x; });
+    var common = ra.fields.filter(function (x) { var y = fb[x.id]; return x.ok && y && y.ok && x.level !== 'lo' && y.level !== 'lo'; })
+      .sort(function (x, y) { return (Math.min(y.score, fb[y.id].score) - Math.min(x.score, fb[x.id].score)) || (x.id < y.id ? -1 : 1); })
+      .map(function (x) { return { id: x.id, name: x.name, a: x.levelK, b: fb[x.id].levelK }; });
+    var tb = {}; rb.talents.forEach(function (x) { tb[x.id] = x; });
+    var roles = [];
+    ra.talents.forEach(function (x) { var y = tb[x.id]; if (!x.ok || !y || !y.ok) return;
+      if (x.level === 'hi' && y.level === 'lo') roles.push({ who: na, id: x.id, name: x.name, role: D.PAIR_ROLE[x.id] });
+      else if (y.level === 'hi' && x.level === 'lo') roles.push({ who: nb, id: x.id, name: x.name, role: D.PAIR_ROLE[x.id] }); });
+    var axb = {}; rb.sport.axes.forEach(function (a) { axb[a.id] = a; });
+    var fill = function (t, a, b) { return t.replace('{a}은', J.은(na)).replace('{b}는', J.은(nb)).replace('{aSide}', a).replace('{bSide}', b); };
+    var axes = ra.sport.axes.map(function (a) {
+      var b = axb[a.id], T = D.PAIR_AXIS[a.id]; if (!a.ok || !b || !b.ok || !T || a.side === 'bal' || b.side === 'bal') return null;
+      if (a.side === b.side) return { id: a.id, kind: 'same', text: T.same.replace('{side}', a.sideK) };
+      return { id: a.id, kind: 'diff', text: fill(T.diff, a.sideK, b.sideK).replace('{L}', a.L).replace('{R}', a.R) };
+    }).filter(Boolean);
+    axes.sort(function (x, y) { return (x.kind === 'diff' ? 0 : 1) - (y.kind === 'diff' ? 0 : 1); });
+    // 함께 해 볼 활동: 두 사람 모두 '취향에 따라' 이상인 세부 분야를 합친 점수 순 — 같은 분야에서 두 개까지
+    var sb = {}; Object.keys(rb.details).forEach(function (fid) { rb.details[fid].subs.forEach(function (x) { sb[x.id] = x; }); });
+    var cand = []; Object.keys(ra.details).forEach(function (fid) { ra.details[fid].subs.forEach(function (x) { var y = sb[x.id]; if (x.ok && y && y.ok && D.PAIR_SKIP.indexOf(x.id) < 0) cand.push({ id: x.id, name: x.name, ex: x.ex, field: ra.details[fid].name, fid: fid, s: x.score + y.score, both: x.rec !== 'pref' && y.rec !== 'pref' }); }); });
+    cand.sort(function (x, y) { return (y.both - x.both) || (y.s - x.s) || (x.id < y.id ? -1 : 1); });
+    var acts = [], perField = {};
+    cand.forEach(function (x) { if (acts.length >= 3 || (perField[x.fid] || 0) >= 2) return; perField[x.fid] = (perField[x.fid] || 0) + 1; acts.push(x); });
+    return { names: [na, nb], common: common.slice(0, 3), roles: roles.slice(0, 3), axes: axes.slice(0, 3), acts: acts };
+  }
+  function pairHtml(M, chA, chB, nameA, nameB) {
+    var p = pair(M, chA, chB, nameA, nameB); if (!p) return '';
+    var D = DD(), na = p.names[0], nb = p.names[1];
+    var li = function (a) { return '<ul>' + a.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>'; };
+    var common = p.common.length ? J.은('두 사람') + ' ' + p.common.map(function (c) { return c.name; }).join(', ') + ' 쪽에 함께 끌리기 쉬워요. 둘 다 ‘드러남’ 이상인 분야만 골랐어요.'
+      : '두 사람이 끌리는 분야가 서로 달라요. 각자 좋아하는 활동에 상대를 한 번씩 초대해 보는 방식이 잘 맞아요.';
+    return '<div class="lc-card lc-apt"><h3>두 사람이 함께 하면 좋은 활동</h3><p class="lc-sub">만세력 특기·적성과 같은 계산으로 두 사람을 나란히 봤어요</p>' +
+      '<p class="lc-lead">' + esc(common) + '</p>' +
+      (p.acts.length ? '<div class="lc-k">함께 해 볼 활동</div>' + li(p.acts.map(function (x) { return x.name + ' · ' + x.field + ' — ' + x.ex.slice(0, 2).join(', '); })) : '') +
+      (p.roles.length ? '<div class="lc-k">서로 채워 주는 역할</div>' + li(p.roles.map(function (r) { return J.은(r.who) + ' ' + r.name + ' 쪽 힘이 뚜렷해서, 함께 할 때 ' + r.role + '을 맡으면 편해요.'; })) : '') +
+      (p.axes.length ? '<div class="lc-k">활동 방식 맞춰 보기</div>' + li(p.axes.map(function (a) { return a.text; })) : '') +
+      '<p class="lc-note">' + esc(D.PAIR_NOTE) + '</p></div>';
   }
   // 재물운 심화 '이렇게 벌면 편해요'(timeline_wealth_02) 끝: 특기가 돈이 되는 구조 — 20세 미만은 넣지 않는다
   function moneyBlock(C) {
@@ -268,7 +325,7 @@
   }
   if (root.document && root.fetch) { try { ready(); } catch (e) { } }
 
-  var API = { VERSION: VERSION, IDS: IDS, TITLES: TITLES, BANNED: BANNED, on: false, buildAll: buildAll, add: add, block: block, ready: ready, readyWithin: readyWithin, localFlag: localFlag,
+  var API = { VERSION: VERSION, IDS: IDS, TITLES: TITLES, BANNED: BANNED, on: false, buildAll: buildAll, add: add, block: block, pair: pair, pairHtml: pairHtml, ready: ready, readyWithin: readyWithin, localFlag: localFlag,
     selfTalent: selfTalent, workTalent: workTalent, restTalent: restTalent };
   R.AptChapters = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;

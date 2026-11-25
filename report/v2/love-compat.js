@@ -116,7 +116,7 @@
       S.busy = false;
       if (d && d.quota && S.status) S.status.quota = d.quota;
       if (d && d.ok) {
-        S.res = d.result; S.rel = REL[i.rel] ? i.rel : 'lover'; S.editing = false;   // 폼에서 고른 관계로 결과를 연다(결과 화면 단추로 바꿔도 횟수는 그대로)
+        S.res = d.result; S.resInp = Object.assign({}, i); S.rel = REL[i.rel] ? i.rel : 'lover'; S.editing = false;   // 폼에서 고른 관계로 결과를 연다(결과 화면 단추로 바꿔도 횟수는 그대로)
         var rec = Object.assign({}, i); S.list = [rec].concat(S.list.filter(function (x) { return keyOf(x) !== keyOf(rec); })).slice(0, 8); saveList(S.list);
         track('love_compat_view');
       } else if (d && (d.status === 401 || d.status === 402)) { S.locked = d.locked && d.locked.reason || 'purchase'; }
@@ -249,7 +249,20 @@
       '<h4>양방향 근거(십성·오행)</h4><div class="lc-2">' + evDir(D.ab) + evDir(D.ba) + '</div>' +
       '<h4>일간으로 본 서로의 자리 · 강약</h4><ul>' + tgLine(a, b, Rr.stems.aSeesB) + tgLine(b, a, Rr.stems.bSeesA) + (Rr.stems.hap ? '<li><b>일간끼리 천간합</b> — 마음이 쉽게 끌리는 인연입니다.</li>' : '') + (Rr.stems.chung ? '<li><b>일간끼리 천간충</b> — 생각이 정면으로 맞서 말다툼이 잦습니다.</li>' : '') + '<li>강약: ' + esc(a) + ' ' + esc(Rr.strength.a) + ' · ' + esc(b) + ' ' + esc(Rr.strength.b) + '</li>' + (Rr.balanceNotes || []).map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' +
       (ip.length ? '<h4>원국 상호작용</h4>' + ul(ip.map(function (x) { return x.text; })) : '') + (res.hourKnown && !res.hourKnown.b ? '<p class="lc-note">상대의 태어난 시각을 몰라 시주 없이 비교했어요.</p>' : '') + '</details>';
-    return hero + glance + dirs + relSec + amhapCard(res) + dayCard(res) + evidence + '<p class="lc-note">궁합 점수는 두 사람의 사주를 견준 상대적인 참고 지표이며, 관계가 잘될 확률이 아닙니다. 같은 점수라도 서로 맞춰 가는 노력에 따라 관계는 달라집니다.</p>';
+    return hero + glance + dirs + relSec + amhapCard(res) + dayCard(res) + aptPairCard(Rr) + evidence + '<p class="lc-note">궁합 점수는 두 사람의 사주를 견준 상대적인 참고 지표이며, 관계가 잘될 확률이 아닙니다. 같은 점수라도 서로 맞춰 가는 노력에 따라 관계는 달라집니다.</p>';
+  }
+
+  // 두 사람이 함께 하면 좋은 활동(2026-11-25, aptitude-chapters.js pairHtml — 스위치 aptChapters). 서버 호출 없이 두 명식을 화면에서 계산한다
+  var aptCache = { key: '', html: '' };
+  function aptPairCard(Rr) {
+    var AC = R.AptChapters, M = root.Manse, p = S.resInp; if (!AC || !AC.on || !AC.pairHtml || !M || !S.me || !p) return '';
+    var key = JSON.stringify([S.me, p, Rr.names]); if (aptCache.key === key) return aptCache.html;
+    var html = ''; try {
+      var inB = { year: +p.year, month: +p.month, day: +p.day, hour: p.hourUnknown ? null : +p.hour, minute: +p.minute || 0, calendar: p.calendar, leap: !!p.leap, gender: p.gender, lon: +p.lon || 126.98 };
+      var inA = Object.assign({}, S.me); if (inA.hourUnknown) inA.hour = null; delete inA.hourUnknown;
+      html = AC.pairHtml(M, M.compute(inA), M.compute(inB), Rr.names.a, Rr.names.b) || '';
+    } catch (e) { html = ''; }
+    aptCache = { key: key, html: html }; return html;
   }
 
   // ───────── 그리기 ─────────
