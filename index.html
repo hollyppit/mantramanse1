@@ -1257,6 +1257,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="luck-care.js?v=20261125-strict"></script>
 <script src="luck-element-theme.js"></script>
 <script src="compat-group.js"></script>
+<script src="compat-flow.js"></script>
 <script src="luck-alerts.js"></script>
 <script src="signal-colors.js"></script>
 <script src="glossary-cases.js"></script>
@@ -7918,8 +7919,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     // elementFlow(오행 흐름 상자)는 [모두 켜기]와 따로 관리자 스위치로 켠다(functions/api/luck-flags.js)
     // luckCycle(오행 사이클: 대운 30년·세운 2년 묶음)도 따로 켠다
     // gyeokAnalysis(오행·강약 탭 '사주 격국 분석' 카드, gyeok-structure.js)도 따로 켠다
-    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis && F.luckOverlay && F.tenGodRoles && F.macroEra && F.luckEnv && F.luckAlerts && F.mulsangArt && F.sajuHouse && F.aptitude && F.groupCompat && F.psych && window.MANTRA_OVERLAY_W)) return;   // 오행 겹쳐 보기 층 무게(overlayWeights)도 여기서 받는다
-    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle', 'luckOverlay', 'tenGodRoles', 'macroEra', 'luckEnv', 'luckAlerts', 'mulsangArt', 'sajuHouse'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (d.aptitude === true && !F.aptitude) { F.aptitude = true; ch = true; } if (d.groupCompat === true && !F.groupCompat) { F.groupCompat = true; ch = true; } if (d.psych === true && !F.psych) { F.psych = true; ch = true; } if (d.overlayWeights && typeof d.overlayWeights === 'object') { window.MANTRA_OVERLAY_W = d.overlayWeights; if (F.luckOverlay) ch = true; } if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
+    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis && F.luckOverlay && F.tenGodRoles && F.macroEra && F.luckEnv && F.luckAlerts && F.mulsangArt && F.sajuHouse && F.aptitude && F.groupCompat && F.pairFlow && F.psych && window.MANTRA_OVERLAY_W)) return;   // 오행 겹쳐 보기 층 무게(overlayWeights)도 여기서 받는다
+    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle', 'luckOverlay', 'tenGodRoles', 'macroEra', 'luckEnv', 'luckAlerts', 'mulsangArt', 'sajuHouse'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (d.aptitude === true && !F.aptitude) { F.aptitude = true; ch = true; } if (d.groupCompat === true && !F.groupCompat) { F.groupCompat = true; ch = true; } if (d.pairFlow === true && !F.pairFlow) { F.pairFlow = true; ch = true; } if (d.psych === true && !F.psych) { F.psych = true; ch = true; } if (d.overlayWeights && typeof d.overlayWeights === 'object') { window.MANTRA_OVERLAY_W = d.overlayWeights; if (F.luckOverlay) ch = true; } if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
   })();
   window.addEventListener('mantra:daycompat', () => { try { readForm(); render(); } catch (e) { } });   // 일주 적합도 2판(compat-day.js) 스위치가 늦게 켜지면 다시 그린다
   // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
@@ -11870,8 +11871,101 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (!PR.inp) PR.inp = prDefault();
     if (grOn() && PR.mode === 'group' && !GR.adding) return GR.res ? grResult() : `${grModeSeg()}${grPicker()}`;
     if (PR.editing || !PR.res) return `${grModeSeg()}<div class="cp-title"><h2>${GR.adding ? '무리에 추가할 사람' : '나와 상대의 궁합'}</h2><p class="note">${GR.adding ? '입력한 사람은 최근 본 사람에 저장되고, 여러 명 궁합에 바로 추가됩니다.' : '두 사람의 사주를 직접 비교해 점수와 등급, 이유를 알려 드립니다.'}</p></div>${prForm()}`;
-    return grModeSeg() + prResult();
+    return grModeSeg() + prResult() + pfCard();
   }
+  // ───────────── 두 사람 운 흐름 겹쳐 보기(2026-11-26, compat-flow.js) ─────────────
+  // 스위치 MANTRA_FLAGS.pairFlow(기본 꺼짐, 관리자 /api/luck-flags pairFlow). 두 사람 각자의 세운 흐름 점수(엔진 combined) 그대로 두 곡선으로 그린다.
+  // 궁합 점수·엔진 계산은 건드리지 않는다. 해석은 두 값의 관계(둘 다 좋음·엇갈림·교차)만.
+  const pfOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.pairFlow === true && window.MantraPairFlow);
+  const PF = { span: 'near', sel: null };   // span: 'near'(올해 −5~+10) · 'long'(−5~+25)
+  const PF_A = 'var(--accent)', PF_B = '#D6336C';
+  function pfData() {
+    const curY = M.yearPillarAt(NOW).sajuYear, to = curY + (PF.span === 'long' ? 25 : 10);
+    return MantraPairFlow.build(M, S.ch, PR.ch, { from: curY - 5, to, names: { a: prMyName(), b: prName() }, LG: window.MantraLuckGrade, curY });
+  }
+  function pfSvg(D, curY, sel) {
+    const narrow = (window.innerWidth || 1000) < 560, n = D.rows.length;
+    const W = narrow ? 360 : 680, H = narrow ? 250 : 270, L = 30, R = 10, T = 22, B = 52;
+    const step = (W - L - R) / Math.max(1, n), x = Y => L + step * (Y - D.from + 0.5);
+    const RG = 60, y = v => T + (RG - Math.max(-RG, Math.min(RG, v))) / (2 * RG) * (H - T - B);   // 운세 흐름 그래프와 같은 ±60 세로축
+    const C = (M.LUCK_CFG && M.LUCK_CFG.condition) || { tailwind: 18, caution: -12 };
+    let s = `<svg class="pf-svg" xmlns="${NS}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(D.names.a)}와 ${esc(D.names.b)}의 연도별 세운 흐름 점수 곡선">`;
+    // 함께 좋음·함께 조심·속도 다름 기둥(배경)
+    D.rows.forEach(r => { if (!r.kind || r.kind === 'mixed') return; const c = r.kind === 'both' ? 'var(--sg-good)' : r.kind === 'care' ? 'var(--sg-care)' : 'var(--samjae)'; s += `<rect x="${(x(r.year) - step / 2).toFixed(1)}" y="${T}" width="${step.toFixed(1)}" height="${H - T - B}" style="fill:${c};opacity:${r.kind === 'split' ? .07 : .11}"/>`; });
+    // 등급 기준선(좋음 +18 · 조심 −12)과 0
+    s += `<line x1="${L}" x2="${W - R}" y1="${y(0)}" y2="${y(0)}" style="stroke:var(--ink-3);stroke-width:1"/>`;
+    s += `<line x1="${L}" x2="${W - R}" y1="${y(C.tailwind)}" y2="${y(C.tailwind)}" style="stroke:var(--sg-good)" stroke-dasharray="4 4"/><text x="${W - R}" y="${y(C.tailwind) - 4}" text-anchor="end" style="fill:var(--sg-good);font-size:10px;font-weight:700;paint-order:stroke;stroke:var(--surface);stroke-width:3px">좋음 +${C.tailwind}</text>`;
+    s += `<line x1="${L}" x2="${W - R}" y1="${y(C.caution)}" y2="${y(C.caution)}" style="stroke:var(--sg-care)" stroke-dasharray="4 4"/><text x="${W - R}" y="${y(C.caution) + 12}" text-anchor="end" style="fill:var(--sg-care);font-size:10px;font-weight:700;paint-order:stroke;stroke:var(--surface);stroke-width:3px">조심 ${C.caution}</text>`;
+    for (const g of [60, 30, -30, -60]) s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:var(--line)"/>`;
+    for (const g of [60, 30, 0, -30, -60]) s += `<text x="${L - 5}" y="${y(g) + 3.5}" text-anchor="end" style="fill:var(--ink-3);font-size:10px">${g > 0 ? '+' + g : g}</text>`;
+    // 연도 눈금
+    const every = n > 24 ? 5 : narrow ? 2 : 1;
+    D.rows.forEach(r => { if ((r.year - D.from) % every && r.year !== curY) return; s += `<text x="${x(r.year)}" y="${H - B + 14}" text-anchor="middle" style="fill:${r.year === curY ? 'var(--seal)' : 'var(--ink-3)'};font-size:10px;font-weight:${r.year === curY ? 800 : 400}">${narrow || every > 1 ? "'" + String(r.year).slice(2) : r.year}</text>`; });
+    // 대운이 바뀌는 해(각자 색 삼각형)
+    const tri = (Y, row, col) => { const cx = x(Y), cy = H - B + 24 + row * 11; return `<path d="M${cx - 4} ${cy + 4}L${cx + 4} ${cy + 4}L${cx} ${cy - 3}Z" style="fill:${col}"/>`; };
+    D.daeunMarks.a.forEach(d => { s += tri(d.year, 0, PF_A); }); D.daeunMarks.b.forEach(d => { s += tri(d.year, 1, PF_B); });
+    if (D.daeunMarks.a.length || D.daeunMarks.b.length) s += `<text x="${L - 5}" y="${H - B + 33}" text-anchor="end" style="fill:var(--ink-3);font-size:9px">대운</text>`;
+    // 올해 선
+    if (curY >= D.from && curY <= D.to) s += `<line x1="${x(curY)}" x2="${x(curY)}" y1="${T}" y2="${H - B}" style="stroke:var(--seal);stroke-width:1.3" stroke-dasharray="4 3"/><text x="${x(curY) + 4}" y="${T - 7}" style="fill:var(--seal);font-size:10px;font-weight:700">올해</text>`;
+    if (sel != null) s += `<rect x="${(x(sel) - step / 2).toFixed(1)}" y="${T}" width="${step.toFixed(1)}" height="${H - T - B}" style="fill:none;stroke:var(--ink-2);stroke-width:1.2" rx="3"/>`;
+    // 곡선(빈 해는 끊는다) — 부드러운 곡선(Catmull-Rom)
+    const curve = (who, col, dash) => {
+      const segs = []; let cur = [];
+      D.rows.forEach(r => { const p = r[who]; if (p) cur.push([x(r.year), y(p.v)]); else if (cur.length) { segs.push(cur); cur = []; } }); if (cur.length) segs.push(cur);
+      let out = '';
+      segs.forEach(P => {
+        let d = `M${P[0][0].toFixed(1)} ${P[0][1].toFixed(1)}`;
+        for (let i = 0; i < P.length - 1; i++) { const p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || p2; d += `C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(1)} ${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(1)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(1)} ${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`; }
+        out += `<path d="${d}" style="fill:none;stroke:${col};stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round"${dash ? ' stroke-dasharray="7 4"' : ''}/>`;
+      });
+      D.rows.forEach(r => { const p = r[who]; if (!p) return; const cx = x(r.year), cy = y(p.v), big = r.year === sel ? 1.5 : 0;
+        out += who === 'a' ? `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${3 + big}" style="fill:${col};stroke:var(--surface);stroke-width:1.5"/>` : `<rect x="${(cx - 3 - big).toFixed(1)}" y="${(cy - 3 - big).toFixed(1)}" width="${6 + 2 * big}" height="${6 + 2 * big}" style="fill:${col};stroke:var(--surface);stroke-width:1.5"/>`; });
+      return out;
+    };
+    s += curve('a', PF_A, false) + curve('b', PF_B, true);
+    // 교차 지점(두 곡선이 엇갈리는 자리)
+    D.crosses.forEach(c => { const i = Math.floor(c.x - D.from), r0 = D.rows[i], r1 = D.rows[i + 1]; if (!r0 || !r1) return; const t = c.x - r0.year, v = r0.a.v + (r1.a.v - r0.a.v) * t; const cx = L + step * (c.x - D.from + 0.5), cy = y(v);
+      s += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="6" style="fill:var(--surface);stroke:var(--ink);stroke-width:1.6"/><path d="M${cx - 2.5} ${cy - 2.5}L${cx + 2.5} ${cy + 2.5}M${cx + 2.5} ${cy - 2.5}L${cx - 2.5} ${cy + 2.5}" style="stroke:var(--ink);stroke-width:1.4"/>`; });
+    // 방향이 엇갈리는 해(⇅ 표시)
+    D.rows.forEach(r => { if (r.move === 'diverge') s += `<text x="${x(r.year)}" y="${T + 11}" text-anchor="middle" style="fill:var(--samjae);font-size:12px;font-weight:800">⇅</text>`; });
+    // 누르는 자리
+    D.rows.forEach(r => { const tip = `${r.year}년 · ${D.names.a} ${r.a ? signed(r.a.v) + ' ' + r.a.gn : '—'} · ${D.names.b} ${r.b ? signed(r.b.v) + ' ' + r.b.gn : '—'}`; s += `<rect class="hit" x="${(x(r.year) - step / 2).toFixed(1)}" y="0" width="${step.toFixed(1)}" height="${H}" style="fill:transparent;cursor:pointer" data-pfy="${r.year}" data-tip="${esc(tip)}"/>`; });
+    return s + '</svg>';
+  }
+  function pfCard() {
+    if (!pfOn() || !S.ch || !PR.ch) return '';
+    let D; try { D = pfData(); } catch (e) { return ''; }
+    if (!D || !D.rows.some(r => r.a && r.b)) return '';
+    const curY = M.yearPillarAt(NOW).sajuYear;
+    if (PF.sel == null || PF.sel < D.from || PF.sel > D.to) PF.sel = curY;
+    const r = D.rows.find(q => q.year === PF.sel), A = D.names.a, B = D.names.b;
+    const chip = p => `<span class="sgchip" style="--c:var(--sg-${p.g});--on:${p.g === 'ok' ? 'var(--ink)' : '#fff'}">${p.gn}</span>`;
+    const who = (nm, p, col, shape) => `<div class="pf-who" style="--pc:${col}"><div class="pf-who-h"><i class="pf-mk ${shape}"></i><b>${esc(nm)}</b>${p ? `<span class="muted small">${p.age}세</span>` : ''}</div>${p ? `<div class="pf-who-v"><span class="pf-gz">${esc(p.gz)}년</span><b class="num">${signed(p.v)}</b>${chip(p)}</div><p class="small muted">${p.daeun ? `대운 ${esc(p.daeun.gz)} (${p.daeun.startYear}년부터)` : '대운 시작 전'}</p>` : '<p class="small muted">아직 태어나기 전이에요.</p>'}</div>`;
+    const ico = { both: '◼︎', split: '◼︎', care: '◼︎', diverge: '⇅', cross: '✕' }, icoCol = { both: 'var(--sg-good)', split: 'var(--samjae)', care: 'var(--sg-care)', diverge: 'var(--samjae)', cross: 'var(--ink)' };
+    return `<section class="card pf-card" id="pfCard">
+      <div class="card-h"><h2>두 사람의 운 흐름 겹쳐 보기</h2><span class="note">각자의 세운 흐름 점수 · 연도 기준</span></div>
+      <div class="pf-top"><div class="pf-legend"><span><i class="pf-ln" style="--pc:${PF_A}"></i>${esc(A)}</span><span><i class="pf-ln dash" style="--pc:${PF_B}"></i>${esc(B)}</span></div>
+        <div class="seg" role="group" aria-label="기간"><button type="button" data-pfspan="near" aria-pressed="${PF.span === 'near'}">앞뒤 15년</button><button type="button" data-pfspan="long" aria-pressed="${PF.span === 'long'}">30년</button></div></div>
+      <div class="pf-chart">${pfSvg(D, curY, PF.sel)}</div>
+      <div class="pf-keys small muted"><span><i style="background:var(--sg-good)"></i>함께 좋음</span><span><i style="background:var(--samjae)"></i>한쪽 좋음·한쪽 조심</span><span><i style="background:var(--sg-care)"></i>함께 조심</span><span><b style="color:var(--samjae)">⇅</b> 방향이 엇갈리는 해</span><span><b>✕</b> 곡선이 엇갈리는 자리</span><span><b style="color:${PF_A}">▲</b><b style="color:${PF_B}">▲</b> 대운이 바뀌는 해</span></div>
+      ${r ? `<div class="pf-year"><div class="pf-year-h"><b>${r.year}년</b>${r.year === curY ? ' <span class="now">올해</span>' : ''}<span class="muted small"> 연도를 누르면 바뀌어요</span></div>
+        <div class="pf-two">${who(A, r.a, PF_A, 'dot')}${who(B, r.b, PF_B, 'sq')}</div>
+        <p class="small">${esc(MantraPairFlow.yearLine(r, D.names))}</p></div>` : ''}
+      <ul class="pf-lines">${D.lines.map(l => `<li><b style="color:${icoCol[l.k]}">${ico[l.k]}</b> ${esc(l.t)}</li>`).join('')}</ul>
+      <p class="note">각자의 사주 기준으로 계산한 세운 흐름 점수(운세 흐름 탭과 같은 값)를 같은 연도 위에 겹친 그림이에요. 두 사람의 궁합 점수와는 따로 계산되며, 관계가 잘되고 못되는 것을 정하지 않아요.</p>
+    </section>`;
+  }
+  function pfRefresh() { const el = document.getElementById('pfCard'); if (el) el.outerHTML = pfCard(); }
+  document.addEventListener('click', ev => {
+    const t = ev.target; if (!t.closest) return;
+    const y = t.closest('[data-pfy]'); if (y) { PF.sel = +y.getAttribute('data-pfy'); pfRefresh(); return; }
+    const sp = t.closest('[data-pfspan]'); if (sp) { PF.span = sp.getAttribute('data-pfspan') === 'long' ? 'long' : 'near'; pfRefresh(); }
+  });
+  { const st = document.createElement('style'); st.textContent = '.pf-top{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;margin:2px 0 6px}.pf-legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-weight:700;font-size:.9rem}.pf-ln{display:inline-block;width:24px;height:0;border-top:3px solid var(--pc);vertical-align:middle;margin-right:6px}.pf-ln.dash{border-top-style:dashed}'
+    + '.pf-chart{width:100%}.pf-svg{display:block;width:100%;height:auto;overflow:visible}.pf-keys{display:flex;flex-wrap:wrap;gap:4px 12px;margin:4px 0 10px}.pf-keys i{display:inline-block;width:10px;height:10px;border-radius:2px;opacity:.45;margin-right:4px;vertical-align:-1px}'
+    + '.pf-year{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;gap:8px;background:var(--surface-2)}.pf-year-h .now{font-size:.72rem;color:var(--seal);font-weight:800}.pf-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pf-who{border-left:4px solid var(--pc);border-radius:8px;padding:6px 10px;background:var(--surface);display:grid;gap:3px}.pf-who-h{display:flex;align-items:center;gap:6px}.pf-who-v{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.pf-gz{font-family:var(--f-display);font-weight:700}'
+    + '.pf-mk{display:inline-block;width:9px;height:9px;background:var(--pc)}.pf-mk.dot{border-radius:50%}.pf-lines{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:6px}.pf-lines li{line-height:1.6}'
+    + '@media (max-width:520px){.pf-two{grid-template-columns:1fr}}'; document.head.appendChild(st); }
   document.addEventListener('change', ev => {
     const t = ev.target; if (!t || !t.dataset) return;
     if (t.dataset.gsel != null) { const k = t.dataset.gsel; GR.sel = GR.sel.filter(x => x !== k); if (t.checked) GR.sel.push(k); GR.err = null; grSave(); render(); return; }
