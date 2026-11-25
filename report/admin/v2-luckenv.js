@@ -91,6 +91,10 @@
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>특기·적성 분석</b> — 현재: <b style="color:' + (fl && fl.aptitude ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.aptitude ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leAPT"' + (fl ? '' : ' disabled') + '>' + (fl && fl.aptitude ? '특기·적성 끄기' : '특기·적성 켜기') + '</button><a class="btn" href="/?mantraFlags=aptitude" target="_blank" rel="noopener">미리보기 주소</a></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 만세력에 <b>특기·적성</b> 탭이 생깁니다: 종합 특기·적성 → 특기 5영역(표현·창작/기술·숙련/신체 활동/분석·탐구/경쟁·전략) → 적성 6분야 → 운동·스포츠 상세(성향 6·활동 방식 5축·종목 6분야) → 최종 추천(활동 3~5개·장기 숙련·보완 성향). 엔진 결과를 읽기만 하는 표시 전용이며, 실력·건강을 판단하지 않습니다. 직업 적성과는 따로입니다.</p></div>';
+    // 여러 명 궁합(2026-11-25, compat-group.js): 만세력 궁합 탭 '두 사람 / 여러 명' 전환, 표시 전용
+    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>여러 명 궁합(무리 궁합)</b> — 현재: <b style="color:' + (fl && fl.groupCompat ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.groupCompat ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leGC"' + (fl ? '' : ' disabled') + '>' + (fl && fl.groupCompat ? '여러 명 궁합 끄기' : '여러 명 궁합 켜기') + '</button><a class="btn" href="/?mantraFlags=groupCompat" target="_blank" rel="noopener">미리보기 주소</a></div>' +
+      '<p class="muted" style="margin:8px 0 0">켜면 만세력 <b>궁합 탭</b> 위에 “두 사람 / 여러 명” 전환이 생깁니다. 여러 명을 고르면 나와 최근 본 사람 중 3~6명을 함께 놓고 관계 지도(모든 두 사람 조합의 궁합 점수)·기운 방향(누가 누구를 받쳐 주고 누구의 기준이 무겁게 느껴지는지)·무리의 오행 균형·이어 주는 사람·앞으로 12달 함께 좋은 달과 예민한 달을 보여 줍니다. 두 사람 궁합 계산을 그대로 모아 보는 표시 전용이며, 다른 사람 생년월일은 지금처럼 그 기기에만 저장됩니다.</p></div>';
     // 뚜렷한 신호 자동 알림(2026-11-18, luck-alerts.js): 만세력 상단(9분야)에만 — 운명의 타임라인 알림은 2026-11-20 제거
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>뚜렷한 신호 자동 알림</b> — 현재: <b style="color:' + (fl && fl.luckAlerts ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.luckAlerts ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leAL"' + (fl ? '' : ' disabled') + '>' + (fl && fl.luckAlerts ? '자동 알림 끄기' : '자동 알림 켜기') + '</button><a class="btn" href="/?mantraFlags=luckAlerts" target="_blank" rel="noopener">미리보기 주소</a></div>' +
@@ -213,6 +217,11 @@
       var v = !(S.flags && S.flags.aptChapters);
       if (v && !confirm('운명의 타임라인 종합풀이·커리어운 심화에 특기·적성 장 3개와 연결 블록을 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
       putFlags({ flags: { aptChapters: v } }, v ? '특기·적성 장을 켰습니다(약 1분 안에 반영)' : '특기·적성 장을 껐습니다(약 1분 안에 반영)');
+    };
+    $('#leGC').onclick = function () {   // 여러 명 궁합 스위치(compat-group.js)
+      var v = !(S.flags && S.flags.groupCompat);
+      if (v && !confirm('만세력 궁합 탭의 여러 명 궁합을 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
+      putFlags({ flags: { groupCompat: v } }, v ? '여러 명 궁합을 켰습니다(약 1분 안에 반영)' : '여러 명 궁합을 껐습니다(약 1분 안에 반영)');
     };
     $('#leAPT').onclick = function () {   // 특기·적성 탭 스위치(aptitude.js)
       var v = !(S.flags && S.flags.aptitude);
