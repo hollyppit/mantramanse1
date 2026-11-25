@@ -47,7 +47,7 @@
       var rs = (x.reasons || []).filter(function (t) { return !/^원국 적합도|통합 용신 기준 보완/.test(t); });
       if (k === 'health') { try { var HB = root.MantraHealthBody, hb = HB && HB.read(M, ch, il, 'ilun'), it = hb && hb.items.filter(function (i) { return i.level === '주의'; }).slice(0, 2); if (it && it.length) return '살펴볼 부위: ' + it.map(function (i) { return (i.focus && i.focus[0] ? i.focus[0].organ + '(' + i.focus[0].glyph + ')' : i.organ) + ' — ' + i.body.split(',').slice(0, 2).join(','); }).join(' · '); } catch (e) { } }
       if (k === 'accident') { try { var AH = root.MantraAccidentHint, ah = AH && AH.read(M, ch, il, 'ilun', x.score), it2 = ah && ah.items.slice(0, 2); if (it2 && it2.length) return it2.map(function (i) { return i.title + (i.where ? ' (' + i.where.split(',').slice(0, 2).join(',') + ')' : ''); }).join(' · ') + (it2[0].tip ? ' — ' + it2[0].tip : ''); } catch (e) { } }
-      if (k === 'wealth' && loss && loss.score >= G.SIG_CUTS.windfallLoss[2]) return '손실 신호: ' + loss.summary;
+      if (k === 'wealth' && loss && loss.score > G.SIG_CUTS.windfallLoss[2]) return '손실 신호: ' + loss.summary;
       var head = plain(x.summary) ? '' : x.summary, rr = pickReason(rs);
       return head && rr ? head + ' (' + easy(rr) + ')' : head || (rr ? easy(rr) : FALLBACK[k] || '이 사주의 평소 수준보다 불리하게 나온 날이에요.');
     }

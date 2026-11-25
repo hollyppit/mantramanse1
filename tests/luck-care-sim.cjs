@@ -32,6 +32,6 @@ assert.ok(nonCareFlowWithHits > 0, '전체 흐름이 조심이 아닌 날에도 
 assert.equal(LC.pickReason(['식상 기운이 들어와 결과물·실력을 드러낼 기회가 늘어납니다', '사회궁: 월지 午子충 — 일하는 환경이 움직입니다']), '사회궁: 월지 午子충 — 일하는 환경이 움직입니다');
 assert.equal(LC.easy('합충형파해 긴장 85 — 업무 안정성 하락 요인'), '부딪히는 글자가 많아 업무 안정성 쪽이 흔들리기 쉬워요');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8'), sj = fs.readFileSync(path.join(root, 'report/hub/hub-saju.js'), 'utf8');
-assert.ok(/<script src="luck-care\.js"><\/script>/.test(html) && /LC\.signals\(M, S\.ch, il/.test(html), '만세력이 공용 모듈을 씀');
+assert.ok(/<script src="luck-care\.js(\?v=[^"]*)?"><\/script>/.test(html) && /LC\.signals\(M, S\.ch, il/.test(html), '만세력이 공용 모듈을 씀');
 assert.ok(/'\/luck-care\.js'/.test(sj) && /LC\.signals\(M, ch, x/.test(sj), '타임라인 캘린더가 공용 모듈을 씀');
 console.log(`luck-care-sim ok · 일진 ${days}일 · 조심 신호 ${hits}개(하루 평균 ${(hits / days).toFixed(1)}) · 건강 ${health}·사고수 ${accident}·재물손실 ${loss} · 전체 흐름 조심 아닌 날에 신호 ${nonCareFlowWithHits}일`);

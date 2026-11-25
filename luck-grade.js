@@ -3,15 +3,17 @@
  *    최고 → 좋음에 합침, 주의·부담 → '조심'으로 합침. 대운·세운·월운·일진 모두 같은 기준.
  *  · 전체 흐름(엔진 흐름 점수 −100~+100): 엔진 상태 기준(engine.js LUCK_CFG.condition)을 그대로 쓴다.
  *      +18 이상 좋음 · −12 이하 조심 · 그 사이 무난. 점수 계산식은 건드리지 않는다.
- *  · 분야 지표(0~100): 이 사주의 평소 수준 대비(SIG_CUTS = [하위10%, 하위30%, 상위30%, 상위10%] 지점).
- *      상위 30% 이상 좋음 · 하위 30% 이하 조심. 사고수·재물손실은 낮을수록 좋아 거꾸로 읽는다.
- *  · extreme(): 등급과 따로, 분포 끝(상위·하위 10%)인지 알려 준다 — 자동 알림(luck-alerts.js)·굵은 글씨 강조용. 등급 이름은 없다.
+ *  · 분야 지표(0~100): 전체 명식 분포에서 뽑은 고정 기준값(SIG_CUTS = 모든 명식의 세운 점수 [하위10%, 하위30%, 상위30%, 상위10%] 지점).
+ *      같은 점수면 누구에게나 같은 등급이다(개인의 평소 수준 대비가 아님 — docs/luck-engine-audit-2026-11-25/03 E-3).
+ *      상위 30% 기준값 초과 좋음 · 하위 30% 기준값 미만 조심 · 기준값과 같으면 무난(2026-11-25 이상·이하 → 초과·미만 정정).
+ *      사고수·재물손실은 낮을수록 좋아 거꾸로 읽는다.
+ *  · extreme(): 등급과 따로, 분포 끝(상위·하위 10% 기준값 초과·미만)인지 알려 준다 — 자동 알림(luck-alerts.js)·굵은 글씨 강조용. 등급 이름은 없다.
  *  · 색: 화면 팔레트마다 다르게 칠할 수 있도록 k(good·ok·care)를 기준으로 쓴다. 기본 색은 COLORS.
  *  브라우저: window.MantraLuckGrade · Node: module.exports
  */
 (function (root) {
   'use strict';
-  var VERSION = 'luck-grade-3-2026-11-20';
+  var VERSION = 'luck-grade-3-2026-11-25-strict';
   // 등급 3개(순서 = 좋은 쪽부터). i 는 순서 번호, k 는 색·CSS 키, n 은 화면 이름
   var GRADES = [
     { i: 0, k: 'good', n: '좋음' },
@@ -39,9 +41,9 @@
     return INVERSE[key] ? { x: -v, q: c.slice().reverse().map(function (z) { return -z; }) } : { x: v, q: c };
   }
   // 분야 지표(0~100) → 등급
-  function metric(key, v) { var o = norm(key, v); if (!o) return OK; return o.x >= o.q[2] ? GOOD : o.x <= o.q[1] ? CARE : OK; }
+  function metric(key, v) { var o = norm(key, v); if (!o) return OK; return o.x > o.q[2] ? GOOD : o.x < o.q[1] ? CARE : OK; }   // 2026-11-25: 경계값은 무난(초과·미만). 이상·이하면 정수 점수가 경계에 몰려 양쪽 등급이 30%보다 커졌다
   // 분포 끝(상위 10%·하위 10%)인지: 'top' | 'bottom' | null (등급 이름과 별개)
-  function extreme(key, v) { var o = norm(key, v); if (!o) return null; return o.x >= o.q[3] ? 'top' : o.x <= o.q[0] ? 'bottom' : null; }
+  function extreme(key, v) { var o = norm(key, v); if (!o) return null; return o.x > o.q[3] ? 'top' : o.x < o.q[0] ? 'bottom' : null; }
   function flowExtreme(v, M) { var C = cond(M); return v >= 30 ? 'top' : v <= C.burden ? 'bottom' : null; }
   function byKey(k) { for (var i = 0; i < GRADES.length; i++) if (GRADES[i].k === k) return GRADES[i]; return null; }
   function color(g, theme) { var c = COLORS[(g && g.k) || g]; return c ? (theme === 'dark' ? c.dark : c.light) : ''; }

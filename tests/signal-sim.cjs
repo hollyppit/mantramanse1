@@ -41,7 +41,9 @@ for (const k of KEYS) { const c = SIG_CUTS[k]; ok(c && c.length === 4 && c.every
 for (const k of KEYS) { let prev = k === 'accident' ? -1 : 2; for (let v = 0; v <= 100; v++) { const i = sigMetric(k, v).i; if (k === 'accident') { ok(i >= prev || prev === -1, `사고수 단계가 점수가 오를수록 나빠지지 않음(${v})`); prev = i; } else { ok(i <= prev, `${k} 단계가 점수가 오를수록 좋아지지 않음(${v})`); prev = i; } } }
 ok(sigMetric('accident', 5).k === 'good' && sigMetric('accident', 90).k === 'care', '사고수 반전이 틀림');
 ok(sigMetric('love', 90).k === 'good' && sigMetric('love', 10).k === 'care', '연애운 양 끝 등급이 틀림');
-ok(sigMetric('love', SIG_CUTS.love[2]).k === 'good' && sigMetric('love', SIG_CUTS.love[1]).k === 'care' && sigMetric('love', SIG_CUTS.love[1] + 1).k === 'ok', '연애운 경계(상위·하위 30%)가 다름');
+// 2026-11-25: 경계값은 무난(초과·미만) — 경계값과 같으면 무난, 넘어야 좋음·조심. 사고수는 방향 반대
+ok(sigMetric('love', SIG_CUTS.love[2]).k === 'ok' && sigMetric('love', SIG_CUTS.love[2] + 1).k === 'good' && sigMetric('love', SIG_CUTS.love[1]).k === 'ok' && sigMetric('love', SIG_CUTS.love[1] - 1).k === 'care', '연애운 경계(상위·하위 30%, 초과·미만)가 다름');
+ok(sigMetric('accident', SIG_CUTS.accident[1]).k === 'ok' && sigMetric('accident', SIG_CUTS.accident[1] - 1).k === 'good' && sigMetric('accident', SIG_CUTS.accident[2]).k === 'ok' && sigMetric('accident', SIG_CUTS.accident[2] + 1).k === 'care', '사고수 경계(초과·미만, 반전)가 다름');
 ok(LG.extreme('love', 90) === 'top' && LG.extreme('love', 10) === 'bottom' && LG.extreme('love', 55) === null, '지표 분포 끝 판정이 다름');
 ok(domCol('job', 90) === SIG[0].c && domCol('job', 10) === SIG[2].c, 'domCol이 등급 색을 돌려주지 않음');
 
@@ -72,7 +74,7 @@ ok(!/const col = it\.ph \? m6Col\(it\.ph\)/.test(html), '막대 색이 아직 �
 ok((html.match(/\$\{elLegendBar\(\)\}<div class="chart" data-chart="(daeun|life|wolun)">/g) || []).length === 3, '대운·연도·월운 그래프 위에 오행 범례가 없음(2026-11-25)');
 ok(/--sg-good:/.test(html) && /--sg-ok:/.test(html) && /--sg-care:/.test(html), '등급 색 변수가 없음');
 ok(!/--sg-(best|warn|bad)\b/.test(html), '옛 5단계 색 변수가 남아 있음');
-ok(/<script src="luck-grade\.js"><\/script>/.test(html), 'index.html이 luck-grade.js를 불러오지 않음');
+ok(/<script src="luck-grade\.js(\?v=[^"]*)?"><\/script>/.test(html), 'index.html이 luck-grade.js를 불러오지 않음');
 ok(!/최고·좋음·무난·주의·부담/.test(html), '옛 5단계 안내 문구가 남아 있음');
 ok(html.includes('${LG.flowRule(M)}') && LG.flowRule(M) === '흐름 점수 +18 이상 좋음 · -12 이하 조심 · 그 사이 무난', '범례 문구가 3단계 기준이 아님');
 // 엔진 4단계 상태 글자(순풍·보통·주의·부담)를 등급 대신 띄우던 자리
