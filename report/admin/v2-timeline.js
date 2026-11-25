@@ -21,7 +21,7 @@
     return rest.concat(last);
   }
   var loveCompatP = null;
-  function loveCompatScript() { if (R.LoveCompat) return Promise.resolve(); return loveCompatP || (loveCompatP = new Promise(function (ok) { var s = document.createElement('script'); s.src = '../v2/love-compat.js?v=20261125-apt'; s.onload = ok; s.onerror = ok; setTimeout(ok, 4000); document.head.appendChild(s); })); }
+  function loveCompatScript() { if (R.LoveCompat) return Promise.resolve(); return loveCompatP || (loveCompatP = new Promise(function (ok) { var s = document.createElement('script'); s.src = '../v2/love-compat.js?v=20261125-apt2'; s.onload = ok; s.onerror = ok; setTimeout(ok, 4000); document.head.appendChild(s); })); }
   function titleOf(id) { var c = state.chapters.find(function (x) { return x.id === id; }); return c ? c.title : id; }
   function build(box) {
     var token = ++state.generation;

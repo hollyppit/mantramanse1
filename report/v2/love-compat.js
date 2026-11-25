@@ -411,6 +411,6 @@
     d.head.appendChild(s);
   }
 
-  R.LoveCompat = { VERSION: VERSION, ID: ID, TITLE: TITLE, TOPIC: TOPIC, API: API, add: add, chapter: chapter, meOf: meOf, resultHtml: function (res, rel) { var keep = { res: S.res, rel: S.rel }; S.res = res; S.rel = rel || 'lover'; try { return resultHtml(); } finally { S.res = keep.res; S.rel = keep.rel; } }, _state: S };
+  R.LoveCompat = { VERSION: VERSION, ID: ID, TITLE: TITLE, TOPIC: TOPIC, API: API, add: add, chapter: chapter, meOf: meOf, resultHtml: function (res, rel, partnerInp) { var keep = { res: S.res, rel: S.rel, resInp: S.resInp }; S.res = res; S.rel = rel || 'lover'; S.resInp = partnerInp || null; try { return resultHtml(); } finally { S.res = keep.res; S.rel = keep.rel; S.resInp = keep.resInp; } }, _state: S };
   if (typeof module !== 'undefined' && module.exports) module.exports = R.LoveCompat;
 })(typeof window !== 'undefined' ? window : globalThis);

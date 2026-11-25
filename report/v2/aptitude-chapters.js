@@ -204,7 +204,7 @@
     var C = ctx(H.M, H.ch, ''); if (!C) return null;
     if (kind === 'work') {
       var t = C.ts.slice(0, 2), D = DD(); if (!t.length) return null;
-      return '<section class="dp-embed dp dp-apt"><div class="cap">특기로 본 일하는 힘</div><p class="lead">' + esc('일하는 방식 위에, 힘을 쓰는 방식(특기)을 겹쳐 보면 ' + t.map(function (x) { return x.name + '(' + x.levelK + ')'; }).join('·') + ' 쪽이 먼저 보여요. ' + D.WORK[t[0].id].use) + '</p>' +
+      return '<section class="dp-embed dp dp-apt"><div class="cap">특기로 본 일하는 힘</div><p class="lead">' + esc('일하는 방식 위에, 힘을 쓰는 방식(특기)을 겹쳐 보면 ' + t.map(function (x) { return x.name + '(' + x.levelK + ')'; }).join('·') + ' 쪽이 먼저 보여요. 위의 일하는 방식이 “어떤 환경이 편한가”라면, 특기는 “그 환경에서 무엇으로 힘을 쓰는가”예요 — 한마디로 ' + J.예요(D.WORK[t[0].id].weapon) + '.') + '</p>' +   // 커리어 무기 장 첫 문단(WORK.use)과 겹치지 않게
         '<p class="dp-mi">' + esc('이 특기가 어떤 직업 분야에서 무기가 되는지는 뒤의 “' + TITLES[IDS.work] + '” 장에서 자세히 풀어요.') + '</p></section>';
     }
     if (kind === 'rest') {

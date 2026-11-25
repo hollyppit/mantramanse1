@@ -87,6 +87,17 @@ for (let i = 0; i < N; i++) {
   assert.equal(AC.pair(M, null, null), null, '명식 없으면 null');
   console.log('두 사람 활동 궁합 ' + pairs + '쌍 통과(함께 할 활동 있음 ' + withActs + '쌍)');
 }
+// 장 3개·블록 4개 사이에 같은 문장(25자 이상)이 두 번 나오지 않음(근거 칸 제외)
+{ const sents = t => String(t).replace(/<[^>]+>/g, ' ').split(/(?<=[.!?요])\s+|\n+/).map(s => s.replace(/\s+/g, ' ').trim()).filter(s => s.length >= 25);
+  AC.on = true;
+  for (let i = 0; i < 80; i++) {
+    const ch = M.compute({ year: 1955 + (i * 7) % 55, month: 1 + (i * 5) % 12, day: 1 + (i * 11) % 28, hour: (i * 3) % 24, minute: 0, gender: i % 2 ? 'M' : 'F', calendar: 'solar' }), where = {};
+    const put = (src, t) => sents(t).forEach(s => { (where[s] = where[s] || new Set()).add(src); });
+    Object.values(AC.buildAll(M, ch, '')).forEach(x => Object.keys(x.readingCore).forEach(k => { if (k !== 'why') put(x.id, x.readingCore[k]); }));
+    ['work', 'money', 'spend', 'meet'].forEach(k => { const b = AC.block({ M, ch }, k); if (b) put('block:' + k, b); });
+    Object.keys(where).forEach(s => assert.ok(where[s].size === 1, '장·블록 사이 반복: ' + [...where[s]].join('+') + ' — ' + s.slice(0, 60)));
+  }
+  AC.on = false; }
 // 연결 블록: 스위치 꺼짐이면 없음, 켜짐이면 장 제목으로 이어 줌
 { const ch = M.compute({ year: 1990, month: 3, day: 15, hour: 14, minute: 30, gender: 'F', calendar: 'solar' });
   AC.on = false; assert.equal(AC.block({ M, ch }, 'work'), null, '꺼지면 블록 없음');
