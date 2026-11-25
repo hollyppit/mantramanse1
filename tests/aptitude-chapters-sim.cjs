@@ -7,7 +7,7 @@
 //  · 엔진 결과 불변 · 같은 명식 같은 결과
 const fs = require('fs'), path = require('path'), vm = require('vm'), assert = require('assert/strict');
 const root = path.join(__dirname, '..'), N = +process.argv[2] || 300;
-const FILES = ['engine.js', 'gyeok-structure.js', 'aptitude-data.js', 'aptitude.js', 'report/v2/aptitude-chapters-data.js', 'report/v2/aptitude-chapters.js'];
+const FILES = ['engine.js', 'gyeok-structure.js', 'wealth-career-data.js', 'wealth-career-data-2.js', 'wealth-career-data-3.js', 'wealth-career-jobs.js', 'wealth-career.js', 'element-strategy.js', 'aptitude-data.js', 'aptitude.js', 'report/v2/aptitude-chapters-data.js', 'report/v2/aptitude-chapters.js'];
 const c = { console }; c.window = c; vm.createContext(c); FILES.forEach(f => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), c, { filename: f }));
 const M = c.Manse, A = c.MantraAptitude, AC = c.ReportV2.AptChapters, D = c.ReportV2.AptChaptersData, J = x => JSON.stringify(x);
 const BAN = /반드시|무조건|성공합니다|성공할 거예요|대박|보장|확정|틀림없|천재|재능이 (뛰어|없)|실력이 (뛰어|부족)|돈을 법니다|수익이 납니다|월 \d+만|건강해|부상|진단|undefined|NaN|null|\{a\}|\{b\}|\{work\}|\{apt\}/;
@@ -18,7 +18,11 @@ const KEYS = ['title', 'reality', 'strength', 'risk', 'reinforce', 'practice', '
 assert.equal(Object.keys(D.WORK).sort().join(), 'body,craft,expr,strat,study', '특기 5영역 문안');
 Object.keys(D.WORK).forEach(k => { const w = D.WORK[k]; ['use', 'proof', 'kidProof', 'trap', 'grow', 'weapon'].forEach(f => assert.ok(w[f], k + '.' + f)); assert.equal(w.roles.length, 3); assert.equal(w.kidRoles.length, 3); assert.equal(Object.keys(D.COMBO_TAIL[k]).sort().join(), 'make,people,system,think', k + ' 무대 유형 4개'); });
 
-let n = 0, kids = 0, side = 0; const titles = {}, recharge = {};
+// 재물 블록 문안: 돈 구조 = 부업 세부 분야 12개, 비용 유형 = 세부 분야 36개 전부
+assert.equal(Object.keys(D.MONEY).sort().join(), Object.keys(D.SIDE).sort().join(), '돈 구조 12개 = 부업 세부 분야');
+Object.keys(D.MONEY).forEach(k => ['model', 'cost', 'repeat', 'eff', 'caution'].forEach(x => assert.ok(D.MONEY[k][x], k + '.' + x)));
+assert.equal(D.TYPE_CLAUSE.length, 5); assert.equal(Object.keys(D.TALENT_MONEY).sort().join(), 'body,craft,expr,strat,study');
+let n = 0, kids = 0, side = 0, moneyN = 0, spendN = 0; const titles = {}, recharge = {};
 const mockRep = () => ({ chapters: ['timeline_self_25', 'timeline_self_26', 'timeline_self_27', 'timeline_career_01', 'timeline_career_02', 'timeline_career_03', 'timeline_career_14', 'timeline_career_15'].map((id, i) => ({ id: 'c' + i, editorialContractId: id, editorialTopicId: /self/.test(id) ? 'self' : 'career', act: 1 })) });
 for (let i = 0; i < N; i++) {
   const kid = i % 10 === 0;
@@ -48,6 +52,14 @@ for (let i = 0; i < N; i++) {
   const restAll = KEYS.map(k => all.timeline_career_recharge.readingCore[k]).join(' ');
   if (age < 20) { kids++; assert.ok(!/업무|부업|일하는 만큼/.test(restAll), '20세 미만 재충전 장에 어른 말: ' + (restAll.match(/업무|부업|일하는 만큼/) || [''])[0]); assert.ok(/진로/.test(all.timeline_career_talent.readingCore.title + all.timeline_career_talent.readingCore.reality), '20세 미만 진로 안내'); }
   else if (/부업·일로 넓히는 길/.test(restAll)) side++;
+  // 재물 블록: 20세 미만은 돈 구조 없음, 활동 비용 유형은 추천 활동 그대로
+  AC.on = true;
+  const mb = AC.block({ M, ch }, 'money'), sb = AC.block({ M, ch }, 'spend');
+  if (age < 20) assert.equal(mb, null, '20세 미만 돈 구조 블록 없음');
+  else { assert.ok(mb && /특기가 돈이 되는 구조/.test(mb) && mb.includes(D.MONEY_NOTE), '돈 구조 블록'); const es = c.MantraElementStrategy.natal(M, ch); if (es && es.core) assert.ok(mb.includes(es.core.type), '핵심 수익 유형 = 오행별 실전 전략'); moneyN++; }
+  assert.ok(sb && r.final.activities.some(a => sb.includes(a.name)), '취미 지출 블록은 추천 활동으로'); spendN++;
+  [mb || '', sb].forEach(t => assert.ok(!BAN.test(t.replace(/<[^>]+>/g, ' ')), '재물 블록 금지 표현: ' + (t.match(BAN) || [''])[0]));
+  AC.on = false;
   // add(): 자리·중복
   AC.on = false;
   const rep = AC.add(mockRep(), null, '', M, ch), ids = rep.chapters.map(x => x.editorialContractId), at = (a, b) => ids.indexOf(b) === ids.indexOf(a) + 1;
@@ -65,8 +77,8 @@ for (let i = 0; i < N; i++) {
 // 화면 연결: viewer·reading-feature·derived-chapters·스위치
 const read = f => fs.readFileSync(path.join(root, f), 'utf8');
 assert.ok(/R\.AptChapters\.readyWithin\(2500\)\)S\.rep=R\.AptChapters\.add\(/.test(read('report/v2/viewer.js')), 'viewer 연결');
-assert.ok(/custom==='apt'/.test(read('report/v2/reading-feature.js')) && /\['timeline_career_01',\{custom:'apt',kind:'work'\}\],\['timeline_career_15',\{custom:'apt',kind:'rest'\}\]/.test(read('report/v2/reading-feature.js')), '연결 블록 자리');
+assert.ok(/custom==='apt'/.test(read('report/v2/reading-feature.js')) && /\['timeline_career_01',\{custom:'apt',kind:'work'\}\],\['timeline_career_15',\{custom:'apt',kind:'rest'\}\],\['timeline_wealth_02',\{custom:'apt',kind:'money'\}\],\['timeline_wealth_03',\{custom:'apt',kind:'spend'\}\]/.test(read('report/v2/reading-feature.js')), '연결 블록 자리');
 assert.ok(/aptitude-chapters\.js\?v=/.test(read('report/v2/index.html')) && /\/aptitude\.js\?v=/.test(read('report/v2/index.html')), '사용자 화면이 모듈을 불러옴');
 assert.ok(/'aptChapters'/.test(read('functions/api/luck-flags.js')) && /aptChapters: false/.test(read('feature-flags.js')) && /id="leAC"/.test(read('report/admin/v2-luckenv.js')), '스위치·관리자');
-console.log('특기·적성 장 통과 — 사주 ' + n + '개(20세 미만 ' + kids + '개), 장 제목 문장 ' + Object.keys(titles).length + '종, 부업 문단 ' + side + '개');
+console.log('특기·적성 장 통과 — 사주 ' + n + '개(20세 미만 ' + kids + '개), 장 제목 문장 ' + Object.keys(titles).length + '종, 부업 문단 ' + side + '개, 재물 블록 돈 구조 ' + moneyN + '·지출 ' + spendN + '개');
 console.log('재충전 활동 분포', Object.entries(recharge).sort((a, b) => b[1] - a[1]).map(x => x[0] + ' ' + x[1]).join(' · '));

@@ -3,6 +3,7 @@
    · 커리어운 심화 '내 특기가 일에서 무기가 되는 방식'(timeline_career_talent): '내 재능의 값'(timeline_career_02) 바로 뒤
    · 커리어운 심화 '일 밖에서 날을 세우는 법 — 재충전과 사이드 프로젝트'(timeline_career_recharge): '앞으로 10년 일의 흐름 그래프'(timeline_career_14) 바로 뒤
    · 연결 블록: '일하는 방식 성향'(timeline_career_01)·'커리어 날을 세우는 습관'(timeline_career_15)에 짧은 요약(reading-feature.js custom:'apt')
+   · 재물운 심화 블록(2026-11-25): '이렇게 벌면 편해요'(timeline_wealth_02) 끝 '특기가 돈이 되는 구조'(20세 미만 제외)·'돈이 새는 자리 점검'(timeline_wealth_03) 끝 '취미에 나가는 돈 점검'
    · 표시 전용: /aptitude.js(MantraAptitude.build) · engine careerProfile 결과만 읽는다. AI·DB 문안·새 점수 없음. 문안은 aptitude-chapters-data.js
    · 20세 미만은 진로·동아리 말로 바꾼다. 실력·수입·건강을 단정하지 않는다(tests/aptitude-chapters-sim.cjs 금지 표현 검사).
    · 공개 스위치: /api/luck-flags aptChapters(기본 꺼짐). 로컬·미리보기 주소에서는 ?mantraFlags=aptChapters
@@ -10,7 +11,7 @@
 (function (root) {
   'use strict';
   var R = root.ReportV2 = root.ReportV2 || {};
-  var VERSION = 'aptitude-chapters-20261125-1';
+  var VERSION = 'aptitude-chapters-20261125-2';
   var IDS = { self: 'timeline_self_talent', work: 'timeline_career_talent', rest: 'timeline_career_recharge' };
   var TITLES = { timeline_self_talent: '내 손이 먼저 가는 일 — 특기와 끌리는 활동', timeline_career_talent: '내 특기가 일에서 무기가 되는 방식', timeline_career_recharge: '일 밖에서 날을 세우는 법 — 재충전과 사이드 프로젝트' };
   var TOPIC = { timeline_self_talent: 'self', timeline_career_talent: 'career', timeline_career_recharge: 'career' };
@@ -161,7 +162,7 @@
       })),
       risk: join(C.kid ? ['시험·과제가 몰리는 시기처럼 같은 일이 반복될 때 쉽게 지칠 수 있어요. 그럴수록 위 활동을 짧게라도 끼워 넣어 리듬을 바꿔 주세요.'] : burden.length ? ['특히 ' + burden.map(function (e) { return e.name; }).join('·') + ' 같은 환경이 겹치는 시기에는 지치기 쉬운 편이에요.'].concat(burden.map(function (e) { return D.REST_ENV[e.env] || ''; })) : []),
       reinforce: join(C.kid ? [ranked.length ? ranked.map(function (x) { return x.sub.name; }).join('·') + ' 쪽은 나중에 진로로도 이어질 수 있는 활동이에요. ' + D.SIDE_KID : ''] :
-        ranked.map(function (x) { var s = D.SIDE[x.sub.id]; return x.sub.name + '(' + x.sub.recK + ') — ' + s.path + ' ' + s.step; }).concat(ranked.length ? [D.SIDE_NOTE] : [])),
+        ranked.map(function (x) { var s = D.SIDE[x.sub.id]; return x.sub.name + '(' + x.sub.recK + ') — ' + s.path + ' ' + s.step; }).concat(ranked.length ? [D.SIDE_NOTE + ' 처음 드는 비용·반복 수입 같은 돈의 구조는 재물운 심화 ‘이렇게 벌면 편해요’ 장에서 따로 짚어요.'] : [])),
       practice: routine,
       why: join([
         ps.length ? (C.kid ? '생활 방식' : '일하는 방식') + '(엔진 careerProfile, 양쪽 합 100%): ' + ps.map(function (p) { return p.name + ' ' + p.v + '%'; }).join(' · ') + '.' : '',
@@ -210,7 +211,37 @@
       return '<section class="dp-embed dp dp-apt"><div class="cap">일 밖에서 기운을 채우는 활동</div><p class="lead">' + esc(rc.map(function (x) { return x.sub.name + '(' + x.sub.ex[0] + ')'; }).join(', ') + ' 쪽이 ' + (C.kid ? '생활 방식' : '일하는 방식') + '의 반대쪽을 채워 줘요. ' + (C.kid ? String(rc[0].why).replace(/일하는/g, '생활하는') : rc[0].why)) + '</p>' +
         '<p class="dp-mi">' + esc('왜 이 활동인지, 지치기 쉬운 시기와 주간 루틴은 앞의 “' + TITLES[IDS.rest] + '” 장에 있어요.') + '</p></section>';
     }
+    if (kind === 'money') return moneyBlock(C);
+    if (kind === 'spend') return spendBlock(C);
     return null;
+  }
+  // 재물운 심화 '이렇게 벌면 편해요'(timeline_wealth_02) 끝: 특기가 돈이 되는 구조 — 20세 미만은 넣지 않는다
+  function moneyBlock(C) {
+    var D = DD(), t1 = C.ts[0]; if (C.kid || !t1) return null;
+    var es = null; try { es = root.MantraElementStrategy && root.MantraElementStrategy.natal(C.M, C.ch); } catch (e) { es = null; }
+    var lead = es && es.core ? es.core.type + ' × ' + t1.name + ' — ' + D.TYPE_CLAUSE[es.core.el] + ', ' + D.TALENT_MONEY[t1.id] : t1.name + ' — ' + D.TALENT_MONEY[t1.id];
+    var subs = moneySubs(C);
+    var rows = subs.map(function (x) { var m = D.MONEY[x.sub.id]; return '<div class="dp-talent"><h4>' + esc(x.sub.name + ' · ' + x.sub.recK) + '</h4><p>' + esc('버는 방식 ' + m.model + ' · 처음 드는 비용 ' + m.cost + ' · ' + m.repeat + '. ' + m.eff + '.') + '</p><p class="dp-mi">' + esc('주의: ' + m.caution) + '</p></div>'; }).join('');
+    return '<section class="dp-embed dp dp-apt"><div class="cap">특기가 돈이 되는 구조</div><p class="lead">' + esc(lead) + '</p>' + rows +
+      '<p class="dp-mi">' + esc(D.MONEY_NOTE) + '</p></section>';
+  }
+  function moneySubs(C) {
+    var D = DD();
+    return Object.keys(C.subs).map(function (k) { return C.subs[k]; }).filter(function (x) { return D.MONEY[x.sub.id]; })
+      .sort(function (a, b) { return (b.sub.score - a.sub.score) || (a.sub.id < b.sub.id ? -1 : 1); }).slice(0, 2);
+  }
+  // 재물운 심화 '돈이 새는 자리 점검'(timeline_wealth_03) 끝: 추천 활동에 나가는 돈의 모양
+  function spendBlock(C) {
+    var D = DD(), acts = C.r.final.activities, seen = {}, groups = {};
+    acts.forEach(function (a) {
+      var hit = null; Object.keys(C.subs).some(function (k) { var x = C.subs[k]; if (x.sub.ex.indexOf(a.name) >= 0) { hit = x; return true; } return false; });
+      if (!hit || seen[hit.sub.id]) return; seen[hit.sub.id] = 1;
+      var t = D.COST_TYPE[hit.sub.id] || 'low'; (groups[t] = groups[t] || []).push(a.name);
+    });
+    var keys = ['gear', 'lesson', 'material', 'low'].filter(function (k) { return groups[k]; }); if (!keys.length) return null;
+    return '<section class="dp-embed dp dp-apt"><div class="cap">취미에 나가는 돈 점검</div><p class="lead">' + esc((C.kid ? '해 보면 좋은 활동' : '추천 활동') + '을 시작하기 전에, 돈이 어떤 모양으로 나가는지 먼저 보면 새는 돈을 줄일 수 있어요.') + '</p>' +
+      keys.map(function (k) { return '<div class="dp-talent"><h4>' + esc(D.COST_NAME[k] + ' · ' + groups[k].join(', ')) + '</h4><p>' + esc(D.COST_TIP[k]) + '</p></div>'; }).join('') +
+      '<p class="dp-mi">' + esc('활동은 특기·적성 풀이(종합풀이 “' + TITLES[IDS.self] + '”)의 추천에서 가져왔어요. 이 사주의 돈 쓰는 성향은 이 장 위쪽 풀이와 함께 보세요.') + '</p></section>';
   }
 
   // ───────── 공개 스위치(flow-chapters.js 와 같은 방식) ─────────
