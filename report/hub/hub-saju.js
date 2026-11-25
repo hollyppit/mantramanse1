@@ -238,7 +238,9 @@
         var ev = d.evidence, why = '<details class="dd why" id="d-why"><summary><span><b>왜 이런 결과가 나왔나요?</b></span><i class="chev" aria-hidden="true"></i></summary><div class="ddb"><p>' + esc(ev.intro) + '</p>' +
           ev.plain.map(function (x) { return '<div class="ev"><h5>' + esc(x.title) + '</h5><p>' + esc(x.body) + '</p></div>'; }).join('') +
           '<details class="pro"><summary>전문 해석 보기</summary>' + lis(ev.pro) + '</details></div></details>';
-        var el = H.view(cal.html() + '<section class="tscore" id="selected-fortune"><h2>' + cal.title() + '</h2><p class="kick">' + +d.date.slice(5, 7) + '월 ' + +d.date.slice(8) + '일 ' + d.dow + '요일 · ' + esc(d.gz) + '日</p><div class="ring" style="--p:' + d.overallScore + '"><b>' + d.overallScore + '</b></div><div class="tflow">' + esc((d.tg || '') + '') + ' · ' + esc(d.grade || d.cond) + '</div><p class="sub" style="margin-top:6px">' + (nm ? esc(nm) + '님, ' : '') + esc(d.line) + '</p>' +
+        // 2026-11-26 용어 각주: 타임라인·상세풀이와 같은 term-notes.js — 명리 용어를 누르면 뜻이 말풍선으로 뜬다(제목·단추·링크 안은 건드리지 않음, 같은 용어는 처음 한 번만)
+        var tnMark = function (h) { var TN = root.ReportV2 && root.ReportV2.TermNotes; try { return TN && TN.mark ? TN.mark(h) : h; } catch (e) { return h; } };
+        var el = H.view(tnMark(cal.html() + '<section class="tscore" id="selected-fortune"><h2>' + cal.title() + '</h2><p class="kick">' + +d.date.slice(5, 7) + '월 ' + +d.date.slice(8) + '일 ' + d.dow + '요일 · ' + esc(d.gz) + '日</p><div class="ring" style="--p:' + d.overallScore + '"><b>' + d.overallScore + '</b></div><div class="tflow">' + esc((d.tg || '') + '') + ' · ' + esc(d.grade || d.cond) + '</div><p class="sub" style="margin-top:6px">' + (nm ? esc(nm) + '님, ' : '') + esc(d.line) + '</p>' +
           '<p class="dhead">“' + esc(d.headline) + '”</p>' + (d.notes.length ? '<p class="note">' + esc(d.notes.join(' ')) + '</p>' : '') + '</section>' +
           cal.dayBlock('') + '<div class="dgrid">' + cards + '</div>' +
           '<section class="dsec"><h3>이날의 핵심</h3><p>' + esc(d.summary) + '</p><p>' + esc(d.summary2) + '</p></section>' +
@@ -246,7 +248,7 @@
           '<section class="actcard" id="d-action"><h3>이날의 행동 처방</h3><h5>하면 좋은 것</h5><div class="chips tg">' + tags(d.todayActions) + '</div><h5>미루면 좋은 것</h5><div class="chips tg avoid">' + tags(d.avoidActions) + '</div><div class="one"><small>이날의 한 문장</small><p>“' + esc(d.closingMessage) + '”</p></div></section>' +
           '<section class="dsec">' + why + '</section>' +
           '<p class="dis">점수는 선택한 날의 일진이 내 사주에 필요한 기운인지를 따진 값입니다. 사건을 확정하지 않는 참고용 흐름이며, 컨디션은 의학적 진단이 아닌 생활 리듬의 참고입니다.</p>' +
-          '<section class="nextc"><p class="q">' + esc(d.next.q) + '</p><a class="btn" href="' + esc(d.next.to) + '" data-track="today_cta_click" data-p="' + esc(d.next.track) + '">' + esc(d.next.btn) + '</a><a class="btn ghost sm" href="#/my" data-track="fortune_content_click" data-p="from_today_my">MY 운명으로</a></section>', { keepScroll: cal.draws++ > 0 });
+          '<section class="nextc"><p class="q">' + esc(d.next.q) + '</p><a class="btn" href="' + esc(d.next.to) + '" data-track="today_cta_click" data-p="' + esc(d.next.track) + '">' + esc(d.next.btn) + '</a><a class="btn ghost sm" href="#/my" data-track="fortune_content_click" data-p="from_today_my">MY 운명으로</a></section>'), { keepScroll: cal.draws++ > 0 });
         cal.bind(el);
         if (root.MantraSignalColors) { try { root.MantraSignalColors.paint(el); } catch (e) { } }   // 좋은 신호·주의할 신호 글자 색
         if (cal.pickScroll) { cal.pickScroll = false; var mb = $('#mc-lv-month', el); if (mb && mb.scrollIntoView) setTimeout(function () { mb.scrollIntoView({ block: 'start', behavior: H.reduce ? 'auto' : 'smooth' }); }, 60); }
