@@ -71,6 +71,38 @@ const pdfPages = buf => (buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) ||
     assert(/^만세력_원국_/.test(dl2.suggestedFilename()), '한 탭 파일 이름: ' + dl2.suggestedFilename());
     await dl2.saveAs('output/export-section-pick/pc-wonguk.pdf');
     console.log('PC 지금 탭만 PDF', dl2.suggestedFilename(), pdfPages(fs.readFileSync('output/export-section-pick/pc-wonguk.pdf')) + '쪽');
+    // 세부 항목(2026-11-25): 섹션 안 소제목·접는 상자·특기·분야를 골라 뺀다
+    await page.evaluate(() => { Object.keys(window.MANTRA_FLAGS).forEach(k => { window.MANTRA_FLAGS[k] = true; }); });
+    await page.click('nav.tabs [data-tab="ohaeng"]'); await page.click('nav.tabs [data-tab="wonguk"]');
+    await page.click('[data-export="pdf"]'); await page.waitForSelector('.xpp');
+    assert.equal(await page.$eval('.tab[aria-selected="true"]', e => e.textContent.trim()), '원국');
+    await page.click('.xpp [data-xpp="none"]');
+    for (let i = 0; i < 12; i++) { const t = await page.$('.xpp-t[aria-expanded="false"]'); if (!t) break; await t.click(); }
+    for (let i = 0; i < 120; i++) { const t = await page.$('.xpp-st[aria-expanded="false"]'); if (!t) break; await t.click(); }
+    const list = await page.$$eval('.xpp-s', els => els.map(s => ({ key: s.querySelector('[data-xpk]').dataset.xpk, subs: [...s.querySelectorAll('[data-xpsub]')].map(i => ({ id: i.dataset.xpsub, t: i.parentElement.textContent.trim() })) })));
+    const find = re => list.find(s => re.test(s.key));
+    // 관계·신살(접는 상자 안 카드)도 섹션으로 나온다
+    assert(find(/^wonguk\|내 사주 신살 한눈에 보기/), '관계·신살 카드가 목록에 있어야 함');
+    // 특기·적성: 숨은 갈래(직업·일)와 숨은 분야 칸까지 목록에
+    const det = find(/^apt\|활동·취미 분야별 상세/), jobs = find(/^apt\|직업·일 나에게 맞는 직업과 업종/);
+    assert(det && det.subs.length >= 6, '분야별 상세 세부 6분야: ' + JSON.stringify(det && det.subs));
+    assert(jobs && jobs.subs.length >= 3, '직업 목록 세부');
+    assert(!list.some(s => /^ohaeng\|직업 · 활동 적성/.test(s.key)), '다른 탭으로 옮긴 안내 카드는 빼야 함');
+    // 세부 하나만 고르면 그 섹션이 그 항목만으로 선택된다
+    await page.check(`.xpp [data-xpsub="${det.subs[1].id}"]`);
+    await page.check(`.xpp [data-xpsub="${det.subs[3].id}"]`);
+    assert(await page.$eval(`.xpp [data-xpk="${det.key}"]`, e => e.checked), '세부를 고르면 섹션도 선택');
+    assert.equal(await page.$$eval(`.xpp [data-xpsub^="${det.key}#"]:checked`, e => e.length), 2, '고른 세부 2개');
+    await page.check(`.xpp [data-xpsub="${jobs.subs[0].id}"]`);
+    // 세부를 모두 빼면 섹션도 빠진다
+    await page.uncheck(`.xpp [data-xpsub="${jobs.subs[0].id}"]`);
+    assert(!(await page.$eval(`.xpp [data-xpk="${jobs.key}"]`, e => e.checked)), '세부를 모두 빼면 섹션도 빠짐');
+    await page.check(`.xpp [data-xpsub="${jobs.subs[0].id}"]`);
+    const [dl3] = await Promise.all([page.waitForEvent('download', { timeout: 90000 }), page.click('.xpp [data-xpp="go"]')]);
+    await dl3.saveAs('output/export-section-pick/pc-apt-subs.pdf');
+    const n3 = pdfPages(fs.readFileSync('output/export-section-pick/pc-apt-subs.pdf'));
+    assert(/^만세력_특기·적성_/.test(dl3.suggestedFilename()) && n3 >= 1 && n3 <= 5, '특기·적성 세부 PDF: ' + dl3.suggestedFilename() + ' ' + n3);
+    console.log('PC 세부 항목 PDF', dl3.suggestedFilename(), n3 + '쪽', `(분야 ${det.subs[1].t}·${det.subs[3].t}, 직업 ${jobs.subs[0].t})`);
     // 닫기(Esc)
     await page.click('[data-export="pdf"]'); await page.waitForSelector('.xpp'); await page.keyboard.press('Escape');
     assert.equal(await page.$$eval('.xpp', e => e.length), 0, 'Esc 로 닫힘');
