@@ -245,11 +245,24 @@
     var w = ws[0], g = w.group, d = DD(), M = B.M, ch = B.ch, dEl = M.stemEl(ch.pillars.day.s), male = (ch.gender || ch.input && ch.input.gender) !== 'F';
     var sgEl = (dEl + (male ? 2 : 3)) % 5, sTg = M.tenGod(ch.pillars.day.s, M.mainHidden(ch.pillars.day.b));
     var lead = esc(d.love.show[g]);
-    var body = '<h4>' + esc('애정 표현과 의사소통') + '</h4><p>' + esc(d.love.talk[g]) + '</p>';
+    var L2 = d.love2;
+    var body = '<h4>' + esc('관계에서의 강점과 매력') + '</h4><p>' + esc(L2.charm[w.el]) + '</p>';   // 2판: 주무기 오행별로 상대에게 전해지는 매력
+    body += '<h4>' + esc('애정 표현과 의사소통') + '</h4><p>' + esc(d.love.talk[g]) + '</p>';
     body += '<h4>' + esc('상대방과의 상호작용') + '</h4><p>' + esc(d.partnerBy[g]) + '</p>';   // 내 주무기 십성별로 맞물리는 상대·부딪히는 지점
-    if (use.tenGod) body += '<p>' + esc(fill(d.love.spouseLine, { tg: J.이(sTg), sg: (male ? '재성' : '관성') + ' ' + EL_K[sgEl], pct: B.A.facts[sgEl].pct })) + '</p>';
+    if (use.tenGod) {
+      // 주무기 오행과 배우자성 오행의 생극(같음·낳음·누름·눌림·받음) + 배우자성 세력 + 배우자 자리(일지)의 원국 합충 — 사실과 관계 방식만, 상대·시기 단정 없음
+      var sgName = (male ? '재성' : '관성') + ' ' + EL_K[sgEl], sgPct = B.A.facts[sgEl].pct, rk = ['same', 'gen', 'ctrl', 'ctrlBy', 'genBy'][(sgEl - w.el + 5) % 5];
+      var dayRel = (ch.relations || []).filter(function (r) { return r.kind === 'branch' && r.members.indexOf('day') >= 0 && /합|충|형|원진|파|해/.test(r.type); });
+      var seenRel = {}, names = dayRel.filter(function (r) { var k = r.type + r.name.replace(/[^一-鿿]/g, '').split('').sort().join(''); if (seenRel[k]) return false; seenRel[k] = 1; return true; }).map(function (r) { return r.name; }).slice(0, 3);   // 같은 관계가 양쪽 자리에서 두 번 나오지 않게
+      var hasBond = dayRel.some(function (r) { return /합/.test(r.type); }), hasMove = dayRel.some(function (r) { return /충|형/.test(r.type); });
+      var sp = [fill(d.love.spouseLine, { tg: J.이(sTg), sg: sgName, pct: sgPct }), fill(L2.rel[rk], { sg: sgName })];
+      if (sgPct < 10) sp.push(fill(L2.sgWeak, { pct: sgPct }));
+      if (names.length && (hasBond || hasMove)) sp.push(fill(L2.day, { br: M.BR[ch.pillars.day.b], names: names.join('·') + (/[합형충진파해]$/.test(names[names.length - 1]) && /[형충]$/.test(names[names.length - 1]) ? '으로' : (bat(names[names.length - 1]) ? '으로' : '로')), mean: L2.dayMean[hasBond && hasMove ? 'both' : hasBond ? 'bond' : 'move'] }));
+      body += '<h4>' + esc('주무기와 배우자 자리') + '</h4>' + sp.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('');
+    }
     body += '<h4>' + esc('관계에서 주의할 성향') + '</h4><p>' + esc(d.love.over[g]) + '</p>';
     body += timingBlock(B, 'love', use, w);
+    body += '<h4>' + esc('관계를 발전시키는 활용 전략') + '</h4><p>' + esc(L2.strategy[g]) + '</p>';
     return sec('관계에서의 주무기 · ' + EL_K[w.el] + '(' + w.groupName + ')', lead, body, '인연의 시기와 상대는 배우자 자리·재성·관성·합충을 함께 보는 이 장의 다른 풀이를 기준으로 하세요.');
   }
   function remedyBlock(B, use) {
