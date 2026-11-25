@@ -130,7 +130,8 @@ ok(/엔진 기준선 일치/.test(base) && !/실패/.test(base), '엔진 기준�
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 ok(/<script src="gyeok-structure\.js"><\/script>/.test(html) && html.indexOf('src="engine.js"') < html.indexOf('src="gyeok-structure.js"'), 'index.html 이 engine.js 뒤에 gyeok-structure.js 를 불러오지 않음');
 const ro = html.indexOf('function renderOhaeng()'), roEnd = html.indexOf('// ───────────── 용신', ro), ohSrc = html.slice(ro, roEnd);
-ok(ohSrc.indexOf('분포') > 0 && ohSrc.indexOf('${renderGyeokAnalysis(ch)}') > ohSrc.indexOf('신강신약') && ohSrc.indexOf('${renderGyeokAnalysis(ch)}') < ohSrc.indexOf('${renderCompat(ch)}'), '격국 카드가 십성 분포·신강신약 바로 아래에 있지 않음');
+ok(ohSrc.indexOf('분포') > 0 && ohSrc.indexOf('${renderGyeokAnalysis(ch)}') > ohSrc.indexOf('신강신약') && ohSrc.indexOf('${renderGyeokAnalysis(ch)}') < ohSrc.indexOf('${renderTenGodRoles(ch)}'), '격국 카드가 십성 분포·신강신약 바로 아래에 있지 않음');
+ok(ohSrc.indexOf('renderCompat(') < 0 && /function renderPair\(\) \{[^\n]*renderCompat\(S\.ch\)/.test(html),'나와 조화로운 기운(renderCompat)이 오행·강약 탭이 아니라 궁합 탭에 있어야 함(2026-11-26 이동)');
 const fn = html.slice(html.indexOf('const gxOn = '), html.indexOf('function renderOhaeng()'));
 ok(/if \(!gxOn\(\)\) return '';/.test(fn), '스위치가 꺼지면 카드를 숨기지 않음');
 ok(fn.indexOf('${hero}${rel}${major}${sum}') > 0 && fn.indexOf('${detail}') > fn.indexOf('${hero}${rel}${major}${sum}'), '화면 순서가 대표 → 주요 구조 → 종합 해석 → 상세 근거가 아님');

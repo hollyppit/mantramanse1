@@ -5799,6 +5799,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${table}
     </section>
     ${renderOverview(ch)}
+    ${wpBlock('wonguk')}
     <section class="card">
       <div class="card-h"><h2>내 사주의 12운성</h2><span class="note">네 지지에서 기운이 생명주기의 어디쯤 있는지</span></div>
       ${unNatalHTML(ch)}
@@ -6997,7 +6998,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const models = Object.entries(M.MODELS);
     const groupsTG = [['비견', '겁재'], ['식신', '상관'], ['편재', '정재'], ['편관', '정관'], ['편인', '정인']];
     const zones = [[0, 20, '극약'], [20, 30, '태약'], [30, 42, '신약'], [42, 58, '중화'], [58, 70, '신강'], [70, 80, '태강'], [80, 100, '극왕']];
-    return `${renderOhaengEasy()}
+    return `${wpBlock('ohaeng') || renderOhaengEasy()}
     <section class="card">
       <div class="card-h"><h2>${term('오행 비율')}</h2>${seg('model', models.map(([k, m]) => [k, m.name]), ch.model)}</div>
       ${ohaengPentagon(ch)}
@@ -7034,7 +7035,6 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     </div>
     ${renderGyeokAnalysis(ch)}
     ${renderTenGodRoles(ch)}
-    ${renderCompat(ch)}
     ${aptOn() ? `<section class="card"><div class="card-h"><h2>직업 · 활동 적성</h2><button type="button" class="btn" data-tab="apt">특기·적성 탭에서 보기 ›</button></div><p class="note">직업·활동 적성은 특기·적성 탭으로 옮겨, 운동·취미 적성과 함께 볼 수 있어요.</p></section>` : renderCareer(ch)}`;
   }
 
@@ -8652,6 +8652,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         ${nowCard('ilun', term('일운'), il, '오늘')}
       </div>${ilCareLine(il)}${nowDetail}
     </section>
+    ${wpBlock('luck', { curY, wolY: Y })}
     ${metricBar()}
     ${eraCardHTML(ch)}
     <section class="card">
@@ -8682,7 +8683,6 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="lts">${M.wolun(ch, Y).map((x, i, a) => luckTile(x, `${x.termName} · ${kstYMD(x.startMs)[1]}월`, 'wolun:' + i, sel.kind === 'wolun' && sel.i === i, NOW >= x.startMs && NOW < (a[i + 1] ? a[i + 1].startMs : Infinity))).join('')}</div>
       ${wolDetail ? wolDetail + (sel.kind === 'wolun' ? tjCompare(Y, sel.i) : '') : ''}${wolDetail ? '' : `<p class="note">입춘(${Y}.2.4 무렵)부터 다음 해 소한까지의 12개월입니다. 막대를 누르면 그 달의 ${term('일운')} 달력으로 이동합니다.</p>`}
     </section>
-    ${wpBlock('luck', { curY, wolY: Y })}
     ${renderCalendar(cy, cm, cal, firstDow, sel, ilDetail)}
     ${regionCard(sel, du, se, curY)}
     <p class="note">흐름 점수는 현재 원국의 불균형을 들어오는 운이 얼마나 보완하거나 심화시키는지를 나타내는 상대 지표이며, 미래의 행운·불운 확률이 아닙니다. 계산 방식은 ${term('흐름 점수')}에 있습니다.</p>`;
@@ -11851,7 +11851,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     + '.gr-bal{display:grid;gap:6px;margin:4px 0 8px}.gr-bal-r{display:grid;grid-template-columns:64px 1fr 52px;align-items:center;gap:8px}.gr-bal-b{position:relative;height:12px;border-radius:6px;background:color-mix(in srgb,var(--line) 60%,transparent);overflow:hidden}.gr-bal-b i{position:absolute;left:0;top:0;bottom:0;border-radius:6px}.gr-bal-b em{position:absolute;left:50%;top:-2px;bottom:-2px;border-left:2px dotted var(--muted)}.gr-bal-r b{text-align:right}'
     + '.gr-months{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:4px 0 8px}.gr-m{position:relative;border:1px solid var(--line);border-top:5px solid var(--mc);border-radius:10px;padding:6px 4px 8px;display:grid;justify-items:center;gap:2px;background:var(--surface);min-width:0}.gr-m.is-good{border-color:var(--sg-good);border-top-color:var(--mc);background:color-mix(in srgb,var(--sg-good) 8%,var(--surface))}.gr-m.is-care{border-color:var(--sg-care);border-top-color:var(--mc);background:color-mix(in srgb,var(--sg-care) 7%,var(--surface))}.gr-m-l{font-size:.78rem;color:var(--muted)}.gr-m b{font-size:.95rem}.gr-dots{display:flex;flex-wrap:wrap;gap:3px;justify-content:center}.gr-dots i,.gr-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--line);vertical-align:middle}.gd-good{background:var(--sg-good)!important}.gd-ok{background:var(--sg-ok)!important}.gd-care{background:var(--sg-care)!important}.gr-m-t{font-style:normal;font-size:.68rem;font-weight:700}.gr-m-t.good{color:var(--sg-good)}.gr-m-t.care{color:var(--sg-care)}'
     + '@media (max-width:520px){.gr-months{grid-template-columns:repeat(4,1fr)}.gr-bal-r{grid-template-columns:54px 1fr 46px}.gr-pcs{grid-template-columns:1fr}}'; document.head.appendChild(st); }
-  function renderPair() {
+  // 나와 조화로운 기운(나와 잘 맞는 오행·상대 일주·궁합 판단 기준, renderCompat)은 2026-11-26 오행·강약 탭에서 궁합 탭 아래로 옮겼다 — 계산은 그대로
+  function renderPair() { const main = renderPairMain(); if (!S.ch) return main; let cp = ''; try { cp = renderCompat(S.ch); } catch (e) { cp = ''; } return main + cp; }
+  function renderPairMain() {
     if (!S.ch) return '<section class="card"><p class="muted">먼저 내 사주를 입력하세요.</p></section>';
     if (!PR.inp) PR.inp = prDefault();
     if (grOn() && PR.mode === 'group' && !GR.adding) return GR.res ? grResult() : `${grModeSeg()}${grPicker()}`;
@@ -11923,8 +11925,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     else if (S.tab === 'tarot') body = renderTarot();
     else if (S.tab === 'iching') body = renderIching();
     else if (!S.ch) body = `<section class="card"><p class="err">${esc(S.err || '입력값을 확인하세요')}</p></section>`;
-    else if (S.tab === 'wonguk' || S.tab === 'rel') body = renderWonguk() + wpBlock('wonguk') + relFold();   // 관계·신살은 원국 탭 아래에 이어 붙였다(이전에 저장된 'rel' 탭 값도 같은 화면)
-    else if (S.tab === 'ohaeng') body = renderOhaeng() + wpBlock('ohaeng');
+    else if (S.tab === 'wonguk' || S.tab === 'rel') body = renderWonguk() + relFold();   // 관계·신살은 원국 탭 아래에 이어 붙였다(이전에 저장된 'rel' 탭 값도 같은 화면)
+    else if (S.tab === 'ohaeng') body = renderOhaeng();
     else if (S.tab === 'yong') body = renderYong();
     else if (S.tab === 'luck') body = renderLuck();
     else if (S.tab === 'pair') body = renderPair();
@@ -11943,7 +11945,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // ── 소제목 접고 펴기: 카드 제목(h2·.card-h)과 그 안의 소제목(h3·h4)을 눌러 아래 내용을 접는다. 상태는 탭·제목별로 기억한다 ──
   const FOLD = new Set(), FOLD_SEEN = new Set();
   // 처음부터 접어 두는 카드(모든 기기): 운세 흐름 탭 맨 위 방위운(참고용), 원국 탭의 내 사주의 12운성(눌러야 펼침)
-  const FOLD_DEFAULT = /우리 집 방위 운|내 사주의 12운성/;
+  const FOLD_DEFAULT = /우리 집 방위 운|내 사주의 12운성|^시대 흐름/;   // 시대 흐름(2026-11-26): 기본 접힘
   const FOLD_EXPERT = /사화 지도|별의 힘 분포|학파|병약|종격|격국 판단|통근|한난조습|조후론 vs|판단 기준|시간 기준별|근거 보기/;
   // 모바일에서만 처음부터 접어 두는 카드(원국 탭의 천간·지지 관계: 길고 자주 안 보는 목록)
   const FOLD_MOBILE = /^(천간 관계|지지 관계)/;
