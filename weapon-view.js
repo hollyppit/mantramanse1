@@ -149,9 +149,12 @@
       var extra = l.kind === 'top' ? ' ' + l.extra.pct + '%' : '';
       return '<li><b>' + E(l.label + ': ' + nmE(l.el) + extra) + '</b> — ' + E(fill(t, { X: nmE(l.el), xf: FN[mod5(l.el - dEl)], wf: wf, p: l.label })) + '</li>';
     }).filter(Boolean);
-    var fl = X.flags.length ? X.flags.map(function (f) { return '<li><span class="wp-fl ' + f.level + '">' + E(C.flagHead[f.level]) + '</span> ' + E(J(f.cause)) + '</li>'; }).join('') : '';
+    // '다듬어 쓰는 무기'(shaky) 참고는 접어 둔다(2026-11-26 사용자 요청) — 나머지 항목만 펼쳐 보이고, 그것도 없으면 '모순 없음'
+    var li1 = function (f) { return '<li><span class="wp-fl ' + f.level + '">' + E(C.flagHead[f.level]) + '</span> ' + E(J(f.cause)) + '</li>'; };
+    var open = X.flags.filter(function (f) { return f.k !== 'shaky'; }), folded = X.flags.filter(function (f) { return f.k === 'shaky'; });
+    var fl = open.map(li1).join(''), fd = folded.length ? '<details class="wp-fold"><summary class="wp-note">참고 ' + folded.length + '개 보기 (다듬어 쓰는 무기)</summary><ul class="wp-ev wp-flags">' + folded.map(li1).join('') + '</ul></details>' : '';
     return '<div class="wp-cross"><p class="wp-sec">' + E(C.title) + '</p><p class="wp-note">' + E(C.lead) + '</p>' + triH +
-      '<ul class="wp-ev">' + lines.join('') + '</ul>' + (fl ? '<ul class="wp-ev wp-flags">' + fl + '</ul>' : '<p class="wp-note">✓ ' + E(C.allOk) + '</p>') + '</div>';
+      '<ul class="wp-ev">' + lines.join('') + '</ul>' + (fl ? '<ul class="wp-ev wp-flags">' + fl + '</ul>' : '<p class="wp-note">✓ ' + E(C.allOk) + '</p>') + fd + '</div>';
   }
   var mod5 = function (a) { return ((a % 5) + 5) % 5; };
   var RD5 = { '甲': '갑', '乙': '을', '丙': '병', '丁': '정', '戊': '무', '己': '기', '庚': '경', '辛': '신', '壬': '임', '癸': '계' };
