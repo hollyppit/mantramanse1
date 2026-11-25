@@ -1,0 +1,7 @@
+{
+  "_note": "출처가 명시한 값으로 원본을 보정한다(2026-11-25, 2차 계산 전). 엔진은 IANA 시간대만 받으므로, 출처가 지방평균시(LMT)로 적은 시각은 출처 경도로 UTC 순간을 구한 뒤 같은 순간의 IANA 벽시계 시각으로 환산했다(순간은 그대로, 추정 아님). 원본 raw 파일은 바꾸지 않는다.",
+  "p2-business-02-coco-chanel": { "set": { "birth_time": "16:10" }, "reason": "출처 16:00 LMT(0w05) = UTC 16:00:20 → Europe/Paris(1883년 파리 평균시 +9.35분) 벽시계 16:10" },
+  "p2-professional-02-einstein": { "set": { "birth_time": "11:44" }, "reason": "출처 11:30 LMT(울름 9.99E, +39.96분) = UTC 10:50:02 → Europe/Berlin(1879년 베를린 평균시 +53.47분) 벽시계 11:44" },
+  "p2-professional-06-wright": { "set": { "birth_time": "17:11" }, "reason": "출처 17:00 LMT(리치랜드 센터 90.39W, −361.6분) = UTC 23:01:34 → America/Chicago(1867년 시카고 평균시 −350.6분) 벽시계 17:11" },
+  "p2-professional-04-armstrong": { "set": { "birth_place.tz": "Etc/GMT+5" }, "reason": "Astro-Databank 가 EST(UTC−5, 표준시)로 기록 — America/New_York 의 1930년 8월 서머타임(−4) 대신 출처 시차를 씀(1차 마돈나와 같은 처리)" }
+}

@@ -1,0 +1,18 @@
+2차 사전 등록 고정: 2026-11-25T13:44:38.583Z
+2차 데이터 병합·계산 전(이 시점 phase2/data/raw 파일: 없음 — 열어 보지 않음)
+phase2/protocol/PREREGISTRATION_PHASE2.md sha256 f8cce664680a969f476e86fe31945240f3c45917ace7607cb3acd2372dafd106
+phase2/protocol/COLLECTION_PROTOCOL.md sha256 882675e942c136976c6f6922fb5f1ec55c72c7df6670ade25f945980961a1363
+protocol/mapping.json sha256 161fbfd8243c0bee356f7ec310391426f715fdaf9f7599611967b98a9b8c2ee6
+src2/lib.cjs sha256 9c5dd63dbba3729456cc9f2ec7fd0d7fdfa80132befcf160fc4fef4669d5ea19
+src2/evaluate2.cjs sha256 0a3a2e11b5e75da734aa99710c962992110b418c7cdc9476d4e7d7c49b910744
+src/compute.cjs sha256 c2ab495760a9ff8ba921599b1ff814bc9c7b65101cdff6cfdc9a61289498730b
+src/adapter.cjs sha256 2d50d9f8d9a479673014ef0e73bab3c513a738e780c2caeec6907d4be070cba5
+src/merge.cjs sha256 10167ff74f9427a60730cc5d59c122db2ae90510c35bf18ada4e477e7e3abc7e
+engine.js sha256 9ccc17faefd9beea51a63fc66fbb03d615b5cd52a099a01c5591a92b3beb55eb
+추가 고정: 2026-11-25T13:45:56.006Z (2차 데이터 병합·계산 전)
+phase2/protocol/ENGINE_CANDIDATES.md sha256 9fde1ea63ece119c4e84acef8dadf43f61085adf33e5b9a402321afbcc087229
+tools/luck-engine-audit-20261125/out/engine-prop-A.js sha256 b222c06e89dfa6c708eca8a08f8a063ea5b8e1d080df970a518cc18cc5c13840
+정정: 2026-11-25T13:46:17.701Z (2차 계산 전) — 위 engine-prop-A.js 는 B·C안 이전 엔진으로 만든 사본이었음. 현행 엔진(B·C 포함, 해시 2d586294046803fe)에 A안만 더한 사본으로 다시 만듦. V1 은 이 사본.
+tools/luck-engine-audit-20261125/out/engine-prop-A.js sha256 639b6a1e5c2ba377db5a447adf7064b222ea64eaf2b833a52f55d3aad99b58e7
+병합 2026-11-25T13:49:01.153Z (계산 전): 40명·사건 543건, mapping.json 은 1차와 같은 해시 161fbfd8243c0bee. 시간대 보정 4건(data/overrides.json sha256 dcd769fb364c58bc). persons.json sha256 852c924daa75ddfc · events.json a0801ca57c73cec7
+제외 2026-11-25T13:50:34.019Z (계산 결과 보기 전): 엔진 지원 범위(1900~2100년) 밖 출생 5명(헤밍웨이 1899·샤넬 1883·아인슈타인 1879·퀴리 1867·라이트 1867) 분석 제외, 대체 인물 없음 → 분석 35명. merge.cjs 에 범위 규칙 추가(1차 30명 결과 불변 확인). persons.json cde000a6f0d324e2 · events.json a0801ca57c73cec7

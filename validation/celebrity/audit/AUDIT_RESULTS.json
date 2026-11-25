@@ -1,0 +1,314 @@
+{
+ "runAt": "2026-11-25T13:42:03.447Z",
+ "engineHash": "2d586294046803fe",
+ "dataVersion": "phase1 (data/persons.json · data/events.json)",
+ "reproducibility": {
+  "resultsIdentical": true,
+  "computedFilesIdentical": "30/30",
+  "nullFilesIdentical": "30/30",
+  "engineHashSame": true
+ },
+ "nullGenerator": {
+  "persons": 30,
+  "sameBirthYear": 6000,
+  "total": 6000,
+  "sameGender": 6000,
+  "samePlace": 6000,
+  "hourKnownMatch": 6000,
+  "sameObsYears": 6000,
+  "yearPillarDiffers": 202,
+  "daeunDirSame": 998,
+  "checkedPillarSample": 1200
+ },
+ "eventQuality": {
+  "total": 395,
+  "usable": 392,
+  "analyzed": 360,
+  "excludedReasons": [
+   "business-07-rupert-murdoch 1990: unverified",
+   "business-10-lee-kun-hee 1967: unverified",
+   "sports-05-diego-maradona 2003: unverified"
+  ],
+  "significance": {
+   "1": 28,
+   "2": 226,
+   "3": 138
+  },
+  "confidence": {
+   "high": 170,
+   "medium": 222
+  },
+  "datePrecision": {
+   "yearOnly": 87,
+   "month": 136,
+   "day": 169
+  },
+  "wikipediaOnly": 151,
+  "topHosts": [
+   [
+    "en.wikipedia.org",
+    259
+   ],
+   [
+    "nytimes.com",
+    24
+   ],
+   [
+    "cbsnews.com",
+    10
+   ],
+   [
+    "npr.org",
+    9
+   ],
+   [
+    "britannica.com",
+    9
+   ],
+   [
+    "espn.com",
+    9
+   ],
+   [
+    "foxsports.com",
+    9
+   ],
+   [
+    "koreatimes.co.kr",
+    8
+   ],
+   [
+    "news.bbc.co.uk",
+    8
+   ],
+   [
+    "wral.com",
+    8
+   ],
+   [
+    "foxnews.com",
+    7
+   ],
+   [
+    "aljazeera.com",
+    7
+   ]
+  ],
+  "duplicatesSamePersonYearKind": [
+   "arts-02-britney-spears|2007|health_event ×2",
+   "arts-09-youn-yuh-jung|2021|achievement ×2",
+   "business-04-martha-stewart|2004|failure ×2",
+   "business-05-lee-iacocca|1983|achievement ×2",
+   "sports-04-steffi-graf|1987|achievement ×2",
+   "sports-06-roger-federer|2003|achievement ×2"
+  ],
+  "byProfessionValence": {
+   "arts:change": 34,
+   "arts:positive": 39,
+   "arts:negative": 42,
+   "business:change": 46,
+   "business:positive": 32,
+   "business:negative": 34,
+   "sports:positive": 41,
+   "sports:change": 50,
+   "sports:negative": 42
+  },
+  "droppedOutOfRange": 4
+ },
+ "statistics": {
+  "flowPctByValence": {
+   "positive": {
+    "n": 112,
+    "mean": 57.8,
+    "median": 65.3,
+    "sd": 29
+   },
+   "negative": {
+    "n": 118,
+    "mean": 53.4,
+    "median": 54.6,
+    "sd": 28.9
+   },
+   "change": {
+    "n": 130,
+    "mean": 45.9,
+    "median": 44.2,
+    "sd": 27.2
+   }
+  },
+  "H1": {
+   "eventLevel": 4.452,
+   "cohenD": 0.154,
+   "cliffDelta": 0.093,
+   "clusterBoot": {
+    "ci95": [
+     -3.988794026470835,
+     12.302322079241662
+    ],
+    "se": 4.147475268158728
+   },
+   "withinPersonPermutation": {
+    "obs": 4.451933951827058,
+    "p": 0.08995502248875563
+   },
+   "personLevel": {
+    "n": 30,
+    "mean": 5.3,
+    "median": 4.2,
+    "wilcoxon": {
+     "n": 30,
+     "W": 274,
+     "z": 0.8433019135506583,
+     "p": 0.19952971045407863
+    }
+   }
+  },
+  "E1_positiveVsFake": {
+   "persons": 30,
+   "pooledReal": 57.8,
+   "pooledFakeMean": 49.9,
+   "pEmp": 0.004975124378109453,
+   "personDiffMean": 8.6,
+   "personDiffMedian": 5.9,
+   "personDiffCI95": [
+    2.8,
+    14
+   ],
+   "wilcoxon": {
+    "n": 30,
+    "W": 357,
+    "z": 2.550474080006869,
+    "p": 0.005378850185518758
+   },
+   "personsPositiveDiff": 22
+  },
+  "E2_anyEventVsFake": {
+   "persons": 30,
+   "pooledReal": 52.1,
+   "pooledFakeMean": 49.8,
+   "pEmp": 0.0845771144278607,
+   "personDiffMean": 2.2,
+   "personDiffMedian": 2.3,
+   "personDiffCI95": [
+    -0.5,
+    4.5
+   ],
+   "wilcoxon": {
+    "n": 30,
+    "W": 314,
+    "z": 1.6660354877464225,
+    "p": 0.04785314411373065
+   },
+   "personsPositiveDiff": 19
+  },
+  "E3_negativeVsFake": {
+   "persons": 30,
+   "pooledReal": 53.4,
+   "pooledFakeMean": 50.1,
+   "pEmp": 0.13930348258706468,
+   "personDiffMean": 2.9,
+   "personDiffMedian": 2.9,
+   "personDiffCI95": [
+    -2.9,
+    8.4
+   ],
+   "wilcoxon": {
+    "n": 30,
+    "W": 283,
+    "z": 1.0284169677447053,
+    "p": 0.15187685161221665
+   },
+   "personsPositiveDiff": 19
+  },
+  "H3_volChangeVsFake": {
+   "persons": 30,
+   "pooledReal": 48.1,
+   "pooledFakeMean": 50.1,
+   "pEmp": 0.8407960199004975,
+   "personDiffMean": -1.7,
+   "personDiffMedian": -2.9,
+   "personDiffCI95": [
+    -6.9,
+    2.5
+   ],
+   "wilcoxon": {
+    "n": 30,
+    "W": 198,
+    "z": -0.7198918774212937,
+    "p": 0.7642043426908526
+   },
+   "personsPositiveDiff": 13
+  },
+  "peerSwap_positive": {
+   "persons": 30,
+   "ownMean": 58.6,
+   "peerMean": 50.7,
+   "diffMean": 7.9,
+   "diffCI95": [
+    1.9,
+    13.6
+   ],
+   "wilcoxon": {
+    "n": 30,
+    "W": 343,
+    "z": 2.2625173290383516,
+    "p": 0.01183269150481725
+   },
+   "meanRankFrac": 0.629
+  },
+  "peerSwap_anyEvent": {
+   "persons": 30,
+   "ownMean": 52.1,
+   "peerMean": 50.1,
+   "diffMean": 2,
+   "diffCI95": [
+    -0.6,
+    4.3
+   ],
+   "wilcoxon": {
+    "n": 30,
+    "W": 318,
+    "z": 1.748308845165999,
+    "p": 0.04020523230337392
+   },
+   "meanRankFrac": 0.556
+  },
+  "holm": [
+   {
+    "test": "H1",
+    "p": 0.149,
+    "pHolm": 0.697
+   },
+   {
+    "test": "H2",
+    "p": 0.507,
+    "pHolm": 1
+   },
+   {
+    "test": "H3",
+    "p": 0.841,
+    "pHolm": 1
+   },
+   {
+    "test": "H4",
+    "p": 0.723,
+    "pHolm": 1
+   },
+   {
+    "test": "E1 긍정 vs 가짜",
+    "p": 0.005,
+    "pHolm": 0.035
+   },
+   {
+    "test": "E2 모든 사건 vs 가짜",
+    "p": 0.085,
+    "pHolm": 0.507
+   },
+   {
+    "test": "E3 부정 vs 가짜(높은 쪽)",
+    "p": 0.139,
+    "pHolm": 0.697
+   }
+  ]
+ }
+}

@@ -1,0 +1,63 @@
+{
+  "version": "celebrity-validation-prereg-2026-11-25",
+  "frozen_note": "이 파일은 데이터 수집·계산 전에 고정한다. 결과를 본 뒤 바꾸지 않는다. 바꾸면 새 version 으로 다시 등록하고 이전 결과를 함께 보고한다.",
+  "event_categories": {
+    "achievement": { "valence": "positive", "desc": "우승·수상·기록·큰 흥행·사업 성공 등 공개적으로 인정된 성취" },
+    "failure": { "valence": "negative", "desc": "패배·탈락·흥행 실패·사업 실패·해임·공개적 비판·법적 처벌" },
+    "career_change": { "valence": "change", "desc": "이적·이직·창업·소속 변경·장르/분야 전환·첫 데뷔" },
+    "financial_event": { "valence": "by_type", "desc": "financial_gain(상장·대형 계약·매각 이익) / financial_loss(파산·큰 손실·벌금)" },
+    "relationship_event": { "valence": "by_type", "desc": "marriage(결혼) / divorce(이혼·공개 결별) / child_birth(자녀 출생)" },
+    "health_event": { "valence": "negative", "desc": "부상·수술·질병·입원 등 공개된 건강 사건" },
+    "retirement": { "valence": "change", "desc": "은퇴·활동 중단·사임" }
+  },
+  "event_type_valence": {
+    "financial_gain": "positive",
+    "financial_loss": "negative",
+    "marriage": "change",
+    "divorce": "negative",
+    "child_birth": "change"
+  },
+  "significance_scale": {
+    "3": "커리어를 규정하는 사건: 올림픽 금·월드컵/메이저 대회 우승·MVP급 개인상, 창업한 회사의 상장/세계적 성공·파산, 오스카·그래미 주요 부문·노벨상급 수상, 시즌 전체를 잃는 부상·생명이 걸린 질병, 공식 은퇴",
+    "2": "주요 사건: 리그/국가 단위 우승·주요 개인상, 주요 인수·대형 계약, 주요 작품 흥행·주요 시상식 후보, 결혼·이혼, 수개월 결장 부상, 이적·이직",
+    "1": "참고 사건: 위 기준에 못 미치는 공개 사건(분석에서는 민감도 확인용으로만)"
+  },
+  "domain_map": {
+    "_note": "사건 범주 → 만트라 분야 지표(evaluateDomainLuck 키)와 기대 방향. 분야 지표 등급은 luck-grade.js 그대로. 직업군별 차이는 profession 으로 고른다.",
+    "achievement": { "sports": ["career"], "business": ["business", "wealth"], "arts": ["career"], "expect": "high" },
+    "failure": { "sports": ["career"], "business": ["business"], "arts": ["career"], "expect": "low" },
+    "career_change": { "all": ["move", "job"], "expect": "change" },
+    "financial_gain": { "all": ["wealth"], "expect": "high" },
+    "financial_loss": { "all": ["wealth"], "expect": "low" },
+    "marriage": { "all": ["marriage", "love"], "expect": "high" },
+    "divorce": { "all": ["marriage"], "expect": "low" },
+    "child_birth": { "all": ["child"], "expect": "high" },
+    "health_event": { "all": ["health", "accident"], "expect": "low_health_high_accident" },
+    "retirement": { "all": ["career"], "expect": "change" }
+  },
+  "primary_analysis": {
+    "min_significance": 2,
+    "flow_score": "세운 흐름 점수(seunRange 의 combined = 세운 자체 0.6 + 그해 대운 0.4, 엔진 값 그대로)",
+    "within_person_standardization": "그 사람의 만 15세~(2025년 또는 사망 연도) 세운 흐름 점수 분포 안의 백분위(0~100)",
+    "event_year_rule": "event_date 의 연도. 월까지 알면 사주 연도(입춘 기준)로 바꾼다. 연도만 알면 그 연도 그대로"
+  },
+  "hypotheses": {
+    "H1": "긍정 사건(achievement·financial_gain) 해의 흐름 점수 백분위 평균이 부정 사건(failure·financial_loss·divorce·health_event) 해보다 높다",
+    "H2": "사건 범주에 대응하는 분야 지표의 백분위가 기대 방향과 같다(긍정 사건 >50, 부정 사건 <50)",
+    "H3": "변화 사건(career_change·retirement·marriage·divorce) 해의 변동성 지표 백분위가 50보다 높다",
+    "H4": "사람-연도 단위에서 '긍정 사건 해 vs 부정 사건 해'를 가를 때, 흐름 점수가 나이·경력 연차 기준 모델보다 추가 설명력(AUC 증가)을 가진다"
+  },
+  "null_models": {
+    "random_birth": "같은 출생 연도 안에서 월·일·시를 무작위로 바꾼 가짜 명식 200개(시드 고정). 나이·시대 효과를 그대로 두고 '그 사람의 명식'만 바꾼다",
+    "age_career": "나이·나이²·첫 경력 사건 이후 연차만으로 만든 로지스틱 모델(사람 단위 교차검증)"
+  },
+  "split": {
+    "rule": "사람 단위로 나눈다. id 의 SHA-256 첫 바이트가 짝수면 dev(가중치·방법 점검용), 홀수면 test(최종 보고용). 같은 사람의 사건은 한쪽에만 들어간다",
+    "note": "이번 단계에서는 계산식을 조정하지 않는다. dev 는 방법 점검용, test 결과는 dev 와 따로 보고한다"
+  },
+  "birth_time_confidence": {
+    "verified": "출생증명·병원 기록을 근거로 한 공개 자료(Astro-Databank Rodden 등급 AA 포함)",
+    "reported": "본인·가족 진술, 전기 인용(Rodden A)",
+    "unknown": "출처 없음 또는 Rodden B·C·DD·X — 시주를 만들지 않고 시간 미상으로 계산"
+  }
+}

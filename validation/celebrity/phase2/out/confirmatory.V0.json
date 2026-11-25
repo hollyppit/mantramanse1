@@ -1,0 +1,123 @@
+{
+ "runAt": "2026-11-25T14:01:19.442Z",
+ "engineHash": "2d586294046803fe",
+ "base": "phase2",
+ "persons": 35,
+ "events": 428,
+ "fakesPerPerson": 200,
+ "confirmatory": {
+  "C1": {
+   "persons": 35,
+   "real": 47.9,
+   "fake": 48.6,
+   "personDiffMean": -0.7,
+   "personDiffMedian": 0,
+   "ci95": [
+    -7,
+    5.3
+   ],
+   "wilcoxonP": 0.613,
+   "pEmp": 0.597,
+   "p": 0.613,
+   "pHolm": 1
+  },
+  "C2": {
+   "stat": -1.5,
+   "posMean": 47.9,
+   "negMean": 49.5,
+   "ci95": [
+    -8.9,
+    4.4
+   ],
+   "pPerm": 0.48,
+   "p": 0.48,
+   "pHolm": 1
+  },
+  "C3": {
+   "persons": 35,
+   "real": 49,
+   "fake": 49.3,
+   "personDiffMean": -0.6,
+   "personDiffMedian": -0.7,
+   "ci95": [
+    -3.4,
+    2.5
+   ],
+   "wilcoxonP": 0.686,
+   "pEmp": 0.627,
+   "p": 0.686,
+   "pHolm": 1
+  },
+  "C4": {
+   "stat": 0.507,
+   "fake": 0.496,
+   "pEmp": 0.353,
+   "p": 0.353,
+   "pHolm": 1
+  },
+  "C5": {
+   "stat": 47.9,
+   "fake": 49.6,
+   "pEmp": 0.791,
+   "p": 0.791,
+   "pHolm": 1
+  },
+  "C6": {
+   "n": 282,
+   "aucBase": 0.573,
+   "aucFlow": 0.563,
+   "gain": -0.01,
+   "fakeGainMean": 0.006,
+   "pEmp": 0.822,
+   "p": 0.822,
+   "pHolm": 1
+  },
+  "C7": {
+   "persons": 35,
+   "own": 48.3,
+   "peer": 48.5,
+   "diffMean": -0.2,
+   "ci95": [
+    -6.4,
+    5.3
+   ],
+   "wilcoxonP": 0.607,
+   "p": 0.607,
+   "pHolm": 1
+  }
+ },
+ "secondary": {
+  "C1_birthTimeKnown": {
+   "persons": 23,
+   "diffMean": -2.2,
+   "wilcoxonP": 0.763
+  },
+  "C1_birthTimeUnknown": {
+   "persons": 12,
+   "diffMean": 2,
+   "wilcoxonP": 0.333
+  },
+  "C1_byProfession": {
+   "arts": {
+    "persons": 9,
+    "diffMean": -7.4,
+    "wilcoxonP": 0.857
+   },
+   "business": {
+    "persons": 9,
+    "diffMean": -1.5,
+    "wilcoxonP": 0.682
+   },
+   "professional": {
+    "persons": 7,
+    "diffMean": 13.5,
+    "wilcoxonP": 0.054
+   },
+   "sports": {
+    "persons": 10,
+    "diffMean": -4.1,
+    "wilcoxonP": 0.869
+   }
+  }
+ }
+}

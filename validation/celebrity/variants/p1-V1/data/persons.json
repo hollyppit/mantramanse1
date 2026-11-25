@@ -1,0 +1,806 @@
+[
+ {
+  "id": "arts-01-robert-downey-jr",
+  "name": "Robert Downey Jr.",
+  "name_ko": "로버트 다우니 주니어",
+  "gender": "M",
+  "birth_date": "1965-04-04",
+  "birth_time": "13:10",
+  "birth_time_confidence": "reported",
+  "birth_time_source": "https://www.astro.com/astro-databank/Downey,_Robert_Jr. (Rodden A, \"From memory\", collector March; EST UTC-5)",
+  "birth_place": {
+   "city": "Manhattan, New York",
+   "country": "United States",
+   "lon": -73.983,
+   "tz": "America/New_York"
+  },
+  "profession": "arts",
+  "profession_detail": "actor",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Downey,_Robert_Jr.",
+   "https://en.wikipedia.org/wiki/Robert_Downey_Jr."
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "arts-02-britney-spears",
+  "name": "Britney Spears",
+  "name_ko": "브리트니 스피어스",
+  "gender": "F",
+  "birth_date": "1981-12-02",
+  "birth_time": "01:30",
+  "birth_time_confidence": "reported",
+  "birth_time_source": "https://www.astro.com/astro-databank/Spears,_Britney (Rodden A, \"From memory\", collector Clifford; CST UTC-6)",
+  "birth_place": {
+   "city": "McComb, Mississippi",
+   "country": "United States",
+   "lon": -90.45,
+   "tz": "America/Chicago"
+  },
+  "profession": "arts",
+  "profession_detail": "pop singer",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Spears,_Britney",
+   "https://en.wikipedia.org/wiki/Britney_Spears"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "arts-03-whitney-houston",
+  "name": "Whitney Houston",
+  "name_ko": "휘트니 휴스턴",
+  "gender": "F",
+  "birth_date": "1963-08-09",
+  "birth_time": "20:55",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "https://www.astro.com/astro-databank/Houston,_Whitney (Rodden AA, \"BC/BR in hand\", collector Farmer; EDT UTC-4)",
+  "birth_place": {
+   "city": "Newark, New Jersey",
+   "country": "United States",
+   "lon": -74.167,
+   "tz": "America/New_York"
+  },
+  "profession": "arts",
+  "profession_detail": "singer, actress",
+  "death_date": "2012-02-11",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Houston,_Whitney",
+   "https://en.wikipedia.org/wiki/Whitney_Houston"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "arts-04-elvis-presley",
+  "name": "Elvis Presley",
+  "name_ko": "엘비스 프레슬리",
+  "gender": "M",
+  "birth_date": "1935-01-08",
+  "birth_time": "04:35",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "https://www.astro.com/astro-databank/Presley,_Elvis (Rodden AA, \"BC/BR in hand\", collector Rodden; CST UTC-6)",
+  "birth_place": {
+   "city": "Tupelo, Mississippi",
+   "country": "United States",
+   "lon": -88.7,
+   "tz": "America/Chicago"
+  },
+  "profession": "arts",
+  "profession_detail": "singer, actor",
+  "death_date": "1977-08-16",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Presley,_Elvis",
+   "https://en.wikipedia.org/wiki/Elvis_Presley"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "arts-05-marilyn-monroe",
+  "name": "Marilyn Monroe",
+  "name_ko": "마릴린 먼로",
+  "gender": "F",
+  "birth_date": "1926-06-01",
+  "birth_time": "09:30",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "https://www.astro.com/astro-databank/Monroe,_Marilyn (Rodden AA, \"BC/BR in hand\", collector Rodden; PST UTC-8)",
+  "birth_place": {
+   "city": "Los Angeles, California",
+   "country": "United States",
+   "lon": -118.25,
+   "tz": "America/Los_Angeles"
+  },
+  "profession": "arts",
+  "profession_detail": "actress",
+  "death_date": "1962-08-04",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Monroe,_Marilyn",
+   "https://en.wikipedia.org/wiki/Marilyn_Monroe"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "arts-06-madonna",
+  "name": "Madonna",
+  "name_ko": "마돈나",
+  "gender": "F",
+  "birth_date": "1958-08-16",
+  "birth_time": "07:05",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "https://www.astro.com/astro-databank/Madonna (Rodden AA, \"Quoted BC/BR\", collector Grady; ADB zone EST UTC-5 standard time, not DST)",
+  "birth_place": {
+   "city": "Bay City, Michigan",
+   "country": "United States",
+   "lon": -83.883,
+   "tz": "Etc/GMT+5"
+  },
+  "profession": "arts",
+  "profession_detail": "singer, songwriter, actress",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Madonna",
+   "https://en.wikipedia.org/wiki/Madonna"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "arts-07-stephen-king",
+  "name": "Stephen King",
+  "name_ko": "스티븐 킹",
+  "gender": "M",
+  "birth_date": "1947-09-21",
+  "birth_time": "01:30",
+  "birth_time_confidence": "reported",
+  "birth_time_source": "https://www.astro.com/astro-databank/King,_Stephen (Rodden A, \"From memory\", collector Rodden; EDT UTC-4)",
+  "birth_place": {
+   "city": "Portland, Maine",
+   "country": "United States",
+   "lon": -70.25,
+   "tz": "America/New_York"
+  },
+  "profession": "arts",
+  "profession_detail": "novelist",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/King,_Stephen",
+   "https://en.wikipedia.org/wiki/Stephen_King"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "arts-08-steven-spielberg",
+  "name": "Steven Spielberg",
+  "name_ko": "스티븐 스필버그",
+  "gender": "M",
+  "birth_date": "1946-12-18",
+  "birth_time": "18:16",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "https://www.astro.com/astro-databank/Spielberg,_Steven (Rodden AA, \"BC/BR in hand\", collector Rodden; EST UTC-5)",
+  "birth_place": {
+   "city": "Cincinnati, Ohio",
+   "country": "United States",
+   "lon": -84.45,
+   "tz": "America/New_York"
+  },
+  "profession": "arts",
+  "profession_detail": "film director, producer",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Spielberg,_Steven",
+   "https://en.wikipedia.org/wiki/Steven_Spielberg"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "arts-09-youn-yuh-jung",
+  "name": "Youn Yuh-jung",
+  "name_ko": "윤여정",
+  "gender": "F",
+  "birth_date": "1947-06-19",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": null,
+  "birth_place": {
+   "city": "unverified (commonly reported Kaesong; not confirmed in cited sources)",
+   "country": "Korea",
+   "lon": 126.55,
+   "tz": "Asia/Seoul"
+  },
+  "profession": "arts",
+  "profession_detail": "actress",
+  "death_date": null,
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Youn_Yuh-jung",
+   "https://ko.wikipedia.org/wiki/%EC%9C%A4%EC%97%AC%EC%A0%95"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "arts-10-bong-joon-ho",
+  "name": "Bong Joon Ho",
+  "name_ko": "봉준호",
+  "gender": "M",
+  "birth_date": "1969-09-14",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": null,
+  "birth_place": {
+   "city": "Daegu (Bongdeok-dong)",
+   "country": "South Korea",
+   "lon": 128.6,
+   "tz": "Asia/Seoul"
+  },
+  "profession": "arts",
+  "profession_detail": "film director, screenwriter",
+  "death_date": null,
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Bong_Joon_Ho"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "business-01-steve-jobs",
+  "name": "Steve Jobs",
+  "name_ko": "스티브 잡스",
+  "gender": "M",
+  "birth_date": "1955-02-24",
+  "birth_time": "19:15",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "https://www.astro.com/astro-databank/Jobs,_Steve (Rodden AA, BC/BR in hand)",
+  "birth_place": {
+   "city": "San Francisco",
+   "country": "United States",
+   "lon": -122.4167,
+   "tz": "America/Los_Angeles"
+  },
+  "profession": "business",
+  "profession_detail": "Technology; co-founder/CEO of Apple, CEO of NeXT, chairman of Pixar",
+  "death_date": "2011-10-05",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Jobs,_Steve",
+   "https://en.wikipedia.org/wiki/Steve_Jobs"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "business-02-bill-gates",
+  "name": "Bill Gates",
+  "name_ko": "빌 게이츠",
+  "gender": "M",
+  "birth_date": "1955-10-28",
+  "birth_time": "22:00",
+  "birth_time_confidence": "reported",
+  "birth_time_source": "https://www.astro.com/astro-databank/Gates,_Bill (Rodden A, from memory)",
+  "birth_place": {
+   "city": "Seattle",
+   "country": "United States",
+   "lon": -122.3333,
+   "tz": "America/Los_Angeles"
+  },
+  "profession": "business",
+  "profession_detail": "Software; co-founder/CEO of Microsoft, philanthropist",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Gates,_Bill",
+   "https://en.wikipedia.org/wiki/Bill_Gates"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "business-03-warren-buffett",
+  "name": "Warren Buffett",
+  "name_ko": "워런 버핏",
+  "gender": "M",
+  "birth_date": "1930-08-30",
+  "birth_time": "15:00",
+  "birth_time_confidence": "reported",
+  "birth_time_source": "https://www.astro.com/astro-databank/Buffett,_Warren (Rodden A, from memory)",
+  "birth_place": {
+   "city": "Omaha",
+   "country": "United States",
+   "lon": -95.9333,
+   "tz": "America/Chicago"
+  },
+  "profession": "business",
+  "profession_detail": "Investing; chairman/CEO of Berkshire Hathaway",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Buffett,_Warren",
+   "https://en.wikipedia.org/wiki/Warren_Buffett"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "business-04-martha-stewart",
+  "name": "Martha Stewart",
+  "name_ko": "마사 스튜어트",
+  "gender": "F",
+  "birth_date": "1941-08-03",
+  "birth_time": "13:33",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "https://www.astro.com/astro-databank/Stewart,_Martha (Rodden AA, BC/BR in hand; EDT)",
+  "birth_place": {
+   "city": "Jersey City",
+   "country": "United States",
+   "lon": -74.0833,
+   "tz": "America/New_York"
+  },
+  "profession": "business",
+  "profession_detail": "Media/lifestyle; founder of Martha Stewart Living Omnimedia",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Stewart,_Martha",
+   "https://en.wikipedia.org/wiki/Martha_Stewart"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "business-05-lee-iacocca",
+  "name": "Lee Iacocca",
+  "name_ko": "리 아이아코카",
+  "gender": "M",
+  "birth_date": "1924-10-15",
+  "birth_time": "17:00",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "https://www.astro.com/astro-databank/Iacocca,_Lee (Rodden AA, BC/BR in hand)",
+  "birth_place": {
+   "city": "Allentown",
+   "country": "United States",
+   "lon": -75.4833,
+   "tz": "America/New_York"
+  },
+  "profession": "business",
+  "profession_detail": "Automotive; president of Ford, chairman/CEO of Chrysler",
+  "death_date": "2019-07-02",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Iacocca,_Lee",
+   "https://en.wikipedia.org/wiki/Lee_Iacocca"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "business-06-richard-branson",
+  "name": "Richard Branson",
+  "name_ko": "리처드 브랜슨",
+  "gender": "M",
+  "birth_date": "1950-07-18",
+  "birth_time": "07:00",
+  "birth_time_confidence": "reported",
+  "birth_time_source": "https://www.astro.com/astro-databank/Branson,_Richard (Rodden A, from memory; GDT)",
+  "birth_place": {
+   "city": "Blackheath, London",
+   "country": "United Kingdom",
+   "lon": 0.0167,
+   "tz": "Europe/London"
+  },
+  "profession": "business",
+  "profession_detail": "Conglomerate; founder of Virgin Group (records, airlines, space)",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Branson,_Richard",
+   "https://en.wikipedia.org/wiki/Richard_Branson"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "business-07-rupert-murdoch",
+  "name": "Rupert Murdoch",
+  "name_ko": "루퍼트 머독",
+  "gender": "M",
+  "birth_date": "1931-03-11",
+  "birth_time": "23:59",
+  "birth_time_confidence": "reported",
+  "birth_time_source": "https://www.astro.com/astro-databank/Murdoch,_Rupert (Rodden A, news report)",
+  "birth_place": {
+   "city": "Melbourne",
+   "country": "Australia",
+   "lon": 144.9667,
+   "tz": "Australia/Melbourne"
+  },
+  "profession": "business",
+  "profession_detail": "Media; founder/chairman of News Corp and Fox Corp",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Murdoch,_Rupert",
+   "https://en.wikipedia.org/wiki/Rupert_Murdoch"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "business-08-bernard-arnault",
+  "name": "Bernard Arnault",
+  "name_ko": "베르나르 아르노",
+  "gender": "M",
+  "birth_date": "1949-03-05",
+  "birth_time": "17:00",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "https://www.astro.com/astro-databank/Arnault,_Bernard (Rodden AA, BC/BR in hand)",
+  "birth_place": {
+   "city": "Roubaix",
+   "country": "France",
+   "lon": 3.1667,
+   "tz": "Europe/Paris"
+  },
+  "profession": "business",
+  "profession_detail": "Luxury goods; chairman/CEO of LVMH",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Arnault,_Bernard",
+   "https://en.wikipedia.org/wiki/Bernard_Arnault"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "business-09-elon-musk",
+  "name": "Elon Musk",
+  "name_ko": "일론 머스크",
+  "gender": "M",
+  "birth_date": "1971-06-28",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": "https://www.astro.com/astro-databank/Musk,_Elon lists 07:30 but Rodden B (bio/autobiography) - not used",
+  "birth_place": {
+   "city": "Pretoria",
+   "country": "South Africa",
+   "lon": 28.1667,
+   "tz": "Africa/Johannesburg"
+  },
+  "profession": "business",
+  "profession_detail": "Technology; founder of Zip2, X.com/PayPal, SpaceX; CEO of Tesla",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Musk,_Elon",
+   "https://en.wikipedia.org/wiki/Elon_Musk"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "business-10-lee-kun-hee",
+  "name": "Lee Kun-hee",
+  "name_ko": "이건희",
+  "gender": "M",
+  "birth_date": "1942-01-09",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": null,
+  "birth_place": {
+   "city": "Daegu",
+   "country": "South Korea",
+   "lon": 128.6014,
+   "tz": "Asia/Seoul"
+  },
+  "profession": "business",
+  "profession_detail": "Conglomerate; chairman of Samsung Group",
+  "death_date": "2020-10-25",
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Lee_Kun-hee",
+   "https://www.britannica.com/biography/Lee-Kun-Hee"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "sports-01-muhammad-ali",
+  "name": "Muhammad Ali",
+  "name_ko": "무하마드 알리",
+  "gender": "M",
+  "birth_date": "1942-01-17",
+  "birth_time": "18:35",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Rodden AA (birth certificate/record, contributor Gauquelin) via https://www.astrotheme.com/astrology/Muhammad_Ali ; ADB: https://www.astro.com/astro-databank/Ali,_Muhammad",
+  "birth_place": {
+   "city": "Louisville, Kentucky",
+   "country": "United States",
+   "lon": -85.7585,
+   "tz": "America/Kentucky/Louisville"
+  },
+  "profession": "sports",
+  "profession_detail": "boxing / heavyweight",
+  "death_date": "2016-06-03",
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Muhammad_Ali",
+   "https://www.vanguardngr.com/2016/06/key-dates-in-muhammad-alis-life-and-career/amp/",
+   "https://www.the-star.co.ke/news/2016-06-04-factbox-key-bouts-in-late-muhammad-alis-boxing-career/",
+   "https://www.history.com/this-day-in-history/ali-defeats-spinks-to-win-world-heavyweight-championship",
+   "https://www.espn.com/blog/statsinfo/post/_/id/109975/looking-back-thrilla-in-manila-and-ali-holmes-40-and-35-years-later"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "sports-02-michael-jordan",
+  "name": "Michael Jordan",
+  "name_ko": "마이클 조던",
+  "gender": "M",
+  "birth_date": "1963-02-17",
+  "birth_time": "13:40",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Rodden AA (birth certificate/record, contributor Lois Rodden) via https://www.astrotheme.com/astrology/Michael_Jordan ; ADB: https://www.astro.com/astro-databank/Jordan,_Michael",
+  "birth_place": {
+   "city": "Brooklyn, New York",
+   "country": "United States",
+   "lon": -73.9442,
+   "tz": "America/New_York"
+  },
+  "profession": "sports",
+  "profession_detail": "basketball / shooting guard",
+  "death_date": null,
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Michael_Jordan",
+   "https://www.espn.com/nba/player/bio/_/id/1035/michael-jordan",
+   "https://basketball.realgm.com/player/Michael-Jordan/Timeline/1192",
+   "https://www.nba.com/history/legends/profiles/michael-jordan",
+   "https://nbcsports.com/bayarea/warriors/michael-jordan-devastated-breaking-foot-vs-warriors-last-dance"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "sports-03-tiger-woods",
+  "name": "Tiger Woods",
+  "name_ko": "타이거 우즈",
+  "gender": "M",
+  "birth_date": "1975-12-30",
+  "birth_time": "22:50",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Rodden AA (birth certificate/record, contributor Lois Rodden) via https://www.astrotheme.com/astrology/Tiger_Woods ; ADB: https://www.astro.com/astro-databank/Woods,_Tiger",
+  "birth_place": {
+   "city": "Long Beach, California (hometown Cypress)",
+   "country": "United States",
+   "lon": -118.1937,
+   "tz": "America/Los_Angeles"
+  },
+  "profession": "sports",
+  "profession_detail": "golf",
+  "death_date": null,
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Tiger_Woods",
+   "https://www.foxsports.com/articles/golf/tiger-woods-a-timeline-of-significant-moments-on-and-off-the-golf-course",
+   "https://wjla.com/news/nation-world/timeline-of-tiger-woods-career"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "sports-04-steffi-graf",
+  "name": "Steffi Graf",
+  "name_ko": "슈테피 그라프",
+  "gender": "F",
+  "birth_date": "1969-06-14",
+  "birth_time": "04:40",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Rodden AA (birth certificate/record) via https://www.astrotheme.com/astrology/Steffi_Graf ; ADB: https://www.astro.com/astro-databank/Graf,_Steffi",
+  "birth_place": {
+   "city": "Mannheim",
+   "country": "Germany",
+   "lon": 8.466,
+   "tz": "Europe/Berlin"
+  },
+  "profession": "sports",
+  "profession_detail": "tennis",
+  "death_date": null,
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Steffi_Graf",
+   "https://www.espn.com/classic/biography/s/Graf_Steffi.html",
+   "https://www.olympedia.org/athletes/124",
+   "https://www.tennisnet.com/en/news/25-years-ago-peter-graf-is-arrested",
+   "https://www.cbsnews.com/news/steffi-graf-calls-it-quits"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "sports-05-diego-maradona",
+  "name": "Diego Maradona",
+  "name_ko": "디에고 마라도나",
+  "gender": "M",
+  "birth_date": "1960-10-30",
+  "birth_time": "07:05",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Rodden AA (birth certificate/record, contributor Sy Scholfield) via https://www.astrotheme.com/astrology/Diego_Maradona ; ADB: https://www.astro.com/astro-databank/Maradona,_Diego",
+  "birth_place": {
+   "city": "Lanús (Policlínico Evita), Buenos Aires Province",
+   "country": "Argentina",
+   "lon": -58.396,
+   "tz": "America/Argentina/Buenos_Aires"
+  },
+  "profession": "sports",
+  "profession_detail": "football / attacking midfielder",
+  "death_date": "2020-11-25",
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Diego_Maradona",
+   "https://worldsoccertalk.com/2020/11/25/diego-maradona-a-life-in-10-key-dates/",
+   "https://www.thestar.com.my/news/world/2020/11/26/timeline-of-argentine-football-legend-maradona039s-life",
+   "https://www.aljazeera.com/sports/2020/11/3/football-star-maradona-to-undergo-brain-surgery"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "sports-06-roger-federer",
+  "name": "Roger Federer",
+  "name_ko": "로저 페더러",
+  "gender": "M",
+  "birth_date": "1981-08-08",
+  "birth_time": "08:40",
+  "birth_time_confidence": "reported",
+  "birth_time_source": "Rodden A (from memory/autobiography) via https://www.astrotheme.com/astrology/Roger_Federer ; ADB: https://www.astro.com/astro-databank/Federer,_Roger",
+  "birth_place": {
+   "city": "Basel",
+   "country": "Switzerland",
+   "lon": 7.5886,
+   "tz": "Europe/Zurich"
+  },
+  "profession": "sports",
+  "profession_detail": "tennis",
+  "death_date": null,
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Roger_Federer",
+   "https://supersport.com/tennis/atp/news/7d953e4f-a903-4673-8322-8b959a9765f3/key-dates-from-roger-federer-s-historic-career",
+   "https://www.atptour.com/en/news/roger-federer-retirement-legacy-story",
+   "https://www.swissinfo.ch/eng/roger-federer-becomes-father-of-twin-girls/7523386",
+   "https://time.com/90515/roger-federer-twins-again"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "sports-07-serena-williams",
+  "name": "Serena Williams",
+  "name_ko": "세리나 윌리엄스",
+  "gender": "F",
+  "birth_date": "1981-09-26",
+  "birth_time": "20:28",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Rodden AA (birth certificate/record, contributor Shelley Ackerman) via https://www.astrotheme.com/astrology/Serena_Williams ; ADB: https://www.astro.com/astro-databank/Williams,_Serena",
+  "birth_place": {
+   "city": "Saginaw, Michigan",
+   "country": "United States",
+   "lon": -83.9508,
+   "tz": "America/Detroit"
+  },
+  "profession": "sports",
+  "profession_detail": "tennis",
+  "death_date": null,
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Serena_Williams",
+   "https://www.wral.com/archive/17271795/",
+   "https://www.aljazeera.com/sports/2022/9/3/timeline-serena-williams-career",
+   "https://www.wtatennis.com/news/4523474/serena-williams-to-return-to-singles-at-wimbledon-after-accepting-wild-card"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "sports-08-michael-phelps",
+  "name": "Michael Phelps",
+  "name_ko": "마이클 펠프스",
+  "gender": "M",
+  "birth_date": "1985-06-30",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": "Rodden C on https://www.astrotheme.com/astrology/Michael_Phelps (source unknown) - not used",
+  "birth_place": {
+   "city": "Baltimore, Maryland",
+   "country": "United States",
+   "lon": -76.6122,
+   "tz": "America/New_York"
+  },
+  "profession": "sports",
+  "profession_detail": "swimming",
+  "death_date": null,
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Michael_Phelps",
+   "https://www.npr.org/2008/08/17/93671607/phelps-turns-legend-with-8th-beijing-gold",
+   "https://www.npr.org/sections/thetwo-way/2014/12/19/371916403/michael-phelps-pleads-guilty-to-dui",
+   "https://bleacherreport.com/articles/2222678-michael-phelps-suspended-latest-details-comments-and-reaction",
+   "https://www.cbsnews.com/news/michael-phelps-secretly-got-married-in-june"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "sports-09-kim-yuna",
+  "name": "Kim Yuna",
+  "name_ko": "김연아",
+  "gender": "F",
+  "birth_date": "1990-09-05",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": null,
+  "birth_place": {
+   "city": "Bucheon, Gyeonggi",
+   "country": "South Korea",
+   "lon": 126.766,
+   "tz": "Asia/Seoul"
+  },
+  "profession": "sports",
+  "profession_detail": "figure skating (ladies' singles)",
+  "death_date": null,
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Yuna_Kim",
+   "https://olympics.com/en/news/yuna-kim-and-her-life-changing-vancouver-2010-gold",
+   "https://www.nbcsports.com/olympics/news/yuna-kim-announces-retirement-after-sochi-silver",
+   "https://www.washingtontimes.com/news/2014/feb/20/olympic-silver-medal-at-end-of-yuna-kims-career/",
+   "https://www.koreatimes.co.kr/amp/lifestyle/people-events/20220725/koreas-figure-skating-icon-kim-yuna-to-wed-singer-ko-woo-rim"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "sports-10-park-ji-sung",
+  "name": "Park Ji-sung",
+  "name_ko": "박지성",
+  "gender": "M",
+  "birth_date": "1981-03-30",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": null,
+  "birth_place": {
+   "city": "Seoul",
+   "country": "South Korea",
+   "lon": 126.978,
+   "tz": "Asia/Seoul"
+  },
+  "profession": "sports",
+  "profession_detail": "football / midfielder",
+  "death_date": null,
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Park_Ji-sung",
+   "https://www.washingtontimes.com/news/2014/may/14/park-ji-sung-announces-retirement-at-age-33/",
+   "https://www.koreatimes.co.kr/amp/southkorea/20140514/park-ji-sung-retires",
+   "https://www.koreajoongangdaily.com/korea/retired-footballer-park-jisung-weds/10045712"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ }
+]

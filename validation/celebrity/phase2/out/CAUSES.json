@@ -1,0 +1,4670 @@
+{
+ "runAt": "2026-11-25T13:55:10.718Z",
+ "engineHash": "2d586294046803fe",
+ "base": "validation\\celebrity\\phase2",
+ "events": 428,
+ "components": {
+  "flow": {
+   "positive": 47.9,
+   "negative": 49.5,
+   "change": 49.6,
+   "diff": -1.5,
+   "cliff": -0.037,
+   "ci95": [
+    -8.7,
+    4.3
+   ],
+   "pPerm": 0.489,
+   "pHolm": 1
+  },
+  "own": {
+   "positive": 49.6,
+   "negative": 51.5,
+   "change": 51.5,
+   "diff": -1.8,
+   "cliff": -0.039,
+   "ci95": [
+    -8.2,
+    4.6
+   ],
+   "pPerm": 0.591,
+   "pHolm": 1
+  },
+  "daeun": {
+   "positive": 48.2,
+   "negative": 46.3,
+   "change": 48.2,
+   "diff": 1.9,
+   "cliff": 0.045,
+   "ci95": [
+    -6.5,
+    9.7
+   ],
+   "pPerm": 0.142,
+   "pHolm": 1
+  },
+  "unified": {
+   "positive": 48.6,
+   "negative": 52,
+   "change": 51.9,
+   "diff": -3.4,
+   "cliff": -0.069,
+   "ci95": [
+    -9.3,
+    3
+   ],
+   "pPerm": 0.729,
+   "pHolm": 1
+  },
+  "eokbu": {
+   "positive": 50,
+   "negative": 51,
+   "change": 53,
+   "diff": -1,
+   "cliff": -0.019,
+   "ci95": [
+    -7.8,
+    6.3
+   ],
+   "pPerm": 0.381,
+   "pHolm": 1
+  },
+  "johu": {
+   "positive": 48.4,
+   "negative": 50.1,
+   "change": 45.3,
+   "diff": -1.7,
+   "cliff": -0.039,
+   "ci95": [
+    -8.3,
+    4.2
+   ],
+   "pPerm": 0.805,
+   "pHolm": 1
+  },
+  "gyeok": {
+   "positive": 47.3,
+   "negative": 47.1,
+   "change": 46.8,
+   "diff": 0.2,
+   "cliff": 0.004,
+   "ci95": [
+    -5.1,
+    6.8
+   ],
+   "pPerm": 0.569,
+   "pHolm": 1
+  },
+  "relation": {
+   "positive": 51.5,
+   "negative": 49.8,
+   "change": 51.3,
+   "diff": 1.7,
+   "cliff": 0.029,
+   "ci95": [
+    -5.8,
+    8
+   ],
+   "pPerm": 0.316,
+   "pHolm": 1
+  },
+  "structure": {
+   "positive": 51.4,
+   "negative": 51.8,
+   "change": 49.7,
+   "diff": -0.4,
+   "cliff": -0.009,
+   "ci95": [
+    -7.6,
+    6.9
+   ],
+   "pPerm": 0.5,
+   "pHolm": 1
+  },
+  "chain": {
+   "positive": 50.7,
+   "negative": 51.2,
+   "change": 48.2,
+   "diff": -0.5,
+   "cliff": -0.022,
+   "ci95": [
+    -8.6,
+    7.1
+   ],
+   "pPerm": 0.71,
+   "pHolm": 1
+  },
+  "vol": {
+   "positive": 47.4,
+   "negative": 46.2,
+   "change": 47.8,
+   "diff": 1.2,
+   "cliff": 0.024,
+   "ci95": [
+    -4.8,
+    8.7
+   ],
+   "pPerm": 0.283,
+   "pHolm": 1
+  },
+  "opportunity": {
+   "positive": 50.6,
+   "negative": 52.8,
+   "change": 50,
+   "diff": -2.1,
+   "cliff": -0.043,
+   "ci95": [
+    -9.2,
+    5.5
+   ],
+   "pPerm": 0.88,
+   "pHolm": 1
+  },
+  "expansion": {
+   "positive": 47.1,
+   "negative": 49.4,
+   "change": 47.8,
+   "diff": -2.3,
+   "cliff": -0.051,
+   "ci95": [
+    -9.7,
+    5.1
+   ],
+   "pPerm": 0.715,
+   "pHolm": 1
+  },
+  "harvest": {
+   "positive": 50.5,
+   "negative": 50.5,
+   "change": 47.3,
+   "diff": 0,
+   "cliff": 0,
+   "ci95": [
+    -6.5,
+    6.2
+   ],
+   "pPerm": 0.673,
+   "pHolm": 1
+  },
+  "accumulation": {
+   "positive": 48.2,
+   "negative": 52.5,
+   "change": 52.8,
+   "diff": -4.2,
+   "cliff": -0.08,
+   "ci95": [
+    -12,
+    3.4
+   ],
+   "pPerm": 0.82,
+   "pHolm": 1
+  }
+ },
+ "byKey": {
+  "marriage": {
+   "n": 45,
+   "valence": "change",
+   "flow": 44.3,
+   "own": 48.9,
+   "daeun": 43.2,
+   "unified": 48,
+   "eokbu": 52.9,
+   "johu": 45,
+   "gyeok": 42,
+   "relation": 49.3,
+   "structure": 48.8,
+   "chain": 44.6,
+   "vol": 49.9,
+   "opportunity": 51.9,
+   "expansion": 48.1,
+   "harvest": 51.1,
+   "accumulation": 51.5
+  },
+  "divorce": {
+   "n": 25,
+   "valence": "negative",
+   "flow": 49.3,
+   "own": 48.6,
+   "daeun": 49.9,
+   "unified": 49.2,
+   "eokbu": 56.8,
+   "johu": 42.3,
+   "gyeok": 37.1,
+   "relation": 55.1,
+   "structure": 51.1,
+   "chain": 58.6,
+   "vol": 43.1,
+   "opportunity": 44.5,
+   "expansion": 52.3,
+   "harvest": 47.4,
+   "accumulation": 60.7
+  },
+  "financial_gain": {
+   "n": 13,
+   "valence": "positive",
+   "flow": 45.2,
+   "own": 47.2,
+   "daeun": 49,
+   "unified": 45.9,
+   "eokbu": 46.6,
+   "johu": 47.2,
+   "gyeok": 55.3,
+   "relation": 48.1,
+   "structure": 51.1,
+   "chain": 37.7,
+   "vol": 50,
+   "opportunity": 52,
+   "expansion": 37.5,
+   "harvest": 57.4,
+   "accumulation": 50.7
+  },
+  "health_event": {
+   "n": 40,
+   "valence": "negative",
+   "flow": 52.2,
+   "own": 54.5,
+   "daeun": 44.9,
+   "unified": 56.2,
+   "eokbu": 51.8,
+   "johu": 56.4,
+   "gyeok": 49.3,
+   "relation": 47,
+   "structure": 57,
+   "chain": 50.6,
+   "vol": 50.1,
+   "opportunity": 54.6,
+   "expansion": 47.3,
+   "harvest": 52.2,
+   "accumulation": 49.5
+  },
+  "achievement": {
+   "n": 126,
+   "valence": "positive",
+   "flow": 48.2,
+   "own": 49.9,
+   "daeun": 48.1,
+   "unified": 48.9,
+   "eokbu": 50.4,
+   "johu": 48.5,
+   "gyeok": 46.5,
+   "relation": 51.8,
+   "structure": 51.4,
+   "chain": 52.1,
+   "vol": 47.1,
+   "opportunity": 50.5,
+   "expansion": 48.1,
+   "harvest": 49.8,
+   "accumulation": 48
+  },
+  "career_change": {
+   "n": 67,
+   "valence": "change",
+   "flow": 53.3,
+   "own": 54.4,
+   "daeun": 48.7,
+   "unified": 55.3,
+   "eokbu": 55.5,
+   "johu": 46.4,
+   "gyeok": 51.6,
+   "relation": 51.9,
+   "structure": 50.9,
+   "chain": 51,
+   "vol": 47.5,
+   "opportunity": 49.1,
+   "expansion": 48.1,
+   "harvest": 47,
+   "accumulation": 52.1
+  },
+  "child_birth": {
+   "n": 14,
+   "valence": "change",
+   "flow": 58.3,
+   "own": 60,
+   "daeun": 52.1,
+   "unified": 56.7,
+   "eokbu": 48,
+   "johu": 50.3,
+   "gyeok": 49.7,
+   "relation": 62.2,
+   "structure": 62.3,
+   "chain": 42.3,
+   "vol": 38.2,
+   "opportunity": 56.2,
+   "expansion": 42.8,
+   "harvest": 37,
+   "accumulation": 52.1
+  },
+  "failure": {
+   "n": 63,
+   "valence": "negative",
+   "flow": 45.5,
+   "own": 49.4,
+   "daeun": 45.4,
+   "unified": 49.7,
+   "eokbu": 48.6,
+   "johu": 49.4,
+   "gyeok": 48.8,
+   "relation": 49,
+   "structure": 46.7,
+   "chain": 47.3,
+   "vol": 45,
+   "opportunity": 54.7,
+   "expansion": 50.3,
+   "harvest": 50.7,
+   "accumulation": 51
+  },
+  "financial_loss": {
+   "n": 15,
+   "valence": "negative",
+   "flow": 59.2,
+   "own": 56.8,
+   "daeun": 47.3,
+   "unified": 55.5,
+   "eokbu": 49,
+   "johu": 49.2,
+   "gyeok": 50.8,
+   "relation": 51,
+   "structure": 60.8,
+   "chain": 56.7,
+   "vol": 45.5,
+   "opportunity": 53.5,
+   "expansion": 46.1,
+   "harvest": 50.7,
+   "accumulation": 52.9
+  },
+  "retirement": {
+   "n": 20,
+   "valence": "change",
+   "flow": 42.7,
+   "own": 41.9,
+   "daeun": 54.8,
+   "unified": 46,
+   "eokbu": 48.6,
+   "johu": 38.6,
+   "gyeok": 39.6,
+   "relation": 46.2,
+   "structure": 39.2,
+   "chain": 51,
+   "vol": 51,
+   "opportunity": 44.4,
+   "expansion": 49.8,
+   "harvest": 46.8,
+   "accumulation": 58.7
+  }
+ },
+ "groups": {
+  "yongPrimary": {
+   "조후": {
+    "n": 121,
+    "miss": 44,
+    "rate": 36.4
+   },
+   "억부": {
+    "n": 139,
+    "miss": 33,
+    "rate": 23.7
+   },
+   "통관": {
+    "n": 9,
+    "miss": 3,
+    "rate": 33.3
+   },
+   "격국": {
+    "n": 13,
+    "miss": 3,
+    "rate": 23.1
+   }
+  },
+  "strength": {
+   "경계(42~58)": {
+    "n": 106,
+    "miss": 25,
+    "rate": 23.6
+   },
+   "신약(<42)": {
+    "n": 110,
+    "miss": 34,
+    "rate": 30.9
+   },
+   "신강(>58)": {
+    "n": 66,
+    "miss": 24,
+    "rate": 36.4
+   }
+  },
+  "gyeokStatus": {
+   "seong": {
+    "n": 76,
+    "miss": 21,
+    "rate": 27.6
+   },
+   "part": {
+    "n": 46,
+    "miss": 14,
+    "rate": 30.4
+   },
+   "pa": {
+    "n": 57,
+    "miss": 16,
+    "rate": 28.1
+   },
+   "hold": {
+    "n": 92,
+    "miss": 27,
+    "rate": 29.3
+   },
+   "none": {
+    "n": 11,
+    "miss": 5,
+    "rate": 45.5
+   }
+  },
+  "luckStructure": {
+   "식신제살+살인상생(관 유입)": {
+    "n": 2,
+    "miss": 1,
+    "rate": 50
+   },
+   "식신제살": {
+    "n": 15,
+    "miss": 3,
+    "rate": 20
+   },
+   "상관패인": {
+    "n": 12,
+    "miss": 4,
+    "rate": 33.3
+   },
+   "없음": {
+    "n": 76,
+    "miss": 31,
+    "rate": 40.8
+   },
+   "살인상생(관 유입)": {
+    "n": 2,
+    "miss": 1,
+    "rate": 50
+   },
+   "살인상생": {
+    "n": 20,
+    "miss": 7,
+    "rate": 35
+   },
+   "상관견관": {
+    "n": 8,
+    "miss": 1,
+    "rate": 12.5
+   },
+   "관제비겁": {
+    "n": 11,
+    "miss": 5,
+    "rate": 45.5
+   },
+   "군겁쟁재(재 유입)": {
+    "n": 18,
+    "miss": 1,
+    "rate": 5.6
+   },
+   "군겁쟁재(재 유입)+관제비겁": {
+    "n": 2,
+    "miss": 0,
+    "rate": 0
+   },
+   "관살혼잡+상관견관": {
+    "n": 2,
+    "miss": 0,
+    "rate": 0
+   },
+   "군겁쟁재(재 유입)+식신제살+관제비겁": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "상관견관+관제비겁": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "효신탈식(도식)+식신제살+관제비겁": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "살인상생+상관패인(견관 해소)": {
+    "n": 4,
+    "miss": 2,
+    "rate": 50
+   },
+   "군겁쟁재+살인상생+상관패인(견관 해소)": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "군겁쟁재+살인상생(관 유입)": {
+    "n": 5,
+    "miss": 0,
+    "rate": 0
+   },
+   "관살혼잡+살인상생(관 유입)": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "효신탈식(도식)": {
+    "n": 4,
+    "miss": 1,
+    "rate": 25
+   },
+   "관살혼잡": {
+    "n": 6,
+    "miss": 2,
+    "rate": 33.3
+   },
+   "살인상생+살인상생(관 유입)": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "상관견관+상관패인": {
+    "n": 4,
+    "miss": 0,
+    "rate": 0
+   },
+   "식신제살+살인상생": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "효신탈식(도식)+식신제살+살인상생": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "상관견관+군겁쟁재(재 유입)+식상 통관": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "상관견관+효신탈식(도식)+식상 통관": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "상관견관+식상 통관": {
+    "n": 2,
+    "miss": 1,
+    "rate": 50
+   },
+   "관살혼잡+상관견관+관제비겁+식상 통관": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "군겁쟁재": {
+    "n": 20,
+    "miss": 6,
+    "rate": 30
+   },
+   "군겁쟁재+재제효": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "식신제살+재제효": {
+    "n": 1,
+    "miss": 1,
+    "rate": 100
+   },
+   "관살혼잡+재제효": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "재제효": {
+    "n": 1,
+    "miss": 1,
+    "rate": 100
+   },
+   "관살혼잡+군겁쟁재": {
+    "n": 2,
+    "miss": 0,
+    "rate": 0
+   },
+   "군겁쟁재+식신제살": {
+    "n": 2,
+    "miss": 1,
+    "rate": 50
+   },
+   "관살혼잡+식신제살+살인상생(관 유입)": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "군겁쟁재+효신탈식(도식)": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "상관견관+상관패인+식상 통관": {
+    "n": 2,
+    "miss": 0,
+    "rate": 0
+   },
+   "군겁쟁재(재 유입)+식신제살+식상 통관": {
+    "n": 2,
+    "miss": 1,
+    "rate": 50
+   },
+   "상관견관+군겁쟁재(재 유입)+상관패인+식상 통관": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "관살혼잡+식신제살": {
+    "n": 6,
+    "miss": 2,
+    "rate": 33.3
+   },
+   "상관패인(견관 해소)": {
+    "n": 3,
+    "miss": 0,
+    "rate": 0
+   },
+   "식신제살+식상 통관": {
+    "n": 2,
+    "miss": 1,
+    "rate": 50
+   },
+   "상관견관+식신제살+상관패인+식상 통관": {
+    "n": 1,
+    "miss": 1,
+    "rate": 100
+   },
+   "식신제살+관제비겁+식상 통관": {
+    "n": 3,
+    "miss": 0,
+    "rate": 0
+   },
+   "상관견관+살인상생": {
+    "n": 1,
+    "miss": 1,
+    "rate": 100
+   },
+   "상관패인+식상 통관": {
+    "n": 4,
+    "miss": 1,
+    "rate": 25
+   },
+   "관살혼잡+상관패인+관제비겁+식상 통관": {
+    "n": 4,
+    "miss": 1,
+    "rate": 25
+   },
+   "효신탈식(도식)+식상 통관": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "군겁쟁재(재 유입)+살인상생+상관패인(견관 해소)": {
+    "n": 1,
+    "miss": 1,
+    "rate": 100
+   },
+   "살인상생+관제비겁+상관패인(견관 해소)": {
+    "n": 1,
+    "miss": 1,
+    "rate": 100
+   },
+   "식신제살+살인상생+식상 통관": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "살인상생+식상 통관+상관패인(견관 해소)": {
+    "n": 2,
+    "miss": 0,
+    "rate": 0
+   },
+   "군겁쟁재+살인상생": {
+    "n": 2,
+    "miss": 2,
+    "rate": 100
+   },
+   "상관견관+군겁쟁재": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "군겁쟁재(재 유입)+재제효": {
+    "n": 2,
+    "miss": 0,
+    "rate": 0
+   },
+   "군겁쟁재(재 유입)+식신제살+관제비겁+재제효": {
+    "n": 2,
+    "miss": 1,
+    "rate": 50
+   },
+   "식상 통관": {
+    "n": 2,
+    "miss": 1,
+    "rate": 50
+   },
+   "화살(혼잡 해소)": {
+    "n": 2,
+    "miss": 0,
+    "rate": 0
+   },
+   "상관견관+화살(혼잡 해소)": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   },
+   "상관견관+살인상생(관 유입)+상관패인": {
+    "n": 1,
+    "miss": 0,
+    "rate": 0
+   }
+  },
+  "primaryFlow": {
+   "opportunity": {
+    "n": 68,
+    "miss": 29,
+    "rate": 42.6
+   },
+   "harvest": {
+    "n": 75,
+    "miss": 23,
+    "rate": 30.7
+   },
+   "accumulation": {
+    "n": 98,
+    "miss": 26,
+    "rate": 26.5
+   },
+   "expansion": {
+    "n": 41,
+    "miss": 5,
+    "rate": 12.2
+   }
+  },
+  "birthTime": {
+   "시간 앎": {
+    "n": 190,
+    "miss": 56,
+    "rate": 29.5
+   },
+   "시간 미상": {
+    "n": 92,
+    "miss": 27,
+    "rate": 29.3
+   }
+  }
+ },
+ "counterexamples": {
+  "highFlowNegative": [
+   {
+    "person": "p2-arts-01-elizabeth-taylor",
+    "date": "1974-06-26",
+    "Y": 1974,
+    "kind": "divorce",
+    "valence": "negative",
+    "desc": "First divorce from Richard Burton",
+    "flowPct": 82.3,
+    "unifiedPct": 63.8,
+    "relationPct": 43.1,
+    "structurePct": 96.2,
+    "daeunPct": 72.3,
+    "volPct": 40,
+    "seun": "甲寅",
+    "daeun": "戊戌",
+    "tg": "편관/편관",
+    "roles": {
+     "stem": "한신",
+     "branch": "한신"
+    },
+    "rels": [
+     "申寅충",
+     "申寅형"
+    ],
+    "structs": [
+     "살인상생(관 유입)"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Elizabeth_Taylor"
+   },
+   {
+    "person": "p2-arts-01-elizabeth-taylor",
+    "date": "1997-02",
+    "Y": 1997,
+    "kind": "health_event",
+    "valence": "negative",
+    "desc": "Surgery to remove a benign brain tumour",
+    "flowPct": 90,
+    "unifiedPct": 82.3,
+    "relationPct": 88.5,
+    "structurePct": 37.7,
+    "daeunPct": 41.5,
+    "volPct": 23.8,
+    "seun": "丁丑",
+    "daeun": "丙申",
+    "tg": "정인/겁재",
+    "roles": {
+     "stem": "용신",
+     "branch": "희신"
+    },
+    "rels": [
+     "壬丁합木",
+     "壬丁합木",
+     "癸丁충",
+     "午丑해",
+     "午丑원진",
+     "午丑귀문"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Elizabeth_Taylor"
+   },
+   {
+    "person": "p2-arts-02-johnny-depp",
+    "date": "2020-11-02",
+    "Y": 2020,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Lost UK libel case against The Sun",
+    "flowPct": 99,
+    "unifiedPct": 92.7,
+    "relationPct": 87.5,
+    "structurePct": 88.5,
+    "daeunPct": 89.6,
+    "volPct": 74,
+    "seun": "庚子",
+    "daeun": "壬子",
+    "tg": "정인/비견",
+    "roles": {
+     "stem": "희신",
+     "branch": "용신"
+    },
+    "rels": [
+     "卯子형(무례지형)",
+     "午子충",
+     "未子해",
+     "未子원진",
+     "辰子 반합水"
+    ],
+    "structs": [
+     "살인상생"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Depp_v_News_Group_Newspapers_Ltd"
+   },
+   {
+    "person": "p2-arts-04-frida-kahlo",
+    "date": "1932-07-04",
+    "Y": 1932,
+    "kind": "health_event",
+    "valence": "negative",
+    "desc": "Miscarriage and hospitalisation in Detroit",
+    "flowPct": 92.4,
+    "unifiedPct": 92.4,
+    "relationPct": 9.1,
+    "structurePct": 89.4,
+    "daeunPct": 63.6,
+    "volPct": 80.3,
+    "seun": "壬申",
+    "daeun": "己酉",
+    "tg": "편관/편재",
+    "roles": {
+     "stem": "용신",
+     "branch": "희신"
+    },
+    "rels": [
+     "丁壬합木",
+     "丙壬충",
+     "丙壬충"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Frida_Kahlo"
+   },
+   {
+    "person": "p2-arts-06-angelina-jolie",
+    "date": "1999-02-03",
+    "Y": 1998,
+    "kind": "divorce",
+    "valence": "negative",
+    "desc": "Divorce from Jonny Lee Miller",
+    "flowPct": 84.7,
+    "unifiedPct": 87.5,
+    "relationPct": 59.7,
+    "structurePct": 87.5,
+    "daeunPct": 13.9,
+    "volPct": 77.8,
+    "seun": "戊寅",
+    "daeun": "甲申",
+    "tg": "정인/정재",
+    "roles": {
+     "stem": "용신",
+     "branch": "기신"
+    },
+    "rels": [
+     "巳寅해",
+     "巳寅형",
+     "巳寅해",
+     "巳寅형",
+     "寅卯辰 방합木"
+    ],
+    "structs": [
+     "살인상생",
+     "상관패인(견관 해소)"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Angelina_Jolie"
+   },
+   {
+    "person": "p2-business-03-ted-turner",
+    "date": "1986",
+    "Y": 1986,
+    "kind": "financial_loss",
+    "valence": "negative",
+    "desc": "Buys MGM/UA for $1.5 billion, leaving heavy debt; forced to sell parts back",
+    "flowPct": 85.6,
+    "unifiedPct": 97.9,
+    "relationPct": 70.5,
+    "structurePct": 95.2,
+    "daeunPct": 24.7,
+    "volPct": 14.4,
+    "seun": "丙寅",
+    "daeun": "戊辰",
+    "tg": "상관/겁재",
+    "roles": {
+     "stem": "용신",
+     "branch": "희신"
+    },
+    "rels": [
+     "亥寅합木",
+     "亥寅파"
+    ],
+    "structs": [
+     "상관견관",
+     "식상 통관"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Ted_Turner"
+   },
+   {
+    "person": "p2-business-06-john-delorean",
+    "date": "1969",
+    "Y": 1969,
+    "kind": "divorce",
+    "valence": "negative",
+    "desc": "Divorces Elizabeth Higgins; marries Kelly Harmon (May 31)",
+    "flowPct": 99.2,
+    "unifiedPct": 97.7,
+    "relationPct": 85.6,
+    "structurePct": 99.2,
+    "daeunPct": 92.4,
+    "volPct": 13.6,
+    "seun": "己酉",
+    "daeun": "辛巳",
+    "tg": "정인/겁재",
+    "roles": {
+     "stem": "용신",
+     "branch": "희신"
+    },
+    "rels": [
+     "甲己합土",
+     "子酉파",
+     "子酉귀문",
+     "寅酉원진",
+     "丑酉 반합金"
+    ],
+    "structs": [
+     "살인상생",
+     "상관패인(견관 해소)"
+    ],
+    "url": "https://en.wikipedia.org/wiki/John_DeLorean"
+   },
+   {
+    "person": "p2-business-08-michael-milken",
+    "date": "1993",
+    "Y": 1993,
+    "kind": "health_event",
+    "valence": "negative",
+    "desc": "Released from prison; diagnosed with prostate cancer the same month",
+    "flowPct": 88.5,
+    "unifiedPct": 79.2,
+    "relationPct": 7.7,
+    "structurePct": 97.7,
+    "daeunPct": 63.1,
+    "volPct": 80,
+    "seun": "癸酉",
+    "daeun": "己亥",
+    "tg": "편재/식신",
+    "roles": {
+     "stem": "용신",
+     "branch": "한신"
+    },
+    "rels": [
+     "戊癸합火",
+     "戌酉해",
+     "卯酉충",
+     "辰酉합金"
+    ],
+    "structs": [
+     "군겁쟁재(재 유입)",
+     "식신제살",
+     "식상 통관"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Michael_Milken"
+   },
+   {
+    "person": "p2-business-09-chung-ju-yung",
+    "date": "1941",
+    "Y": 1941,
+    "kind": "financial_loss",
+    "valence": "negative",
+    "desc": "A-do Service garage destroyed by fire",
+    "flowPct": 84,
+    "unifiedPct": 87.5,
+    "relationPct": 24.3,
+    "structurePct": 72.9,
+    "daeunPct": 51.4,
+    "volPct": 94.4,
+    "seun": "辛巳",
+    "daeun": "甲申",
+    "tg": "겁재/편관",
+    "roles": {
+     "stem": "용신",
+     "branch": "기신"
+    },
+    "rels": [
+     "乙辛충",
+     "亥巳충",
+     "申巳합水",
+     "申巳파",
+     "申巳형"
+    ],
+    "structs": [
+     "관살혼잡",
+     "식신제살"
+    ],
+    "url": "https://ko.wikipedia.org/wiki/%EC%A0%95%EC%A3%BC%EC%98%81"
+   },
+   {
+    "person": "p2-business-10-kim-woo-choong",
+    "date": "1998-10",
+    "Y": 1998,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Daewoo liquidity crisis erupts after Asian financial crisis",
+    "flowPct": 97.8,
+    "unifiedPct": 80.4,
+    "relationPct": 49.3,
+    "structurePct": 86.2,
+    "daeunPct": 92.8,
+    "volPct": 42,
+    "seun": "戊寅",
+    "daeun": "丙午",
+    "tg": "정재/겁재",
+    "roles": {
+     "stem": "희신",
+     "branch": "한신"
+    },
+    "rels": [
+     "亥寅합木",
+     "亥寅파"
+    ],
+    "structs": [],
+    "url": "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91"
+   },
+   {
+    "person": "p2-business-10-kim-woo-choong",
+    "date": "1999-11-01",
+    "Y": 1999,
+    "kind": "financial_loss",
+    "valence": "negative",
+    "desc": "Daewoo Group collapses with about $50 billion debt; resigns as chairman",
+    "flowPct": 87.7,
+    "unifiedPct": 58.7,
+    "relationPct": 49.3,
+    "structurePct": 73.2,
+    "daeunPct": 92.8,
+    "volPct": 64.5,
+    "seun": "己卯",
+    "daeun": "丙午",
+    "tg": "편재/비견",
+    "roles": {
+     "stem": "희신",
+     "branch": "한신"
+    },
+    "rels": [
+     "子卯형(무례지형)",
+     "子卯형(무례지형)",
+     "亥卯 반합木"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Kim_Woo-choong"
+   },
+   {
+    "person": "p2-business-10-kim-woo-choong",
+    "date": "2006-05",
+    "Y": 2006,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Convicted of embezzlement and accounting fraud; 10-year sentence (8.5 years on appeal)",
+    "flowPct": 99.3,
+    "unifiedPct": 93.5,
+    "relationPct": 49.3,
+    "structurePct": 89.1,
+    "daeunPct": 78.3,
+    "volPct": 3.6,
+    "seun": "丙戌",
+    "daeun": "丁未",
+    "tg": "상관/정재",
+    "roles": {
+     "stem": "용신",
+     "branch": "희신"
+    },
+    "rels": [],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Kim_Woo-choong"
+   },
+   {
+    "person": "p2-business-10-kim-woo-choong",
+    "date": "2006-11-03",
+    "Y": 2006,
+    "kind": "financial_loss",
+    "valence": "negative",
+    "desc": "Appeal court confirms forfeiture of about 17.9 trillion won",
+    "flowPct": 99.3,
+    "unifiedPct": 93.5,
+    "relationPct": 49.3,
+    "structurePct": 89.1,
+    "daeunPct": 78.3,
+    "volPct": 3.6,
+    "seun": "丙戌",
+    "daeun": "丁未",
+    "tg": "상관/정재",
+    "roles": {
+     "stem": "용신",
+     "branch": "희신"
+    },
+    "rels": [],
+    "structs": [],
+    "url": "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91"
+   },
+   {
+    "person": "p2-professional-04-armstrong",
+    "date": "1994",
+    "Y": 1994,
+    "kind": "divorce",
+    "valence": "negative",
+    "desc": "Divorced Janet after 38 years",
+    "flowPct": 81.6,
+    "unifiedPct": 62.5,
+    "relationPct": 52.9,
+    "structurePct": 74.3,
+    "daeunPct": 77.9,
+    "volPct": 65.4,
+    "seun": "甲戌",
+    "daeun": "庚寅",
+    "tg": "정인/상관",
+    "roles": {
+     "stem": "용신",
+     "branch": "구신"
+    },
+    "rels": [
+     "庚甲충",
+     "庚甲충",
+     "未戌파",
+     "未戌형",
+     "戌午 반합火"
+    ],
+    "structs": [
+     "상관견관",
+     "살인상생"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Neil_Armstrong"
+   },
+   {
+    "person": "p2-professional-07-ginsburg",
+    "date": "2009-02-05",
+    "Y": 2009,
+    "kind": "health_event",
+    "valence": "negative",
+    "desc": "Pancreatic cancer surgery",
+    "flowPct": 87,
+    "unifiedPct": 83.6,
+    "relationPct": 89,
+    "structurePct": 98.6,
+    "daeunPct": 52.1,
+    "volPct": 29.5,
+    "seun": "己丑",
+    "daeun": "壬戌",
+    "tg": "정인/정인",
+    "roles": {
+     "stem": "희신",
+     "branch": "희신"
+    },
+    "rels": [
+     "辰丑파",
+     "丑酉 반합金"
+    ],
+    "structs": [
+     "상관패인"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg"
+   },
+   {
+    "person": "p2-professional-08-barnard",
+    "date": "1967-12-21",
+    "Y": 1967,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "First transplant patient died after 18 days",
+    "flowPct": 90,
+    "unifiedPct": 96.2,
+    "relationPct": 96.9,
+    "structurePct": 97.7,
+    "daeunPct": 30.8,
+    "volPct": 23.8,
+    "seun": "丁未",
+    "daeun": "乙卯",
+    "tg": "정관/정인",
+    "roles": {
+     "stem": "용신",
+     "branch": "희신"
+    },
+    "rels": [
+     "壬丁합木",
+     "戌未파",
+     "戌未형"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Christiaan_Barnard"
+   },
+   {
+    "person": "p2-professional-09-obama",
+    "date": "2010-11-02",
+    "Y": 2010,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Democrats lost House in midterm \"shellacking\"",
+    "flowPct": 85,
+    "unifiedPct": 49,
+    "relationPct": 22,
+    "structurePct": 71,
+    "daeunPct": 90,
+    "volPct": 55,
+    "seun": "庚寅",
+    "daeun": "辛卯",
+    "tg": "상관/정관",
+    "roles": {
+     "stem": "기신",
+     "branch": "용신"
+    },
+    "rels": [
+     "乙庚합金",
+     "未寅귀문",
+     "巳寅해",
+     "巳寅형",
+     "酉寅원진"
+    ],
+    "structs": [
+     "관살혼잡",
+     "상관패인",
+     "관제비겁",
+     "식상 통관"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Barack_Obama"
+   },
+   {
+    "person": "p2-professional-10-park-geun-hye",
+    "date": "2006-05-20",
+    "Y": 2006,
+    "kind": "health_event",
+    "valence": "negative",
+    "desc": "Face slashed by attacker; 60 stitches surgery",
+    "flowPct": 97.5,
+    "unifiedPct": 94.1,
+    "relationPct": 90.7,
+    "structurePct": 82.2,
+    "daeunPct": 74.6,
+    "volPct": 65.3,
+    "seun": "丙戌",
+    "daeun": "丁未",
+    "tg": "편인/비견",
+    "roles": {
+     "stem": "용신",
+     "branch": "희신"
+    },
+    "rels": [
+     "辛丙합水",
+     "辛丙합水",
+     "卯戌합火",
+     "丑戌형"
+    ],
+    "structs": [
+     "살인상생"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Park_Geun-hye"
+   },
+   {
+    "person": "p2-professional-10-park-geun-hye",
+    "date": "2007-08-20",
+    "Y": 2007,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Lost GNP presidential primary to Lee Myung-bak",
+    "flowPct": 82.2,
+    "unifiedPct": 66.9,
+    "relationPct": 40.7,
+    "structurePct": 94.1,
+    "daeunPct": 74.6,
+    "volPct": 43.2,
+    "seun": "丁亥",
+    "daeun": "丁未",
+    "tg": "정인/편재",
+    "roles": {
+     "stem": "용신",
+     "branch": "기신"
+    },
+    "rels": [
+     "寅亥합木",
+     "寅亥파",
+     "亥卯 반합木"
+    ],
+    "structs": [
+     "군겁쟁재(재 유입)",
+     "살인상생",
+     "상관패인(견관 해소)"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Park_Geun-hye"
+   },
+   {
+    "person": "p2-sports-01-pele",
+    "date": "1966-07-19",
+    "Y": 1966,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Brazil eliminated in 1966 World Cup group stage after Pelé is fouled out",
+    "flowPct": 93.4,
+    "unifiedPct": 99.3,
+    "relationPct": 97.1,
+    "structurePct": 47.8,
+    "daeunPct": 51.5,
+    "volPct": 16.9,
+    "seun": "丙午",
+    "daeun": "己丑",
+    "tg": "겁재/비견",
+    "roles": {
+     "stem": "용신",
+     "branch": "용신"
+    },
+    "rels": [
+     "辛丙합水",
+     "丑午해",
+     "丑午원진",
+     "丑午귀문",
+     "戌午 반합火"
+    ],
+    "structs": [
+     "군겁쟁재"
+    ],
+    "url": "https://en.wikipedia.org/wiki/1966_FIFA_World_Cup"
+   },
+   {
+    "person": "p2-sports-02-ayrton-senna",
+    "date": "1989-10-22",
+    "Y": 1989,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Collision with Prost at Suzuka, disqualified, loses title",
+    "flowPct": 82.5,
+    "unifiedPct": 77.5,
+    "relationPct": 7.5,
+    "structurePct": 77.5,
+    "daeunPct": 75,
+    "volPct": 72.5,
+    "seun": "己巳",
+    "daeun": "壬午",
+    "tg": "겁재/편인",
+    "roles": {
+     "stem": "희신",
+     "branch": "용신"
+    },
+    "rels": [
+     "申巳합水",
+     "申巳파",
+     "申巳형"
+    ],
+    "structs": [
+     "군겁쟁재",
+     "살인상생"
+    ],
+    "url": "https://en.wikipedia.org/wiki/1989_Japanese_Grand_Prix"
+   },
+   {
+    "person": "p2-sports-03-boris-becker",
+    "date": "2001-01-15",
+    "Y": 2000,
+    "kind": "divorce",
+    "valence": "negative",
+    "desc": "Divorce from Barbara Feltus with multimillion settlement",
+    "flowPct": 83,
+    "unifiedPct": 73.9,
+    "relationPct": 69.3,
+    "structurePct": 30.7,
+    "daeunPct": 88.6,
+    "volPct": 22.7,
+    "seun": "庚辰",
+    "daeun": "戊申",
+    "tg": "비견/편인",
+    "roles": {
+     "stem": "희신",
+     "branch": "용신"
+    },
+    "rels": [
+     "亥辰원진",
+     "亥辰귀문",
+     "辰辰자형"
+    ],
+    "structs": [
+     "군겁쟁재"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Boris_Becker"
+   },
+   {
+    "person": "p2-sports-04-monica-seles",
+    "date": "1998-06-06",
+    "Y": 1998,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Loses French Open final to Arantxa Sánchez Vicario",
+    "flowPct": 90.8,
+    "unifiedPct": 72.4,
+    "relationPct": 96.1,
+    "structurePct": 69.7,
+    "daeunPct": 86.8,
+    "volPct": 96.1,
+    "seun": "戊寅",
+    "daeun": "丙寅",
+    "tg": "편관/식신",
+    "roles": {
+     "stem": "한신",
+     "branch": "희신"
+    },
+    "rels": [
+     "癸戊합火",
+     "癸戊합火",
+     "癸戊합火",
+     "亥寅합木",
+     "亥寅파",
+     "申寅충",
+     "申寅형"
+    ],
+    "structs": [
+     "관살혼잡"
+    ],
+    "url": "https://en.wikipedia.org/wiki/1998_French_Open_%E2%80%93_Women's_singles"
+   },
+   {
+    "person": "p2-sports-04-monica-seles",
+    "date": "2025-08",
+    "Y": 2025,
+    "kind": "health_event",
+    "valence": "negative",
+    "desc": "Publicly discloses myasthenia gravis (diagnosed 2022)",
+    "flowPct": 82.9,
+    "unifiedPct": 90.8,
+    "relationPct": 23.7,
+    "structurePct": 80.3,
+    "daeunPct": 34.2,
+    "volPct": 89.5,
+    "seun": "乙巳",
+    "daeun": "戊辰",
+    "tg": "상관/편재",
+    "roles": {
+     "stem": "희신",
+     "branch": "용신"
+    },
+    "rels": [
+     "亥巳충",
+     "申巳합水",
+     "申巳파",
+     "申巳형"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Monica_Seles"
+   },
+   {
+    "person": "p2-sports-07-mike-tyson",
+    "date": "1992-02-10",
+    "Y": 1992,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Convicted of rape, sentenced to six years",
+    "flowPct": 81.1,
+    "unifiedPct": 94.4,
+    "relationPct": 45.6,
+    "structurePct": 94.4,
+    "daeunPct": 51.1,
+    "volPct": 20,
+    "seun": "壬申",
+    "daeun": "丁酉",
+    "tg": "식신/비견",
+    "roles": {
+     "stem": "용신",
+     "branch": "희신"
+    },
+    "rels": [
+     "丙壬충"
+    ],
+    "structs": [
+     "식신제살"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Mike_Tyson"
+   },
+   {
+    "person": "p2-sports-08-michael-schumacher",
+    "date": "1997-10-26",
+    "Y": 1997,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Jerez collision with Villeneuve; excluded from 1997 championship standings",
+    "flowPct": 86.9,
+    "unifiedPct": 82.1,
+    "relationPct": 85.7,
+    "structurePct": 75,
+    "daeunPct": 59.5,
+    "volPct": 27.4,
+    "seun": "丁丑",
+    "daeun": "丁卯",
+    "tg": "정인/겁재",
+    "roles": {
+     "stem": "용신",
+     "branch": "희신"
+    },
+    "rels": [
+     "子丑합土"
+    ],
+    "structs": [
+     "군겁쟁재",
+     "살인상생"
+    ],
+    "url": "https://en.wikipedia.org/wiki/1997_European_Grand_Prix"
+   },
+   {
+    "person": "p2-sports-10-son-heung-min",
+    "date": "2020-02-16",
+    "Y": 2020,
+    "kind": "health_event",
+    "valence": "negative",
+    "desc": "Fractured arm vs Aston Villa, requires surgery",
+    "flowPct": 97.4,
+    "unifiedPct": 92.1,
+    "relationPct": 94.7,
+    "structurePct": 97.4,
+    "daeunPct": 73.7,
+    "volPct": 50,
+    "seun": "庚子",
+    "daeun": "己酉",
+    "tg": "정관/편인",
+    "roles": {
+     "stem": "한신",
+     "branch": "용신"
+    },
+    "rels": [
+     "乙庚합金",
+     "未子해",
+     "未子원진",
+     "酉子파",
+     "酉子귀문",
+     "申子 반합水"
+    ],
+    "structs": [
+     "살인상생"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Son_Heung-min"
+   },
+   {
+    "person": "p2-sports-10-son-heung-min",
+    "date": "2022-11-01",
+    "Y": 2022,
+    "kind": "health_event",
+    "valence": "negative",
+    "desc": "Fractured eye socket, surgery weeks before World Cup",
+    "flowPct": 81.6,
+    "unifiedPct": 86.8,
+    "relationPct": 28.9,
+    "structurePct": 65.8,
+    "daeunPct": 36.8,
+    "volPct": 55.3,
+    "seun": "壬寅",
+    "daeun": "庚戌",
+    "tg": "정인/겁재",
+    "roles": {
+     "stem": "용신",
+     "branch": "희신"
+    },
+    "rels": [
+     "丁壬합木",
+     "申寅충",
+     "申寅형",
+     "未寅귀문",
+     "酉寅원진"
+    ],
+    "structs": [
+     "살인상생"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Son_Heung-min"
+   }
+  ],
+  "lowFlowPositive": [
+   {
+    "person": "p2-arts-01-elizabeth-taylor",
+    "date": "1960-09",
+    "Y": 1960,
+    "kind": "financial_gain",
+    "valence": "positive",
+    "desc": "Signed record US$1 million contract for Cleopatra",
+    "flowPct": 0.8,
+    "unifiedPct": 6.9,
+    "relationPct": 3.1,
+    "structurePct": 17.7,
+    "daeunPct": 23.1,
+    "volPct": 76.2,
+    "seun": "庚子",
+    "daeun": "己亥",
+    "tg": "식신/정재",
+    "roles": {
+     "stem": "구신",
+     "branch": "기신"
+    },
+    "rels": [
+     "午子충",
+     "丑子합土",
+     "申子 반합水"
+    ],
+    "structs": [
+     "식신제살"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Cleopatra_(1963_film)"
+   },
+   {
+    "person": "p2-arts-03-francis-ford-coppola",
+    "date": "1971-04-15",
+    "Y": 1971,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Oscar for Best Original Screenplay (Patton)",
+    "flowPct": 9,
+    "unifiedPct": 17.4,
+    "relationPct": 59,
+    "structurePct": 77.8,
+    "daeunPct": 20.8,
+    "volPct": 27.1,
+    "seun": "辛亥",
+    "daeun": "甲子",
+    "tg": "정관/편인",
+    "roles": {
+     "stem": "구신",
+     "branch": "기신"
+    },
+    "rels": [
+     "乙辛충",
+     "辰亥원진",
+     "辰亥귀문",
+     "亥卯 반합木"
+    ],
+    "structs": [
+     "관제비겁"
+    ],
+    "url": "https://www.oscars.org/oscars/ceremonies/1971"
+   },
+   {
+    "person": "p2-arts-03-francis-ford-coppola",
+    "date": "1973-03-27",
+    "Y": 1973,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "The Godfather wins Best Picture; huge box-office success",
+    "flowPct": 4.9,
+    "unifiedPct": 3.5,
+    "relationPct": 79.9,
+    "structurePct": 22.2,
+    "daeunPct": 20.8,
+    "volPct": 54.9,
+    "seun": "癸丑",
+    "daeun": "甲子",
+    "tg": "정인/정재",
+    "roles": {
+     "stem": "기신",
+     "branch": "한신"
+    },
+    "rels": [
+     "戊癸합火",
+     "辰丑파",
+     "戌丑형"
+    ],
+    "structs": [
+     "군겁쟁재(재 유입)"
+    ],
+    "url": "https://www.oscars.org/oscars/ceremonies/1973"
+   },
+   {
+    "person": "p2-arts-03-francis-ford-coppola",
+    "date": "1992-11-13",
+    "Y": 1992,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Bram Stoker's Dracula a commercial hit, restoring finances",
+    "flowPct": 10.4,
+    "unifiedPct": 4.9,
+    "relationPct": 36.8,
+    "structurePct": 60.4,
+    "daeunPct": 34.7,
+    "volPct": 4.9,
+    "seun": "壬申",
+    "daeun": "壬戌",
+    "tg": "편인/편관",
+    "roles": {
+     "stem": "기신",
+     "branch": "구신"
+    },
+    "rels": [
+     "卯申원진",
+     "卯申귀문"
+    ],
+    "structs": [
+     "관제비겁"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Bram_Stoker%27s_Dracula"
+   },
+   {
+    "person": "p2-arts-04-frida-kahlo",
+    "date": "1938-11",
+    "Y": 1938,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "First solo exhibition, Julien Levy Gallery, New York",
+    "flowPct": 10.6,
+    "unifiedPct": 16.7,
+    "relationPct": 24.2,
+    "structurePct": 40.9,
+    "daeunPct": 33.3,
+    "volPct": 15.2,
+    "seun": "戊寅",
+    "daeun": "庚戌",
+    "tg": "식신/편인",
+    "roles": {
+     "stem": "기신",
+     "branch": "한신"
+    },
+    "rels": [
+     "未寅귀문",
+     "寅午 반합火"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Frida_Kahlo"
+   },
+   {
+    "person": "p2-arts-04-frida-kahlo",
+    "date": "1939-03",
+    "Y": 1939,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Paris exhibition; Louvre acquires The Frame",
+    "flowPct": 19.7,
+    "unifiedPct": 31.8,
+    "relationPct": 57.6,
+    "structurePct": 74.2,
+    "daeunPct": 33.3,
+    "volPct": 28.8,
+    "seun": "己卯",
+    "daeun": "庚戌",
+    "tg": "상관/정인",
+    "roles": {
+     "stem": "기신",
+     "branch": "한신"
+    },
+    "rels": [
+     "午卯파",
+     "辰卯해",
+     "辰卯해",
+     "未卯 반합木"
+    ],
+    "structs": [
+     "상관패인"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Frida_Kahlo"
+   },
+   {
+    "person": "p2-arts-08-jk-rowling",
+    "date": "1997-04",
+    "Y": 1997,
+    "kind": "financial_gain",
+    "valence": "positive",
+    "desc": "Scholastic buys US rights for over US$100,000",
+    "flowPct": 9.8,
+    "unifiedPct": 25,
+    "relationPct": 59.8,
+    "structurePct": 12,
+    "daeunPct": 10.9,
+    "volPct": 96.7,
+    "seun": "丁丑",
+    "daeun": "丙戌",
+    "tg": "겁재/상관",
+    "roles": {
+     "stem": "구신",
+     "branch": "기신"
+    },
+    "rels": [
+     "癸丁충",
+     "未丑충",
+     "未丑형",
+     "戌丑형",
+     "丑戌未 삼형 — 지세지형(축술미)"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/J._K._Rowling"
+   },
+   {
+    "person": "p2-arts-08-jk-rowling",
+    "date": "1997-06-26",
+    "Y": 1997,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Harry Potter and the Philosopher's Stone published",
+    "flowPct": 9.8,
+    "unifiedPct": 25,
+    "relationPct": 59.8,
+    "structurePct": 12,
+    "daeunPct": 10.9,
+    "volPct": 96.7,
+    "seun": "丁丑",
+    "daeun": "丙戌",
+    "tg": "겁재/상관",
+    "roles": {
+     "stem": "구신",
+     "branch": "기신"
+    },
+    "rels": [
+     "癸丁충",
+     "未丑충",
+     "未丑형",
+     "戌丑형",
+     "丑戌未 삼형 — 지세지형(축술미)"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Harry_Potter_and_the_Philosopher%27s_Stone"
+   },
+   {
+    "person": "p2-arts-09-psy",
+    "date": "2012-07-15",
+    "Y": 2012,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Gangnam Style released, global viral hit",
+    "flowPct": 13.2,
+    "unifiedPct": 10.3,
+    "relationPct": 1.5,
+    "structurePct": 30.9,
+    "daeunPct": 26.5,
+    "volPct": 89.7,
+    "seun": "壬辰",
+    "daeun": "己酉",
+    "tg": "비견/편관",
+    "roles": {
+     "stem": "기신",
+     "branch": "희신"
+    },
+    "rels": [
+     "丁壬합木",
+     "戌辰충",
+     "辰子 반합水"
+    ],
+    "structs": [
+     "관제비겁"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Gangnam_Style"
+   },
+   {
+    "person": "p2-arts-09-psy",
+    "date": "2012-11-11",
+    "Y": 2012,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "MTV EMA Best Video for Gangnam Style",
+    "flowPct": 13.2,
+    "unifiedPct": 10.3,
+    "relationPct": 1.5,
+    "structurePct": 30.9,
+    "daeunPct": 26.5,
+    "volPct": 89.7,
+    "seun": "壬辰",
+    "daeun": "己酉",
+    "tg": "비견/편관",
+    "roles": {
+     "stem": "기신",
+     "branch": "희신"
+    },
+    "rels": [
+     "丁壬합木",
+     "戌辰충",
+     "辰子 반합水"
+    ],
+    "structs": [
+     "관제비겁"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Gangnam_Style"
+   },
+   {
+    "person": "p2-arts-09-psy",
+    "date": "2012-12-21",
+    "Y": 2012,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "First YouTube video to pass one billion views",
+    "flowPct": 13.2,
+    "unifiedPct": 10.3,
+    "relationPct": 1.5,
+    "structurePct": 30.9,
+    "daeunPct": 26.5,
+    "volPct": 89.7,
+    "seun": "壬辰",
+    "daeun": "己酉",
+    "tg": "비견/편관",
+    "roles": {
+     "stem": "기신",
+     "branch": "희신"
+    },
+    "rels": [
+     "丁壬합木",
+     "戌辰충",
+     "辰子 반합水"
+    ],
+    "structs": [
+     "관제비겁"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Gangnam_Style"
+   },
+   {
+    "person": "p2-arts-10-lee-byung-hun",
+    "date": "2015-11-19",
+    "Y": 2015,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Inside Men big box-office success",
+    "flowPct": 15.9,
+    "unifiedPct": 11,
+    "relationPct": 45.1,
+    "structurePct": 52.4,
+    "daeunPct": 36.6,
+    "volPct": 32.9,
+    "seun": "乙未",
+    "daeun": "丁亥",
+    "tg": "식신/편관",
+    "roles": {
+     "stem": "구신",
+     "branch": "한신"
+    },
+    "rels": [
+     "庚乙합金",
+     "戌未파",
+     "戌未형"
+    ],
+    "structs": [
+     "식신제살",
+     "살인상생(관 유입)"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Inside_Men"
+   },
+   {
+    "person": "p2-business-01-walt-disney",
+    "date": "1928-11-18",
+    "Y": 1928,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Steamboat Willie premieres, launching Mickey Mouse",
+    "flowPct": 10.8,
+    "unifiedPct": 28.4,
+    "relationPct": 56.9,
+    "structurePct": 30.4,
+    "daeunPct": 19.6,
+    "volPct": 15.7,
+    "seun": "戊辰",
+    "daeun": "丁酉",
+    "tg": "상관/상관",
+    "roles": {
+     "stem": "구신",
+     "branch": "구신"
+    },
+    "rels": [
+     "丑辰파",
+     "亥辰원진",
+     "亥辰귀문",
+     "辰子 반합水"
+    ],
+    "structs": [
+     "상관견관"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Walt_Disney"
+   },
+   {
+    "person": "p2-business-04-oprah-winfrey",
+    "date": "1986-02",
+    "Y": 1986,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Oscar nomination for Best Supporting Actress (The Color Purple)",
+    "flowPct": 4.4,
+    "unifiedPct": 9.6,
+    "relationPct": 56.1,
+    "structurePct": 50,
+    "daeunPct": 8.8,
+    "volPct": 9.6,
+    "seun": "丙寅",
+    "daeun": "己巳",
+    "tg": "상관/겁재",
+    "roles": {
+     "stem": "구신",
+     "branch": "희신"
+    },
+    "rels": [
+     "巳寅해",
+     "巳寅형",
+     "酉寅원진"
+    ],
+    "structs": [
+     "군겁쟁재"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Oprah_Winfrey"
+   },
+   {
+    "person": "p2-business-04-oprah-winfrey",
+    "date": "1986-09-08",
+    "Y": 1986,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "The Oprah Winfrey Show goes national in syndication",
+    "flowPct": 4.4,
+    "unifiedPct": 9.6,
+    "relationPct": 56.1,
+    "structurePct": 50,
+    "daeunPct": 8.8,
+    "volPct": 9.6,
+    "seun": "丙寅",
+    "daeun": "己巳",
+    "tg": "상관/겁재",
+    "roles": {
+     "stem": "구신",
+     "branch": "희신"
+    },
+    "rels": [
+     "巳寅해",
+     "巳寅형",
+     "酉寅원진"
+    ],
+    "structs": [
+     "군겁쟁재"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Oprah_Winfrey"
+   },
+   {
+    "person": "p2-business-04-oprah-winfrey",
+    "date": "1998-02-26",
+    "Y": 1998,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Jury finds her not liable in Texas cattlemen beef-defamation suit",
+    "flowPct": 13.2,
+    "unifiedPct": 20.2,
+    "relationPct": 27.2,
+    "structurePct": 32.5,
+    "daeunPct": 26.3,
+    "volPct": 16.7,
+    "seun": "戊寅",
+    "daeun": "庚午",
+    "tg": "정재/겁재",
+    "roles": {
+     "stem": "기신",
+     "branch": "희신"
+    },
+    "rels": [
+     "癸戊합火",
+     "巳寅해",
+     "巳寅형",
+     "酉寅원진"
+    ],
+    "structs": [
+     "군겁쟁재"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Oprah_Winfrey"
+   },
+   {
+    "person": "p2-business-06-john-delorean",
+    "date": "1984-08-16",
+    "Y": 1984,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Acquitted of drug-trafficking charges (entrapment defense)",
+    "flowPct": 8.3,
+    "unifiedPct": 6.8,
+    "relationPct": 61.4,
+    "structurePct": 3.8,
+    "daeunPct": 56.1,
+    "volPct": 70.5,
+    "seun": "甲子",
+    "daeun": "癸未",
+    "tg": "편재/상관",
+    "roles": {
+     "stem": "기신",
+     "branch": "구신"
+    },
+    "rels": [
+     "庚甲충",
+     "丑子합土",
+     "午子충"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/John_DeLorean"
+   },
+   {
+    "person": "p2-professional-01-nixon",
+    "date": "1972-02-21",
+    "Y": 1972,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Historic visit to China",
+    "flowPct": 9.7,
+    "unifiedPct": 0.7,
+    "relationPct": 73.9,
+    "structurePct": 1.5,
+    "daeunPct": 62.7,
+    "volPct": 12.7,
+    "seun": "壬子",
+    "daeun": "己未",
+    "tg": "식신/상관",
+    "roles": {
+     "stem": "기신",
+     "branch": "기신"
+    },
+    "rels": [
+     "丁壬합木",
+     "丑子합土"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Richard_Nixon"
+   },
+   {
+    "person": "p2-professional-01-nixon",
+    "date": "1972-11-07",
+    "Y": 1972,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Re-elected in landslide",
+    "flowPct": 9.7,
+    "unifiedPct": 0.7,
+    "relationPct": 73.9,
+    "structurePct": 1.5,
+    "daeunPct": 62.7,
+    "volPct": 12.7,
+    "seun": "壬子",
+    "daeun": "己未",
+    "tg": "식신/상관",
+    "roles": {
+     "stem": "기신",
+     "branch": "기신"
+    },
+    "rels": [
+     "丁壬합木",
+     "丑子합土"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Richard_Nixon"
+   },
+   {
+    "person": "p2-sports-01-pele",
+    "date": "1969-11-19",
+    "Y": 1969,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Scores his 1000th career goal at the Maracanã",
+    "flowPct": 18.4,
+    "unifiedPct": 21.3,
+    "relationPct": 72.8,
+    "structurePct": 6.6,
+    "daeunPct": 51.5,
+    "volPct": 43.4,
+    "seun": "己酉",
+    "daeun": "己丑",
+    "tg": "식신/편재",
+    "roles": {
+     "stem": "한신",
+     "branch": "구신"
+    },
+    "rels": [
+     "辰酉합金",
+     "戌酉해",
+     "酉酉자형"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Pel%C3%A9"
+   },
+   {
+    "person": "p2-sports-01-pele",
+    "date": "1970-06-21",
+    "Y": 1970,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Wins third World Cup, scoring in final vs Italy",
+    "flowPct": 9.6,
+    "unifiedPct": 16.9,
+    "relationPct": 34.6,
+    "structurePct": 8.1,
+    "daeunPct": 51.5,
+    "volPct": 34.6,
+    "seun": "庚戌",
+    "daeun": "己丑",
+    "tg": "정재/상관",
+    "roles": {
+     "stem": "구신",
+     "branch": "한신"
+    },
+    "rels": [
+     "辰戌충",
+     "酉戌해",
+     "丑戌형"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/1970_FIFA_World_Cup_final"
+   },
+   {
+    "person": "p2-sports-03-boris-becker",
+    "date": "1996-01-28",
+    "Y": 1995,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Wins Australian Open, sixth and last major",
+    "flowPct": 5.7,
+    "unifiedPct": 1.1,
+    "relationPct": 30.7,
+    "structurePct": 17,
+    "daeunPct": 88.6,
+    "volPct": 73.9,
+    "seun": "乙亥",
+    "daeun": "戊申",
+    "tg": "정재/식신",
+    "roles": {
+     "stem": "기신",
+     "branch": "구신"
+    },
+    "rels": [
+     "辛乙충",
+     "庚乙합金",
+     "庚乙합金",
+     "亥亥자형",
+     "寅亥합木",
+     "寅亥파",
+     "辰亥원진",
+     "辰亥귀문"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/1996_Australian_Open_%E2%80%93_Men's_singles"
+   },
+   {
+    "person": "p2-sports-04-monica-seles",
+    "date": "1993-01-30",
+    "Y": 1992,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Wins third straight Australian Open",
+    "flowPct": 3.9,
+    "unifiedPct": 1.3,
+    "relationPct": 46.1,
+    "structurePct": 3.9,
+    "daeunPct": 10.5,
+    "volPct": 15.8,
+    "seun": "壬申",
+    "daeun": "乙丑",
+    "tg": "비견/편인",
+    "roles": {
+     "stem": "기신",
+     "branch": "구신"
+    },
+    "rels": [
+     "亥申해",
+     "卯申원진",
+     "卯申귀문"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/1993_Australian_Open_%E2%80%93_Women's_singles"
+   },
+   {
+    "person": "p2-sports-04-monica-seles",
+    "date": "1995-08",
+    "Y": 1995,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Comeback: wins Canadian Open in first tour event after stabbing",
+    "flowPct": 14.5,
+    "unifiedPct": 35.5,
+    "relationPct": 46.1,
+    "structurePct": 14.5,
+    "daeunPct": 10.5,
+    "volPct": 44.7,
+    "seun": "乙亥",
+    "daeun": "乙丑",
+    "tg": "상관/비견",
+    "roles": {
+     "stem": "희신",
+     "branch": "기신"
+    },
+    "rels": [
+     "亥亥자형",
+     "申亥해"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Monica_Seles"
+   },
+   {
+    "person": "p2-sports-04-monica-seles",
+    "date": "1996-01-27",
+    "Y": 1995,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Wins 1996 Australian Open, ninth and last major",
+    "flowPct": 14.5,
+    "unifiedPct": 35.5,
+    "relationPct": 46.1,
+    "structurePct": 14.5,
+    "daeunPct": 10.5,
+    "volPct": 44.7,
+    "seun": "乙亥",
+    "daeun": "乙丑",
+    "tg": "상관/비견",
+    "roles": {
+     "stem": "희신",
+     "branch": "기신"
+    },
+    "rels": [
+     "亥亥자형",
+     "申亥해"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/1996_Australian_Open_%E2%80%93_Women's_singles"
+   },
+   {
+    "person": "p2-sports-05-martina-navratilova",
+    "date": "1978-07-07",
+    "Y": 1978,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "First Wimbledon singles title, becomes world No. 1",
+    "flowPct": 0.9,
+    "unifiedPct": 0.9,
+    "relationPct": 39.1,
+    "structurePct": 4.5,
+    "daeunPct": 44.5,
+    "volPct": 32.7,
+    "seun": "戊午",
+    "daeun": "丙申",
+    "tg": "비견/정인",
+    "roles": {
+     "stem": "기신",
+     "branch": "구신"
+    },
+    "rels": [
+     "午午자형"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/1978_Wimbledon_Championships_%E2%80%93_Women's_singles"
+   },
+   {
+    "person": "p2-sports-06-nadia-comaneci",
+    "date": "1980-07-25",
+    "Y": 1980,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Olympic gold on beam and floor in Moscow",
+    "flowPct": 13,
+    "unifiedPct": 27,
+    "relationPct": 54,
+    "structurePct": 29,
+    "daeunPct": 18,
+    "volPct": 32,
+    "seun": "庚申",
+    "daeun": "辛丑",
+    "tg": "상관/상관",
+    "roles": {
+     "stem": "구신",
+     "branch": "구신"
+    },
+    "rels": [
+     "亥申해",
+     "巳申합水",
+     "巳申파",
+     "巳申형"
+    ],
+    "structs": [
+     "상관패인",
+     "식상 통관"
+    ],
+    "url": "https://www.olympics.com/en/athletes/nadia-comaneci"
+   },
+   {
+    "person": "p2-sports-07-mike-tyson",
+    "date": "1986-11-22",
+    "Y": 1986,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Beats Trevor Berbick for WBC title, youngest heavyweight champion",
+    "flowPct": 3.3,
+    "unifiedPct": 3.3,
+    "relationPct": 4.4,
+    "structurePct": 1.1,
+    "daeunPct": 31.1,
+    "volPct": 91.1,
+    "seun": "丙寅",
+    "daeun": "丙申",
+    "tg": "편관/편재",
+    "roles": {
+     "stem": "구신",
+     "branch": "한신"
+    },
+    "rels": [
+     "申寅충",
+     "申寅형",
+     "寅午 반합火"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Mike_Tyson"
+   },
+   {
+    "person": "p2-sports-08-michael-schumacher",
+    "date": "1992-08-30",
+    "Y": 1992,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "First Grand Prix win at Spa",
+    "flowPct": 1.2,
+    "unifiedPct": 1.2,
+    "relationPct": 11.9,
+    "structurePct": 29.8,
+    "daeunPct": 59.5,
+    "volPct": 94,
+    "seun": "壬申",
+    "daeun": "丁卯",
+    "tg": "편재/식신",
+    "roles": {
+     "stem": "기신",
+     "branch": "구신"
+    },
+    "rels": [
+     "寅申충",
+     "寅申형"
+    ],
+    "structs": [
+     "식신제살"
+    ],
+    "url": "https://en.wikipedia.org/wiki/1992_Belgian_Grand_Prix"
+   },
+   {
+    "person": "p2-sports-10-son-heung-min",
+    "date": "2018-09-01",
+    "Y": 2018,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Asian Games gold as captain, earning military service exemption",
+    "flowPct": 2.6,
+    "unifiedPct": 2.6,
+    "relationPct": 52.6,
+    "structurePct": 2.6,
+    "daeunPct": 73.7,
+    "volPct": 86.8,
+    "seun": "戊戌",
+    "daeun": "己酉",
+    "tg": "정재/정재",
+    "roles": {
+     "stem": "기신",
+     "branch": "기신"
+    },
+    "rels": [
+     "未戌파",
+     "未戌형",
+     "酉戌해",
+     "申酉戌 방합金"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Football_at_the_2018_Asian_Games_%E2%80%93_Men's_tournament"
+   }
+  ],
+  "highWealthLoss": [
+   {
+    "person": "p2-business-03-ted-turner",
+    "date": "1986",
+    "Y": 1986,
+    "kind": "financial_loss",
+    "valence": "negative",
+    "desc": "Buys MGM/UA for $1.5 billion, leaving heavy debt; forced to sell parts back",
+    "flowPct": 85.6,
+    "unifiedPct": 97.9,
+    "relationPct": 70.5,
+    "structurePct": 95.2,
+    "daeunPct": 24.7,
+    "volPct": 14.4,
+    "seun": "丙寅",
+    "daeun": "戊辰",
+    "tg": "상관/겁재",
+    "roles": {
+     "stem": "용신",
+     "branch": "희신"
+    },
+    "rels": [
+     "亥寅합木",
+     "亥寅파"
+    ],
+    "structs": [
+     "상관견관",
+     "식상 통관"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Ted_Turner",
+    "wealthPct": 93
+   },
+   {
+    "person": "p2-business-10-kim-woo-choong",
+    "date": "2006-11-03",
+    "Y": 2006,
+    "kind": "financial_loss",
+    "valence": "negative",
+    "desc": "Appeal court confirms forfeiture of about 17.9 trillion won",
+    "flowPct": 99.3,
+    "unifiedPct": 93.5,
+    "relationPct": 49.3,
+    "structurePct": 89.1,
+    "daeunPct": 78.3,
+    "volPct": 3.6,
+    "seun": "丙戌",
+    "daeun": "丁未",
+    "tg": "상관/정재",
+    "roles": {
+     "stem": "용신",
+     "branch": "희신"
+    },
+    "rels": [],
+    "structs": [],
+    "url": "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91",
+    "wealthPct": 99
+   },
+   {
+    "person": "p2-sports-07-mike-tyson",
+    "date": "2003-08",
+    "Y": 2003,
+    "kind": "financial_loss",
+    "valence": "negative",
+    "desc": "Files for bankruptcy despite ~$300m career earnings",
+    "flowPct": 38.9,
+    "unifiedPct": 63.3,
+    "relationPct": 25.6,
+    "structurePct": 45.6,
+    "daeunPct": 11.1,
+    "volPct": 41.1,
+    "seun": "癸未",
+    "daeun": "戊戌",
+    "tg": "상관/정인",
+    "roles": {
+     "stem": "용신",
+     "branch": "기신"
+    },
+    "rels": [
+     "午未합火",
+     "午未합火"
+    ],
+    "structs": [
+     "상관견관",
+     "화살(혼잡 해소)"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Mike_Tyson",
+    "wealthPct": 81
+   }
+  ],
+  "lowCareerAchievement": [
+   {
+    "person": "p2-arts-01-elizabeth-taylor",
+    "date": "1961-04-17",
+    "Y": 1961,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Academy Award for Best Actress (BUtterfield 8)",
+    "flowPct": 22.3,
+    "unifiedPct": 25.4,
+    "relationPct": 75.4,
+    "structurePct": 46.9,
+    "daeunPct": 23.1,
+    "volPct": 7.7,
+    "seun": "辛丑",
+    "daeun": "己亥",
+    "tg": "상관/겁재",
+    "roles": {
+     "stem": "구신",
+     "branch": "희신"
+    },
+    "rels": [
+     "午丑해",
+     "午丑원진",
+     "午丑귀문"
+    ],
+    "structs": [
+     "상관패인"
+    ],
+    "url": "https://www.oscars.org/oscars/ceremonies/1961",
+    "domainPct": 14
+   },
+   {
+    "person": "p2-arts-03-francis-ford-coppola",
+    "date": "1971-04-15",
+    "Y": 1971,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Oscar for Best Original Screenplay (Patton)",
+    "flowPct": 9,
+    "unifiedPct": 17.4,
+    "relationPct": 59,
+    "structurePct": 77.8,
+    "daeunPct": 20.8,
+    "volPct": 27.1,
+    "seun": "辛亥",
+    "daeun": "甲子",
+    "tg": "정관/편인",
+    "roles": {
+     "stem": "구신",
+     "branch": "기신"
+    },
+    "rels": [
+     "乙辛충",
+     "辰亥원진",
+     "辰亥귀문",
+     "亥卯 반합木"
+    ],
+    "structs": [
+     "관제비겁"
+    ],
+    "url": "https://www.oscars.org/oscars/ceremonies/1971",
+    "domainPct": 12
+   },
+   {
+    "person": "p2-arts-03-francis-ford-coppola",
+    "date": "1975-04-08",
+    "Y": 1975,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "The Godfather Part II wins Best Picture and Best Director",
+    "flowPct": 63.2,
+    "unifiedPct": 68.8,
+    "relationPct": 92.4,
+    "structurePct": 43.8,
+    "daeunPct": 20.8,
+    "volPct": 29.2,
+    "seun": "乙卯",
+    "daeun": "甲子",
+    "tg": "겁재/겁재",
+    "roles": {
+     "stem": "희신",
+     "branch": "희신"
+    },
+    "rels": [
+     "辰卯해",
+     "戌卯합火"
+    ],
+    "structs": [],
+    "url": "https://www.oscars.org/oscars/ceremonies/1975",
+    "domainPct": 16
+   },
+   {
+    "person": "p2-arts-03-francis-ford-coppola",
+    "date": "1992-11-13",
+    "Y": 1992,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Bram Stoker's Dracula a commercial hit, restoring finances",
+    "flowPct": 10.4,
+    "unifiedPct": 4.9,
+    "relationPct": 36.8,
+    "structurePct": 60.4,
+    "daeunPct": 34.7,
+    "volPct": 4.9,
+    "seun": "壬申",
+    "daeun": "壬戌",
+    "tg": "편인/편관",
+    "roles": {
+     "stem": "기신",
+     "branch": "구신"
+    },
+    "rels": [
+     "卯申원진",
+     "卯申귀문"
+    ],
+    "structs": [
+     "관제비겁"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Bram_Stoker%27s_Dracula",
+    "domainPct": 4
+   },
+   {
+    "person": "p2-arts-04-frida-kahlo",
+    "date": "1953-04",
+    "Y": 1953,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "First solo exhibition in Mexico, attended on a bed",
+    "flowPct": 65.2,
+    "unifiedPct": 74.2,
+    "relationPct": 24.2,
+    "structurePct": 19.7,
+    "daeunPct": 89.4,
+    "volPct": 68.2,
+    "seun": "癸巳",
+    "daeun": "辛亥",
+    "tg": "정관/비견",
+    "roles": {
+     "stem": "용신",
+     "branch": "구신"
+    },
+    "rels": [
+     "丁癸충",
+     "巳午未 방합火"
+    ],
+    "structs": [
+     "관살혼잡",
+     "상관견관"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Frida_Kahlo",
+    "domainPct": 8
+   },
+   {
+    "person": "p2-arts-05-kurt-cobain",
+    "date": "1993-09-21",
+    "Y": 1993,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "In Utero debuts at No. 1",
+    "flowPct": 42.3,
+    "unifiedPct": 26.9,
+    "relationPct": 73.1,
+    "structurePct": 96.2,
+    "daeunPct": 7.7,
+    "volPct": 65.4,
+    "seun": "癸酉",
+    "daeun": "己亥",
+    "tg": "편인/편관",
+    "roles": {
+     "stem": "구신",
+     "branch": "한신"
+    },
+    "rels": [
+     "丁癸충",
+     "寅酉원진",
+     "卯酉충",
+     "戌酉해"
+    ],
+    "structs": [
+     "효신탈식(도식)",
+     "식신제살",
+     "관제비겁"
+    ],
+    "url": "https://en.wikipedia.org/wiki/In_Utero",
+    "domainPct": 27
+   },
+   {
+    "person": "p2-arts-06-angelina-jolie",
+    "date": "2000-03-26",
+    "Y": 2000,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Academy Award for Best Supporting Actress (Girl, Interrupted)",
+    "flowPct": 73.6,
+    "unifiedPct": 81.9,
+    "relationPct": 80.6,
+    "structurePct": 76.4,
+    "daeunPct": 13.9,
+    "volPct": 45.8,
+    "seun": "庚辰",
+    "daeun": "甲申",
+    "tg": "겁재/정인",
+    "roles": {
+     "stem": "희신",
+     "branch": "용신"
+    },
+    "rels": [
+     "乙庚합金",
+     "卯辰해",
+     "辰辰자형"
+    ],
+    "structs": [
+     "군겁쟁재",
+     "살인상생",
+     "상관패인(견관 해소)"
+    ],
+    "url": "https://www.oscars.org/oscars/ceremonies/2000",
+    "domainPct": 19
+   },
+   {
+    "person": "p2-arts-06-angelina-jolie",
+    "date": "2001-06-15",
+    "Y": 2001,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Lara Croft: Tomb Raider worldwide hit",
+    "flowPct": 59.7,
+    "unifiedPct": 84.7,
+    "relationPct": 59.7,
+    "structurePct": 31.9,
+    "daeunPct": 13.9,
+    "volPct": 23.6,
+    "seun": "辛巳",
+    "daeun": "甲申",
+    "tg": "비견/정관",
+    "roles": {
+     "stem": "희신",
+     "branch": "한신"
+    },
+    "rels": [
+     "乙辛충"
+    ],
+    "structs": [
+     "군겁쟁재",
+     "살인상생(관 유입)"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Lara_Croft:_Tomb_Raider",
+    "domainPct": 6
+   },
+   {
+    "person": "p2-arts-08-jk-rowling",
+    "date": "1997-06-26",
+    "Y": 1997,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Harry Potter and the Philosopher's Stone published",
+    "flowPct": 9.8,
+    "unifiedPct": 25,
+    "relationPct": 59.8,
+    "structurePct": 12,
+    "daeunPct": 10.9,
+    "volPct": 96.7,
+    "seun": "丁丑",
+    "daeun": "丙戌",
+    "tg": "겁재/상관",
+    "roles": {
+     "stem": "구신",
+     "branch": "기신"
+    },
+    "rels": [
+     "癸丁충",
+     "未丑충",
+     "未丑형",
+     "戌丑형",
+     "丑戌未 삼형 — 지세지형(축술미)"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Harry_Potter_and_the_Philosopher%27s_Stone",
+    "domainPct": 11
+   },
+   {
+    "person": "p2-arts-08-jk-rowling",
+    "date": "2007-07-21",
+    "Y": 2007,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Deathly Hallows sets sales records, concluding series",
+    "flowPct": 79.3,
+    "unifiedPct": 66.3,
+    "relationPct": 79.3,
+    "structurePct": 42.4,
+    "daeunPct": 89.1,
+    "volPct": 51.1,
+    "seun": "丁亥",
+    "daeun": "丁亥",
+    "tg": "겁재/편관",
+    "roles": {
+     "stem": "구신",
+     "branch": "용신"
+    },
+    "rels": [
+     "癸丁충",
+     "巳亥충"
+    ],
+    "structs": [
+     "관살혼잡"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Harry_Potter_and_the_Deathly_Hallows",
+    "domainPct": 1
+   },
+   {
+    "person": "p2-arts-09-psy",
+    "date": "2012-07-15",
+    "Y": 2012,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Gangnam Style released, global viral hit",
+    "flowPct": 13.2,
+    "unifiedPct": 10.3,
+    "relationPct": 1.5,
+    "structurePct": 30.9,
+    "daeunPct": 26.5,
+    "volPct": 89.7,
+    "seun": "壬辰",
+    "daeun": "己酉",
+    "tg": "비견/편관",
+    "roles": {
+     "stem": "기신",
+     "branch": "희신"
+    },
+    "rels": [
+     "丁壬합木",
+     "戌辰충",
+     "辰子 반합水"
+    ],
+    "structs": [
+     "관제비겁"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Gangnam_Style",
+    "domainPct": 19
+   },
+   {
+    "person": "p2-arts-09-psy",
+    "date": "2012-11-11",
+    "Y": 2012,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "MTV EMA Best Video for Gangnam Style",
+    "flowPct": 13.2,
+    "unifiedPct": 10.3,
+    "relationPct": 1.5,
+    "structurePct": 30.9,
+    "daeunPct": 26.5,
+    "volPct": 89.7,
+    "seun": "壬辰",
+    "daeun": "己酉",
+    "tg": "비견/편관",
+    "roles": {
+     "stem": "기신",
+     "branch": "희신"
+    },
+    "rels": [
+     "丁壬합木",
+     "戌辰충",
+     "辰子 반합水"
+    ],
+    "structs": [
+     "관제비겁"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Gangnam_Style",
+    "domainPct": 19
+   },
+   {
+    "person": "p2-arts-09-psy",
+    "date": "2012-12-21",
+    "Y": 2012,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "First YouTube video to pass one billion views",
+    "flowPct": 13.2,
+    "unifiedPct": 10.3,
+    "relationPct": 1.5,
+    "structurePct": 30.9,
+    "daeunPct": 26.5,
+    "volPct": 89.7,
+    "seun": "壬辰",
+    "daeun": "己酉",
+    "tg": "비견/편관",
+    "roles": {
+     "stem": "기신",
+     "branch": "희신"
+    },
+    "rels": [
+     "丁壬합木",
+     "戌辰충",
+     "辰子 반합水"
+    ],
+    "structs": [
+     "관제비겁"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Gangnam_Style",
+    "domainPct": 19
+   },
+   {
+    "person": "p2-arts-10-lee-byung-hun",
+    "date": "2015-11-19",
+    "Y": 2015,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Inside Men big box-office success",
+    "flowPct": 15.9,
+    "unifiedPct": 11,
+    "relationPct": 45.1,
+    "structurePct": 52.4,
+    "daeunPct": 36.6,
+    "volPct": 32.9,
+    "seun": "乙未",
+    "daeun": "丁亥",
+    "tg": "식신/편관",
+    "roles": {
+     "stem": "구신",
+     "branch": "한신"
+    },
+    "rels": [
+     "庚乙합金",
+     "戌未파",
+     "戌未형"
+    ],
+    "structs": [
+     "식신제살",
+     "살인상생(관 유입)"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Inside_Men",
+    "domainPct": 29
+   },
+   {
+    "person": "p2-business-03-ted-turner",
+    "date": "1980-06-01",
+    "Y": 1980,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Launches CNN, first 24-hour cable news channel",
+    "flowPct": 41.8,
+    "unifiedPct": 25.3,
+    "relationPct": 15.1,
+    "structurePct": 63.7,
+    "daeunPct": 79.5,
+    "volPct": 55.5,
+    "seun": "庚申",
+    "daeun": "丁卯",
+    "tg": "정관/정관",
+    "roles": {
+     "stem": "구신",
+     "branch": "구신"
+    },
+    "rels": [
+     "乙庚합金",
+     "寅申충",
+     "寅申형",
+     "亥申해",
+     "卯申원진",
+     "卯申귀문"
+    ],
+    "structs": [
+     "관제비겁"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Ted_Turner",
+    "domainPct": 22
+   },
+   {
+    "person": "p2-business-06-john-delorean",
+    "date": "1964",
+    "Y": 1964,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Pontiac GTO debuts, credited as first muscle car",
+    "flowPct": 22,
+    "unifiedPct": 9.8,
+    "relationPct": 8.3,
+    "structurePct": 53.8,
+    "daeunPct": 92.4,
+    "volPct": 61.4,
+    "seun": "甲辰",
+    "daeun": "辛巳",
+    "tg": "편재/편인",
+    "roles": {
+     "stem": "기신",
+     "branch": "용신"
+    },
+    "rels": [
+     "庚甲충",
+     "丑辰파",
+     "辰子 반합水"
+    ],
+    "structs": [
+     "살인상생"
+    ],
+    "url": "https://en.wikipedia.org/wiki/John_DeLorean",
+    "domainPct": 27
+   },
+   {
+    "person": "p2-business-07-leona-helmsley",
+    "date": "1980",
+    "Y": 1980,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Becomes public face of Helmsley Hotels ad campaign, running the hotel chain",
+    "flowPct": 51.4,
+    "unifiedPct": 77.4,
+    "relationPct": 76,
+    "structurePct": 77.4,
+    "daeunPct": 20.5,
+    "volPct": 10.3,
+    "seun": "庚申",
+    "daeun": "丙子",
+    "tg": "정인/정인",
+    "roles": {
+     "stem": "희신",
+     "branch": "희신"
+    },
+    "rels": [
+     "乙庚합金",
+     "亥申해",
+     "卯申원진",
+     "卯申귀문"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Leona_Helmsley",
+    "domainPct": 24
+   },
+   {
+    "person": "p2-business-09-chung-ju-yung",
+    "date": "1976",
+    "Y": 1976,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Hyundai Pony, Korea's first mass-produced domestic car, introduced",
+    "flowPct": 42.4,
+    "unifiedPct": 22.9,
+    "relationPct": 45.1,
+    "structurePct": 79.9,
+    "daeunPct": 65.3,
+    "volPct": 9.7,
+    "seun": "丙辰",
+    "daeun": "辛巳",
+    "tg": "편관/편인",
+    "roles": {
+     "stem": "기신",
+     "branch": "희신"
+    },
+    "rels": [
+     "卯辰해",
+     "亥辰원진",
+     "亥辰귀문"
+    ],
+    "structs": [
+     "관살혼잡",
+     "식신제살"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Chung_Ju-yung",
+    "domainPct": 29
+   },
+   {
+    "person": "p2-business-09-chung-ju-yung",
+    "date": "1998-06-16",
+    "Y": 1998,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Crosses into North Korea with 500 cattle via Panmunjom",
+    "flowPct": 25.7,
+    "unifiedPct": 51.4,
+    "relationPct": 3.5,
+    "structurePct": 63.9,
+    "daeunPct": 23.6,
+    "volPct": 85.4,
+    "seun": "戊寅",
+    "daeun": "己卯",
+    "tg": "편인/편재",
+    "roles": {
+     "stem": "희신",
+     "branch": "구신"
+    },
+    "rels": [
+     "亥寅합木",
+     "亥寅파",
+     "申寅충",
+     "申寅형"
+    ],
+    "structs": [
+     "효신탈식(도식)"
+    ],
+    "url": "https://ko.wikipedia.org/wiki/%EC%A0%95%EC%A3%BC%EC%98%81",
+    "domainPct": 26
+   },
+   {
+    "person": "p2-business-10-kim-woo-choong",
+    "date": "1982-01",
+    "Y": 1981,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Daewoo Corporation launched; becomes Daewoo Group chairman",
+    "flowPct": 21,
+    "unifiedPct": 18.1,
+    "relationPct": 6.5,
+    "structurePct": 32.6,
+    "daeunPct": 39.1,
+    "volPct": 76.1,
+    "seun": "辛酉",
+    "daeun": "甲辰",
+    "tg": "편관/편관",
+    "roles": {
+     "stem": "구신",
+     "branch": "구신"
+    },
+    "rels": [
+     "丙辛합水",
+     "乙辛충",
+     "子酉파",
+     "子酉귀문",
+     "子酉파",
+     "子酉귀문"
+    ],
+    "structs": [
+     "관살혼잡"
+    ],
+    "url": "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91",
+    "domainPct": 8
+   },
+   {
+    "person": "p2-sports-01-pele",
+    "date": "1962-06-17",
+    "Y": 1962,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Brazil retains World Cup (Pelé on squad, injured)",
+    "flowPct": 49.3,
+    "unifiedPct": 48.5,
+    "relationPct": 76.5,
+    "structurePct": 83.1,
+    "daeunPct": 7.4,
+    "volPct": 38.2,
+    "seun": "壬寅",
+    "daeun": "戊子",
+    "tg": "정관/정인",
+    "roles": {
+     "stem": "기신",
+     "branch": "희신"
+    },
+    "rels": [
+     "丙壬충",
+     "丁壬합木",
+     "酉寅원진"
+    ],
+    "structs": [
+     "상관견관",
+     "상관패인"
+    ],
+    "url": "https://en.wikipedia.org/wiki/1962_FIFA_World_Cup",
+    "domainPct": 26
+   },
+   {
+    "person": "p2-sports-02-ayrton-senna",
+    "date": "1988-10-30",
+    "Y": 1988,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Wins first World Championship at Japanese GP",
+    "flowPct": 47.5,
+    "unifiedPct": 62.5,
+    "relationPct": 17.5,
+    "structurePct": 17.5,
+    "daeunPct": 75,
+    "volPct": 77.5,
+    "seun": "戊辰",
+    "daeun": "壬午",
+    "tg": "비견/비견",
+    "roles": {
+     "stem": "희신",
+     "branch": "희신"
+    },
+    "rels": [
+     "癸戊합火",
+     "卯辰해",
+     "丑辰파",
+     "申子辰 삼합水국"
+    ],
+    "structs": [
+     "군겁쟁재"
+    ],
+    "url": "https://en.wikipedia.org/wiki/1988_Japanese_Grand_Prix",
+    "domainPct": 5
+   },
+   {
+    "person": "p2-sports-03-boris-becker",
+    "date": "1991-01-27",
+    "Y": 1990,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Wins Australian Open and becomes world No. 1",
+    "flowPct": 85.2,
+    "unifiedPct": 78.4,
+    "relationPct": 69.3,
+    "structurePct": 48.9,
+    "daeunPct": 65.9,
+    "volPct": 12.5,
+    "seun": "庚午",
+    "daeun": "己酉",
+    "tg": "비견/정관",
+    "roles": {
+     "stem": "희신",
+     "branch": "한신"
+    },
+    "rels": [
+     "未午합火",
+     "寅午 반합火"
+    ],
+    "structs": [
+     "군겁쟁재"
+    ],
+    "url": "https://en.wikipedia.org/wiki/1991_Australian_Open_%E2%80%93_Men's_singles",
+    "domainPct": 13
+   },
+   {
+    "person": "p2-sports-04-monica-seles",
+    "date": "1993-01-30",
+    "Y": 1992,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Wins third straight Australian Open",
+    "flowPct": 3.9,
+    "unifiedPct": 1.3,
+    "relationPct": 46.1,
+    "structurePct": 3.9,
+    "daeunPct": 10.5,
+    "volPct": 15.8,
+    "seun": "壬申",
+    "daeun": "乙丑",
+    "tg": "비견/편인",
+    "roles": {
+     "stem": "기신",
+     "branch": "구신"
+    },
+    "rels": [
+     "亥申해",
+     "卯申원진",
+     "卯申귀문"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/1993_Australian_Open_%E2%80%93_Women's_singles",
+    "domainPct": 7
+   },
+   {
+    "person": "p2-sports-05-martina-navratilova",
+    "date": "1978-07-07",
+    "Y": 1978,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "First Wimbledon singles title, becomes world No. 1",
+    "flowPct": 0.9,
+    "unifiedPct": 0.9,
+    "relationPct": 39.1,
+    "structurePct": 4.5,
+    "daeunPct": 44.5,
+    "volPct": 32.7,
+    "seun": "戊午",
+    "daeun": "丙申",
+    "tg": "비견/정인",
+    "roles": {
+     "stem": "기신",
+     "branch": "구신"
+    },
+    "rels": [
+     "午午자형"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/1978_Wimbledon_Championships_%E2%80%93_Women's_singles",
+    "domainPct": 26
+   },
+   {
+    "person": "p2-sports-07-mike-tyson",
+    "date": "1986-11-22",
+    "Y": 1986,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Beats Trevor Berbick for WBC title, youngest heavyweight champion",
+    "flowPct": 3.3,
+    "unifiedPct": 3.3,
+    "relationPct": 4.4,
+    "structurePct": 1.1,
+    "daeunPct": 31.1,
+    "volPct": 91.1,
+    "seun": "丙寅",
+    "daeun": "丙申",
+    "tg": "편관/편재",
+    "roles": {
+     "stem": "구신",
+     "branch": "한신"
+    },
+    "rels": [
+     "申寅충",
+     "申寅형",
+     "寅午 반합火"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Mike_Tyson",
+    "domainPct": 6
+   },
+   {
+    "person": "p2-sports-07-mike-tyson",
+    "date": "1996-03-16",
+    "Y": 1996,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Regains WBC heavyweight title vs Frank Bruno",
+    "flowPct": 45.6,
+    "unifiedPct": 50,
+    "relationPct": 88.9,
+    "structurePct": 27.8,
+    "daeunPct": 51.1,
+    "volPct": 80,
+    "seun": "丙子",
+    "daeun": "丁酉",
+    "tg": "편관/상관",
+    "roles": {
+     "stem": "구신",
+     "branch": "용신"
+    },
+    "rels": [
+     "午子충",
+     "午子충",
+     "申子 반합水"
+    ],
+    "structs": [
+     "상관견관"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Mike_Tyson",
+    "domainPct": 10
+   },
+   {
+    "person": "p2-sports-08-michael-schumacher",
+    "date": "1992-08-30",
+    "Y": 1992,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "First Grand Prix win at Spa",
+    "flowPct": 1.2,
+    "unifiedPct": 1.2,
+    "relationPct": 11.9,
+    "structurePct": 29.8,
+    "daeunPct": 59.5,
+    "volPct": 94,
+    "seun": "壬申",
+    "daeun": "丁卯",
+    "tg": "편재/식신",
+    "roles": {
+     "stem": "기신",
+     "branch": "구신"
+    },
+    "rels": [
+     "寅申충",
+     "寅申형"
+    ],
+    "structs": [
+     "식신제살"
+    ],
+    "url": "https://en.wikipedia.org/wiki/1992_Belgian_Grand_Prix",
+    "domainPct": 13
+   },
+   {
+    "person": "p2-sports-08-michael-schumacher",
+    "date": "2000-10-08",
+    "Y": 2000,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "First Ferrari title, ending 21-year drought",
+    "flowPct": 20.2,
+    "unifiedPct": 34.5,
+    "relationPct": 11.9,
+    "structurePct": 67.9,
+    "daeunPct": 11.9,
+    "volPct": 79.8,
+    "seun": "庚辰",
+    "daeun": "戊辰",
+    "tg": "식신/비견",
+    "roles": {
+     "stem": "구신",
+     "branch": "희신"
+    },
+    "rels": [
+     "甲庚충",
+     "申子辰 삼합水국"
+    ],
+    "structs": [
+     "군겁쟁재",
+     "식신제살"
+    ],
+    "url": "https://en.wikipedia.org/wiki/2000_Japanese_Grand_Prix",
+    "domainPct": 13
+   },
+   {
+    "person": "p2-sports-09-pak-se-ri",
+    "date": "1998-05-17",
+    "Y": 1998,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Wins LPGA Championship, first major as rookie",
+    "flowPct": 66.2,
+    "unifiedPct": 92.6,
+    "relationPct": 51.5,
+    "structurePct": 69.1,
+    "daeunPct": 13.2,
+    "volPct": 29.4,
+    "seun": "戊寅",
+    "daeun": "辛亥",
+    "tg": "비견/편관",
+    "roles": {
+     "stem": "희신",
+     "branch": "한신"
+    },
+    "rels": [
+     "巳寅해",
+     "巳寅형",
+     "酉寅원진"
+    ],
+    "structs": [
+     "군겁쟁재",
+     "살인상생(관 유입)"
+    ],
+    "url": "https://en.wikipedia.org/wiki/1998_LPGA_Championship",
+    "domainPct": 18
+   },
+   {
+    "person": "p2-sports-09-pak-se-ri",
+    "date": "1998-07-06",
+    "Y": 1998,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Wins U.S. Women's Open in 20-hole playoff",
+    "flowPct": 66.2,
+    "unifiedPct": 92.6,
+    "relationPct": 51.5,
+    "structurePct": 69.1,
+    "daeunPct": 13.2,
+    "volPct": 29.4,
+    "seun": "戊寅",
+    "daeun": "辛亥",
+    "tg": "비견/편관",
+    "roles": {
+     "stem": "희신",
+     "branch": "한신"
+    },
+    "rels": [
+     "巳寅해",
+     "巳寅형",
+     "酉寅원진"
+    ],
+    "structs": [
+     "군겁쟁재",
+     "살인상생(관 유입)"
+    ],
+    "url": "https://en.wikipedia.org/wiki/1998_U.S._Women's_Open",
+    "domainPct": 18
+   },
+   {
+    "person": "p2-sports-09-pak-se-ri",
+    "date": "1998-11",
+    "Y": 1998,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "LPGA Rookie of the Year",
+    "flowPct": 66.2,
+    "unifiedPct": 92.6,
+    "relationPct": 51.5,
+    "structurePct": 69.1,
+    "daeunPct": 13.2,
+    "volPct": 29.4,
+    "seun": "戊寅",
+    "daeun": "辛亥",
+    "tg": "비견/편관",
+    "roles": {
+     "stem": "희신",
+     "branch": "한신"
+    },
+    "rels": [
+     "巳寅해",
+     "巳寅형",
+     "酉寅원진"
+    ],
+    "structs": [
+     "군겁쟁재",
+     "살인상생(관 유입)"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Pak_Se-ri",
+    "domainPct": 18
+   },
+   {
+    "person": "p2-sports-10-son-heung-min",
+    "date": "2025-05-21",
+    "Y": 2025,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Captains Tottenham to Europa League title, first major trophy",
+    "flowPct": 50,
+    "unifiedPct": 55.3,
+    "relationPct": 81.6,
+    "structurePct": 18.4,
+    "daeunPct": 36.8,
+    "volPct": 44.7,
+    "seun": "乙巳",
+    "daeun": "庚戌",
+    "tg": "비견/상관",
+    "roles": {
+     "stem": "희신",
+     "branch": "구신"
+    },
+    "rels": [
+     "申巳합水",
+     "申巳파",
+     "申巳형",
+     "巳酉 반합金"
+    ],
+    "structs": [
+     "상관견관",
+     "상관패인"
+    ],
+    "url": "https://en.wikipedia.org/wiki/2025_UEFA_Europa_League_final",
+    "domainPct": 11
+   }
+  ],
+  "midFlowMajor": [
+   {
+    "person": "p2-arts-02-johnny-depp",
+    "date": "2003-07-09",
+    "Y": 2003,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Pirates of the Caribbean: The Curse of the Black Pearl global hit; first Oscar nomination",
+    "flowPct": 40.6,
+    "unifiedPct": 65.6,
+    "relationPct": 38.5,
+    "structurePct": 40.6,
+    "daeunPct": 22.9,
+    "volPct": 21.9,
+    "seun": "癸未",
+    "daeun": "甲寅",
+    "tg": "비견/편관",
+    "roles": {
+     "stem": "용신",
+     "branch": "기신"
+    },
+    "rels": [
+     "戊癸합火",
+     "午未합火"
+    ],
+    "structs": [
+     "식신제살"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Pirates_of_the_Caribbean:_The_Curse_of_the_Black_Pearl"
+   },
+   {
+    "person": "p2-arts-04-frida-kahlo",
+    "date": "1925-09-17",
+    "Y": 1925,
+    "kind": "health_event",
+    "valence": "negative",
+    "desc": "Near-fatal bus accident with multiple fractures",
+    "flowPct": 56.1,
+    "unifiedPct": 56.1,
+    "relationPct": 57.6,
+    "structurePct": 83.3,
+    "daeunPct": 9.1,
+    "volPct": 51.5,
+    "seun": "乙丑",
+    "daeun": "戊申",
+    "tg": "정인/상관",
+    "roles": {
+     "stem": "한신",
+     "branch": "기신"
+    },
+    "rels": [
+     "未丑충",
+     "未丑형",
+     "午丑해",
+     "午丑원진",
+     "午丑귀문",
+     "辰丑파",
+     "辰丑파"
+    ],
+    "structs": [
+     "상관패인"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Frida_Kahlo"
+   },
+   {
+    "person": "p2-arts-06-angelina-jolie",
+    "date": "2013-05-14",
+    "Y": 2013,
+    "kind": "health_event",
+    "valence": "negative",
+    "desc": "Disclosed preventive double mastectomy (BRCA1)",
+    "flowPct": 43.1,
+    "unifiedPct": 43.1,
+    "relationPct": 59.7,
+    "structurePct": 54.2,
+    "daeunPct": 41.7,
+    "volPct": 1.4,
+    "seun": "癸巳",
+    "daeun": "乙酉",
+    "tg": "식신/정관",
+    "roles": {
+     "stem": "구신",
+     "branch": "한신"
+    },
+    "rels": [],
+    "structs": [
+     "살인상생(관 유입)"
+    ],
+    "url": "https://www.nytimes.com/2013/05/14/opinion/my-medical-choice.html"
+   },
+   {
+    "person": "p2-arts-09-psy",
+    "date": "2007-12-03",
+    "Y": 2007,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Ordered to re-enlist after alternative service found deficient",
+    "flowPct": 57.4,
+    "unifiedPct": 66.2,
+    "relationPct": 25,
+    "structurePct": 13.2,
+    "daeunPct": 26.5,
+    "volPct": 51.5,
+    "seun": "丁亥",
+    "daeun": "己酉",
+    "tg": "정재/비견",
+    "roles": {
+     "stem": "용신",
+     "branch": "기신"
+    },
+    "rels": [
+     "壬丁합木",
+     "壬丁합木",
+     "巳亥충"
+    ],
+    "structs": [
+     "군겁쟁재(재 유입)"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Psy"
+   },
+   {
+    "person": "p2-business-01-walt-disney",
+    "date": "1937-12-21",
+    "Y": 1937,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Snow White and the Seven Dwarfs premieres to huge success",
+    "flowPct": 42.2,
+    "unifiedPct": 55.9,
+    "relationPct": 33.3,
+    "structurePct": 61.8,
+    "daeunPct": 51,
+    "volPct": 6.9,
+    "seun": "丁丑",
+    "daeun": "丙申",
+    "tg": "비견/식신",
+    "roles": {
+     "stem": "희신",
+     "branch": "구신"
+    },
+    "rels": [
+     "子丑합土"
+    ],
+    "structs": [
+     "식신제살"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Walt_Disney"
+   },
+   {
+    "person": "p2-business-03-ted-turner",
+    "date": "1980-06-01",
+    "Y": 1980,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Launches CNN, first 24-hour cable news channel",
+    "flowPct": 41.8,
+    "unifiedPct": 25.3,
+    "relationPct": 15.1,
+    "structurePct": 63.7,
+    "daeunPct": 79.5,
+    "volPct": 55.5,
+    "seun": "庚申",
+    "daeun": "丁卯",
+    "tg": "정관/정관",
+    "roles": {
+     "stem": "구신",
+     "branch": "구신"
+    },
+    "rels": [
+     "乙庚합金",
+     "寅申충",
+     "寅申형",
+     "亥申해",
+     "卯申원진",
+     "卯申귀문"
+    ],
+    "structs": [
+     "관제비겁"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Ted_Turner"
+   },
+   {
+    "person": "p2-business-03-ted-turner",
+    "date": "1996-10-10",
+    "Y": 1996,
+    "kind": "financial_gain",
+    "valence": "positive",
+    "desc": "Turner Broadcasting merges with Time Warner; becomes vice chairman and top shareholder",
+    "flowPct": 54.1,
+    "unifiedPct": 47.3,
+    "relationPct": 34.2,
+    "structurePct": 45.9,
+    "daeunPct": 52.1,
+    "volPct": 53.4,
+    "seun": "丙子",
+    "daeun": "己巳",
+    "tg": "상관/편인",
+    "roles": {
+     "stem": "용신",
+     "branch": "기신"
+    },
+    "rels": [
+     "卯子형(무례지형)",
+     "辰子 반합水"
+    ],
+    "structs": [
+     "상관견관",
+     "식상 통관"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Ted_Turner"
+   },
+   {
+    "person": "p2-business-04-oprah-winfrey",
+    "date": "2003",
+    "Y": 2003,
+    "kind": "financial_gain",
+    "valence": "positive",
+    "desc": "Named by Forbes the first Black woman billionaire",
+    "flowPct": 43,
+    "unifiedPct": 67.5,
+    "relationPct": 77.2,
+    "structurePct": 78.1,
+    "daeunPct": 26.3,
+    "volPct": 92.1,
+    "seun": "癸未",
+    "daeun": "庚午",
+    "tg": "편인/편재",
+    "roles": {
+     "stem": "용신",
+     "branch": "기신"
+    },
+    "rels": [
+     "戊癸합火",
+     "丑未충",
+     "丑未형",
+     "寅未귀문"
+    ],
+    "structs": [
+     "살인상생"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Oprah_Winfrey"
+   },
+   {
+    "person": "p2-business-04-oprah-winfrey",
+    "date": "2011-05-25",
+    "Y": 2011,
+    "kind": "retirement",
+    "valence": "change",
+    "desc": "Ends The Oprah Winfrey Show after 25 seasons",
+    "flowPct": 44.7,
+    "unifiedPct": 64.9,
+    "relationPct": 0.9,
+    "structurePct": 20.2,
+    "daeunPct": 43.9,
+    "volPct": 97.4,
+    "seun": "辛卯",
+    "daeun": "辛未",
+    "tg": "편관/비견",
+    "roles": {
+     "stem": "한신",
+     "branch": "희신"
+    },
+    "rels": [
+     "乙辛충",
+     "乙辛충",
+     "酉卯충"
+    ],
+    "structs": [
+     "군겁쟁재"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Oprah_Winfrey"
+   },
+   {
+    "person": "p2-business-06-john-delorean",
+    "date": "1982-02",
+    "Y": 1982,
+    "kind": "financial_loss",
+    "valence": "negative",
+    "desc": "DeLorean Motor Company and Belfast factory placed in receivership",
+    "flowPct": 55.3,
+    "unifiedPct": 58.3,
+    "relationPct": 47,
+    "structurePct": 31.1,
+    "daeunPct": 37.9,
+    "volPct": 73.5,
+    "seun": "壬戌",
+    "daeun": "壬午",
+    "tg": "식신/편인",
+    "roles": {
+     "stem": "구신",
+     "branch": "용신"
+    },
+    "rels": [
+     "丁壬합木",
+     "丑戌형",
+     "寅午戌 삼합火국"
+    ],
+    "structs": [
+     "살인상생"
+    ],
+    "url": "https://en.wikipedia.org/wiki/John_DeLorean"
+   },
+   {
+    "person": "p2-business-06-john-delorean",
+    "date": "1982-10-19",
+    "Y": 1982,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Arrested in FBI cocaine-trafficking sting",
+    "flowPct": 55.3,
+    "unifiedPct": 58.3,
+    "relationPct": 47,
+    "structurePct": 31.1,
+    "daeunPct": 37.9,
+    "volPct": 73.5,
+    "seun": "壬戌",
+    "daeun": "壬午",
+    "tg": "식신/편인",
+    "roles": {
+     "stem": "구신",
+     "branch": "용신"
+    },
+    "rels": [
+     "丁壬합木",
+     "丑戌형",
+     "寅午戌 삼합火국"
+    ],
+    "structs": [
+     "살인상생"
+    ],
+    "url": "https://en.wikipedia.org/wiki/John_DeLorean"
+   },
+   {
+    "person": "p2-business-07-leona-helmsley",
+    "date": "1988-04",
+    "Y": 1988,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Indicted with Harry Helmsley on federal tax evasion and extortion charges",
+    "flowPct": 56.8,
+    "unifiedPct": 91.1,
+    "relationPct": 54.1,
+    "structurePct": 88.4,
+    "daeunPct": 20.5,
+    "volPct": 26.7,
+    "seun": "戊辰",
+    "daeun": "丙子",
+    "tg": "정관/정관",
+    "roles": {
+     "stem": "용신",
+     "branch": "용신"
+    },
+    "rels": [
+     "癸戊합火",
+     "亥辰원진",
+     "亥辰귀문",
+     "卯辰해"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Leona_Helmsley"
+   },
+   {
+    "person": "p2-business-09-chung-ju-yung",
+    "date": "1972",
+    "Y": 1972,
+    "kind": "career_change",
+    "valence": "change",
+    "desc": "Founds Hyundai shipbuilding (Ulsan shipyard), later Hyundai Heavy Industries",
+    "flowPct": 53.5,
+    "unifiedPct": 39.6,
+    "relationPct": 81.3,
+    "structurePct": 9,
+    "daeunPct": 65.3,
+    "volPct": 52.1,
+    "seun": "壬子",
+    "daeun": "辛巳",
+    "tg": "식신/상관",
+    "roles": {
+     "stem": "한신",
+     "branch": "한신"
+    },
+    "rels": [
+     "丁壬합木",
+     "卯子형(무례지형)",
+     "申子 반합水"
+    ],
+    "structs": [
+     "상관견관"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Chung_Ju-yung"
+   },
+   {
+    "person": "p2-business-09-chung-ju-yung",
+    "date": "1976-02",
+    "Y": 1976,
+    "kind": "financial_gain",
+    "valence": "positive",
+    "desc": "Hyundai Construction wins Jubail Industrial Harbour contract in Saudi Arabia (~$930M)",
+    "flowPct": 42.4,
+    "unifiedPct": 22.9,
+    "relationPct": 45.1,
+    "structurePct": 79.9,
+    "daeunPct": 65.3,
+    "volPct": 9.7,
+    "seun": "丙辰",
+    "daeun": "辛巳",
+    "tg": "편관/편인",
+    "roles": {
+     "stem": "기신",
+     "branch": "희신"
+    },
+    "rels": [
+     "卯辰해",
+     "亥辰원진",
+     "亥辰귀문"
+    ],
+    "structs": [
+     "관살혼잡",
+     "식신제살"
+    ],
+    "url": "https://encykorea.aks.ac.kr/Article/E0025843"
+   },
+   {
+    "person": "p2-business-09-chung-ju-yung",
+    "date": "1992-12",
+    "Y": 1992,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Runs for president as Unification National Party candidate, finishes third",
+    "flowPct": 56.3,
+    "unifiedPct": 69.4,
+    "relationPct": 81.3,
+    "structurePct": 30.6,
+    "daeunPct": 23.6,
+    "volPct": 36.1,
+    "seun": "壬申",
+    "daeun": "己卯",
+    "tg": "식신/비견",
+    "roles": {
+     "stem": "한신",
+     "branch": "용신"
+    },
+    "rels": [
+     "丁壬합木",
+     "卯申원진",
+     "卯申귀문",
+     "亥申해"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Chung_Ju-yung"
+   },
+   {
+    "person": "p2-professional-03-thatcher",
+    "date": "1990-11-22",
+    "Y": 1990,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Forced to resign after leadership challenge",
+    "flowPct": 45.3,
+    "unifiedPct": 65.5,
+    "relationPct": 45.9,
+    "structurePct": 15.5,
+    "daeunPct": 20.3,
+    "volPct": 42.6,
+    "seun": "庚午",
+    "daeun": "壬辰",
+    "tg": "비견/정관",
+    "roles": {
+     "stem": "구신",
+     "branch": "용신"
+    },
+    "rels": [
+     "乙庚합金",
+     "丑午해",
+     "丑午원진",
+     "丑午귀문",
+     "午午자형"
+    ],
+    "structs": [
+     "관제비겁"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Margaret_Thatcher"
+   },
+   {
+    "person": "p2-professional-04-armstrong",
+    "date": "2012-08-07",
+    "Y": 2012,
+    "kind": "health_event",
+    "valence": "negative",
+    "desc": "Coronary bypass surgery; died of complications",
+    "flowPct": 47.8,
+    "unifiedPct": 41.2,
+    "relationPct": 74.3,
+    "structurePct": 20.6,
+    "daeunPct": 44.9,
+    "volPct": 23.5,
+    "seun": "壬辰",
+    "daeun": "壬辰",
+    "tg": "정관/상관",
+    "roles": {
+     "stem": "한신",
+     "branch": "구신"
+    },
+    "rels": [
+     "丁壬합木",
+     "亥辰원진",
+     "亥辰귀문",
+     "辰子 반합水"
+    ],
+    "structs": [
+     "상관견관"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Neil_Armstrong"
+   },
+   {
+    "person": "p2-professional-07-ginsburg",
+    "date": "1999",
+    "Y": 1999,
+    "kind": "health_event",
+    "valence": "negative",
+    "desc": "Colon cancer surgery and chemotherapy",
+    "flowPct": 58.2,
+    "unifiedPct": 40.4,
+    "relationPct": 13,
+    "structurePct": 15.8,
+    "daeunPct": 93.2,
+    "volPct": 39.7,
+    "seun": "己卯",
+    "daeun": "辛酉",
+    "tg": "정인/정재",
+    "roles": {
+     "stem": "희신",
+     "branch": "구신"
+    },
+    "rels": [
+     "酉卯충",
+     "辰卯해"
+    ],
+    "structs": [
+     "상관패인"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg"
+   },
+   {
+    "person": "p2-professional-07-ginsburg",
+    "date": "2018-12-21",
+    "Y": 2018,
+    "kind": "health_event",
+    "valence": "negative",
+    "desc": "Lung cancer surgery after fall broke ribs",
+    "flowPct": 55.5,
+    "unifiedPct": 89,
+    "relationPct": 4.1,
+    "structurePct": 91.8,
+    "daeunPct": 24.7,
+    "volPct": 83.6,
+    "seun": "戊戌",
+    "daeun": "癸亥",
+    "tg": "편인/편인",
+    "roles": {
+     "stem": "희신",
+     "branch": "희신"
+    },
+    "rels": [
+     "癸戊합火",
+     "酉戌해",
+     "卯戌합火",
+     "辰戌충"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg"
+   },
+   {
+    "person": "p2-professional-10-park-geun-hye",
+    "date": "2016-12-09",
+    "Y": 2016,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Impeached by National Assembly over Choi Soon-sil scandal",
+    "flowPct": 53.4,
+    "unifiedPct": 78.8,
+    "relationPct": 14.4,
+    "structurePct": 80.5,
+    "daeunPct": 23.7,
+    "volPct": 95.8,
+    "seun": "丙申",
+    "daeun": "戊申",
+    "tg": "편인/식신",
+    "roles": {
+     "stem": "용신",
+     "branch": "구신"
+    },
+    "rels": [
+     "辛丙합水",
+     "辛丙합水",
+     "卯申원진",
+     "卯申귀문",
+     "寅申충",
+     "寅申형"
+    ],
+    "structs": [
+     "식신제살",
+     "살인상생",
+     "식상 통관"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Park_Geun-hye"
+   },
+   {
+    "person": "p2-professional-10-park-geun-hye",
+    "date": "2017-03-10",
+    "Y": 2017,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Removed from office by Constitutional Court",
+    "flowPct": 41.5,
+    "unifiedPct": 73.7,
+    "relationPct": 3.4,
+    "structurePct": 70.3,
+    "daeunPct": 23.7,
+    "volPct": 48.3,
+    "seun": "丁酉",
+    "daeun": "戊申",
+    "tg": "정인/상관",
+    "roles": {
+     "stem": "용신",
+     "branch": "구신"
+    },
+    "rels": [
+     "卯酉충",
+     "寅酉원진",
+     "丑酉 반합金"
+    ],
+    "structs": [
+     "살인상생",
+     "식상 통관",
+     "상관패인(견관 해소)"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Park_Geun-hye"
+   },
+   {
+    "person": "p2-professional-10-park-geun-hye",
+    "date": "2018-04-06",
+    "Y": 2018,
+    "kind": "failure",
+    "valence": "negative",
+    "desc": "Sentenced to 24 years for corruption and abuse of power",
+    "flowPct": 56.8,
+    "unifiedPct": 80.5,
+    "relationPct": 76.3,
+    "structurePct": 24.6,
+    "daeunPct": 23.7,
+    "volPct": 54.2,
+    "seun": "戊戌",
+    "daeun": "戊申",
+    "tg": "비견/비견",
+    "roles": {
+     "stem": "희신",
+     "branch": "희신"
+    },
+    "rels": [
+     "卯戌합火",
+     "丑戌형"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Park_Geun-hye"
+   },
+   {
+    "person": "p2-sports-01-pele",
+    "date": "2021-09",
+    "Y": 2021,
+    "kind": "health_event",
+    "valence": "negative",
+    "desc": "Colon cancer diagnosis and tumour surgery",
+    "flowPct": 44.9,
+    "unifiedPct": 14.7,
+    "relationPct": 45.6,
+    "structurePct": 11.8,
+    "daeunPct": 94.9,
+    "volPct": 30.9,
+    "seun": "辛丑",
+    "daeun": "甲午",
+    "tg": "편재/식신",
+    "roles": {
+     "stem": "구신",
+     "branch": "한신"
+    },
+    "rels": [
+     "丙辛합水",
+     "辰丑파",
+     "戌丑형"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Pel%C3%A9"
+   },
+   {
+    "person": "p2-sports-02-ayrton-senna",
+    "date": "1988-10-30",
+    "Y": 1988,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Wins first World Championship at Japanese GP",
+    "flowPct": 47.5,
+    "unifiedPct": 62.5,
+    "relationPct": 17.5,
+    "structurePct": 17.5,
+    "daeunPct": 75,
+    "volPct": 77.5,
+    "seun": "戊辰",
+    "daeun": "壬午",
+    "tg": "비견/비견",
+    "roles": {
+     "stem": "희신",
+     "branch": "희신"
+    },
+    "rels": [
+     "癸戊합火",
+     "卯辰해",
+     "丑辰파",
+     "申子辰 삼합水국"
+    ],
+    "structs": [
+     "군겁쟁재"
+    ],
+    "url": "https://en.wikipedia.org/wiki/1988_Japanese_Grand_Prix"
+   },
+   {
+    "person": "p2-sports-02-ayrton-senna",
+    "date": "1991-10-20",
+    "Y": 1991,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Third World Championship",
+    "flowPct": 57.5,
+    "unifiedPct": 47.5,
+    "relationPct": 45,
+    "structurePct": 47.5,
+    "daeunPct": 75,
+    "volPct": 55,
+    "seun": "辛未",
+    "daeun": "壬午",
+    "tg": "상관/겁재",
+    "roles": {
+     "stem": "구신",
+     "branch": "희신"
+    },
+    "rels": [
+     "子未해",
+     "子未원진",
+     "丑未충",
+     "丑未형",
+     "未卯 반합木"
+    ],
+    "structs": [
+     "상관견관",
+     "군겁쟁재"
+    ],
+    "url": "https://en.wikipedia.org/wiki/1991_Japanese_Grand_Prix"
+   },
+   {
+    "person": "p2-sports-03-boris-becker",
+    "date": "1985-07-07",
+    "Y": 1985,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Wins Wimbledon at 17, youngest men's champion",
+    "flowPct": 58,
+    "unifiedPct": 30.7,
+    "relationPct": 58,
+    "structurePct": 51.1,
+    "daeunPct": 65.9,
+    "volPct": 64.8,
+    "seun": "乙丑",
+    "daeun": "己酉",
+    "tg": "정재/정인",
+    "roles": {
+     "stem": "기신",
+     "branch": "용신"
+    },
+    "rels": [
+     "辛乙충",
+     "庚乙합金",
+     "庚乙합金",
+     "未丑충",
+     "未丑형",
+     "辰丑파"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/1985_Wimbledon_Championships_%E2%80%93_Men's_singles"
+   },
+   {
+    "person": "p2-sports-04-monica-seles",
+    "date": "1990-06-10",
+    "Y": 1990,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Wins French Open at 16, first Grand Slam",
+    "flowPct": 40.8,
+    "unifiedPct": 75,
+    "relationPct": 46.1,
+    "structurePct": 85.5,
+    "daeunPct": 10.5,
+    "volPct": 30.3,
+    "seun": "庚午",
+    "daeun": "乙丑",
+    "tg": "편인/정재",
+    "roles": {
+     "stem": "구신",
+     "branch": "용신"
+    },
+    "rels": [
+     "丑午해",
+     "丑午원진",
+     "丑午귀문",
+     "卯午파"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/1990_French_Open_%E2%80%93_Women's_singles"
+   },
+   {
+    "person": "p2-sports-05-martina-navratilova",
+    "date": "1975-09",
+    "Y": 1975,
+    "kind": "career_change",
+    "valence": "change",
+    "desc": "Defects from Czechoslovakia to the United States during US Open",
+    "flowPct": 42.7,
+    "unifiedPct": 44.5,
+    "relationPct": 10,
+    "structurePct": 99.1,
+    "daeunPct": 44.5,
+    "volPct": 27.3,
+    "seun": "乙卯",
+    "daeun": "丙申",
+    "tg": "정관/정관",
+    "roles": {
+     "stem": "한신",
+     "branch": "한신"
+    },
+    "rels": [
+     "庚乙합金",
+     "申卯원진",
+     "申卯귀문",
+     "戌卯합火",
+     "午卯파",
+     "申卯원진",
+     "申卯귀문"
+    ],
+    "structs": [
+     "관제비겁"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Martina_Navratilova"
+   },
+   {
+    "person": "p2-sports-05-martina-navratilova",
+    "date": "2010-04-07",
+    "Y": 2010,
+    "kind": "health_event",
+    "valence": "negative",
+    "desc": "Announces treatment for breast cancer (DCIS)",
+    "flowPct": 57.3,
+    "unifiedPct": 62.7,
+    "relationPct": 4.5,
+    "structurePct": 70,
+    "daeunPct": 80,
+    "volPct": 93.6,
+    "seun": "庚寅",
+    "daeun": "壬辰",
+    "tg": "식신/편관",
+    "roles": {
+     "stem": "희신",
+     "branch": "한신"
+    },
+    "rels": [
+     "申寅충",
+     "申寅형",
+     "申寅충",
+     "申寅형",
+     "寅午戌 삼합火국"
+    ],
+    "structs": [
+     "식신제살",
+     "관제비겁",
+     "식상 통관"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Martina_Navratilova"
+   },
+   {
+    "person": "p2-sports-06-nadia-comaneci",
+    "date": "1976-07-18",
+    "Y": 1976,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "First perfect 10 in Olympic gymnastics, Montreal",
+    "flowPct": 41,
+    "unifiedPct": 91,
+    "relationPct": 23,
+    "structurePct": 67,
+    "daeunPct": 4,
+    "volPct": 25,
+    "seun": "丙辰",
+    "daeun": "庚子",
+    "tg": "정인/겁재",
+    "roles": {
+     "stem": "용신",
+     "branch": "희신"
+    },
+    "rels": [
+     "辛丙합水",
+     "丑辰파",
+     "亥辰원진",
+     "亥辰귀문",
+     "酉辰합金"
+    ],
+    "structs": [],
+    "url": "https://www.olympics.com/en/athletes/nadia-comaneci"
+   },
+   {
+    "person": "p2-sports-06-nadia-comaneci",
+    "date": "1976-07-21",
+    "Y": 1976,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Olympic all-around gold at 14 (three golds in Montreal)",
+    "flowPct": 41,
+    "unifiedPct": 91,
+    "relationPct": 23,
+    "structurePct": 67,
+    "daeunPct": 4,
+    "volPct": 25,
+    "seun": "丙辰",
+    "daeun": "庚子",
+    "tg": "정인/겁재",
+    "roles": {
+     "stem": "용신",
+     "branch": "희신"
+    },
+    "rels": [
+     "辛丙합水",
+     "丑辰파",
+     "亥辰원진",
+     "亥辰귀문",
+     "酉辰합金"
+    ],
+    "structs": [],
+    "url": "https://www.olympics.com/en/athletes/nadia-comaneci"
+   },
+   {
+    "person": "p2-sports-07-mike-tyson",
+    "date": "2005-06-11",
+    "Y": 2005,
+    "kind": "retirement",
+    "valence": "change",
+    "desc": "Quits on stool vs Kevin McBride and retires",
+    "flowPct": 52.2,
+    "unifiedPct": 56.7,
+    "relationPct": 72.2,
+    "structurePct": 50,
+    "daeunPct": 11.1,
+    "volPct": 43.3,
+    "seun": "乙酉",
+    "daeun": "戊戌",
+    "tg": "정재/겁재",
+    "roles": {
+     "stem": "한신",
+     "branch": "희신"
+    },
+    "rels": [
+     "庚乙합金"
+    ],
+    "structs": [],
+    "url": "https://en.wikipedia.org/wiki/Mike_Tyson"
+   },
+   {
+    "person": "p2-sports-10-son-heung-min",
+    "date": "2025-05-21",
+    "Y": 2025,
+    "kind": "achievement",
+    "valence": "positive",
+    "desc": "Captains Tottenham to Europa League title, first major trophy",
+    "flowPct": 50,
+    "unifiedPct": 55.3,
+    "relationPct": 81.6,
+    "structurePct": 18.4,
+    "daeunPct": 36.8,
+    "volPct": 44.7,
+    "seun": "乙巳",
+    "daeun": "庚戌",
+    "tg": "비견/상관",
+    "roles": {
+     "stem": "희신",
+     "branch": "구신"
+    },
+    "rels": [
+     "申巳합水",
+     "申巳파",
+     "申巳형",
+     "巳酉 반합金"
+    ],
+    "structs": [
+     "상관견관",
+     "상관패인"
+    ],
+    "url": "https://en.wikipedia.org/wiki/2025_UEFA_Europa_League_final"
+   }
+  ]
+ },
+ "counts": {
+  "highFlowNegative": 28,
+  "lowFlowPositive": 30,
+  "highWealthLoss": 3,
+  "lowCareerAchievement": 33,
+  "midFlowMajor": 33
+ }
+}

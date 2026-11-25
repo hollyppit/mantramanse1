@@ -56,6 +56,8 @@ const C_PAIRS=[
  ["      add('good', '상관패인', Gd['상관패인'],","      if (useful(4) || !useful(1)) add('good', '상관패인', Gd['상관패인'],"]];
 function build(opts){let s=base;
  if(opts.A){const a=s.indexOf(A_OLD_START),b=s.indexOf(A_OLD_END);if(a<0||b<0)throw 'A';s=s.slice(0,a)+A_NEW+s.slice(b);}
+ if(opts.B&&s.includes('function patEstablished('))opts=Object.assign({},opts,{B:0});   // 2026-11-25: 엔진에 B안이 이미 들어 있으면 건너뜀
+ if(opts.C&&s.includes('LUCK_CFG.structure.goodGate'))opts=Object.assign({},opts,{C:0});
  if(opts.B){if(!s.includes(B_OLD))throw 'B';s=s.replace(B_OLD,B_NEW);s=s.replace('  function luckStructures(ch, p) {',B_FN+'  function luckStructures(ch, p) {');}
  if(opts.C){for(const [o,n] of C_PAIRS){if(!s.includes(o))throw 'C '+o;s=s.replace(o,n);}}
  return s;}

@@ -1,0 +1,1057 @@
+[
+ {
+  "id": "p2-arts-01-elizabeth-taylor",
+  "name": "Elizabeth Taylor",
+  "name_ko": "엘리자베스 테일러",
+  "gender": "F",
+  "birth_date": "1932-02-27",
+  "birth_time": "02:30",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank Rodden AA (BC/BR in hand, collector Scholfield), GMT; read via built-in browser 2026-11-25",
+  "birth_place": {
+   "city": "London",
+   "country": "GB",
+   "lon": -0.1667,
+   "tz": "Europe/London"
+  },
+  "profession": "arts",
+  "profession_detail": "actress (UK/US)",
+  "death_date": "2011-03-23",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Taylor,_Elizabeth",
+   "https://en.wikipedia.org/wiki/Elizabeth_Taylor"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-arts-02-johnny-depp",
+  "name": "Johnny Depp",
+  "name_ko": "조니 뎁",
+  "gender": "M",
+  "birth_date": "1963-06-09",
+  "birth_time": "08:44",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank Rodden AA (BC/BR in hand, collector Steinbrecher), recorded CDT (UTC-5), local tz America/Chicago; read via built-in browser 2026-11-25",
+  "birth_place": {
+   "city": "Owensboro, Kentucky",
+   "country": "US",
+   "lon": -87.1167,
+   "tz": "America/Chicago"
+  },
+  "profession": "arts",
+  "profession_detail": "actor (US)",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Depp,_Johnny",
+   "https://en.wikipedia.org/wiki/Johnny_Depp"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-arts-03-francis-ford-coppola",
+  "name": "Francis Ford Coppola",
+  "name_ko": "프랜시스 포드 코폴라",
+  "gender": "M",
+  "birth_date": "1939-04-07",
+  "birth_time": "01:38",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank Rodden AA (quoted BC/BR, collector CAH), EST; read via built-in browser 2026-11-25",
+  "birth_place": {
+   "city": "Detroit, Michigan",
+   "country": "US",
+   "lon": -83.05,
+   "tz": "America/Detroit"
+  },
+  "profession": "arts",
+  "profession_detail": "film director/producer (US)",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Coppola,_Francis_Ford",
+   "https://en.wikipedia.org/wiki/Francis_Ford_Coppola"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-arts-04-frida-kahlo",
+  "name": "Frida Kahlo",
+  "name_ko": "프리다 칼로",
+  "gender": "F",
+  "birth_date": "1907-07-06",
+  "birth_time": "08:30",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank Rodden AA (BC/BR in hand, collector Rodden); source time is LMT (99w10), not zone time; read via built-in browser 2026-11-25",
+  "birth_place": {
+   "city": "Coyoacán",
+   "country": "MX",
+   "lon": -99.1667,
+   "tz": "America/Mexico_City"
+  },
+  "profession": "arts",
+  "profession_detail": "painter (Mexico)",
+  "death_date": "1954-07-13",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Kahlo,_Frida",
+   "https://en.wikipedia.org/wiki/Frida_Kahlo"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-arts-05-kurt-cobain",
+  "name": "Kurt Cobain",
+  "name_ko": "커트 코베인",
+  "gender": "M",
+  "birth_date": "1967-02-20",
+  "birth_time": "19:38",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank Rodden AA (BC/BR in hand, collector Craft), PST; read via built-in browser 2026-11-25",
+  "birth_place": {
+   "city": "Aberdeen, Washington",
+   "country": "US",
+   "lon": -123.8167,
+   "tz": "America/Los_Angeles"
+  },
+  "profession": "arts",
+  "profession_detail": "musician, Nirvana (US)",
+  "death_date": "1994-04-05",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Cobain,_Kurt",
+   "https://en.wikipedia.org/wiki/Kurt_Cobain"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-arts-06-angelina-jolie",
+  "name": "Angelina Jolie",
+  "name_ko": "앤젤리나 졸리",
+  "gender": "F",
+  "birth_date": "1975-06-04",
+  "birth_time": "09:09",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank Rodden AA (quoted BC/BR, collector Penfield), PDT; read via built-in browser 2026-11-25",
+  "birth_place": {
+   "city": "Los Angeles, California",
+   "country": "US",
+   "lon": -118.2944,
+   "tz": "America/Los_Angeles"
+  },
+  "profession": "arts",
+  "profession_detail": "actress/director (US)",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Jolie,_Angelina",
+   "https://en.wikipedia.org/wiki/Angelina_Jolie"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-arts-07-ernest-hemingway",
+  "name": "Ernest Hemingway",
+  "name_ko": "어니스트 헤밍웨이",
+  "gender": "M",
+  "birth_date": "1899-07-21",
+  "birth_time": "08:00",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank Rodden AA (BC/BR in hand, collector Scholfield), CST; read via built-in browser 2026-11-25",
+  "birth_place": {
+   "city": "Oak Park, Illinois",
+   "country": "US",
+   "lon": -87.7833,
+   "tz": "America/Chicago"
+  },
+  "profession": "arts",
+  "profession_detail": "novelist (US)",
+  "death_date": "1961-07-02",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Hemingway,_Ernest",
+   "https://en.wikipedia.org/wiki/Ernest_Hemingway"
+  ],
+  "split": "test",
+  "excluded": true,
+  "issues": [
+   "엔진 지원 범위 밖 출생 연도(1900~2100년만 계산, 서비스도 같음) → 분석 제외"
+  ]
+ },
+ {
+  "id": "p2-arts-08-jk-rowling",
+  "name": "J. K. Rowling",
+  "name_ko": "J. K. 롤링",
+  "gender": "F",
+  "birth_date": "1965-07-31",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": "Astro-Databank lists 21:10 but Rodden C (rectified from approximate time), so not used",
+  "birth_place": {
+   "city": "Yate",
+   "country": "GB",
+   "lon": -2.4167,
+   "tz": "Europe/London"
+  },
+  "profession": "arts",
+  "profession_detail": "novelist (UK)",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Rowling,_J._K.",
+   "https://en.wikipedia.org/wiki/J._K._Rowling"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-arts-09-psy",
+  "name": "PSY (Park Jae-sang)",
+  "name_ko": "싸이(박재상)",
+  "gender": "M",
+  "birth_date": "1977-12-31",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": "Astro-Databank Rodden AX (documented source, untimed)",
+  "birth_place": {
+   "city": "Seoul",
+   "country": "KR",
+   "lon": 126.9667,
+   "tz": "Asia/Seoul"
+  },
+  "profession": "arts",
+  "profession_detail": "singer/rapper/producer (Korea)",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Psy",
+   "https://en.wikipedia.org/wiki/Psy",
+   "https://ko.wikipedia.org/wiki/%EC%8B%B8%EC%9D%B4"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-arts-10-lee-byung-hun",
+  "name": "Lee Byung-hun",
+  "name_ko": "이병헌",
+  "gender": "M",
+  "birth_date": "1970-07-12",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": "No Astro-Databank entry found (404); no documented birth time",
+  "birth_place": {
+   "city": "Seoul",
+   "country": "KR",
+   "lon": 126.978,
+   "tz": "Asia/Seoul"
+  },
+  "profession": "arts",
+  "profession_detail": "actor (Korea)",
+  "death_date": null,
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Lee_Byung-hun",
+   "https://ko.wikipedia.org/wiki/%EC%9D%B4%EB%B3%91%ED%97%8C"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-business-01-walt-disney",
+  "name": "Walt Disney",
+  "name_ko": "월트 디즈니",
+  "gender": "M",
+  "birth_date": "1901-12-05",
+  "birth_time": "00:35",
+  "birth_time_confidence": "reported",
+  "birth_time_source": "Astro-Databank, Rodden A (from memory), recorded as CST (UTC-6), read via built-in browser",
+  "birth_place": {
+   "city": "Chicago",
+   "country": "United States",
+   "lon": -87.65,
+   "tz": "America/Chicago"
+  },
+  "profession": "business",
+  "profession_detail": "Animation studio and theme park founder (The Walt Disney Company)",
+  "death_date": "1966-12-15",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Disney,_Walt",
+   "https://en.wikipedia.org/wiki/Walt_Disney",
+   "https://www.britannica.com/biography/Walt-Disney"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-business-02-coco-chanel",
+  "name": "Coco Chanel",
+  "name_ko": "코코 샤넬",
+  "gender": "F",
+  "birth_date": "1883-08-19",
+  "birth_time": "16:10",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank, Rodden AA (BC/BR in hand), recorded in LMT (0w05), read via built-in browser",
+  "birth_place": {
+   "city": "Saumur",
+   "country": "France",
+   "lon": -0.083,
+   "tz": "Europe/Paris"
+  },
+  "profession": "business",
+  "profession_detail": "Fashion designer, founder of the House of Chanel",
+  "death_date": "1971-01-10",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Chanel,_Coco",
+   "https://en.wikipedia.org/wiki/Coco_Chanel",
+   "https://www.britannica.com/biography/Coco-Chanel"
+  ],
+  "split": "dev",
+  "excluded": true,
+  "issues": [
+   "엔진 지원 범위 밖 출생 연도(1900~2100년만 계산, 서비스도 같음) → 분석 제외"
+  ]
+ },
+ {
+  "id": "p2-business-03-ted-turner",
+  "name": "Ted Turner",
+  "name_ko": "테드 터너",
+  "gender": "M",
+  "birth_date": "1938-11-19",
+  "birth_time": "08:50",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank, Rodden AA (BC/BR in hand), recorded as EST (UTC-5), read via built-in browser",
+  "birth_place": {
+   "city": "Cincinnati",
+   "country": "United States",
+   "lon": -84.45,
+   "tz": "America/New_York"
+  },
+  "profession": "business",
+  "profession_detail": "Media entrepreneur, founder of CNN and Turner Broadcasting System",
+  "death_date": "2026-05-06",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Turner,_Ted",
+   "https://en.wikipedia.org/wiki/Ted_Turner",
+   "https://www.britannica.com/biography/Ted-Turner"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-business-04-oprah-winfrey",
+  "name": "Oprah Winfrey",
+  "name_ko": "오프라 윈프리",
+  "gender": "F",
+  "birth_date": "1954-01-29",
+  "birth_time": "04:30",
+  "birth_time_confidence": "reported",
+  "birth_time_source": "Astro-Databank, Rodden A (from memory), recorded as CST (UTC-6), read via built-in browser",
+  "birth_place": {
+   "city": "Kosciusko, Mississippi",
+   "country": "United States",
+   "lon": -89.583,
+   "tz": "America/Chicago"
+  },
+  "profession": "business",
+  "profession_detail": "Media executive, founder of Harpo Productions and OWN, talk-show host",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Winfrey,_Oprah",
+   "https://en.wikipedia.org/wiki/Oprah_Winfrey",
+   "https://www.britannica.com/biography/Oprah-Winfrey"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-business-05-hugh-hefner",
+  "name": "Hugh Hefner",
+  "name_ko": "휴 헤프너",
+  "gender": "M",
+  "birth_date": "1926-04-09",
+  "birth_time": "16:20",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank, Rodden AA (BC/BR in hand), recorded as CST (UTC-6), read via built-in browser",
+  "birth_place": {
+   "city": "Chicago",
+   "country": "United States",
+   "lon": -87.65,
+   "tz": "America/Chicago"
+  },
+  "profession": "business",
+  "profession_detail": "Publisher, founder of Playboy magazine and Playboy Enterprises",
+  "death_date": "2017-09-27",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Hefner,_Hugh",
+   "https://en.wikipedia.org/wiki/Hugh_Hefner",
+   "https://www.britannica.com/biography/Hugh-Hefner"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-business-06-john-delorean",
+  "name": "John DeLorean",
+  "name_ko": "존 들로리언",
+  "gender": "M",
+  "birth_date": "1925-01-06",
+  "birth_time": "12:00",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank, Rodden AA (quoted BC/BR, collector Gauquelin), recorded as EST (UTC-5), read via built-in browser",
+  "birth_place": {
+   "city": "Detroit",
+   "country": "United States",
+   "lon": -83.05,
+   "tz": "America/Detroit"
+  },
+  "profession": "business",
+  "profession_detail": "Automotive executive (GM Pontiac/Chevrolet), founder of DeLorean Motor Company",
+  "death_date": "2005-03-19",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/DeLorean,_John",
+   "https://en.wikipedia.org/wiki/John_DeLorean"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-business-07-leona-helmsley",
+  "name": "Leona Helmsley",
+  "name_ko": "리오나 헴슬리",
+  "gender": "F",
+  "birth_date": "1920-07-04",
+  "birth_time": "06:00",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank, Rodden AA (quoted BC/BR), recorded as EDT (UTC-4, daylight saving), read via built-in browser",
+  "birth_place": {
+   "city": "Marbletown, New York",
+   "country": "United States",
+   "lon": -74.117,
+   "tz": "America/New_York"
+  },
+  "profession": "business",
+  "profession_detail": "Real estate and hotel executive (Helmsley Hotels)",
+  "death_date": "2007-08-20",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Helmsley,_Leona",
+   "https://en.wikipedia.org/wiki/Leona_Helmsley"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-business-08-michael-milken",
+  "name": "Michael Milken",
+  "name_ko": "마이클 밀컨",
+  "gender": "M",
+  "birth_date": "1946-07-04",
+  "birth_time": "07:31",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank, Rodden AA (quoted BC/BR), recorded as PST (UTC-8), read via built-in browser",
+  "birth_place": {
+   "city": "Los Angeles (Encino)",
+   "country": "United States",
+   "lon": -118.25,
+   "tz": "America/Los_Angeles"
+  },
+  "profession": "business",
+  "profession_detail": "Financier (Drexel Burnham Lambert high-yield bonds), philanthropist",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Milken,_Michael",
+   "https://en.wikipedia.org/wiki/Michael_Milken"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-business-09-chung-ju-yung",
+  "name": "Chung Ju-yung",
+  "name_ko": "정주영",
+  "gender": "M",
+  "birth_date": "1915-11-25",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": "No Astro-Databank entry found; no documented birth time. birth_date is the solar date given by Wikipedia (lunar date not stated)",
+  "birth_place": {
+   "city": "Tongchon County, Gangwon",
+   "country": "Korea (now North Korea)",
+   "lon": 127.98,
+   "tz": "Asia/Seoul"
+  },
+  "profession": "business",
+  "profession_detail": "Founder of Hyundai Group (construction, automobiles, shipbuilding)",
+  "death_date": "2001-03-21",
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Chung_Ju-yung",
+   "https://ko.wikipedia.org/wiki/%EC%A0%95%EC%A3%BC%EC%98%81"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-business-10-kim-woo-choong",
+  "name": "Kim Woo-choong",
+  "name_ko": "김우중",
+  "gender": "M",
+  "birth_date": "1936-12-19",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": "No Astro-Databank entry found; no documented birth time",
+  "birth_place": {
+   "city": "Daegu",
+   "country": "South Korea",
+   "lon": 128.6,
+   "tz": "Asia/Seoul"
+  },
+  "profession": "business",
+  "profession_detail": "Founder and chairman of Daewoo Group",
+  "death_date": "2019-12-09",
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Kim_Woo-choong",
+   "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-professional-01-nixon",
+  "name": "Richard Nixon",
+  "name_ko": "리처드 닉슨",
+  "gender": "M",
+  "birth_date": "1913-01-09",
+  "birth_time": "21:35",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank Rodden AA (quoted BC), recorded as PST; read via built-in browser https://www.astro.com/astro-databank/Nixon,_Richard",
+  "birth_place": {
+   "city": "Yorba Linda",
+   "country": "USA",
+   "lon": -117.82,
+   "tz": "America/Los_Angeles"
+  },
+  "profession": "professional",
+  "profession_detail": "37th US President",
+  "death_date": "1994-04-22",
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Richard_Nixon",
+   "https://www.britannica.com/biography/Richard-Nixon"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-professional-02-einstein",
+  "name": "Albert Einstein",
+  "name_ko": "알베르트 아인슈타인",
+  "gender": "M",
+  "birth_date": "1879-03-14",
+  "birth_time": "11:44",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank Rodden AA (BC/BR in hand), recorded in LMT; read via built-in browser https://www.astro.com/astro-databank/Einstein,_Albert",
+  "birth_place": {
+   "city": "Ulm",
+   "country": "Germany",
+   "lon": 9.99,
+   "tz": "Europe/Berlin"
+  },
+  "profession": "professional",
+  "profession_detail": "Theoretical physicist",
+  "death_date": "1955-04-18",
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Albert_Einstein",
+   "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/"
+  ],
+  "split": "dev",
+  "excluded": true,
+  "issues": [
+   "엔진 지원 범위 밖 출생 연도(1900~2100년만 계산, 서비스도 같음) → 분석 제외"
+  ]
+ },
+ {
+  "id": "p2-professional-03-thatcher",
+  "name": "Margaret Thatcher",
+  "name_ko": "마거릿 대처",
+  "gender": "F",
+  "birth_date": "1925-10-13",
+  "birth_time": "09:00",
+  "birth_time_confidence": "reported",
+  "birth_time_source": "Astro-Databank Rodden A (from memory), recorded as GMT; read via built-in browser https://www.astro.com/astro-databank/Thatcher,_Margaret",
+  "birth_place": {
+   "city": "Grantham",
+   "country": "UK",
+   "lon": -0.65,
+   "tz": "Europe/London"
+  },
+  "profession": "professional",
+  "profession_detail": "UK Prime Minister",
+  "death_date": "2013-04-08",
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Margaret_Thatcher",
+   "https://www.britannica.com/biography/Margaret-Thatcher"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-professional-04-armstrong",
+  "name": "Neil Armstrong",
+  "name_ko": "닐 암스트롱",
+  "gender": "M",
+  "birth_date": "1930-08-05",
+  "birth_time": "00:31",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank Rodden AA (BC/BR in hand), recorded as EST; read via built-in browser https://www.astro.com/astro-databank/Armstrong,_Neil",
+  "birth_place": {
+   "city": "Wapakoneta",
+   "country": "USA",
+   "lon": -84.19,
+   "tz": "Etc/GMT+5"
+  },
+  "profession": "professional",
+  "profession_detail": "NASA astronaut, test pilot",
+  "death_date": "2012-08-25",
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Neil_Armstrong",
+   "https://www.britannica.com/biography/Neil-Armstrong"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-professional-05-curie",
+  "name": "Marie Curie",
+  "name_ko": "마리 퀴리",
+  "gender": "F",
+  "birth_date": "1867-11-07",
+  "birth_time": "12:00",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank Rodden AA (quoted BC/BR), 12:00 recorded in LMT; read via built-in browser https://www.astro.com/astro-databank/Curie,_Marie",
+  "birth_place": {
+   "city": "Warsaw",
+   "country": "Poland",
+   "lon": 21.01,
+   "tz": "Europe/Warsaw"
+  },
+  "profession": "professional",
+  "profession_detail": "Physicist and chemist",
+  "death_date": "1934-07-04",
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Marie_Curie",
+   "https://www.nobelprize.org/prizes/physics/1903/marie-curie/biographical/"
+  ],
+  "split": "dev",
+  "excluded": true,
+  "issues": [
+   "엔진 지원 범위 밖 출생 연도(1900~2100년만 계산, 서비스도 같음) → 분석 제외"
+  ]
+ },
+ {
+  "id": "p2-professional-06-wright",
+  "name": "Frank Lloyd Wright",
+  "name_ko": "프랭크 로이드 라이트",
+  "gender": "M",
+  "birth_date": "1867-06-08",
+  "birth_time": "17:11",
+  "birth_time_confidence": "reported",
+  "birth_time_source": "Astro-Databank Rodden A (from memory), recorded in LMT; read via built-in browser https://www.astro.com/astro-databank/Wright,_Frank_Lloyd",
+  "birth_place": {
+   "city": "Richland Center",
+   "country": "USA",
+   "lon": -90.39,
+   "tz": "America/Chicago"
+  },
+  "profession": "professional",
+  "profession_detail": "Architect",
+  "death_date": "1959-04-09",
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Frank_Lloyd_Wright",
+   "https://www.britannica.com/biography/Frank-Lloyd-Wright"
+  ],
+  "split": "test",
+  "excluded": true,
+  "issues": [
+   "엔진 지원 범위 밖 출생 연도(1900~2100년만 계산, 서비스도 같음) → 분석 제외"
+  ]
+ },
+ {
+  "id": "p2-professional-07-ginsburg",
+  "name": "Ruth Bader Ginsburg",
+  "name_ko": "루스 베이더 긴즈버그",
+  "gender": "F",
+  "birth_date": "1933-03-15",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": "Astro-Databank Rodden X (date without time) https://www.astro.com/astro-databank/Ginsburg,_Ruth_Bader",
+  "birth_place": {
+   "city": "Brooklyn, New York",
+   "country": "USA",
+   "lon": -73.94,
+   "tz": "America/New_York"
+  },
+  "profession": "professional",
+  "profession_detail": "US Supreme Court Justice",
+  "death_date": "2020-09-18",
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg",
+   "https://www.supremecourt.gov/about/biographies.aspx"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-professional-08-barnard",
+  "name": "Christiaan Barnard",
+  "name_ko": "크리스티안 바너드",
+  "gender": "M",
+  "birth_date": "1922-11-08",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": "Astro-Databank Rodden DD (conflicting/unverified 20:00), not used https://www.astro.com/astro-databank/Barnard,_Christiaan",
+  "birth_place": {
+   "city": "Beaufort West",
+   "country": "South Africa",
+   "lon": 22.58,
+   "tz": "Africa/Johannesburg"
+  },
+  "profession": "professional",
+  "profession_detail": "Cardiac surgeon (first human heart transplant)",
+  "death_date": "2001-09-02",
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Christiaan_Barnard",
+   "https://www.britannica.com/biography/Christiaan-Barnard"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-professional-09-obama",
+  "name": "Barack Obama",
+  "name_ko": "버락 오바마",
+  "gender": "M",
+  "birth_date": "1961-08-04",
+  "birth_time": "19:24",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank Rodden AA (BC/BR in hand), recorded as AHST (UTC-10); read via built-in browser https://www.astro.com/astro-databank/Obama,_Barack",
+  "birth_place": {
+   "city": "Honolulu",
+   "country": "USA",
+   "lon": -157.86,
+   "tz": "Pacific/Honolulu"
+  },
+  "profession": "professional",
+  "profession_detail": "44th US President",
+  "death_date": null,
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Barack_Obama",
+   "https://www.obamalibrary.gov/obamas/president-barack-obama"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-professional-10-park-geun-hye",
+  "name": "Park Geun-hye",
+  "name_ko": "박근혜",
+  "gender": "F",
+  "birth_date": "1952-02-02",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": "No Astro-Databank entry found (checked via built-in browser); no public verified birth time",
+  "birth_place": {
+   "city": "Daegu",
+   "country": "South Korea",
+   "lon": 128.6,
+   "tz": "Asia/Seoul"
+  },
+  "profession": "professional",
+  "profession_detail": "18th President of South Korea (impeached)",
+  "death_date": null,
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Park_Geun-hye",
+   "https://ko.wikipedia.org/wiki/%EB%B0%95%EA%B7%BC%ED%98%9C"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-sports-01-pele",
+  "name": "Pelé",
+  "name_ko": "펠레",
+  "gender": "M",
+  "birth_date": "1940-10-21",
+  "birth_time": "03:00",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank Rodden AA (BC/BR in hand, collector Borges), 03:00 BZT h3w standard time; read via built-in browser",
+  "birth_place": {
+   "city": "Três Corações",
+   "country": "Brazil",
+   "lon": -45.2525,
+   "tz": "America/Sao_Paulo"
+  },
+  "profession": "sports",
+  "profession_detail": "football forward (Santos, New York Cosmos, Brazil)",
+  "death_date": "2022-12-29",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Pelé",
+   "https://en.wikipedia.org/wiki/Pel%C3%A9"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-sports-02-ayrton-senna",
+  "name": "Ayrton Senna",
+  "name_ko": "아일톤 세나",
+  "gender": "M",
+  "birth_date": "1960-03-21",
+  "birth_time": "02:35",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank Rodden AA (quoted BC/BR, collector Borges), 02:35 BZT h3w standard time; read via built-in browser",
+  "birth_place": {
+   "city": "São Paulo",
+   "country": "Brazil",
+   "lon": -46.6247,
+   "tz": "America/Sao_Paulo"
+  },
+  "profession": "sports",
+  "profession_detail": "Formula One driver (Toleman, Lotus, McLaren, Williams)",
+  "death_date": "1994-05-01",
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Senna,_Ayrton",
+   "https://en.wikipedia.org/wiki/Ayrton_Senna"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-sports-03-boris-becker",
+  "name": "Boris Becker",
+  "name_ko": "보리스 베커",
+  "gender": "M",
+  "birth_date": "1967-11-22",
+  "birth_time": "08:45",
+  "birth_time_confidence": "verified",
+  "birth_time_source": "Astro-Databank Rodden AA (quoted BC/BR, collector March), 08:45 MET h1e standard time; read via built-in browser",
+  "birth_place": {
+   "city": "Leimen",
+   "country": "Germany",
+   "lon": 8.6833,
+   "tz": "Europe/Berlin"
+  },
+  "profession": "sports",
+  "profession_detail": "tennis player (6 Grand Slam singles titles)",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Becker,_Boris",
+   "https://en.wikipedia.org/wiki/Boris_Becker"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-sports-04-monica-seles",
+  "name": "Monica Seles",
+  "name_ko": "모니카 셀레스",
+  "gender": "F",
+  "birth_date": "1973-12-02",
+  "birth_time": "05:00",
+  "birth_time_confidence": "reported",
+  "birth_time_source": "Astro-Databank Rodden A (from memory, collector Rodden), 05:00 MET h1e standard time; read via built-in browser",
+  "birth_place": {
+   "city": "Novi Sad",
+   "country": "Serbia",
+   "lon": 19.8333,
+   "tz": "Europe/Belgrade"
+  },
+  "profession": "sports",
+  "profession_detail": "tennis player (9 Grand Slam singles titles)",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Seles,_Monica",
+   "https://en.wikipedia.org/wiki/Monica_Seles"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-sports-05-martina-navratilova",
+  "name": "Martina Navratilova",
+  "name_ko": "마르티나 나브라틸로바",
+  "gender": "F",
+  "birth_date": "1956-10-18",
+  "birth_time": "16:40",
+  "birth_time_confidence": "reported",
+  "birth_time_source": "Astro-Databank Rodden A (from memory, collector Clifford), 16:40 MET h1e standard time; read via built-in browser",
+  "birth_place": {
+   "city": "Prague",
+   "country": "Czech Republic",
+   "lon": 14.4333,
+   "tz": "Europe/Prague"
+  },
+  "profession": "sports",
+  "profession_detail": "tennis player (18 Grand Slam singles titles)",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Navratilova,_Martina",
+   "https://en.wikipedia.org/wiki/Martina_Navratilova"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-sports-06-nadia-comaneci",
+  "name": "Nadia Comăneci",
+  "name_ko": "나디아 코마네치",
+  "gender": "F",
+  "birth_date": "1961-11-12",
+  "birth_time": "10:00",
+  "birth_time_confidence": "reported",
+  "birth_time_source": "Astro-Databank Rodden A (from memory, collector Taglilatelo), 10:00 EET h2e standard time; place listed as Gheorghe Gheorghiu-Dej (now Onești); read via built-in browser",
+  "birth_place": {
+   "city": "Onești (then Gheorghe Gheorghiu-Dej)",
+   "country": "Romania",
+   "lon": 26.7333,
+   "tz": "Europe/Bucharest"
+  },
+  "profession": "sports",
+  "profession_detail": "artistic gymnast (5 Olympic golds)",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Comaneci,_Nadia",
+   "https://en.wikipedia.org/wiki/Nadia_Com%C4%83neci",
+   "https://www.olympics.com/en/athletes/nadia-comaneci"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-sports-07-mike-tyson",
+  "name": "Mike Tyson",
+  "name_ko": "마이크 타이슨",
+  "gender": "M",
+  "birth_date": "1966-06-30",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": "Astro-Databank Rodden X (date without time; ADB lists Catskill NY as place, Wikipedia gives Cumberland Hospital, Brooklyn); no time used",
+  "birth_place": {
+   "city": "Brooklyn, New York",
+   "country": "USA",
+   "lon": -73.9442,
+   "tz": "America/New_York"
+  },
+  "profession": "sports",
+  "profession_detail": "heavyweight boxer",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Tyson,_Mike",
+   "https://en.wikipedia.org/wiki/Mike_Tyson"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-sports-08-michael-schumacher",
+  "name": "Michael Schumacher",
+  "name_ko": "미하엘 슈마허",
+  "gender": "M",
+  "birth_date": "1969-01-03",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": "Astro-Databank Rodden C (13:43, original source not known) -> below A, birth_time set to null per protocol",
+  "birth_place": {
+   "city": "Hürth",
+   "country": "Germany",
+   "lon": 6.85,
+   "tz": "Europe/Berlin"
+  },
+  "profession": "sports",
+  "profession_detail": "Formula One driver (7 world titles; Jordan, Benetton, Ferrari, Mercedes)",
+  "death_date": null,
+  "source_urls": [
+   "https://www.astro.com/astro-databank/Schumacher,_Michael",
+   "https://en.wikipedia.org/wiki/Michael_Schumacher"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-sports-09-pak-se-ri",
+  "name": "Pak Se-ri",
+  "name_ko": "박세리",
+  "gender": "F",
+  "birth_date": "1977-09-28",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": "No Astro-Databank entry found (404 on name variants); no public birth time",
+  "birth_place": {
+   "city": "Daejeon",
+   "country": "South Korea",
+   "lon": 127.3845,
+   "tz": "Asia/Seoul"
+  },
+  "profession": "sports",
+  "profession_detail": "professional golfer (LPGA, 5 majors)",
+  "death_date": null,
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Pak_Se-ri"
+  ],
+  "split": "dev",
+  "excluded": false,
+  "issues": []
+ },
+ {
+  "id": "p2-sports-10-son-heung-min",
+  "name": "Son Heung-min",
+  "name_ko": "손흥민",
+  "gender": "M",
+  "birth_date": "1992-07-08",
+  "birth_time": null,
+  "birth_time_confidence": "unknown",
+  "birth_time_source": "No Astro-Databank entry found (404 on name variants); no public birth time",
+  "birth_place": {
+   "city": "Chuncheon",
+   "country": "South Korea",
+   "lon": 127.7298,
+   "tz": "Asia/Seoul"
+  },
+  "profession": "sports",
+  "profession_detail": "football forward (Hamburg, Leverkusen, Tottenham, LAFC, South Korea)",
+  "death_date": null,
+  "source_urls": [
+   "https://en.wikipedia.org/wiki/Son_Heung-min"
+  ],
+  "split": "test",
+  "excluded": false,
+  "issues": []
+ }
+]

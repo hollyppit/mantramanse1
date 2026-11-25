@@ -5,15 +5,18 @@
 const fs = require('fs'), path = require('path'), vm = require('vm'), crypto = require('crypto');
 const ROOT = path.join(__dirname, '..', '..', '..');
 const FILES = ['engine.js', 'luck-grade.js', 'luck-element-theme.js'];
+// 검증 전용 후보 비교(2026-11-25): CV_ENGINE=대체 엔진 파일(저장소 기준 경로), CV_SEUN_PARENT=세운에 섞는 대운 비중. 둘 다 없으면 현행 그대로.
+const srcOf = f => f === 'engine.js' && process.env.CV_ENGINE ? path.resolve(ROOT, process.env.CV_ENGINE) : path.join(ROOT, f);
 const DOMAINS = ['career', 'business', 'wealth', 'move', 'job', 'marriage', 'love', 'child', 'health', 'accident'];
 
 function engine() {
   const c = { console }; c.window = c; vm.createContext(c);
-  FILES.forEach(f => vm.runInContext(fs.readFileSync(path.join(ROOT, f), 'utf8'), c, { filename: f }));
+  FILES.forEach(f => vm.runInContext(fs.readFileSync(srcOf(f), 'utf8'), c, { filename: f }));
+  if (process.env.CV_SEUN_PARENT) c.Manse.LUCK_CFG.levels.seun.parent = +process.env.CV_SEUN_PARENT;
   return { M: c.Manse, LG: c.MantraLuckGrade, LT: c.MantraLuckTheme };
 }
 function engineHash() {
-  const h = crypto.createHash('sha256'); FILES.forEach(f => h.update(fs.readFileSync(path.join(ROOT, f)))); return h.digest('hex').slice(0, 16);
+  const h = crypto.createHash('sha256'); FILES.forEach(f => h.update(fs.readFileSync(srcOf(f)))); if (process.env.CV_SEUN_PARENT) h.update('seun.parent=' + process.env.CV_SEUN_PARENT); return h.digest('hex').slice(0, 16);
 }
 const timeKnown = p => (p.birth_time_confidence === 'verified' || p.birth_time_confidence === 'reported') && /^\d{1,2}:\d{2}$/.test(p.birth_time || '');
 function toInput(p, over = {}) {

@@ -1,0 +1,2269 @@
+{
+  "group": "business",
+  "collected_at": "2026-11-25",
+  "persons": [
+    {
+      "id": "p2-business-01-walt-disney",
+      "name": "Walt Disney",
+      "name_ko": "월트 디즈니",
+      "gender": "M",
+      "birth_date": "1901-12-05",
+      "birth_time": "00:35",
+      "birth_time_confidence": "reported",
+      "birth_time_source": "Astro-Databank, Rodden A (from memory), recorded as CST (UTC-6), read via built-in browser",
+      "birth_place": {
+        "city": "Chicago",
+        "country": "United States",
+        "lon": -87.65,
+        "tz": "America/Chicago"
+      },
+      "profession": "business",
+      "profession_detail": "Animation studio and theme park founder (The Walt Disney Company)",
+      "death_date": "1966-12-15",
+      "source_urls": [
+        "https://www.astro.com/astro-databank/Disney,_Walt",
+        "https://en.wikipedia.org/wiki/Walt_Disney",
+        "https://www.britannica.com/biography/Walt-Disney"
+      ]
+    },
+    {
+      "id": "p2-business-02-coco-chanel",
+      "name": "Coco Chanel",
+      "name_ko": "코코 샤넬",
+      "gender": "F",
+      "birth_date": "1883-08-19",
+      "birth_time": "16:00",
+      "birth_time_confidence": "verified",
+      "birth_time_source": "Astro-Databank, Rodden AA (BC/BR in hand), recorded in LMT (0w05), read via built-in browser",
+      "birth_place": {
+        "city": "Saumur",
+        "country": "France",
+        "lon": -0.083,
+        "tz": "Europe/Paris"
+      },
+      "profession": "business",
+      "profession_detail": "Fashion designer, founder of the House of Chanel",
+      "death_date": "1971-01-10",
+      "source_urls": [
+        "https://www.astro.com/astro-databank/Chanel,_Coco",
+        "https://en.wikipedia.org/wiki/Coco_Chanel",
+        "https://www.britannica.com/biography/Coco-Chanel"
+      ]
+    },
+    {
+      "id": "p2-business-03-ted-turner",
+      "name": "Ted Turner",
+      "name_ko": "테드 터너",
+      "gender": "M",
+      "birth_date": "1938-11-19",
+      "birth_time": "08:50",
+      "birth_time_confidence": "verified",
+      "birth_time_source": "Astro-Databank, Rodden AA (BC/BR in hand), recorded as EST (UTC-5), read via built-in browser",
+      "birth_place": {
+        "city": "Cincinnati",
+        "country": "United States",
+        "lon": -84.45,
+        "tz": "America/New_York"
+      },
+      "profession": "business",
+      "profession_detail": "Media entrepreneur, founder of CNN and Turner Broadcasting System",
+      "death_date": "2026-05-06",
+      "source_urls": [
+        "https://www.astro.com/astro-databank/Turner,_Ted",
+        "https://en.wikipedia.org/wiki/Ted_Turner",
+        "https://www.britannica.com/biography/Ted-Turner"
+      ]
+    },
+    {
+      "id": "p2-business-04-oprah-winfrey",
+      "name": "Oprah Winfrey",
+      "name_ko": "오프라 윈프리",
+      "gender": "F",
+      "birth_date": "1954-01-29",
+      "birth_time": "04:30",
+      "birth_time_confidence": "reported",
+      "birth_time_source": "Astro-Databank, Rodden A (from memory), recorded as CST (UTC-6), read via built-in browser",
+      "birth_place": {
+        "city": "Kosciusko, Mississippi",
+        "country": "United States",
+        "lon": -89.583,
+        "tz": "America/Chicago"
+      },
+      "profession": "business",
+      "profession_detail": "Media executive, founder of Harpo Productions and OWN, talk-show host",
+      "death_date": null,
+      "source_urls": [
+        "https://www.astro.com/astro-databank/Winfrey,_Oprah",
+        "https://en.wikipedia.org/wiki/Oprah_Winfrey",
+        "https://www.britannica.com/biography/Oprah-Winfrey"
+      ]
+    },
+    {
+      "id": "p2-business-05-hugh-hefner",
+      "name": "Hugh Hefner",
+      "name_ko": "휴 헤프너",
+      "gender": "M",
+      "birth_date": "1926-04-09",
+      "birth_time": "16:20",
+      "birth_time_confidence": "verified",
+      "birth_time_source": "Astro-Databank, Rodden AA (BC/BR in hand), recorded as CST (UTC-6), read via built-in browser",
+      "birth_place": {
+        "city": "Chicago",
+        "country": "United States",
+        "lon": -87.65,
+        "tz": "America/Chicago"
+      },
+      "profession": "business",
+      "profession_detail": "Publisher, founder of Playboy magazine and Playboy Enterprises",
+      "death_date": "2017-09-27",
+      "source_urls": [
+        "https://www.astro.com/astro-databank/Hefner,_Hugh",
+        "https://en.wikipedia.org/wiki/Hugh_Hefner",
+        "https://www.britannica.com/biography/Hugh-Hefner"
+      ]
+    },
+    {
+      "id": "p2-business-06-john-delorean",
+      "name": "John DeLorean",
+      "name_ko": "존 들로리언",
+      "gender": "M",
+      "birth_date": "1925-01-06",
+      "birth_time": "12:00",
+      "birth_time_confidence": "verified",
+      "birth_time_source": "Astro-Databank, Rodden AA (quoted BC/BR, collector Gauquelin), recorded as EST (UTC-5), read via built-in browser",
+      "birth_place": {
+        "city": "Detroit",
+        "country": "United States",
+        "lon": -83.05,
+        "tz": "America/Detroit"
+      },
+      "profession": "business",
+      "profession_detail": "Automotive executive (GM Pontiac/Chevrolet), founder of DeLorean Motor Company",
+      "death_date": "2005-03-19",
+      "source_urls": [
+        "https://www.astro.com/astro-databank/DeLorean,_John",
+        "https://en.wikipedia.org/wiki/John_DeLorean"
+      ]
+    },
+    {
+      "id": "p2-business-07-leona-helmsley",
+      "name": "Leona Helmsley",
+      "name_ko": "리오나 헴슬리",
+      "gender": "F",
+      "birth_date": "1920-07-04",
+      "birth_time": "06:00",
+      "birth_time_confidence": "verified",
+      "birth_time_source": "Astro-Databank, Rodden AA (quoted BC/BR), recorded as EDT (UTC-4, daylight saving), read via built-in browser",
+      "birth_place": {
+        "city": "Marbletown, New York",
+        "country": "United States",
+        "lon": -74.117,
+        "tz": "America/New_York"
+      },
+      "profession": "business",
+      "profession_detail": "Real estate and hotel executive (Helmsley Hotels)",
+      "death_date": "2007-08-20",
+      "source_urls": [
+        "https://www.astro.com/astro-databank/Helmsley,_Leona",
+        "https://en.wikipedia.org/wiki/Leona_Helmsley"
+      ]
+    },
+    {
+      "id": "p2-business-08-michael-milken",
+      "name": "Michael Milken",
+      "name_ko": "마이클 밀컨",
+      "gender": "M",
+      "birth_date": "1946-07-04",
+      "birth_time": "07:31",
+      "birth_time_confidence": "verified",
+      "birth_time_source": "Astro-Databank, Rodden AA (quoted BC/BR), recorded as PST (UTC-8), read via built-in browser",
+      "birth_place": {
+        "city": "Los Angeles (Encino)",
+        "country": "United States",
+        "lon": -118.25,
+        "tz": "America/Los_Angeles"
+      },
+      "profession": "business",
+      "profession_detail": "Financier (Drexel Burnham Lambert high-yield bonds), philanthropist",
+      "death_date": null,
+      "source_urls": [
+        "https://www.astro.com/astro-databank/Milken,_Michael",
+        "https://en.wikipedia.org/wiki/Michael_Milken"
+      ]
+    },
+    {
+      "id": "p2-business-09-chung-ju-yung",
+      "name": "Chung Ju-yung",
+      "name_ko": "정주영",
+      "gender": "M",
+      "birth_date": "1915-11-25",
+      "birth_time": null,
+      "birth_time_confidence": "unknown",
+      "birth_time_source": "No Astro-Databank entry found; no documented birth time. birth_date is the solar date given by Wikipedia (lunar date not stated)",
+      "birth_place": {
+        "city": "Tongchon County, Gangwon",
+        "country": "Korea (now North Korea)",
+        "lon": 127.98,
+        "tz": "Asia/Seoul"
+      },
+      "profession": "business",
+      "profession_detail": "Founder of Hyundai Group (construction, automobiles, shipbuilding)",
+      "death_date": "2001-03-21",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Chung_Ju-yung",
+        "https://ko.wikipedia.org/wiki/%EC%A0%95%EC%A3%BC%EC%98%81"
+      ]
+    },
+    {
+      "id": "p2-business-10-kim-woo-choong",
+      "name": "Kim Woo-choong",
+      "name_ko": "김우중",
+      "gender": "M",
+      "birth_date": "1936-12-19",
+      "birth_time": null,
+      "birth_time_confidence": "unknown",
+      "birth_time_source": "No Astro-Databank entry found; no documented birth time",
+      "birth_place": {
+        "city": "Daegu",
+        "country": "South Korea",
+        "lon": 128.6,
+        "tz": "Asia/Seoul"
+      },
+      "profession": "business",
+      "profession_detail": "Founder and chairman of Daewoo Group",
+      "death_date": "2019-12-09",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Kim_Woo-choong",
+        "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "person_id": "p2-business-01-walt-disney",
+      "event_date": "1921-05",
+      "event_category": "career_change",
+      "event_type": "founding",
+      "event_description": "Founds Laugh-O-Gram Studio in Kansas City",
+      "event_significance": 2,
+      "evidence_text": "Disney established the Laugh-O-Gram Studio in Kansas City in May 1921.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Walt_Disney"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-01-walt-disney",
+      "event_date": "1923",
+      "event_category": "failure",
+      "event_type": "venture_failed",
+      "event_description": "Laugh-O-Gram Studio goes bankrupt",
+      "event_significance": 2,
+      "evidence_text": "The Kansas City studio went bankrupt in 1923, sending Disney to Hollywood.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Walt_Disney",
+        "https://www.britannica.com/biography/Walt-Disney"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-01-walt-disney",
+      "event_date": "1923-10-16",
+      "event_category": "career_change",
+      "event_type": "founding",
+      "event_description": "Co-founds Disney Brothers Studio with brother Roy",
+      "event_significance": 3,
+      "evidence_text": "Walt and Roy formed Disney Brothers Studio, forerunner of The Walt Disney Company.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Walt_Disney",
+        "https://en.wikipedia.org/wiki/The_Walt_Disney_Company"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-01-walt-disney",
+      "event_date": "1925-07",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries Lillian Bounds in Lewiston, Idaho",
+      "event_significance": 2,
+      "evidence_text": "Disney married ink artist Lillian Bounds in July 1925.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Walt_Disney"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-01-walt-disney",
+      "event_date": "1928-02",
+      "event_category": "failure",
+      "event_type": "venture_failed",
+      "event_description": "Loses Oswald the Lucky Rabbit rights and most staff to Charles Mintz",
+      "event_significance": 2,
+      "evidence_text": "Dispute with distributor Mintz cost Disney the Oswald series and most animators.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Walt_Disney"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-01-walt-disney",
+      "event_date": "1928-11-18",
+      "event_category": "achievement",
+      "event_type": "product_launch_success",
+      "event_description": "Steamboat Willie premieres, launching Mickey Mouse",
+      "event_significance": 3,
+      "evidence_text": "Synchronized-sound cartoon Steamboat Willie made Mickey Mouse a hit in 1928.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Walt_Disney",
+        "https://en.wikipedia.org/wiki/Steamboat_Willie"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-01-walt-disney",
+      "event_date": "1931-10",
+      "event_category": "health_event",
+      "event_type": "illness",
+      "event_description": "Suffers a nervous breakdown from overwork",
+      "event_significance": 2,
+      "evidence_text": "Disney had a nervous breakdown in October 1931 and took a rest trip.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Walt_Disney"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-01-walt-disney",
+      "event_date": "1933-12",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Daughter Diane born",
+      "event_significance": 1,
+      "evidence_text": "First daughter Diane was born in December 1933.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Walt_Disney"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-01-walt-disney",
+      "event_date": "1936-12",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Adopts daughter Sharon",
+      "event_significance": 1,
+      "evidence_text": "The Disneys adopted daughter Sharon in December 1936.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Walt_Disney"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-01-walt-disney",
+      "event_date": "1937-12-21",
+      "event_category": "achievement",
+      "event_type": "product_launch_success",
+      "event_description": "Snow White and the Seven Dwarfs premieres to huge success",
+      "event_significance": 3,
+      "evidence_text": "First full-length cel-animated feature became a major box-office success.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Walt_Disney",
+        "https://en.wikipedia.org/wiki/Snow_White_and_the_Seven_Dwarfs_(1937_film)"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-01-walt-disney",
+      "event_date": "1939-02-23",
+      "event_category": "achievement",
+      "event_type": "major_award",
+      "event_description": "Special Academy Award for Snow White (one statuette plus seven miniatures)",
+      "event_significance": 2,
+      "evidence_text": "Academy gave a Special Award for Snow White, presented by Shirley Temple.",
+      "evidence_urls": [
+        "https://www.oscars.org/oscars/ceremonies/1939"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "A"
+    },
+    {
+      "person_id": "p2-business-01-walt-disney",
+      "event_date": "1940",
+      "event_category": "financial_event",
+      "event_type": "financial_loss",
+      "event_description": "Pinocchio and Fantasia underperform; studio sinks into heavy debt",
+      "event_significance": 2,
+      "evidence_text": "Pinocchio and Fantasia lost money; studio deeply in debt by early 1941.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Walt_Disney"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-01-walt-disney",
+      "event_date": "1941",
+      "event_category": "failure",
+      "event_type": "scandal_penalty",
+      "event_description": "Five-week animators strike at the Disney studio",
+      "event_significance": 2,
+      "evidence_text": "Animators struck for five weeks in 1941, damaging Disney's reputation.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Walt_Disney",
+        "https://en.wikipedia.org/wiki/1941_Disney_animators'_strike"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-01-walt-disney",
+      "event_date": "1955-07-17",
+      "event_category": "achievement",
+      "event_type": "company_success",
+      "event_description": "Disneyland opens in Anaheim, California",
+      "event_significance": 3,
+      "evidence_text": "Disneyland theme park opened in Anaheim in July 1955.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Walt_Disney",
+        "https://en.wikipedia.org/wiki/Disneyland"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-01-walt-disney",
+      "event_date": "1966-11",
+      "event_category": "health_event",
+      "event_type": "illness",
+      "event_description": "Diagnosed with lung cancer (died December 1966)",
+      "event_significance": 3,
+      "evidence_text": "Lung cancer was found in early November 1966; he died December 15.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Walt_Disney"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-02-coco-chanel",
+      "event_date": "1910",
+      "event_category": "career_change",
+      "event_type": "new_ceo_role",
+      "event_description": "Becomes licensed milliner, opens Chanel Modes at 21 rue Cambon, Paris",
+      "event_significance": 2,
+      "evidence_text": "Licensed as milliner in 1910, she opened Chanel Modes on rue Cambon.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Coco_Chanel",
+        "https://www.britannica.com/biography/Coco-Chanel"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-02-coco-chanel",
+      "event_date": "1913",
+      "event_category": "career_change",
+      "event_type": "new_ceo_role",
+      "event_description": "Opens boutique in Deauville financed by Arthur Capel",
+      "event_significance": 1,
+      "evidence_text": "A Deauville boutique opened in 1913 with Capel's financing.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Coco_Chanel"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-02-coco-chanel",
+      "event_date": "1915",
+      "event_category": "career_change",
+      "event_type": "new_ceo_role",
+      "event_description": "Opens couture establishment in Biarritz",
+      "event_significance": 1,
+      "evidence_text": "She opened an establishment in Biarritz in 1915.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Coco_Chanel"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-02-coco-chanel",
+      "event_date": "1919",
+      "event_category": "achievement",
+      "event_type": "company_success",
+      "event_description": "Registered as couturiere; establishes maison de couture at 31 rue Cambon",
+      "event_significance": 2,
+      "evidence_text": "In 1919 she registered as couturiere and set up at 31 rue Cambon.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Coco_Chanel"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-02-coco-chanel",
+      "event_date": "1921",
+      "event_category": "achievement",
+      "event_type": "product_launch_success",
+      "event_description": "Launches Chanel No. 5 perfume",
+      "event_significance": 3,
+      "evidence_text": "Chanel No. 5 was introduced in 1921 and became world-famous.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Coco_Chanel",
+        "https://en.wikipedia.org/wiki/Chanel_No._5"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-02-coco-chanel",
+      "event_date": "1924",
+      "event_category": "career_change",
+      "event_type": "founding",
+      "event_description": "Forms Parfums Chanel with the Wertheimer brothers (keeps 10% stake)",
+      "event_significance": 2,
+      "evidence_text": "She agreed with the Wertheimers to create Parfums Chanel in 1924.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Coco_Chanel"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-02-coco-chanel",
+      "event_date": "1939",
+      "event_category": "retirement",
+      "event_type": "retirement",
+      "event_description": "Closes her shops at the outbreak of World War II",
+      "event_significance": 3,
+      "evidence_text": "She closed her shops in 1939 when the war began.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Coco_Chanel",
+        "https://www.britannica.com/biography/Coco-Chanel"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-02-coco-chanel",
+      "event_date": "1944-09",
+      "event_category": "failure",
+      "event_type": "legal_penalty",
+      "event_description": "Interrogated by Free French purge committee over wartime collaboration",
+      "event_significance": 2,
+      "evidence_text": "Questioned about collaboration in September 1944, then released without charge.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Coco_Chanel"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-02-coco-chanel",
+      "event_date": "1945",
+      "event_category": "career_change",
+      "event_type": "restructuring",
+      "event_description": "Moves into self-imposed exile in Switzerland",
+      "event_significance": 2,
+      "evidence_text": "She moved to Switzerland in 1945.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Coco_Chanel"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-02-coco-chanel",
+      "event_date": "1947",
+      "event_category": "financial_event",
+      "event_type": "financial_gain",
+      "event_description": "Renegotiates perfume deal: royalty on No. 5 sales and living expenses covered",
+      "event_significance": 2,
+      "evidence_text": "New Wertheimer deal gave her a share of No. 5 sales for life.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Coco_Chanel"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-02-coco-chanel",
+      "event_date": "1954-02",
+      "event_category": "career_change",
+      "event_type": "comeback",
+      "event_description": "Reopens couture house at age 71, financed by Pierre Wertheimer",
+      "event_significance": 3,
+      "evidence_text": "She revived her couture house in 1954 with Wertheimer financing.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Coco_Chanel",
+        "https://www.britannica.com/biography/Coco-Chanel"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-02-coco-chanel",
+      "event_date": "1954-02",
+      "event_category": "failure",
+      "event_type": "flop",
+      "event_description": "Comeback collection panned by French press",
+      "event_significance": 1,
+      "evidence_text": "French critics initially dismissed the 1954 comeback show.",
+      "evidence_urls": [
+        "https://www.britannica.com/biography/Coco-Chanel"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-02-coco-chanel",
+      "event_date": "1969-12-18",
+      "event_category": "achievement",
+      "event_type": "product_launch_success",
+      "event_description": "Broadway musical Coco about her life opens",
+      "event_significance": 1,
+      "evidence_text": "Musical Coco opened December 1969, closing October 1970.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Coco_Chanel",
+        "https://en.wikipedia.org/wiki/Coco_(musical)"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-03-ted-turner",
+      "event_date": "1960",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries Julia Nye",
+      "event_significance": 2,
+      "evidence_text": "Turner married Julia Nye in 1960; they divorced in 1964.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ted_Turner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-03-ted-turner",
+      "event_date": "1963-03",
+      "event_category": "career_change",
+      "event_type": "new_ceo_role",
+      "event_description": "Takes over family billboard company after father's suicide",
+      "event_significance": 3,
+      "evidence_text": "At 24 he became president of the family advertising firm in 1963.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ted_Turner",
+        "https://www.britannica.com/biography/Ted-Turner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-03-ted-turner",
+      "event_date": "1964",
+      "event_category": "relationship_event",
+      "event_type": "divorce",
+      "event_description": "Divorces Julia Nye",
+      "event_significance": 2,
+      "evidence_text": "First marriage to Julia Nye ended in divorce in 1964.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ted_Turner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-03-ted-turner",
+      "event_date": "1965",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries Jane Smith",
+      "event_significance": 2,
+      "evidence_text": "He married Jane Smith in 1965; they divorced in 1988.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ted_Turner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-03-ted-turner",
+      "event_date": "1969",
+      "event_category": "career_change",
+      "event_type": "founding",
+      "event_description": "Buys Atlanta UHF station WJRJ (later WTCG), start of Turner Broadcasting",
+      "event_significance": 2,
+      "evidence_text": "Purchase of an Atlanta UHF station began Turner Broadcasting System.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ted_Turner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-03-ted-turner",
+      "event_date": "1976",
+      "event_category": "financial_event",
+      "event_type": "financial_gain",
+      "event_description": "Buys the Atlanta Braves; WTCG goes national as cable superstation (Dec 17)",
+      "event_significance": 2,
+      "evidence_text": "He bought the Braves in 1976; WTCG became a national superstation.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ted_Turner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-03-ted-turner",
+      "event_date": "1977-09",
+      "event_category": "achievement",
+      "event_type": "championship",
+      "event_description": "Skippers Courageous to win the America's Cup",
+      "event_significance": 2,
+      "evidence_text": "Turner won the 1977 America's Cup as skipper of Courageous.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ted_Turner",
+        "https://www.britannica.com/biography/Ted-Turner"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-03-ted-turner",
+      "event_date": "1980-06-01",
+      "event_category": "achievement",
+      "event_type": "product_launch_success",
+      "event_description": "Launches CNN, first 24-hour cable news channel",
+      "event_significance": 3,
+      "evidence_text": "CNN debuted June 1, 1980 as the first 24-hour news channel.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ted_Turner",
+        "https://www.britannica.com/biography/Ted-Turner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-03-ted-turner",
+      "event_date": "1985",
+      "event_category": "failure",
+      "event_type": "venture_failed",
+      "event_description": "Failed hostile takeover attempt of CBS",
+      "event_significance": 2,
+      "evidence_text": "His attempt to acquire CBS did not succeed.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ted_Turner",
+        "https://www.britannica.com/biography/Ted-Turner"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-03-ted-turner",
+      "event_date": "1986",
+      "event_category": "financial_event",
+      "event_type": "financial_loss",
+      "event_description": "Buys MGM/UA for $1.5 billion, leaving heavy debt; forced to sell parts back",
+      "event_significance": 2,
+      "evidence_text": "MGM purchase left heavy debt; he sold parts back to Kerkorian.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ted_Turner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-03-ted-turner",
+      "event_date": "1988",
+      "event_category": "relationship_event",
+      "event_type": "divorce",
+      "event_description": "Divorces Jane Smith",
+      "event_significance": 2,
+      "evidence_text": "Second marriage to Jane Smith ended in 1988.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ted_Turner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-03-ted-turner",
+      "event_date": "1991-12-21",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries actress Jane Fonda",
+      "event_significance": 2,
+      "evidence_text": "Turner married Jane Fonda in December 1991.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ted_Turner",
+        "https://en.wikipedia.org/wiki/Jane_Fonda"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-03-ted-turner",
+      "event_date": "1996-10-10",
+      "event_category": "financial_event",
+      "event_type": "financial_gain",
+      "event_description": "Turner Broadcasting merges with Time Warner; becomes vice chairman and top shareholder",
+      "event_significance": 3,
+      "evidence_text": "Turner Broadcasting merged into Time Warner in October 1996.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ted_Turner",
+        "https://www.britannica.com/biography/Ted-Turner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-03-ted-turner",
+      "event_date": "2001",
+      "event_category": "financial_event",
+      "event_type": "financial_loss",
+      "event_description": "AOL-Time Warner stock collapse costs him up to $7 billion; divorce from Fonda the same year",
+      "event_significance": 3,
+      "evidence_text": "Turner estimated losing as much as $7 billion after the AOL merger.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ted_Turner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-03-ted-turner",
+      "event_date": "2003",
+      "event_category": "retirement",
+      "event_type": "stepped_down",
+      "event_description": "Resigns as AOL Time Warner vice chairman",
+      "event_significance": 2,
+      "evidence_text": "He resigned as vice chairman of AOL Time Warner in 2003.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ted_Turner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-04-oprah-winfrey",
+      "event_date": "1976-06",
+      "event_category": "career_change",
+      "event_type": "new_ceo_role",
+      "event_description": "Moves to WJZ-TV Baltimore to co-anchor the evening news",
+      "event_significance": 2,
+      "evidence_text": "She joined Baltimore's WJZ-TV as six o'clock news co-anchor in 1976.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Oprah_Winfrey"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-04-oprah-winfrey",
+      "event_date": "1984-01-02",
+      "event_category": "career_change",
+      "event_type": "new_ceo_role",
+      "event_description": "Takes over AM Chicago on WLS-TV",
+      "event_significance": 2,
+      "evidence_text": "Her first AM Chicago episode aired January 2, 1984.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Oprah_Winfrey"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-04-oprah-winfrey",
+      "event_date": "1986-02",
+      "event_category": "achievement",
+      "event_type": "major_nomination",
+      "event_description": "Oscar nomination for Best Supporting Actress (The Color Purple)",
+      "event_significance": 2,
+      "evidence_text": "The Color Purple earned her an Academy Award nomination.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Oprah_Winfrey",
+        "https://www.britannica.com/biography/Oprah-Winfrey"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-04-oprah-winfrey",
+      "event_date": "1986",
+      "event_category": "career_change",
+      "event_type": "founding",
+      "event_description": "Founds Harpo Productions as chairwoman and CEO",
+      "event_significance": 3,
+      "evidence_text": "She became chairwoman and CEO of Harpo Productions in 1986.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Oprah_Winfrey",
+        "https://www.britannica.com/biography/Oprah-Winfrey"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-04-oprah-winfrey",
+      "event_date": "1986-09-08",
+      "event_category": "achievement",
+      "event_type": "product_launch_success",
+      "event_description": "The Oprah Winfrey Show goes national in syndication",
+      "event_significance": 3,
+      "evidence_text": "The show was first broadcast nationwide on September 8, 1986.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Oprah_Winfrey",
+        "https://www.britannica.com/biography/Oprah-Winfrey"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-04-oprah-winfrey",
+      "event_date": "1998-02-26",
+      "event_category": "achievement",
+      "event_type": "legal_victory",
+      "event_description": "Jury finds her not liable in Texas cattlemen beef-defamation suit",
+      "event_significance": 2,
+      "evidence_text": "A jury found Winfrey and Lyman not liable on February 26, 1998.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Oprah_Winfrey"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-04-oprah-winfrey",
+      "event_date": "1998-10",
+      "event_category": "failure",
+      "event_type": "flop",
+      "event_description": "Self-produced film Beloved flops, losing about $30 million",
+      "event_significance": 2,
+      "evidence_text": "Beloved opened poorly in October 1998, losing about $30 million.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Oprah_Winfrey",
+        "https://en.wikipedia.org/wiki/Beloved_(1998_film)"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-04-oprah-winfrey",
+      "event_date": "2003",
+      "event_category": "financial_event",
+      "event_type": "financial_gain",
+      "event_description": "Named by Forbes the first Black woman billionaire",
+      "event_significance": 3,
+      "evidence_text": "Forbes named her the first Black woman billionaire in 2003.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Oprah_Winfrey"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-04-oprah-winfrey",
+      "event_date": "2006-01",
+      "event_category": "failure",
+      "event_type": "scandal_penalty",
+      "event_description": "Book-club pick A Million Little Pieces exposed as fabricated; public backlash",
+      "event_significance": 1,
+      "evidence_text": "After fabrications surfaced she confronted author James Frey on air.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Oprah_Winfrey",
+        "https://en.wikipedia.org/wiki/A_Million_Little_Pieces"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-04-oprah-winfrey",
+      "event_date": "2011-01-01",
+      "event_category": "career_change",
+      "event_type": "founding",
+      "event_description": "Launches Oprah Winfrey Network (OWN) after delay",
+      "event_significance": 2,
+      "evidence_text": "OWN launched January 1, 2011, delayed from a planned 2009 debut.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Oprah_Winfrey",
+        "https://en.wikipedia.org/wiki/Oprah_Winfrey_Network"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-04-oprah-winfrey",
+      "event_date": "2011-05-25",
+      "event_category": "retirement",
+      "event_type": "retirement",
+      "event_description": "Ends The Oprah Winfrey Show after 25 seasons",
+      "event_significance": 3,
+      "evidence_text": "The series finale aired May 25, 2011.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Oprah_Winfrey"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-04-oprah-winfrey",
+      "event_date": "2013-11",
+      "event_category": "achievement",
+      "event_type": "major_award",
+      "event_description": "Awarded the Presidential Medal of Freedom",
+      "event_significance": 2,
+      "evidence_text": "President Obama awarded her the Presidential Medal of Freedom in 2013.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Oprah_Winfrey"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-04-oprah-winfrey",
+      "event_date": "2015-10",
+      "event_category": "financial_event",
+      "event_type": "financial_gain",
+      "event_description": "Buys about 10% stake in Weight Watchers; shares surge",
+      "event_significance": 2,
+      "evidence_text": "Her stake purchase in Weight Watchers sent its shares sharply higher.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Oprah_Winfrey",
+        "https://en.wikipedia.org/wiki/WW_International"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-05-hugh-hefner",
+      "event_date": "1949",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries Mildred Williams",
+      "event_significance": 2,
+      "evidence_text": "Hefner married Mildred Williams in 1949.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Hugh_Hefner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-05-hugh-hefner",
+      "event_date": "1952",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Daughter Christie born",
+      "event_significance": 1,
+      "evidence_text": "Daughter Christie was born in 1952.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Hugh_Hefner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-05-hugh-hefner",
+      "event_date": "1953-12",
+      "event_category": "career_change",
+      "event_type": "founding",
+      "event_description": "Launches Playboy magazine (first issue December 1953)",
+      "event_significance": 3,
+      "evidence_text": "He launched Playboy, first issue dated December 1953.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Hugh_Hefner",
+        "https://www.britannica.com/biography/Hugh-Hefner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-05-hugh-hefner",
+      "event_date": "1955",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Son David born",
+      "event_significance": 1,
+      "evidence_text": "Son David was born in 1955.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Hugh_Hefner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-05-hugh-hefner",
+      "event_date": "1959",
+      "event_category": "relationship_event",
+      "event_type": "divorce",
+      "event_description": "Divorces Mildred Williams",
+      "event_significance": 2,
+      "evidence_text": "His first marriage ended in divorce in 1959.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Hugh_Hefner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-05-hugh-hefner",
+      "event_date": "1960-02-29",
+      "event_category": "achievement",
+      "event_type": "product_launch_success",
+      "event_description": "Opens first Playboy Club in Chicago",
+      "event_significance": 2,
+      "evidence_text": "The first Playboy Club opened in Chicago in 1960.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Playboy_Club",
+        "https://www.britannica.com/biography/Hugh-Hefner"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-05-hugh-hefner",
+      "event_date": "1963-06-04",
+      "event_category": "failure",
+      "event_type": "legal_penalty",
+      "event_description": "Arrested for obscenity over nude photos; trial ends in hung jury",
+      "event_significance": 2,
+      "evidence_text": "Arrested June 4, 1963 for obscene literature; jury deadlocked.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Hugh_Hefner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-05-hugh-hefner",
+      "event_date": "1971",
+      "event_category": "financial_event",
+      "event_type": "financial_gain",
+      "event_description": "Playboy Enterprises goes public; buys Playboy Mansion West",
+      "event_significance": 2,
+      "evidence_text": "Playboy Enterprises became publicly traded in 1971.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Playboy_Enterprises",
+        "https://en.wikipedia.org/wiki/Hugh_Hefner"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-05-hugh-hefner",
+      "event_date": "1985-03-07",
+      "event_category": "health_event",
+      "event_type": "illness",
+      "event_description": "Suffers a stroke at age 58",
+      "event_significance": 2,
+      "evidence_text": "Hefner had a minor stroke on March 7, 1985.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Hugh_Hefner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-05-hugh-hefner",
+      "event_date": "1988",
+      "event_category": "retirement",
+      "event_type": "stepped_down",
+      "event_description": "Steps back; daughter Christie takes over Playboy operations",
+      "event_significance": 2,
+      "evidence_text": "Christie Hefner took over the company's operations in 1988.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Hugh_Hefner",
+        "https://en.wikipedia.org/wiki/Christie_Hefner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-05-hugh-hefner",
+      "event_date": "1989",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries Kimberley Conrad",
+      "event_significance": 2,
+      "evidence_text": "He married Playmate Kimberley Conrad in 1989.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Hugh_Hefner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-05-hugh-hefner",
+      "event_date": "1990",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Son Marston born",
+      "event_significance": 1,
+      "evidence_text": "Son Marston Glenn was born in 1990.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Hugh_Hefner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-05-hugh-hefner",
+      "event_date": "1991",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Son Cooper born",
+      "event_significance": 1,
+      "evidence_text": "Son Cooper was born in 1991.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Hugh_Hefner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-05-hugh-hefner",
+      "event_date": "1998",
+      "event_category": "relationship_event",
+      "event_type": "divorce",
+      "event_description": "Separates from Kimberley Conrad (divorce final 2010)",
+      "event_significance": 2,
+      "evidence_text": "He separated from Conrad in 1998; divorce finalized in 2010.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Hugh_Hefner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-05-hugh-hefner",
+      "event_date": "2012-12-31",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries Crystal Harris",
+      "event_significance": 1,
+      "evidence_text": "He married Crystal Harris on December 31, 2012.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Hugh_Hefner"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-06-john-delorean",
+      "event_date": "1954-09-03",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries Elizabeth Higgins",
+      "event_significance": 2,
+      "evidence_text": "DeLorean married Elizabeth Higgins in September 1954.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/John_DeLorean"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-06-john-delorean",
+      "event_date": "1956",
+      "event_category": "career_change",
+      "event_type": "new_ceo_role",
+      "event_description": "Joins Pontiac division of General Motors",
+      "event_significance": 2,
+      "evidence_text": "He joined GM's Pontiac division in 1956.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/John_DeLorean"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-06-john-delorean",
+      "event_date": "1964",
+      "event_category": "achievement",
+      "event_type": "product_launch_success",
+      "event_description": "Pontiac GTO debuts, credited as first muscle car",
+      "event_significance": 2,
+      "evidence_text": "The GTO debuted in 1964 as a Tempest/LeMans option package.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/John_DeLorean",
+        "https://en.wikipedia.org/wiki/Pontiac_GTO"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-06-john-delorean",
+      "event_date": "1965",
+      "event_category": "achievement",
+      "event_type": "company_success",
+      "event_description": "Promoted to general manager of Pontiac",
+      "event_significance": 2,
+      "evidence_text": "He was promoted to head of the Pontiac division in 1965.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/John_DeLorean"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-06-john-delorean",
+      "event_date": "1969-02-15",
+      "event_category": "career_change",
+      "event_type": "new_ceo_role",
+      "event_description": "Named head of Chevrolet division",
+      "event_significance": 2,
+      "evidence_text": "In February 1969 he was promoted to run Chevrolet.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/John_DeLorean"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-06-john-delorean",
+      "event_date": "1969",
+      "event_category": "relationship_event",
+      "event_type": "divorce",
+      "event_description": "Divorces Elizabeth Higgins; marries Kelly Harmon (May 31)",
+      "event_significance": 2,
+      "evidence_text": "First marriage ended 1969; he married Kelly Harmon May 31, 1969.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/John_DeLorean"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-06-john-delorean",
+      "event_date": "1973-04-02",
+      "event_category": "retirement",
+      "event_type": "stepped_down",
+      "event_description": "Announces departure from General Motors",
+      "event_significance": 3,
+      "evidence_text": "He announced his departure from GM on April 2, 1973.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/John_DeLorean"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-06-john-delorean",
+      "event_date": "1973",
+      "event_category": "career_change",
+      "event_type": "founding",
+      "event_description": "Founds DeLorean Motor Company; marries Cristina Ferrare",
+      "event_significance": 3,
+      "evidence_text": "He founded DeLorean Motor Company and married Cristina Ferrare in 1973.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/John_DeLorean",
+        "https://en.wikipedia.org/wiki/DeLorean_Motor_Company"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-06-john-delorean",
+      "event_date": "1981-01",
+      "event_category": "achievement",
+      "event_type": "product_launch_success",
+      "event_description": "DMC DeLorean sports car reaches consumers",
+      "event_significance": 2,
+      "evidence_text": "The DMC DeLorean reached the consumer market in January 1981.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/John_DeLorean",
+        "https://en.wikipedia.org/wiki/DMC_DeLorean"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-06-john-delorean",
+      "event_date": "1982-02",
+      "event_category": "financial_event",
+      "event_type": "financial_loss",
+      "event_description": "DeLorean Motor Company and Belfast factory placed in receivership",
+      "event_significance": 3,
+      "evidence_text": "DMC and its Dunmurry factory went into receivership in February 1982.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/John_DeLorean",
+        "https://en.wikipedia.org/wiki/DeLorean_Motor_Company"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-06-john-delorean",
+      "event_date": "1982-10-19",
+      "event_category": "failure",
+      "event_type": "legal_penalty",
+      "event_description": "Arrested in FBI cocaine-trafficking sting",
+      "event_significance": 3,
+      "evidence_text": "He was charged with cocaine trafficking after an FBI sting.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/John_DeLorean"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-06-john-delorean",
+      "event_date": "1984-08-16",
+      "event_category": "achievement",
+      "event_type": "legal_victory",
+      "event_description": "Acquitted of drug-trafficking charges (entrapment defense)",
+      "event_significance": 2,
+      "evidence_text": "A jury found him not guilty of trafficking on August 16, 1984.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/John_DeLorean"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-06-john-delorean",
+      "event_date": "1985",
+      "event_category": "relationship_event",
+      "event_type": "divorce",
+      "event_description": "Divorces Cristina Ferrare; indicted for fraud Sept 1985 (later acquitted)",
+      "event_significance": 2,
+      "evidence_text": "Ferrare divorce in 1985; fraud indictment September 1985, later acquitted.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/John_DeLorean"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-06-john-delorean",
+      "event_date": "1999",
+      "event_category": "financial_event",
+      "event_type": "financial_loss",
+      "event_description": "Declares personal bankruptcy; forced to sell New Jersey estate in 2000",
+      "event_significance": 2,
+      "evidence_text": "He declared personal bankruptcy in 1999 and sold his Bedminster estate.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/John_DeLorean"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-06-john-delorean",
+      "event_date": "2002-02-19",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Daughter born to Sally Baldwin; marries Baldwin in 2002",
+      "event_significance": 1,
+      "evidence_text": "A daughter was born to Sally Baldwin in 2002; they married.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/John_DeLorean"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-07-leona-helmsley",
+      "event_date": "1938",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries attorney Leo Panzirer",
+      "event_significance": 2,
+      "evidence_text": "She married first husband Leo Panzirer in 1938.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Leona_Helmsley"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-07-leona-helmsley",
+      "event_date": "1952",
+      "event_category": "relationship_event",
+      "event_type": "divorce",
+      "event_description": "Divorces Leo Panzirer",
+      "event_significance": 2,
+      "evidence_text": "Her marriage to Panzirer ended in divorce in 1952.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Leona_Helmsley"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-07-leona-helmsley",
+      "event_date": "1970",
+      "event_category": "career_change",
+      "event_type": "new_ceo_role",
+      "event_description": "Joins Brown Harris Stevens as senior vice-president",
+      "event_significance": 2,
+      "evidence_text": "She joined Harry Helmsley's firm Brown Harris Stevens as senior VP.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Leona_Helmsley"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-07-leona-helmsley",
+      "event_date": "1971",
+      "event_category": "failure",
+      "event_type": "legal_penalty",
+      "event_description": "Tenants win suit over forced condo purchases; real estate license suspended",
+      "event_significance": 2,
+      "evidence_text": "Tenants sued and won; her real estate license was suspended.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Leona_Helmsley"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-07-leona-helmsley",
+      "event_date": "1972-04-08",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries real estate magnate Harry Helmsley",
+      "event_significance": 3,
+      "evidence_text": "She married Harry Helmsley on April 8, 1972.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Leona_Helmsley"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-07-leona-helmsley",
+      "event_date": "1980",
+      "event_category": "achievement",
+      "event_type": "company_success",
+      "event_description": "Becomes public face of Helmsley Hotels ad campaign, running the hotel chain",
+      "event_significance": 2,
+      "evidence_text": "She ran Harry's hotel empire, controlling 23 hotels by 1989.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Leona_Helmsley"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-07-leona-helmsley",
+      "event_date": "1988-04",
+      "event_category": "failure",
+      "event_type": "legal_penalty",
+      "event_description": "Indicted with Harry Helmsley on federal tax evasion and extortion charges",
+      "event_significance": 3,
+      "evidence_text": "U.S. Attorney Giuliani indicted the Helmsleys on tax and extortion charges.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Leona_Helmsley"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-07-leona-helmsley",
+      "event_date": "1989-08-30",
+      "event_category": "failure",
+      "event_type": "legal_penalty",
+      "event_description": "Convicted of federal tax evasion and fraud (acquitted of extortion)",
+      "event_significance": 3,
+      "evidence_text": "Convicted August 30, 1989 on tax and fraud counts.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Leona_Helmsley"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-07-leona-helmsley",
+      "event_date": "1989-12",
+      "event_category": "financial_event",
+      "event_type": "financial_loss",
+      "event_description": "Sentenced to four years in prison and $7.1 million fine",
+      "event_significance": 2,
+      "evidence_text": "She received a four-year sentence and multimillion-dollar fine.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Leona_Helmsley"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-07-leona-helmsley",
+      "event_date": "1992-04-15",
+      "event_category": "failure",
+      "event_type": "legal_penalty",
+      "event_description": "Reports to federal prison",
+      "event_significance": 3,
+      "evidence_text": "She was ordered to report to prison April 15, 1992.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Leona_Helmsley"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-07-leona-helmsley",
+      "event_date": "1994-01-26",
+      "event_category": "career_change",
+      "event_type": "restructuring",
+      "event_description": "Released from federal custody",
+      "event_significance": 2,
+      "evidence_text": "She was released from custody on January 26, 1994.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Leona_Helmsley"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-07-leona-helmsley",
+      "event_date": "1997",
+      "event_category": "financial_event",
+      "event_type": "financial_gain",
+      "event_description": "Inherits Harry Helmsley's fortune on his death",
+      "event_significance": 3,
+      "evidence_text": "Harry died in 1997, leaving her his fortune.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Leona_Helmsley"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-07-leona-helmsley",
+      "event_date": "2002",
+      "event_category": "financial_event",
+      "event_type": "financial_loss",
+      "event_description": "Jury awards $11.2 million to fired employee in discrimination suit (later reduced)",
+      "event_significance": 1,
+      "evidence_text": "Jury awarded ex-employee $11.2 million, later cut to $554,000.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Leona_Helmsley"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-08-michael-milken",
+      "event_date": "1968",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries Lori Hackel; graduates UC Berkeley",
+      "event_significance": 2,
+      "evidence_text": "He graduated from Berkeley and married Lori Hackel in 1968.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Milken"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-08-michael-milken",
+      "event_date": "1978",
+      "event_category": "career_change",
+      "event_type": "new_ceo_role",
+      "event_description": "Moves Drexel high-yield bond operation to Century City, Los Angeles",
+      "event_significance": 2,
+      "evidence_text": "He relocated Drexel's high-yield bond department to Los Angeles in 1978.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Milken"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-08-michael-milken",
+      "event_date": "1987",
+      "event_category": "financial_event",
+      "event_type": "financial_gain",
+      "event_description": "Peak Drexel compensation; earnings exceeded $1 billion over four years",
+      "event_significance": 2,
+      "evidence_text": "His late-1980s compensation exceeded $1 billion over four years.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Milken"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-08-michael-milken",
+      "event_date": "1986-11",
+      "event_category": "failure",
+      "event_type": "scandal_penalty",
+      "event_description": "Implicated by Ivan Boesky's guilty plea, triggering SEC and criminal probes",
+      "event_significance": 2,
+      "evidence_text": "Boesky's plea implicated Milken, prompting SEC and criminal investigations.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Milken"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-08-michael-milken",
+      "event_date": "1989-03",
+      "event_category": "failure",
+      "event_type": "legal_penalty",
+      "event_description": "Indicted on 98 counts of racketeering and securities fraud",
+      "event_significance": 3,
+      "evidence_text": "A federal grand jury indicted Milken on 98 counts in March 1989.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Milken"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-08-michael-milken",
+      "event_date": "1989-06",
+      "event_category": "retirement",
+      "event_type": "stepped_down",
+      "event_description": "Leaves Drexel Burnham Lambert",
+      "event_significance": 2,
+      "evidence_text": "Milken departed Drexel in 1989 after his indictment.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Milken",
+        "https://en.wikipedia.org/wiki/Drexel_Burnham_Lambert"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-08-michael-milken",
+      "event_date": "1990-04-24",
+      "event_category": "financial_event",
+      "event_type": "financial_loss",
+      "event_description": "Pleads guilty to six counts; agrees to about $600 million in fines and settlements",
+      "event_significance": 3,
+      "evidence_text": "He pleaded guilty to six securities and tax counts in April 1990.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Milken"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-08-michael-milken",
+      "event_date": "1990-11",
+      "event_category": "failure",
+      "event_type": "legal_penalty",
+      "event_description": "Sentenced to ten years in prison (later reduced to two)",
+      "event_significance": 3,
+      "evidence_text": "Sentenced to ten years, later reduced; he served 22 months.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Milken"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-08-michael-milken",
+      "event_date": "1993",
+      "event_category": "health_event",
+      "event_type": "illness",
+      "event_description": "Released from prison; diagnosed with prostate cancer the same month",
+      "event_significance": 3,
+      "evidence_text": "Released in 1993, then diagnosed with prostate cancer that month.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Milken"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-08-michael-milken",
+      "event_date": "1993",
+      "event_category": "career_change",
+      "event_type": "founding",
+      "event_description": "Founds Prostate Cancer Foundation (philanthropy career)",
+      "event_significance": 2,
+      "evidence_text": "He founded the Prostate Cancer Foundation after his diagnosis.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Milken"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-08-michael-milken",
+      "event_date": "1996",
+      "event_category": "career_change",
+      "event_type": "founding",
+      "event_description": "Co-founds Knowledge Universe education company with brother Lowell",
+      "event_significance": 2,
+      "evidence_text": "He co-founded Knowledge Universe with his brother in 1996.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Milken"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-08-michael-milken",
+      "event_date": "2013-02",
+      "event_category": "failure",
+      "event_type": "legal_penalty",
+      "event_description": "SEC investigates possible violation of his lifetime securities-industry ban",
+      "event_significance": 1,
+      "evidence_text": "SEC announced a probe into whether he breached his lifetime ban.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Milken"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-08-michael-milken",
+      "event_date": "2020-02-18",
+      "event_category": "achievement",
+      "event_type": "legal_victory",
+      "event_description": "Receives full presidential pardon from Donald Trump",
+      "event_significance": 2,
+      "evidence_text": "Trump granted Milken a full pardon on February 18, 2020.",
+      "evidence_urls": [
+        "https://www.bloomberg.com/news/articles/2020-02-18/junk-bond-king-michael-milken-wins-redemption-with-trump-pardon",
+        "https://www.pbs.org/newshour/politics/trump-commutes-blagojevich-sentence-pardons-others"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "B"
+    },
+    {
+      "person_id": "p2-business-09-chung-ju-yung",
+      "event_date": "1936",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries Byun Joong-seok",
+      "event_significance": 2,
+      "evidence_text": "He married Byun Joong-seok after meeting her in late 1935.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Chung_Ju-yung",
+        "https://ko.wikipedia.org/wiki/%EC%A0%95%EC%A3%BC%EC%98%81"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-09-chung-ju-yung",
+      "event_date": "1938",
+      "event_category": "career_change",
+      "event_type": "founding",
+      "event_description": "Takes over a rice store, renamed Kyungil Rice Store",
+      "event_significance": 2,
+      "evidence_text": "A store owner handed him the rice shop, renamed Kyungil.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Chung_Ju-yung",
+        "https://ko.wikipedia.org/wiki/%EC%A0%95%EC%A3%BC%EC%98%81"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-09-chung-ju-yung",
+      "event_date": "1939",
+      "event_category": "failure",
+      "event_type": "venture_failed",
+      "event_description": "Loses rice store under colonial rice-trade restrictions",
+      "event_significance": 2,
+      "evidence_text": "Colonial controls on Korean rice shops cost him the store.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Chung_Ju-yung"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-09-chung-ju-yung",
+      "event_date": "1940",
+      "event_category": "career_change",
+      "event_type": "founding",
+      "event_description": "Starts A-do Service auto repair garage with borrowed 3,000 won",
+      "event_significance": 2,
+      "evidence_text": "He started A-do Service Garage in Seoul with a loan.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Chung_Ju-yung",
+        "https://ko.wikipedia.org/wiki/%EC%A0%95%EC%A3%BC%EC%98%81"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-09-chung-ju-yung",
+      "event_date": "1941",
+      "event_category": "financial_event",
+      "event_type": "financial_loss",
+      "event_description": "A-do Service garage destroyed by fire",
+      "event_significance": 2,
+      "evidence_text": "The A-do Service factory burned down in 1941.",
+      "evidence_urls": [
+        "https://ko.wikipedia.org/wiki/%EC%A0%95%EC%A3%BC%EC%98%81"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-09-chung-ju-yung",
+      "event_date": "1943",
+      "event_category": "failure",
+      "event_type": "venture_failed",
+      "event_description": "Garage forcibly merged into a steel plant by colonial authorities",
+      "event_significance": 2,
+      "evidence_text": "Authorities forced the garage into a merger; he returned home.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Chung_Ju-yung"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-09-chung-ju-yung",
+      "event_date": "1947-05",
+      "event_category": "career_change",
+      "event_type": "founding",
+      "event_description": "Founds Hyundai Togeon (construction), after Hyundai Auto Service in 1946",
+      "event_significance": 3,
+      "evidence_text": "He founded Hyundai Auto Service in 1946 and Hyundai Togeon in 1947.",
+      "evidence_urls": [
+        "https://ko.wikipedia.org/wiki/%EC%A0%95%EC%A3%BC%EC%98%81",
+        "https://en.wikipedia.org/wiki/Chung_Ju-yung"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-09-chung-ju-yung",
+      "event_date": "1967-12",
+      "event_category": "career_change",
+      "event_type": "founding",
+      "event_description": "Founds Hyundai Motor Company",
+      "event_significance": 3,
+      "evidence_text": "Hyundai Motor Company was established in December 1967.",
+      "evidence_urls": [
+        "https://ko.wikipedia.org/wiki/%EC%A0%95%EC%A3%BC%EC%98%81",
+        "https://en.wikipedia.org/wiki/Hyundai_Motor_Company"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-09-chung-ju-yung",
+      "event_date": "1972",
+      "event_category": "career_change",
+      "event_type": "founding",
+      "event_description": "Founds Hyundai shipbuilding (Ulsan shipyard), later Hyundai Heavy Industries",
+      "event_significance": 3,
+      "evidence_text": "He founded Hyundai Shipbuilding with headquarters at the Ulsan shipyard.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Chung_Ju-yung",
+        "https://en.wikipedia.org/wiki/HD_Hyundai_Heavy_Industries"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-09-chung-ju-yung",
+      "event_date": "1976-02",
+      "event_category": "financial_event",
+      "event_type": "financial_gain",
+      "event_description": "Hyundai Construction wins Jubail Industrial Harbour contract in Saudi Arabia (~$930M)",
+      "event_significance": 3,
+      "evidence_text": "Hyundai won the Jubail harbour project, Korea's landmark overseas contract.",
+      "evidence_urls": [
+        "https://encykorea.aks.ac.kr/Article/E0025843",
+        "https://www.mt.co.kr/estate/2007/11/21/2007111919452658992"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-09-chung-ju-yung",
+      "event_date": "1976",
+      "event_category": "achievement",
+      "event_type": "product_launch_success",
+      "event_description": "Hyundai Pony, Korea's first mass-produced domestic car, introduced",
+      "event_significance": 2,
+      "evidence_text": "He introduced the Hyundai Pony in 1976.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Chung_Ju-yung",
+        "https://en.wikipedia.org/wiki/Hyundai_Pony"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-09-chung-ju-yung",
+      "event_date": "1981-11",
+      "event_category": "achievement",
+      "event_type": "company_success",
+      "event_description": "Leads successful bid for the 1988 Seoul Olympics",
+      "event_significance": 2,
+      "evidence_text": "Seoul's 1988 Olympic bid was confirmed in 1981 under his leadership.",
+      "evidence_urls": [
+        "https://ko.wikipedia.org/wiki/%EC%A0%95%EC%A3%BC%EC%98%81"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-09-chung-ju-yung",
+      "event_date": "1987-02",
+      "event_category": "retirement",
+      "event_type": "stepped_down",
+      "event_description": "Steps back to honorary chairman of Hyundai Group",
+      "event_significance": 2,
+      "evidence_text": "He became honorary chairman of Hyundai Group in February 1987.",
+      "evidence_urls": [
+        "https://ko.wikipedia.org/wiki/%EC%A0%95%EC%A3%BC%EC%98%81"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-09-chung-ju-yung",
+      "event_date": "1992-12",
+      "event_category": "failure",
+      "event_type": "defeat_final",
+      "event_description": "Runs for president as Unification National Party candidate, finishes third",
+      "event_significance": 3,
+      "evidence_text": "He ran for president in 1992 and finished third.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Chung_Ju-yung",
+        "https://ko.wikipedia.org/wiki/%EC%A0%95%EC%A3%BC%EC%98%81"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-09-chung-ju-yung",
+      "event_date": "1998-06-16",
+      "event_category": "achievement",
+      "event_type": "company_success",
+      "event_description": "Crosses into North Korea with 500 cattle via Panmunjom",
+      "event_significance": 2,
+      "evidence_text": "He crossed to North Korea with 500 head of cattle in June 1998.",
+      "evidence_urls": [
+        "https://ko.wikipedia.org/wiki/%EC%A0%95%EC%A3%BC%EC%98%81"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-10-kim-woo-choong",
+      "event_date": "1965-09-17",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Eldest daughter Kim Sun-jung born",
+      "event_significance": 1,
+      "evidence_text": "Eldest daughter Kim Sun-jung was born in September 1965.",
+      "evidence_urls": [
+        "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-10-kim-woo-choong",
+      "event_date": "1967-03",
+      "event_category": "career_change",
+      "event_type": "founding",
+      "event_description": "Founds Daewoo Industrial textile trading firm with 5 million won",
+      "event_significance": 3,
+      "evidence_text": "He co-founded Daewoo Industrial in March 1967 with 5 million won.",
+      "evidence_urls": [
+        "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91",
+        "https://en.wikipedia.org/wiki/Kim_Woo-choong"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-10-kim-woo-choong",
+      "event_date": "1967-01-07",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Eldest son Kim Sun-jae born",
+      "event_significance": 1,
+      "evidence_text": "Eldest son Kim Sun-jae was born in January 1967.",
+      "evidence_urls": [
+        "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-10-kim-woo-choong",
+      "event_date": "1970",
+      "event_category": "career_change",
+      "event_type": "new_ceo_role",
+      "event_description": "Becomes president and CEO of Daewoo Industrial",
+      "event_significance": 2,
+      "evidence_text": "He took office as Daewoo Industrial president in 1970.",
+      "evidence_urls": [
+        "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-10-kim-woo-choong",
+      "event_date": "1982-01",
+      "event_category": "achievement",
+      "event_type": "company_success",
+      "event_description": "Daewoo Corporation launched; becomes Daewoo Group chairman",
+      "event_significance": 2,
+      "evidence_text": "Daewoo Corporation launched in 1982 with him as group chairman.",
+      "evidence_urls": [
+        "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-10-kim-woo-choong",
+      "event_date": "1989-08",
+      "event_category": "achievement",
+      "event_type": "product_launch_success",
+      "event_description": "Memoir \"The World Is Wide and There Is Much to Do\" sells over a million copies",
+      "event_significance": 2,
+      "evidence_text": "His 1989 essay book sold over a million copies in six months.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Kim_Woo-choong",
+        "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-10-kim-woo-choong",
+      "event_date": "1998",
+      "event_category": "career_change",
+      "event_type": "new_ceo_role",
+      "event_description": "Becomes chairman of the Federation of Korean Industries",
+      "event_significance": 2,
+      "evidence_text": "He became chairman of the Federation of Korean Industries in 1998.",
+      "evidence_urls": [
+        "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-10-kim-woo-choong",
+      "event_date": "1998-10",
+      "event_category": "failure",
+      "event_type": "venture_failed",
+      "event_description": "Daewoo liquidity crisis erupts after Asian financial crisis",
+      "event_significance": 2,
+      "evidence_text": "A late-1998 broker report triggered Daewoo's deepening crisis.",
+      "evidence_urls": [
+        "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91",
+        "https://en.wikipedia.org/wiki/Kim_Woo-choong"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-10-kim-woo-choong",
+      "event_date": "1999-11-01",
+      "event_category": "financial_event",
+      "event_type": "financial_loss",
+      "event_description": "Daewoo Group collapses with about $50 billion debt; resigns as chairman",
+      "event_significance": 3,
+      "evidence_text": "Daewoo went bankrupt with about $50 billion in debt; he stepped down.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Kim_Woo-choong",
+        "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91",
+        "https://en.wikipedia.org/wiki/Daewoo"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-10-kim-woo-choong",
+      "event_date": "1999",
+      "event_category": "career_change",
+      "event_type": "restructuring",
+      "event_description": "Leaves Korea, living abroad for about five years to avoid prosecution",
+      "event_significance": 2,
+      "evidence_text": "He fled abroad, mainly Vietnam, for nearly six years.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Kim_Woo-choong",
+        "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-10-kim-woo-choong",
+      "event_date": "2005-06-14",
+      "event_category": "failure",
+      "event_type": "legal_penalty",
+      "event_description": "Arrested on return to South Korea",
+      "event_significance": 3,
+      "evidence_text": "He was arrested after returning to Korea on June 14, 2005.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Kim_Woo-choong",
+        "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-10-kim-woo-choong",
+      "event_date": "2006-05",
+      "event_category": "failure",
+      "event_type": "legal_penalty",
+      "event_description": "Convicted of embezzlement and accounting fraud; 10-year sentence (8.5 years on appeal)",
+      "event_significance": 3,
+      "evidence_text": "Sentenced to ten years for fraud, reduced to 8.5 on appeal.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Kim_Woo-choong",
+        "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-10-kim-woo-choong",
+      "event_date": "2006-11-03",
+      "event_category": "financial_event",
+      "event_type": "financial_loss",
+      "event_description": "Appeal court confirms forfeiture of about 17.9 trillion won",
+      "event_significance": 2,
+      "evidence_text": "Appeal ruling ordered forfeiture of roughly 17.9 trillion won.",
+      "evidence_urls": [
+        "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-business-10-kim-woo-choong",
+      "event_date": "2007-12-31",
+      "event_category": "achievement",
+      "event_type": "legal_victory",
+      "event_description": "Receives special presidential pardon",
+      "event_significance": 2,
+      "evidence_text": "President Roh Moo-hyun granted him a special pardon.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Kim_Woo-choong",
+        "https://ko.wikipedia.org/wiki/%EA%B9%80%EC%9A%B0%EC%A4%91"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    }
+  ]
+}

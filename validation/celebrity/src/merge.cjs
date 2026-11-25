@@ -27,7 +27,8 @@ for (const f of files) {
     if (p.birth_time && p.birth_time_confidence === 'unknown') pi.push('시간 미상인데 출생시간 값이 있음 → 무시');
     if ((p.birth_time_confidence === 'verified' || p.birth_time_confidence === 'reported') && !p.birth_time_source) pi.push('출생시간 출처 없음 → 시간 미상으로 처리');
     if (!(p.source_urls || []).length) pi.push('출생 정보 출처 URL 없음');
-    const excluded = pi.some(x => /형식 오류|성별 없음|시간대|경도 없음|id·이름/.test(x));
+    if (okDate(p.birth_date) && (+String(p.birth_date).slice(0, 4) < 1900 || +String(p.birth_date).slice(0, 4) > 2100)) pi.push('엔진 지원 범위 밖 출생 연도(1900~2100년만 계산, 서비스도 같음) → 분석 제외');   // 2026-11-25 2차에서 추가, 1차 30명은 모두 범위 안
+    const excluded = pi.some(x => /형식 오류|성별 없음|시간대|경도 없음|id·이름|범위 밖/.test(x));
     const conf = (p.birth_time_confidence === 'verified' || p.birth_time_confidence === 'reported') && p.birth_time_source && p.birth_time ? p.birth_time_confidence : 'unknown';
     const split = (crypto.createHash('sha256').update(String(p.id)).digest()[0] % 2 === 0) ? 'dev' : 'test';
     persons.push({ id: p.id, name: p.name, name_ko: p.name_ko || '', gender: p.gender, birth_date: p.birth_date, birth_time: conf === 'unknown' ? null : p.birth_time,

@@ -1,0 +1,2051 @@
+{
+  "group": "sports",
+  "collected_at": "2026-11-25",
+  "notes": "Blind collection: no saju/fortune computed. Wikipedia event/person page URLs checked to exist via Wikipedia API on collection date. source_grade C = single reputable source (Wikipedia with cited articles); A = official Olympic record (olympics.com).",
+  "persons": [
+    {
+      "id": "p2-sports-01-pele",
+      "name": "Pelé",
+      "name_ko": "펠레",
+      "gender": "M",
+      "birth_date": "1940-10-21",
+      "birth_time": "03:00",
+      "birth_time_confidence": "verified",
+      "birth_time_source": "Astro-Databank Rodden AA (BC/BR in hand, collector Borges), 03:00 BZT h3w standard time; read via built-in browser",
+      "birth_place": {
+        "city": "Três Corações",
+        "country": "Brazil",
+        "lon": -45.2525,
+        "tz": "America/Sao_Paulo"
+      },
+      "profession": "sports",
+      "profession_detail": "football forward (Santos, New York Cosmos, Brazil)",
+      "death_date": "2022-12-29",
+      "source_urls": [
+        "https://www.astro.com/astro-databank/Pelé",
+        "https://en.wikipedia.org/wiki/Pel%C3%A9"
+      ]
+    },
+    {
+      "id": "p2-sports-02-ayrton-senna",
+      "name": "Ayrton Senna",
+      "name_ko": "아일톤 세나",
+      "gender": "M",
+      "birth_date": "1960-03-21",
+      "birth_time": "02:35",
+      "birth_time_confidence": "verified",
+      "birth_time_source": "Astro-Databank Rodden AA (quoted BC/BR, collector Borges), 02:35 BZT h3w standard time; read via built-in browser",
+      "birth_place": {
+        "city": "São Paulo",
+        "country": "Brazil",
+        "lon": -46.6247,
+        "tz": "America/Sao_Paulo"
+      },
+      "profession": "sports",
+      "profession_detail": "Formula One driver (Toleman, Lotus, McLaren, Williams)",
+      "death_date": "1994-05-01",
+      "source_urls": [
+        "https://www.astro.com/astro-databank/Senna,_Ayrton",
+        "https://en.wikipedia.org/wiki/Ayrton_Senna"
+      ]
+    },
+    {
+      "id": "p2-sports-03-boris-becker",
+      "name": "Boris Becker",
+      "name_ko": "보리스 베커",
+      "gender": "M",
+      "birth_date": "1967-11-22",
+      "birth_time": "08:45",
+      "birth_time_confidence": "verified",
+      "birth_time_source": "Astro-Databank Rodden AA (quoted BC/BR, collector March), 08:45 MET h1e standard time; read via built-in browser",
+      "birth_place": {
+        "city": "Leimen",
+        "country": "Germany",
+        "lon": 8.6833,
+        "tz": "Europe/Berlin"
+      },
+      "profession": "sports",
+      "profession_detail": "tennis player (6 Grand Slam singles titles)",
+      "death_date": null,
+      "source_urls": [
+        "https://www.astro.com/astro-databank/Becker,_Boris",
+        "https://en.wikipedia.org/wiki/Boris_Becker"
+      ]
+    },
+    {
+      "id": "p2-sports-04-monica-seles",
+      "name": "Monica Seles",
+      "name_ko": "모니카 셀레스",
+      "gender": "F",
+      "birth_date": "1973-12-02",
+      "birth_time": "05:00",
+      "birth_time_confidence": "reported",
+      "birth_time_source": "Astro-Databank Rodden A (from memory, collector Rodden), 05:00 MET h1e standard time; read via built-in browser",
+      "birth_place": {
+        "city": "Novi Sad",
+        "country": "Serbia",
+        "lon": 19.8333,
+        "tz": "Europe/Belgrade"
+      },
+      "profession": "sports",
+      "profession_detail": "tennis player (9 Grand Slam singles titles)",
+      "death_date": null,
+      "source_urls": [
+        "https://www.astro.com/astro-databank/Seles,_Monica",
+        "https://en.wikipedia.org/wiki/Monica_Seles"
+      ]
+    },
+    {
+      "id": "p2-sports-05-martina-navratilova",
+      "name": "Martina Navratilova",
+      "name_ko": "마르티나 나브라틸로바",
+      "gender": "F",
+      "birth_date": "1956-10-18",
+      "birth_time": "16:40",
+      "birth_time_confidence": "reported",
+      "birth_time_source": "Astro-Databank Rodden A (from memory, collector Clifford), 16:40 MET h1e standard time; read via built-in browser",
+      "birth_place": {
+        "city": "Prague",
+        "country": "Czech Republic",
+        "lon": 14.4333,
+        "tz": "Europe/Prague"
+      },
+      "profession": "sports",
+      "profession_detail": "tennis player (18 Grand Slam singles titles)",
+      "death_date": null,
+      "source_urls": [
+        "https://www.astro.com/astro-databank/Navratilova,_Martina",
+        "https://en.wikipedia.org/wiki/Martina_Navratilova"
+      ]
+    },
+    {
+      "id": "p2-sports-06-nadia-comaneci",
+      "name": "Nadia Comăneci",
+      "name_ko": "나디아 코마네치",
+      "gender": "F",
+      "birth_date": "1961-11-12",
+      "birth_time": "10:00",
+      "birth_time_confidence": "reported",
+      "birth_time_source": "Astro-Databank Rodden A (from memory, collector Taglilatelo), 10:00 EET h2e standard time; place listed as Gheorghe Gheorghiu-Dej (now Onești); read via built-in browser",
+      "birth_place": {
+        "city": "Onești (then Gheorghe Gheorghiu-Dej)",
+        "country": "Romania",
+        "lon": 26.7333,
+        "tz": "Europe/Bucharest"
+      },
+      "profession": "sports",
+      "profession_detail": "artistic gymnast (5 Olympic golds)",
+      "death_date": null,
+      "source_urls": [
+        "https://www.astro.com/astro-databank/Comaneci,_Nadia",
+        "https://en.wikipedia.org/wiki/Nadia_Com%C4%83neci",
+        "https://www.olympics.com/en/athletes/nadia-comaneci"
+      ]
+    },
+    {
+      "id": "p2-sports-07-mike-tyson",
+      "name": "Mike Tyson",
+      "name_ko": "마이크 타이슨",
+      "gender": "M",
+      "birth_date": "1966-06-30",
+      "birth_time": null,
+      "birth_time_confidence": "unknown",
+      "birth_time_source": "Astro-Databank Rodden X (date without time; ADB lists Catskill NY as place, Wikipedia gives Cumberland Hospital, Brooklyn); no time used",
+      "birth_place": {
+        "city": "Brooklyn, New York",
+        "country": "USA",
+        "lon": -73.9442,
+        "tz": "America/New_York"
+      },
+      "profession": "sports",
+      "profession_detail": "heavyweight boxer",
+      "death_date": null,
+      "source_urls": [
+        "https://www.astro.com/astro-databank/Tyson,_Mike",
+        "https://en.wikipedia.org/wiki/Mike_Tyson"
+      ]
+    },
+    {
+      "id": "p2-sports-08-michael-schumacher",
+      "name": "Michael Schumacher",
+      "name_ko": "미하엘 슈마허",
+      "gender": "M",
+      "birth_date": "1969-01-03",
+      "birth_time": null,
+      "birth_time_confidence": "unknown",
+      "birth_time_source": "Astro-Databank Rodden C (13:43, original source not known) -> below A, birth_time set to null per protocol",
+      "birth_place": {
+        "city": "Hürth",
+        "country": "Germany",
+        "lon": 6.85,
+        "tz": "Europe/Berlin"
+      },
+      "profession": "sports",
+      "profession_detail": "Formula One driver (7 world titles; Jordan, Benetton, Ferrari, Mercedes)",
+      "death_date": null,
+      "source_urls": [
+        "https://www.astro.com/astro-databank/Schumacher,_Michael",
+        "https://en.wikipedia.org/wiki/Michael_Schumacher"
+      ]
+    },
+    {
+      "id": "p2-sports-09-pak-se-ri",
+      "name": "Pak Se-ri",
+      "name_ko": "박세리",
+      "gender": "F",
+      "birth_date": "1977-09-28",
+      "birth_time": null,
+      "birth_time_confidence": "unknown",
+      "birth_time_source": "No Astro-Databank entry found (404 on name variants); no public birth time",
+      "birth_place": {
+        "city": "Daejeon",
+        "country": "South Korea",
+        "lon": 127.3845,
+        "tz": "Asia/Seoul"
+      },
+      "profession": "sports",
+      "profession_detail": "professional golfer (LPGA, 5 majors)",
+      "death_date": null,
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Pak_Se-ri"
+      ]
+    },
+    {
+      "id": "p2-sports-10-son-heung-min",
+      "name": "Son Heung-min",
+      "name_ko": "손흥민",
+      "gender": "M",
+      "birth_date": "1992-07-08",
+      "birth_time": null,
+      "birth_time_confidence": "unknown",
+      "birth_time_source": "No Astro-Databank entry found (404 on name variants); no public birth time",
+      "birth_place": {
+        "city": "Chuncheon",
+        "country": "South Korea",
+        "lon": 127.7298,
+        "tz": "Asia/Seoul"
+      },
+      "profession": "sports",
+      "profession_detail": "football forward (Hamburg, Leverkusen, Tottenham, LAFC, South Korea)",
+      "death_date": null,
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Son_Heung-min"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "person_id": "p2-sports-01-pele",
+      "event_date": "1956-09-07",
+      "event_category": "career_change",
+      "event_description": "First-team debut for Santos at 15",
+      "event_significance": 2,
+      "evidence_text": "Debuted for Santos in September 1956 and scored in his first match.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pel%C3%A9"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-01-pele",
+      "event_date": "1958-06-29",
+      "event_category": "achievement",
+      "event_description": "Wins 1958 World Cup with Brazil at 17, scoring twice in the final",
+      "event_significance": 3,
+      "evidence_text": "Seventeen-year-old scored two goals as Brazil beat Sweden 5-2 in the final.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1958_FIFA_World_Cup_final",
+        "https://en.wikipedia.org/wiki/Pel%C3%A9"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-01-pele",
+      "event_date": "1962-06-02",
+      "event_category": "health_event",
+      "event_description": "Muscle injury vs Czechoslovakia rules him out of rest of 1962 World Cup",
+      "event_significance": 2,
+      "evidence_text": "Injured in the second group match and missed the remainder of the tournament.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1962_FIFA_World_Cup",
+        "https://en.wikipedia.org/wiki/Pel%C3%A9"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-01-pele",
+      "event_date": "1962-06-17",
+      "event_category": "achievement",
+      "event_description": "Brazil retains World Cup (Pelé on squad, injured)",
+      "event_significance": 2,
+      "evidence_text": "Brazil won the 1962 tournament while Pelé watched injured.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1962_FIFA_World_Cup"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-01-pele",
+      "event_date": "1966",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries Rosemeri dos Reis Cholbi",
+      "event_significance": 2,
+      "evidence_text": "Married Rosemeri dos Reis Cholbi in 1966.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pel%C3%A9"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-01-pele",
+      "event_date": "1966-07-19",
+      "event_category": "failure",
+      "event_description": "Brazil eliminated in 1966 World Cup group stage after Pelé is fouled out",
+      "event_significance": 2,
+      "evidence_text": "Heavily fouled, Pelé left as holders Brazil exited in the first round.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1966_FIFA_World_Cup",
+        "https://en.wikipedia.org/wiki/Pel%C3%A9"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-01-pele",
+      "event_date": "1969-11-19",
+      "event_category": "achievement",
+      "event_description": "Scores his 1000th career goal at the Maracanã",
+      "event_significance": 2,
+      "evidence_text": "Penalty against Vasco da Gama marked his milestone thousandth goal.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pel%C3%A9"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-01-pele",
+      "event_date": "1970-06-21",
+      "event_category": "achievement",
+      "event_description": "Wins third World Cup, scoring in final vs Italy",
+      "event_significance": 3,
+      "evidence_text": "Opened scoring as Brazil defeated Italy 4-1, his third world title.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1970_FIFA_World_Cup_final",
+        "https://en.wikipedia.org/wiki/Pel%C3%A9"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-01-pele",
+      "event_date": "1974-10",
+      "event_category": "retirement",
+      "event_description": "Leaves Santos, first retirement from Brazilian club football",
+      "event_significance": 2,
+      "evidence_text": "Played his final Santos match in October 1974.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pel%C3%A9"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-01-pele",
+      "event_date": "1975-06",
+      "event_category": "career_change",
+      "event_description": "Comes out of retirement to sign with New York Cosmos (NASL)",
+      "event_significance": 2,
+      "evidence_text": "Signed a lucrative contract with the New York Cosmos in 1975.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pel%C3%A9"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-01-pele",
+      "event_date": "1977-10-01",
+      "event_category": "retirement",
+      "event_description": "Final professional match, Cosmos vs Santos exhibition",
+      "event_significance": 3,
+      "evidence_text": "Played one half for each club in his farewell game in New Jersey.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pel%C3%A9"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-01-pele",
+      "event_date": "1982",
+      "event_category": "relationship_event",
+      "event_type": "divorce",
+      "event_description": "Divorce from Rosemeri dos Reis Cholbi",
+      "event_significance": 2,
+      "evidence_text": "Pelé and Cholbi divorced in 1982.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pel%C3%A9"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-01-pele",
+      "event_date": "1995-01",
+      "event_category": "career_change",
+      "event_description": "Appointed Brazil's Extraordinary Minister for Sport",
+      "event_significance": 2,
+      "evidence_text": "Served as minister for sport under President Cardoso from 1995.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pel%C3%A9"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-01-pele",
+      "event_date": "2021-09",
+      "event_category": "health_event",
+      "event_description": "Colon cancer diagnosis and tumour surgery",
+      "event_significance": 3,
+      "evidence_text": "Diagnosed with colon cancer in 2021 and operated on the same month.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pel%C3%A9"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-02-ayrton-senna",
+      "event_date": "1981",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries childhood friend Lilian de Vasconcelos Souza",
+      "event_significance": 2,
+      "evidence_text": "Married childhood friend Lilian de Vasconcelos Souza in 1981.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ayrton_Senna"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-02-ayrton-senna",
+      "event_date": "1982",
+      "event_category": "relationship_event",
+      "event_type": "divorce",
+      "event_description": "Divorce from Lilian de Vasconcelos Souza",
+      "event_significance": 2,
+      "evidence_text": "Couple divorced in 1982 as she struggled with racing life.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ayrton_Senna"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-02-ayrton-senna",
+      "event_date": "1984-03-25",
+      "event_category": "career_change",
+      "event_description": "Formula One debut with Toleman at Brazilian GP",
+      "event_significance": 2,
+      "evidence_text": "Made his F1 debut for Toleman at the 1984 Brazilian Grand Prix.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1984_Brazilian_Grand_Prix",
+        "https://en.wikipedia.org/wiki/Ayrton_Senna"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-02-ayrton-senna",
+      "event_date": "1984-06-03",
+      "event_category": "achievement",
+      "event_description": "Second place in rain-shortened Monaco GP in a Toleman",
+      "event_significance": 2,
+      "evidence_text": "Charged through the rain to second before the race was stopped.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1984_Monaco_Grand_Prix"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-02-ayrton-senna",
+      "event_date": "1985-04-21",
+      "event_category": "achievement",
+      "event_description": "First F1 win, Portuguese GP, after joining Lotus",
+      "event_significance": 2,
+      "evidence_text": "Won in heavy rain at Estoril for his maiden Grand Prix victory.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1985_Portuguese_Grand_Prix",
+        "https://en.wikipedia.org/wiki/Ayrton_Senna"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-02-ayrton-senna",
+      "event_date": "1988",
+      "event_category": "career_change",
+      "event_description": "Joins McLaren alongside Alain Prost",
+      "event_significance": 2,
+      "evidence_text": "Moved to McLaren-Honda for 1988, partnering Prost.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ayrton_Senna"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-02-ayrton-senna",
+      "event_date": "1988-10-30",
+      "event_category": "achievement",
+      "event_description": "Wins first World Championship at Japanese GP",
+      "event_significance": 3,
+      "evidence_text": "Victory at Suzuka clinched his first drivers' title.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1988_Japanese_Grand_Prix",
+        "https://en.wikipedia.org/wiki/Ayrton_Senna"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-02-ayrton-senna",
+      "event_date": "1989-10-22",
+      "event_category": "failure",
+      "event_description": "Collision with Prost at Suzuka, disqualified, loses title",
+      "event_significance": 2,
+      "evidence_text": "Disqualified after the chicane collision, handing Prost the championship.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1989_Japanese_Grand_Prix",
+        "https://en.wikipedia.org/wiki/Ayrton_Senna"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-02-ayrton-senna",
+      "event_date": "1990-10-21",
+      "event_category": "achievement",
+      "event_description": "Second World Championship after first-corner crash with Prost",
+      "event_significance": 3,
+      "evidence_text": "First-corner collision at Suzuka settled the title in his favour.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1990_Japanese_Grand_Prix",
+        "https://en.wikipedia.org/wiki/Ayrton_Senna"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-02-ayrton-senna",
+      "event_date": "1991-10-20",
+      "event_category": "achievement",
+      "event_description": "Third World Championship",
+      "event_significance": 3,
+      "evidence_text": "Secured his third drivers' title at the 1991 Japanese Grand Prix.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1991_Japanese_Grand_Prix",
+        "https://en.wikipedia.org/wiki/Ayrton_Senna"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-02-ayrton-senna",
+      "event_date": "1994",
+      "event_category": "career_change",
+      "event_description": "Moves from McLaren to Williams-Renault",
+      "event_significance": 2,
+      "evidence_text": "Joined Williams for the 1994 season replacing Prost.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Ayrton_Senna"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-03-boris-becker",
+      "event_date": "1985-07-07",
+      "event_category": "achievement",
+      "event_description": "Wins Wimbledon at 17, youngest men's champion",
+      "event_significance": 3,
+      "evidence_text": "Unseeded 17-year-old became the youngest male Wimbledon singles champion.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1985_Wimbledon_Championships_%E2%80%93_Men's_singles",
+        "https://en.wikipedia.org/wiki/Boris_Becker"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-03-boris-becker",
+      "event_date": "1986-07-06",
+      "event_category": "achievement",
+      "event_description": "Defends Wimbledon title",
+      "event_significance": 2,
+      "evidence_text": "Beat Ivan Lendl to retain the Wimbledon crown.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Boris_Becker"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-03-boris-becker",
+      "event_date": "1987-06-26",
+      "event_category": "failure",
+      "event_description": "Second-round Wimbledon loss to Peter Doohan as two-time champion",
+      "event_significance": 2,
+      "evidence_text": "Defending champion was upset early by Australian Peter Doohan.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1987_Wimbledon_Championships_%E2%80%93_Men's_singles"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-03-boris-becker",
+      "event_date": "1988-12-18",
+      "event_category": "achievement",
+      "event_description": "Leads West Germany to first Davis Cup title",
+      "event_significance": 2,
+      "evidence_text": "West Germany won the 1988 Davis Cup final against Sweden.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1988_Davis_Cup"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-03-boris-becker",
+      "event_date": "1989-07-09",
+      "event_category": "achievement",
+      "event_description": "Third Wimbledon title; adds US Open in September",
+      "event_significance": 3,
+      "evidence_text": "Won Wimbledon and the US Open in 1989.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1989_Wimbledon_Championships_%E2%80%93_Men's_singles",
+        "https://en.wikipedia.org/wiki/Boris_Becker"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-03-boris-becker",
+      "event_date": "1991-01-27",
+      "event_category": "achievement",
+      "event_description": "Wins Australian Open and becomes world No. 1",
+      "event_significance": 3,
+      "evidence_text": "Australian Open victory lifted him to the top of the rankings.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1991_Australian_Open_%E2%80%93_Men's_singles",
+        "https://en.wikipedia.org/wiki/Boris_Becker"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-03-boris-becker",
+      "event_date": "1993-12-17",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries Barbara Feltus",
+      "event_significance": 2,
+      "evidence_text": "Married Barbara Feltus in December 1993.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Boris_Becker"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-03-boris-becker",
+      "event_date": "1994-01-18",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Son Noah born",
+      "event_significance": 2,
+      "evidence_text": "First son Noah born in January 1994.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Boris_Becker"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-03-boris-becker",
+      "event_date": "1996-01-28",
+      "event_category": "achievement",
+      "event_description": "Wins Australian Open, sixth and last major",
+      "event_significance": 2,
+      "evidence_text": "Defeated Michael Chang for his second Australian Open title.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1996_Australian_Open_%E2%80%93_Men's_singles"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-03-boris-becker",
+      "event_date": "1999-07",
+      "event_category": "retirement",
+      "event_description": "Retires from professional tennis after Wimbledon 1999",
+      "event_significance": 3,
+      "evidence_text": "Ended his playing career following the 1999 Wimbledon fourth round.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Boris_Becker"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-03-boris-becker",
+      "event_date": "2001-01-15",
+      "event_category": "relationship_event",
+      "event_type": "divorce",
+      "event_description": "Divorce from Barbara Feltus with multimillion settlement",
+      "event_significance": 2,
+      "evidence_text": "Divorce granted 15 January 2001; Barbara received a $14.4 million settlement.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Boris_Becker"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-03-boris-becker",
+      "event_date": "2002-10",
+      "event_category": "failure",
+      "event_description": "Munich court gives suspended two-year sentence for tax evasion",
+      "event_significance": 2,
+      "evidence_text": "Munich District Court handed him a suspended two-year sentence for tax evasion.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Boris_Becker"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-03-boris-becker",
+      "event_date": "2009-06",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries Lilly Kerssenberg in St. Moritz",
+      "event_significance": 2,
+      "evidence_text": "Married Dutch model Lilly Kerssenberg in June 2009.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Boris_Becker"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-03-boris-becker",
+      "event_date": "2017-06-21",
+      "event_category": "financial_event",
+      "event_type": "financial_loss",
+      "event_description": "Declared bankrupt by London court",
+      "event_significance": 3,
+      "evidence_text": "Declared bankrupt in the UK in 2017 over unpaid debts.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Boris_Becker"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-03-boris-becker",
+      "event_date": "2022-04-29",
+      "event_category": "failure",
+      "event_description": "Sentenced to 2.5 years in prison for hiding assets in bankruptcy",
+      "event_significance": 3,
+      "evidence_text": "UK court jailed him for concealing assets and loans from creditors.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Boris_Becker"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-04-monica-seles",
+      "event_date": "1990-06-10",
+      "event_category": "achievement",
+      "event_description": "Wins French Open at 16, first Grand Slam",
+      "event_significance": 3,
+      "evidence_text": "Beat Steffi Graf to become youngest French Open champion.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1990_French_Open_%E2%80%93_Women's_singles",
+        "https://en.wikipedia.org/wiki/Monica_Seles"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-04-monica-seles",
+      "event_date": "1991-03-11",
+      "event_category": "achievement",
+      "event_description": "Becomes world No. 1",
+      "event_significance": 3,
+      "evidence_text": "Took over the WTA top ranking in March 1991.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Monica_Seles"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-04-monica-seles",
+      "event_date": "1992-07-05",
+      "event_category": "failure",
+      "event_description": "Loses Wimbledon final to Graf amid grunting criticism",
+      "event_significance": 2,
+      "evidence_text": "Muted after grunting complaints, she lost the final heavily to Graf.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1992_Wimbledon_Championships_%E2%80%93_Women's_singles"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-04-monica-seles",
+      "event_date": "1993-01-30",
+      "event_category": "achievement",
+      "event_description": "Wins third straight Australian Open",
+      "event_significance": 2,
+      "evidence_text": "Defeated Graf for her third consecutive Australian Open.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1993_Australian_Open_%E2%80%93_Women's_singles"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-04-monica-seles",
+      "event_date": "1993-04-30",
+      "event_category": "health_event",
+      "event_description": "Stabbed in the back by spectator in Hamburg; out over two years",
+      "event_significance": 3,
+      "evidence_text": "Spectator stabbed her during a changeover; she did not compete for 27 months.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Monica_Seles"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-04-monica-seles",
+      "event_date": "1995-08",
+      "event_category": "achievement",
+      "event_description": "Comeback: wins Canadian Open in first tour event after stabbing",
+      "event_significance": 2,
+      "evidence_text": "Returned in 1995 and won her first tournament back in Toronto.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Monica_Seles"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-04-monica-seles",
+      "event_date": "1996-01-27",
+      "event_category": "achievement",
+      "event_description": "Wins 1996 Australian Open, ninth and last major",
+      "event_significance": 2,
+      "evidence_text": "Won the Australian Open over Anke Huber.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1996_Australian_Open_%E2%80%93_Women's_singles"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-04-monica-seles",
+      "event_date": "1998-06-06",
+      "event_category": "failure",
+      "event_description": "Loses French Open final to Arantxa Sánchez Vicario",
+      "event_significance": 2,
+      "evidence_text": "Lost a three-set Roland Garros final weeks after her father died.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1998_French_Open_%E2%80%93_Women's_singles"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-04-monica-seles",
+      "event_date": "2000-09-28",
+      "event_category": "achievement",
+      "event_description": "Olympic bronze in singles at Sydney 2000",
+      "event_significance": 2,
+      "evidence_text": "Defeated Jelena Dokic for the singles bronze medal.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Tennis_at_the_2000_Summer_Olympics_%E2%80%93_Women's_singles",
+        "https://en.wikipedia.org/wiki/Monica_Seles"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-04-monica-seles",
+      "event_date": "2003-05",
+      "event_category": "health_event",
+      "event_description": "Foot injury at French Open; last professional match",
+      "event_significance": 2,
+      "evidence_text": "Foot injury in spring 2003 effectively ended her playing career.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Monica_Seles"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-04-monica-seles",
+      "event_date": "2008-02-14",
+      "event_category": "retirement",
+      "event_description": "Officially announces retirement",
+      "event_significance": 3,
+      "evidence_text": "Formally retired in February 2008 without playing again.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Monica_Seles"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-04-monica-seles",
+      "event_date": "2009-07",
+      "event_category": "achievement",
+      "event_description": "Inducted into International Tennis Hall of Fame",
+      "event_significance": 1,
+      "evidence_text": "Enshrined in the International Tennis Hall of Fame in 2009.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Monica_Seles"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-04-monica-seles",
+      "event_date": "2025-08",
+      "event_category": "health_event",
+      "event_description": "Publicly discloses myasthenia gravis (diagnosed 2022)",
+      "event_significance": 2,
+      "evidence_text": "Diagnosed with myasthenia gravis in 2022, spoke publicly in August 2025.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Monica_Seles"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-05-martina-navratilova",
+      "event_date": "1975-09",
+      "event_category": "career_change",
+      "event_description": "Defects from Czechoslovakia to the United States during US Open",
+      "event_significance": 3,
+      "evidence_text": "At 18 she sought asylum in the US during the 1975 US Open.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Martina_Navratilova"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-05-martina-navratilova",
+      "event_date": "1978-07-07",
+      "event_category": "achievement",
+      "event_description": "First Wimbledon singles title, becomes world No. 1",
+      "event_significance": 3,
+      "evidence_text": "Beat Chris Evert for her first Wimbledon title.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1978_Wimbledon_Championships_%E2%80%93_Women's_singles",
+        "https://en.wikipedia.org/wiki/Martina_Navratilova"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-05-martina-navratilova",
+      "event_date": "1983",
+      "event_category": "achievement",
+      "event_description": "Dominant 86-1 season with three majors",
+      "event_significance": 2,
+      "evidence_text": "Lost only one match in 1983, an all-time season record.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Martina_Navratilova"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-05-martina-navratilova",
+      "event_date": "1984-09",
+      "event_category": "achievement",
+      "event_description": "Completes six consecutive Grand Slam singles titles",
+      "event_significance": 2,
+      "evidence_text": "Won six straight major singles titles across 1983-84.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Martina_Navratilova"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-05-martina-navratilova",
+      "event_date": "1990-07-07",
+      "event_category": "achievement",
+      "event_description": "Record ninth Wimbledon singles title",
+      "event_significance": 3,
+      "evidence_text": "Beat Zina Garrison for a record ninth Wimbledon singles crown.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1990_Wimbledon_Championships_%E2%80%93_Women's_singles",
+        "https://en.wikipedia.org/wiki/Martina_Navratilova"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-05-martina-navratilova",
+      "event_date": "1991",
+      "event_category": "relationship_event",
+      "event_type": "divorce",
+      "event_description": "Split from partner Judy Nelson, televised palimony lawsuit",
+      "event_significance": 2,
+      "evidence_text": "Their 1991 split led to a televised palimony suit settled out of court.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Martina_Navratilova"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-05-martina-navratilova",
+      "event_date": "1994-11",
+      "event_category": "retirement",
+      "event_description": "Retires from full-time singles after WTA Championships",
+      "event_significance": 3,
+      "evidence_text": "Retired from singles after first-round loss to Sabatini in November 1994.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Martina_Navratilova"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-05-martina-navratilova",
+      "event_date": "2000-07",
+      "event_category": "achievement",
+      "event_description": "Inducted into International Tennis Hall of Fame",
+      "event_significance": 1,
+      "evidence_text": "Inducted into the Tennis Hall of Fame in 2000.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Martina_Navratilova"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-05-martina-navratilova",
+      "event_date": "2003-07-06",
+      "event_category": "achievement",
+      "event_description": "Wimbledon mixed doubles win ties King's record 20 Wimbledon titles",
+      "event_significance": 2,
+      "evidence_text": "Mixed doubles title with Leander Paes gave her 20 Wimbledon titles.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/2003_Wimbledon_Championships_%E2%80%93_Mixed_doubles"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-05-martina-navratilova",
+      "event_date": "2006-09-10",
+      "event_category": "retirement",
+      "event_description": "Final pro match: wins US Open mixed doubles at 49, retires",
+      "event_significance": 2,
+      "evidence_text": "Won the 2006 US Open mixed doubles a month before turning 50.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/2006_US_Open_%E2%80%93_Mixed_doubles",
+        "https://en.wikipedia.org/wiki/Martina_Navratilova"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-05-martina-navratilova",
+      "event_date": "2010-04-07",
+      "event_category": "health_event",
+      "event_description": "Announces treatment for breast cancer (DCIS)",
+      "event_significance": 3,
+      "evidence_text": "Announced on 7 April 2010 she was being treated for breast cancer.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Martina_Navratilova"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-05-martina-navratilova",
+      "event_date": "2014-12-15",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries Julia Lemigova in New York",
+      "event_significance": 2,
+      "evidence_text": "Married Julia Lemigova in New York on 15 December 2014.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Martina_Navratilova"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-05-martina-navratilova",
+      "event_date": "2023-01",
+      "event_category": "health_event",
+      "event_description": "Diagnosed with stage-one throat cancer and breast cancer",
+      "event_significance": 3,
+      "evidence_text": "In January 2023 diagnosed with both throat and breast cancer.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Martina_Navratilova"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-06-nadia-comaneci",
+      "event_date": "1975-05",
+      "event_category": "achievement",
+      "event_description": "Wins European all-around title at 13 in Skien",
+      "event_significance": 2,
+      "evidence_text": "Won the European all-around and three event titles in 1975.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1975_European_Women's_Artistic_Gymnastics_Championships",
+        "https://en.wikipedia.org/wiki/Nadia_Com%C4%83neci"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-06-nadia-comaneci",
+      "event_date": "1976-07-18",
+      "event_category": "achievement",
+      "event_description": "First perfect 10 in Olympic gymnastics, Montreal",
+      "event_significance": 3,
+      "evidence_text": "Scored the first perfect 10.0 in Olympic gymnastics history on bars.",
+      "evidence_urls": [
+        "https://www.olympics.com/en/athletes/nadia-comaneci",
+        "https://en.wikipedia.org/wiki/Nadia_Com%C4%83neci"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "A"
+    },
+    {
+      "person_id": "p2-sports-06-nadia-comaneci",
+      "event_date": "1976-07-21",
+      "event_category": "achievement",
+      "event_description": "Olympic all-around gold at 14 (three golds in Montreal)",
+      "event_significance": 3,
+      "evidence_text": "Won all-around, bars and beam golds at the 1976 Olympics.",
+      "evidence_urls": [
+        "https://www.olympics.com/en/athletes/nadia-comaneci",
+        "https://en.wikipedia.org/wiki/Gymnastics_at_the_1976_Summer_Olympics_%E2%80%93_Women's_artistic_individual_all-around"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "A"
+    },
+    {
+      "person_id": "p2-sports-06-nadia-comaneci",
+      "event_date": "1978-10",
+      "event_category": "failure",
+      "event_description": "Falls from bars at Strasbourg Worlds, misses all-around title",
+      "event_significance": 2,
+      "evidence_text": "Heavier and unhappy, she lost the 1978 world all-around title.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1978_World_Artistic_Gymnastics_Championships",
+        "https://en.wikipedia.org/wiki/Nadia_Com%C4%83neci"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-06-nadia-comaneci",
+      "event_date": "1979-12",
+      "event_category": "health_event",
+      "event_description": "Hospitalised with blood poisoning from wrist infection at Fort Worth Worlds",
+      "event_significance": 2,
+      "evidence_text": "Infected hand forced hospital treatment during the 1979 World Championships.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1979_World_Artistic_Gymnastics_Championships",
+        "https://en.wikipedia.org/wiki/Nadia_Com%C4%83neci"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-06-nadia-comaneci",
+      "event_date": "1980-07-24",
+      "event_category": "failure",
+      "event_description": "Takes Olympic all-around silver in disputed Moscow judging",
+      "event_significance": 2,
+      "evidence_text": "Lost the Moscow all-around gold to Yelena Davydova amid scoring dispute.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Gymnastics_at_the_1980_Summer_Olympics_%E2%80%93_Women's_artistic_individual_all-around"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-06-nadia-comaneci",
+      "event_date": "1980-07-25",
+      "event_category": "achievement",
+      "event_description": "Olympic gold on beam and floor in Moscow",
+      "event_significance": 2,
+      "evidence_text": "Won beam and floor exercise golds at the 1980 Games.",
+      "evidence_urls": [
+        "https://www.olympics.com/en/athletes/nadia-comaneci"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "A"
+    },
+    {
+      "person_id": "p2-sports-06-nadia-comaneci",
+      "event_date": "1984",
+      "event_category": "retirement",
+      "event_description": "Official retirement ceremony in Bucharest",
+      "event_significance": 3,
+      "evidence_text": "Official retirement ceremony held in Bucharest in 1984, attended by IOC chair.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Nadia_Com%C4%83neci"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-06-nadia-comaneci",
+      "event_date": "1989-11",
+      "event_category": "career_change",
+      "event_description": "Defects from Romania via Hungary to the United States",
+      "event_significance": 3,
+      "evidence_text": "Fled Romania on foot weeks before the December 1989 revolution.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Nadia_Com%C4%83neci"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-06-nadia-comaneci",
+      "event_date": "1993",
+      "event_category": "achievement",
+      "event_description": "Inducted into International Gymnastics Hall of Fame",
+      "event_significance": 1,
+      "evidence_text": "Honoured by the International Gymnastics Hall of Fame in 1993.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Nadia_Com%C4%83neci"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-06-nadia-comaneci",
+      "event_date": "1996-04-27",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries Bart Conner in Bucharest",
+      "event_significance": 2,
+      "evidence_text": "Wedding to Bart Conner in Bucharest was televised live in Romania.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Nadia_Com%C4%83neci"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-06-nadia-comaneci",
+      "event_date": "2006-06",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Son Dylan born",
+      "event_significance": 2,
+      "evidence_text": "Son Dylan Paul Conner was born in June 2006.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Nadia_Com%C4%83neci"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-07-mike-tyson",
+      "event_date": "1985-03-06",
+      "event_category": "career_change",
+      "event_description": "Professional boxing debut",
+      "event_significance": 2,
+      "evidence_text": "Made his pro debut with a first-round knockout in March 1985.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Mike_Tyson"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-07-mike-tyson",
+      "event_date": "1986-11-22",
+      "event_category": "achievement",
+      "event_description": "Beats Trevor Berbick for WBC title, youngest heavyweight champion",
+      "event_significance": 3,
+      "evidence_text": "At 20 became the youngest heavyweight champion in history.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Mike_Tyson"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-07-mike-tyson",
+      "event_date": "1988-02-07",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries actress Robin Givens",
+      "event_significance": 2,
+      "evidence_text": "Married Robin Givens in February 1988.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Mike_Tyson"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-07-mike-tyson",
+      "event_date": "1989-02-14",
+      "event_category": "relationship_event",
+      "event_type": "divorce",
+      "event_description": "Divorce from Robin Givens",
+      "event_significance": 2,
+      "evidence_text": "Divorce from Givens finalised in February 1989.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Mike_Tyson"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-07-mike-tyson",
+      "event_date": "1990-02-11",
+      "event_category": "failure",
+      "event_description": "Knocked out by Buster Douglas in Tokyo, loses undisputed title",
+      "event_significance": 3,
+      "evidence_text": "42-1 underdog Douglas knocked him out in the tenth round.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Mike_Tyson_vs._Buster_Douglas",
+        "https://en.wikipedia.org/wiki/Mike_Tyson"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-07-mike-tyson",
+      "event_date": "1992-02-10",
+      "event_category": "failure",
+      "event_description": "Convicted of rape, sentenced to six years",
+      "event_significance": 3,
+      "evidence_text": "Indianapolis jury convicted him; he served three years in prison.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Mike_Tyson"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-07-mike-tyson",
+      "event_date": "1995-03-25",
+      "event_category": "career_change",
+      "event_description": "Released from prison, returns to boxing",
+      "event_significance": 2,
+      "evidence_text": "Released in March 1995 and resumed his career.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Mike_Tyson"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-07-mike-tyson",
+      "event_date": "1996-03-16",
+      "event_category": "achievement",
+      "event_description": "Regains WBC heavyweight title vs Frank Bruno",
+      "event_significance": 2,
+      "evidence_text": "Stopped Frank Bruno in three rounds to reclaim the WBC belt.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Mike_Tyson"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-07-mike-tyson",
+      "event_date": "1997-06-28",
+      "event_category": "failure",
+      "event_description": "Disqualified for biting Holyfield's ears; licence revoked",
+      "event_significance": 3,
+      "evidence_text": "Bit Holyfield's ears, was disqualified and his licence was revoked.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Evander_Holyfield_vs._Mike_Tyson_II"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-07-mike-tyson",
+      "event_date": "2002-06-08",
+      "event_category": "failure",
+      "event_description": "Knocked out by Lennox Lewis in world title fight",
+      "event_significance": 2,
+      "evidence_text": "Lewis stopped him in the eighth round in Memphis.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Lennox_Lewis_vs._Mike_Tyson"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-07-mike-tyson",
+      "event_date": "2003-08",
+      "event_category": "financial_event",
+      "event_type": "financial_loss",
+      "event_description": "Files for bankruptcy despite ~$300m career earnings",
+      "event_significance": 3,
+      "evidence_text": "Filed for bankruptcy in August 2003 after years of financial struggles.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Mike_Tyson"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-07-mike-tyson",
+      "event_date": "2005-06-11",
+      "event_category": "retirement",
+      "event_description": "Quits on stool vs Kevin McBride and retires",
+      "event_significance": 3,
+      "evidence_text": "Retired after failing to answer the bell against Kevin McBride.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Mike_Tyson"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-07-mike-tyson",
+      "event_date": "2009-06-06",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries Lakiha Spicer",
+      "event_significance": 2,
+      "evidence_text": "Married Lakiha Spicer in Las Vegas on 6 June 2009.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Mike_Tyson"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-07-mike-tyson",
+      "event_date": "2024-11-15",
+      "event_category": "failure",
+      "event_description": "Comeback bout at 58: loses decision to Jake Paul",
+      "event_significance": 1,
+      "evidence_text": "Lost a unanimous decision to Jake Paul in Texas.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Jake_Paul_vs._Mike_Tyson"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-08-michael-schumacher",
+      "event_date": "1991-08-25",
+      "event_category": "career_change",
+      "event_description": "F1 debut with Jordan at Belgian GP, then signed by Benetton",
+      "event_significance": 2,
+      "evidence_text": "Debuted for Jordan at Spa and moved to Benetton one race later.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1991_Belgian_Grand_Prix",
+        "https://en.wikipedia.org/wiki/Michael_Schumacher"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-08-michael-schumacher",
+      "event_date": "1992-08-30",
+      "event_category": "achievement",
+      "event_description": "First Grand Prix win at Spa",
+      "event_significance": 2,
+      "evidence_text": "Won the 1992 Belgian Grand Prix for his first victory.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1992_Belgian_Grand_Prix"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-08-michael-schumacher",
+      "event_date": "1994-11-13",
+      "event_category": "achievement",
+      "event_description": "First World Championship after Adelaide collision with Damon Hill",
+      "event_significance": 3,
+      "evidence_text": "Collision with Hill in Adelaide decided the title by one point.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1994_Australian_Grand_Prix",
+        "https://en.wikipedia.org/wiki/Michael_Schumacher"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-08-michael-schumacher",
+      "event_date": "1995-08",
+      "event_category": "relationship_event",
+      "event_type": "marriage",
+      "event_description": "Marries Corinna Betsch",
+      "event_significance": 2,
+      "evidence_text": "Married Corinna Betsch in August 1995.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Schumacher"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-08-michael-schumacher",
+      "event_date": "1996",
+      "event_category": "career_change",
+      "event_description": "Moves from Benetton to Ferrari",
+      "event_significance": 2,
+      "evidence_text": "Joined Ferrari for 1996 after two titles with Benetton.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Schumacher"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-08-michael-schumacher",
+      "event_date": "1997",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Daughter Gina-Maria born",
+      "event_significance": 2,
+      "evidence_text": "Daughter Gina-Maria born in 1997.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Schumacher"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-08-michael-schumacher",
+      "event_date": "1997-10-26",
+      "event_category": "failure",
+      "event_description": "Jerez collision with Villeneuve; excluded from 1997 championship standings",
+      "event_significance": 2,
+      "evidence_text": "Excluded from the 1997 standings after colliding with Villeneuve.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1997_European_Grand_Prix",
+        "https://en.wikipedia.org/wiki/Michael_Schumacher"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-08-michael-schumacher",
+      "event_date": "1999",
+      "event_category": "relationship_event",
+      "event_type": "child_birth",
+      "event_description": "Son Mick born",
+      "event_significance": 2,
+      "evidence_text": "Son Mick born in 1999.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Schumacher"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-08-michael-schumacher",
+      "event_date": "1999-07-11",
+      "event_category": "health_event",
+      "event_description": "Breaks leg at British GP, misses six races",
+      "event_significance": 2,
+      "evidence_text": "Broke his leg at Silverstone and lost his title chances.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1999_British_Grand_Prix",
+        "https://en.wikipedia.org/wiki/Michael_Schumacher"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-08-michael-schumacher",
+      "event_date": "2000-10-08",
+      "event_category": "achievement",
+      "event_description": "First Ferrari title, ending 21-year drought",
+      "event_significance": 3,
+      "evidence_text": "Win at Suzuka gave Ferrari its first drivers' title since 1979.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/2000_Japanese_Grand_Prix",
+        "https://en.wikipedia.org/wiki/Michael_Schumacher"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-08-michael-schumacher",
+      "event_date": "2004-08-29",
+      "event_category": "achievement",
+      "event_description": "Clinches record seventh World Championship",
+      "event_significance": 3,
+      "evidence_text": "Secured his seventh drivers' title at Spa in 2004.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/2004_Belgian_Grand_Prix",
+        "https://en.wikipedia.org/wiki/Michael_Schumacher"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-08-michael-schumacher",
+      "event_date": "2006-10-22",
+      "event_category": "retirement",
+      "event_description": "First retirement at end of 2006 season",
+      "event_significance": 3,
+      "evidence_text": "Retired after the 2006 Brazilian Grand Prix.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/2006_Brazilian_Grand_Prix",
+        "https://en.wikipedia.org/wiki/Michael_Schumacher"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-08-michael-schumacher",
+      "event_date": "2010-03-14",
+      "event_category": "career_change",
+      "event_description": "Comeback with Mercedes",
+      "event_significance": 2,
+      "evidence_text": "Returned to F1 with Mercedes at the 2010 Bahrain GP.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/2010_Bahrain_Grand_Prix",
+        "https://en.wikipedia.org/wiki/Michael_Schumacher"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-08-michael-schumacher",
+      "event_date": "2012-11-25",
+      "event_category": "retirement",
+      "event_description": "Second and final retirement",
+      "event_significance": 2,
+      "evidence_text": "Retired again after the 2012 Brazilian Grand Prix.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/2012_Brazilian_Grand_Prix",
+        "https://en.wikipedia.org/wiki/Michael_Schumacher"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-08-michael-schumacher",
+      "event_date": "2013-12-29",
+      "event_category": "health_event",
+      "event_description": "Skiing accident in Méribel causes severe traumatic brain injury",
+      "event_significance": 3,
+      "evidence_text": "Hit his head skiing in Méribel and was put in an induced coma.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Michael_Schumacher"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-09-pak-se-ri",
+      "event_date": "1996",
+      "event_category": "career_change",
+      "event_description": "Turns professional on KLPGA tour",
+      "event_significance": 2,
+      "evidence_text": "Turned professional in 1996 and won on the Korean tour.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pak_Se-ri"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-09-pak-se-ri",
+      "event_date": "1998",
+      "event_category": "career_change",
+      "event_description": "Joins LPGA Tour as rookie",
+      "event_significance": 2,
+      "evidence_text": "Began playing the LPGA Tour full-time in 1998.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pak_Se-ri"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-09-pak-se-ri",
+      "event_date": "1998-05-17",
+      "event_category": "achievement",
+      "event_description": "Wins LPGA Championship, first major as rookie",
+      "event_significance": 3,
+      "evidence_text": "Won the 1998 LPGA Championship for her first major title.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1998_LPGA_Championship",
+        "https://en.wikipedia.org/wiki/Pak_Se-ri"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-09-pak-se-ri",
+      "event_date": "1998-07-06",
+      "event_category": "achievement",
+      "event_description": "Wins U.S. Women's Open in 20-hole playoff",
+      "event_significance": 3,
+      "evidence_text": "Barefoot water-hazard shot preceded her U.S. Women's Open playoff win.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/1998_U.S._Women's_Open",
+        "https://en.wikipedia.org/wiki/Pak_Se-ri"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-09-pak-se-ri",
+      "event_date": "1998-11",
+      "event_category": "achievement",
+      "event_description": "LPGA Rookie of the Year",
+      "event_significance": 2,
+      "evidence_text": "Named 1998 LPGA Rookie of the Year.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pak_Se-ri"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-09-pak-se-ri",
+      "event_date": "2001-08-05",
+      "event_category": "achievement",
+      "event_description": "Wins Women's British Open",
+      "event_significance": 2,
+      "evidence_text": "Won the 2001 Women's British Open, its first year as a major.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/2001_Women's_British_Open"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-09-pak-se-ri",
+      "event_date": "2002-06-09",
+      "event_category": "achievement",
+      "event_description": "Second LPGA Championship",
+      "event_significance": 2,
+      "evidence_text": "Won the 2002 LPGA Championship.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/2002_LPGA_Championship"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-09-pak-se-ri",
+      "event_date": "2005",
+      "event_category": "health_event",
+      "event_description": "Slump with injuries; misses first major cut in 29 starts",
+      "event_significance": 2,
+      "evidence_text": "Missed her first major cut in 29 starts at the 2005 LPGA Championship.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pak_Se-ri"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-09-pak-se-ri",
+      "event_date": "2006-06-11",
+      "event_category": "achievement",
+      "event_description": "Comeback win at LPGA Championship (fifth major)",
+      "event_significance": 2,
+      "evidence_text": "Won the 2006 LPGA Championship in a playoff with Karrie Webb.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/2006_LPGA_Championship"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-09-pak-se-ri",
+      "event_date": "2007-06",
+      "event_category": "achievement",
+      "event_description": "Qualifies for World Golf Hall of Fame at 29",
+      "event_significance": 2,
+      "evidence_text": "In June 2007 qualified as youngest living Hall of Fame entrant.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pak_Se-ri"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-09-pak-se-ri",
+      "event_date": "2016-08",
+      "event_category": "career_change",
+      "event_description": "Head coach of Korean women's Olympic golf team (Rio)",
+      "event_significance": 2,
+      "evidence_text": "Coached Korea's women at Rio 2016, where Inbee Park won gold.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pak_Se-ri"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-09-pak-se-ri",
+      "event_date": "2016-10-13",
+      "event_category": "retirement",
+      "event_description": "Retires at LPGA KEB Hana Bank Championship in Korea",
+      "event_significance": 3,
+      "evidence_text": "Retired on 13 October 2016 after the first round in Korea.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pak_Se-ri"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-09-pak-se-ri",
+      "event_date": "2024-06",
+      "event_category": "failure",
+      "event_description": "Public dispute with father over foundation seal forgery complaint",
+      "event_significance": 1,
+      "evidence_text": "Her foundation filed a complaint against her father over alleged seal forgery.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Pak_Se-ri"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-10-son-heung-min",
+      "event_date": "2010-10-30",
+      "event_category": "career_change",
+      "event_description": "Bundesliga debut and first goal for Hamburger SV",
+      "event_significance": 2,
+      "evidence_text": "Debuted for Hamburg in the Bundesliga in 2010.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Son_Heung-min"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-10-son-heung-min",
+      "event_date": "2013-06",
+      "event_category": "career_change",
+      "event_description": "Club-record transfer to Bayer Leverkusen",
+      "event_significance": 2,
+      "evidence_text": "Moved to Leverkusen in 2013 for a club record fee.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Son_Heung-min"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-10-son-heung-min",
+      "event_date": "2014-06-26",
+      "event_category": "failure",
+      "event_description": "South Korea eliminated in 2014 World Cup group stage",
+      "event_significance": 2,
+      "evidence_text": "Korea finished bottom of Group H despite his goal against Algeria.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/2014_FIFA_World_Cup_Group_H"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-10-son-heung-min",
+      "event_date": "2015-01-31",
+      "event_category": "failure",
+      "event_description": "Loses Asian Cup final to Australia in extra time",
+      "event_significance": 2,
+      "evidence_text": "Scored a late equaliser but Korea lost 2-1 after extra time.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/2015_AFC_Asian_Cup_final"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-10-son-heung-min",
+      "event_date": "2015-08-28",
+      "event_category": "career_change",
+      "event_description": "Transfer to Tottenham Hotspur",
+      "event_significance": 2,
+      "evidence_text": "Joined Tottenham from Leverkusen in August 2015.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Son_Heung-min"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-10-son-heung-min",
+      "event_date": "2018-09-01",
+      "event_category": "achievement",
+      "event_description": "Asian Games gold as captain, earning military service exemption",
+      "event_significance": 3,
+      "evidence_text": "Captained Korea to Asian Games gold, exempting him from conscription.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Football_at_the_2018_Asian_Games_%E2%80%93_Men's_tournament",
+        "https://en.wikipedia.org/wiki/Son_Heung-min"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-10-son-heung-min",
+      "event_date": "2019-06-01",
+      "event_category": "failure",
+      "event_description": "Loses Champions League final to Liverpool",
+      "event_significance": 2,
+      "evidence_text": "Tottenham lost the 2019 Champions League final 2-0.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/2019_UEFA_Champions_League_final"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-10-son-heung-min",
+      "event_date": "2020-02-16",
+      "event_category": "health_event",
+      "event_description": "Fractured arm vs Aston Villa, requires surgery",
+      "event_significance": 2,
+      "evidence_text": "Broke his right arm and underwent surgery in February 2020.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Son_Heung-min"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-10-son-heung-min",
+      "event_date": "2020-12-17",
+      "event_category": "achievement",
+      "event_description": "Wins FIFA Puskás Award for solo goal vs Burnley",
+      "event_significance": 2,
+      "evidence_text": "His solo goal earned the 2020 FIFA Puskás Award.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Son_Heung-min"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-10-son-heung-min",
+      "event_date": "2022-05-22",
+      "event_category": "achievement",
+      "event_description": "Shares Premier League Golden Boot, first Asian winner",
+      "event_significance": 3,
+      "evidence_text": "Jointly won the Golden Boot with 23 goals, the first Asian to do so.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Son_Heung-min"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-10-son-heung-min",
+      "event_date": "2022-11-01",
+      "event_category": "health_event",
+      "event_description": "Fractured eye socket, surgery weeks before World Cup",
+      "event_significance": 2,
+      "evidence_text": "Broke his eye socket and played the World Cup in a mask.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Son_Heung-min"
+      ],
+      "evidence_confidence": "medium",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-10-son-heung-min",
+      "event_date": "2022-12-02",
+      "event_category": "achievement",
+      "event_description": "Assists late winner vs Portugal, Korea reach World Cup last 16",
+      "event_significance": 2,
+      "evidence_text": "His assist set up the stoppage-time winner that sent Korea through.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/2022_FIFA_World_Cup_Group_H"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-10-son-heung-min",
+      "event_date": "2024-02-06",
+      "event_category": "failure",
+      "event_description": "Asian Cup semi-final loss to Jordan; dressing-room altercation",
+      "event_significance": 2,
+      "evidence_text": "Korea lost 2-0 to Jordan after an eve-of-match squad altercation.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/2023_AFC_Asian_Cup_knockout_stage",
+        "https://en.wikipedia.org/wiki/Son_Heung-min"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-10-son-heung-min",
+      "event_date": "2025-05-21",
+      "event_category": "achievement",
+      "event_description": "Captains Tottenham to Europa League title, first major trophy",
+      "event_significance": 3,
+      "evidence_text": "Lifted the Europa League as captain, his first major club trophy.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/2025_UEFA_Europa_League_final",
+        "https://en.wikipedia.org/wiki/Son_Heung-min"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    },
+    {
+      "person_id": "p2-sports-10-son-heung-min",
+      "event_date": "2025-08",
+      "event_category": "career_change",
+      "event_description": "Leaves Tottenham for Los Angeles FC",
+      "event_significance": 2,
+      "evidence_text": "Transferred to LAFC in August 2025.",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Son_Heung-min"
+      ],
+      "evidence_confidence": "high",
+      "source_grade": "C"
+    }
+  ]
+}

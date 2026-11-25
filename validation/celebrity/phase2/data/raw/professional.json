@@ -1,0 +1,2293 @@
+{
+ "group": "professional",
+ "collected_at": "2026-11-25",
+ "persons": [
+  {
+   "id": "p2-professional-01-nixon",
+   "name": "Richard Nixon",
+   "name_ko": "리처드 닉슨",
+   "gender": "M",
+   "birth_date": "1913-01-09",
+   "birth_time": "21:35",
+   "birth_time_confidence": "verified",
+   "birth_time_source": "Astro-Databank Rodden AA (quoted BC), recorded as PST; read via built-in browser https://www.astro.com/astro-databank/Nixon,_Richard",
+   "birth_place": {
+    "city": "Yorba Linda",
+    "country": "USA",
+    "lon": -117.82,
+    "tz": "America/Los_Angeles"
+   },
+   "profession": "professional",
+   "profession_detail": "37th US President",
+   "death_date": "1994-04-22",
+   "source_urls": [
+    "https://en.wikipedia.org/wiki/Richard_Nixon",
+    "https://www.britannica.com/biography/Richard-Nixon"
+   ]
+  },
+  {
+   "id": "p2-professional-02-einstein",
+   "name": "Albert Einstein",
+   "name_ko": "알베르트 아인슈타인",
+   "gender": "M",
+   "birth_date": "1879-03-14",
+   "birth_time": "11:30",
+   "birth_time_confidence": "verified",
+   "birth_time_source": "Astro-Databank Rodden AA (BC/BR in hand), recorded in LMT; read via built-in browser https://www.astro.com/astro-databank/Einstein,_Albert",
+   "birth_place": {
+    "city": "Ulm",
+    "country": "Germany",
+    "lon": 9.99,
+    "tz": "Europe/Berlin"
+   },
+   "profession": "professional",
+   "profession_detail": "Theoretical physicist",
+   "death_date": "1955-04-18",
+   "source_urls": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/"
+   ]
+  },
+  {
+   "id": "p2-professional-03-thatcher",
+   "name": "Margaret Thatcher",
+   "name_ko": "마거릿 대처",
+   "gender": "F",
+   "birth_date": "1925-10-13",
+   "birth_time": "09:00",
+   "birth_time_confidence": "reported",
+   "birth_time_source": "Astro-Databank Rodden A (from memory), recorded as GMT; read via built-in browser https://www.astro.com/astro-databank/Thatcher,_Margaret",
+   "birth_place": {
+    "city": "Grantham",
+    "country": "UK",
+    "lon": -0.65,
+    "tz": "Europe/London"
+   },
+   "profession": "professional",
+   "profession_detail": "UK Prime Minister",
+   "death_date": "2013-04-08",
+   "source_urls": [
+    "https://en.wikipedia.org/wiki/Margaret_Thatcher",
+    "https://www.britannica.com/biography/Margaret-Thatcher"
+   ]
+  },
+  {
+   "id": "p2-professional-04-armstrong",
+   "name": "Neil Armstrong",
+   "name_ko": "닐 암스트롱",
+   "gender": "M",
+   "birth_date": "1930-08-05",
+   "birth_time": "00:31",
+   "birth_time_confidence": "verified",
+   "birth_time_source": "Astro-Databank Rodden AA (BC/BR in hand), recorded as EST; read via built-in browser https://www.astro.com/astro-databank/Armstrong,_Neil",
+   "birth_place": {
+    "city": "Wapakoneta",
+    "country": "USA",
+    "lon": -84.19,
+    "tz": "America/New_York"
+   },
+   "profession": "professional",
+   "profession_detail": "NASA astronaut, test pilot",
+   "death_date": "2012-08-25",
+   "source_urls": [
+    "https://en.wikipedia.org/wiki/Neil_Armstrong",
+    "https://www.britannica.com/biography/Neil-Armstrong"
+   ]
+  },
+  {
+   "id": "p2-professional-05-curie",
+   "name": "Marie Curie",
+   "name_ko": "마리 퀴리",
+   "gender": "F",
+   "birth_date": "1867-11-07",
+   "birth_time": "12:00",
+   "birth_time_confidence": "verified",
+   "birth_time_source": "Astro-Databank Rodden AA (quoted BC/BR), 12:00 recorded in LMT; read via built-in browser https://www.astro.com/astro-databank/Curie,_Marie",
+   "birth_place": {
+    "city": "Warsaw",
+    "country": "Poland",
+    "lon": 21.01,
+    "tz": "Europe/Warsaw"
+   },
+   "profession": "professional",
+   "profession_detail": "Physicist and chemist",
+   "death_date": "1934-07-04",
+   "source_urls": [
+    "https://en.wikipedia.org/wiki/Marie_Curie",
+    "https://www.nobelprize.org/prizes/physics/1903/marie-curie/biographical/"
+   ]
+  },
+  {
+   "id": "p2-professional-06-wright",
+   "name": "Frank Lloyd Wright",
+   "name_ko": "프랭크 로이드 라이트",
+   "gender": "M",
+   "birth_date": "1867-06-08",
+   "birth_time": "17:00",
+   "birth_time_confidence": "reported",
+   "birth_time_source": "Astro-Databank Rodden A (from memory), recorded in LMT; read via built-in browser https://www.astro.com/astro-databank/Wright,_Frank_Lloyd",
+   "birth_place": {
+    "city": "Richland Center",
+    "country": "USA",
+    "lon": -90.39,
+    "tz": "America/Chicago"
+   },
+   "profession": "professional",
+   "profession_detail": "Architect",
+   "death_date": "1959-04-09",
+   "source_urls": [
+    "https://en.wikipedia.org/wiki/Frank_Lloyd_Wright",
+    "https://www.britannica.com/biography/Frank-Lloyd-Wright"
+   ]
+  },
+  {
+   "id": "p2-professional-07-ginsburg",
+   "name": "Ruth Bader Ginsburg",
+   "name_ko": "루스 베이더 긴즈버그",
+   "gender": "F",
+   "birth_date": "1933-03-15",
+   "birth_time": null,
+   "birth_time_confidence": "unknown",
+   "birth_time_source": "Astro-Databank Rodden X (date without time) https://www.astro.com/astro-databank/Ginsburg,_Ruth_Bader",
+   "birth_place": {
+    "city": "Brooklyn, New York",
+    "country": "USA",
+    "lon": -73.94,
+    "tz": "America/New_York"
+   },
+   "profession": "professional",
+   "profession_detail": "US Supreme Court Justice",
+   "death_date": "2020-09-18",
+   "source_urls": [
+    "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg",
+    "https://www.supremecourt.gov/about/biographies.aspx"
+   ]
+  },
+  {
+   "id": "p2-professional-08-barnard",
+   "name": "Christiaan Barnard",
+   "name_ko": "크리스티안 바너드",
+   "gender": "M",
+   "birth_date": "1922-11-08",
+   "birth_time": null,
+   "birth_time_confidence": "unknown",
+   "birth_time_source": "Astro-Databank Rodden DD (conflicting/unverified 20:00), not used https://www.astro.com/astro-databank/Barnard,_Christiaan",
+   "birth_place": {
+    "city": "Beaufort West",
+    "country": "South Africa",
+    "lon": 22.58,
+    "tz": "Africa/Johannesburg"
+   },
+   "profession": "professional",
+   "profession_detail": "Cardiac surgeon (first human heart transplant)",
+   "death_date": "2001-09-02",
+   "source_urls": [
+    "https://en.wikipedia.org/wiki/Christiaan_Barnard",
+    "https://www.britannica.com/biography/Christiaan-Barnard"
+   ]
+  },
+  {
+   "id": "p2-professional-09-obama",
+   "name": "Barack Obama",
+   "name_ko": "버락 오바마",
+   "gender": "M",
+   "birth_date": "1961-08-04",
+   "birth_time": "19:24",
+   "birth_time_confidence": "verified",
+   "birth_time_source": "Astro-Databank Rodden AA (BC/BR in hand), recorded as AHST (UTC-10); read via built-in browser https://www.astro.com/astro-databank/Obama,_Barack",
+   "birth_place": {
+    "city": "Honolulu",
+    "country": "USA",
+    "lon": -157.86,
+    "tz": "Pacific/Honolulu"
+   },
+   "profession": "professional",
+   "profession_detail": "44th US President",
+   "death_date": null,
+   "source_urls": [
+    "https://en.wikipedia.org/wiki/Barack_Obama",
+    "https://www.obamalibrary.gov/obamas/president-barack-obama"
+   ]
+  },
+  {
+   "id": "p2-professional-10-park-geun-hye",
+   "name": "Park Geun-hye",
+   "name_ko": "박근혜",
+   "gender": "F",
+   "birth_date": "1952-02-02",
+   "birth_time": null,
+   "birth_time_confidence": "unknown",
+   "birth_time_source": "No Astro-Databank entry found (checked via built-in browser); no public verified birth time",
+   "birth_place": {
+    "city": "Daegu",
+    "country": "South Korea",
+    "lon": 128.6,
+    "tz": "Asia/Seoul"
+   },
+   "profession": "professional",
+   "profession_detail": "18th President of South Korea (impeached)",
+   "death_date": null,
+   "source_urls": [
+    "https://en.wikipedia.org/wiki/Park_Geun-hye",
+    "https://ko.wikipedia.org/wiki/%EB%B0%95%EA%B7%BC%ED%98%9C"
+   ]
+  }
+ ],
+ "events": [
+  {
+   "person_id": "p2-professional-01-nixon",
+   "event_date": "1940-06-21",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Married Pat Ryan",
+   "event_significance": 2,
+   "evidence_text": "Nixon married Thelma \"Pat\" Ryan in 1940.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Richard_Nixon",
+    "https://www.britannica.com/biography/Richard-Nixon"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-01-nixon",
+   "event_date": "1946-02-21",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "Daughter Tricia born",
+   "event_significance": 1,
+   "evidence_text": "First daughter Tricia born February 1946.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Richard_Nixon",
+    "https://www.britannica.com/biography/Richard-Nixon"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-01-nixon",
+   "event_date": "1946-11-05",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Elected to US House of Representatives",
+   "event_significance": 2,
+   "evidence_text": "Won California House seat defeating Jerry Voorhis.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Richard_Nixon",
+    "https://www.britannica.com/biography/Richard-Nixon"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-01-nixon",
+   "event_date": "1950-11-07",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Elected US Senator from California",
+   "event_significance": 2,
+   "evidence_text": "Defeated Helen Gahagan Douglas for Senate seat.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Richard_Nixon",
+    "https://www.britannica.com/biography/Richard-Nixon"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-01-nixon",
+   "event_date": "1952-11-04",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Elected Vice President under Eisenhower",
+   "event_significance": 2,
+   "evidence_text": "Became vice president on Eisenhower ticket.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Richard_Nixon",
+    "https://www.britannica.com/biography/Richard-Nixon"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-01-nixon",
+   "event_date": "1960-11-08",
+   "event_category": "failure",
+   "event_type": "election_loss",
+   "event_description": "Lost presidential election to John F. Kennedy",
+   "event_significance": 3,
+   "evidence_text": "Narrowly lost the 1960 presidential race to Kennedy.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Richard_Nixon",
+    "https://www.britannica.com/biography/Richard-Nixon"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-01-nixon",
+   "event_date": "1962-11-06",
+   "event_category": "failure",
+   "event_type": "election_loss",
+   "event_description": "Lost California governor race to Pat Brown",
+   "event_significance": 2,
+   "evidence_text": "Defeated for governor; declared it his last press conference.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Richard_Nixon",
+    "https://www.britannica.com/biography/Richard-Nixon"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-01-nixon",
+   "event_date": "1968-11-05",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Elected 37th President of the United States",
+   "event_significance": 3,
+   "evidence_text": "Won 1968 presidential election over Humphrey.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Richard_Nixon",
+    "https://www.britannica.com/biography/Richard-Nixon"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-01-nixon",
+   "event_date": "1972-02-21",
+   "event_category": "achievement",
+   "event_type": "acclaimed_work",
+   "event_description": "Historic visit to China",
+   "event_significance": 2,
+   "evidence_text": "First US president to visit the People's Republic of China.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Richard_Nixon",
+    "https://www.britannica.com/biography/Richard-Nixon"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-01-nixon",
+   "event_date": "1972-11-07",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Re-elected in landslide",
+   "event_significance": 2,
+   "evidence_text": "Won 49 states against McGovern.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Richard_Nixon",
+    "https://www.britannica.com/biography/Richard-Nixon"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-01-nixon",
+   "event_date": "1974-08-09",
+   "event_category": "failure",
+   "event_type": "resignation_scandal",
+   "event_description": "Resigned presidency over Watergate scandal",
+   "event_significance": 3,
+   "evidence_text": "Only US president to resign, facing impeachment over Watergate.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Richard_Nixon",
+    "https://en.wikipedia.org/wiki/Watergate_scandal"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-01-nixon",
+   "event_date": "1974-10",
+   "event_category": "health_event",
+   "event_type": "surgery",
+   "event_description": "Phlebitis surgery with life-threatening complications",
+   "event_significance": 3,
+   "evidence_text": "Underwent surgery for phlebitis and nearly died from shock.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Richard_Nixon",
+    "https://www.britannica.com/biography/Richard-Nixon"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-01-nixon",
+   "event_date": "1994-04-18",
+   "event_category": "health_event",
+   "event_type": "illness",
+   "event_description": "Suffered major stroke, died four days later",
+   "event_significance": 3,
+   "evidence_text": "Severe stroke at home; died April 22, 1994.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Richard_Nixon",
+    "https://www.britannica.com/biography/Richard-Nixon"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-02-einstein",
+   "event_date": "1902-06",
+   "event_category": "career_change",
+   "event_type": "new_role",
+   "event_description": "Joined Swiss Patent Office in Bern",
+   "event_significance": 2,
+   "evidence_text": "Hired as technical expert at the federal patent office.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-02-einstein",
+   "event_date": "1903-01-06",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Married Mileva Marić",
+   "event_significance": 2,
+   "evidence_text": "Married fellow physics student Mileva Marić in Bern.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-02-einstein",
+   "event_date": "1904-05-14",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "Son Hans Albert born",
+   "event_significance": 1,
+   "evidence_text": "First son Hans Albert born in Bern.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-02-einstein",
+   "event_date": "1905",
+   "event_category": "achievement",
+   "event_type": "landmark_discovery",
+   "event_description": "Annus mirabilis papers (photoelectric effect, special relativity, E=mc2)",
+   "event_significance": 3,
+   "evidence_text": "Published four groundbreaking papers in Annalen der Physik.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-02-einstein",
+   "event_date": "1910-07-28",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "Son Eduard born",
+   "event_significance": 1,
+   "evidence_text": "Second son Eduard born in Zurich.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-02-einstein",
+   "event_date": "1914-04",
+   "event_category": "career_change",
+   "event_type": "relocation",
+   "event_description": "Moved to Berlin, Prussian Academy of Sciences",
+   "event_significance": 2,
+   "evidence_text": "Accepted Berlin academy post and directorship offer.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-02-einstein",
+   "event_date": "1915-11-25",
+   "event_category": "achievement",
+   "event_type": "landmark_discovery",
+   "event_description": "Completed general theory of relativity",
+   "event_significance": 3,
+   "evidence_text": "Presented final field equations of general relativity.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-02-einstein",
+   "event_date": "1917",
+   "event_category": "health_event",
+   "event_type": "illness",
+   "event_description": "Physical collapse with liver and stomach illness",
+   "event_significance": 2,
+   "evidence_text": "Fell seriously ill; bedridden for months during wartime.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-02-einstein",
+   "event_date": "1919-02-14",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Divorced Mileva Marić",
+   "event_significance": 2,
+   "evidence_text": "Divorce from Mileva finalized after years of separation.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-02-einstein",
+   "event_date": "1919-06-02",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Married Elsa Löwenthal",
+   "event_significance": 2,
+   "evidence_text": "Married cousin Elsa months after divorce.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-02-einstein",
+   "event_date": "1919-11-06",
+   "event_category": "achievement",
+   "event_type": "landmark_discovery",
+   "event_description": "Eclipse observations confirm general relativity; world fame",
+   "event_significance": 3,
+   "evidence_text": "Royal Society announced eclipse results supporting his theory.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-02-einstein",
+   "event_date": "1922-11-09",
+   "event_category": "achievement",
+   "event_type": "nobel_prize",
+   "event_description": "Awarded 1921 Nobel Prize in Physics",
+   "event_significance": 3,
+   "evidence_text": "Nobel for explanation of photoelectric effect.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.nobelprize.org/prizes/physics/1921/einstein/facts/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "A"
+  },
+  {
+   "person_id": "p2-professional-02-einstein",
+   "event_date": "1928",
+   "event_category": "health_event",
+   "event_type": "illness",
+   "event_description": "Diagnosed with enlarged heart after collapse",
+   "event_significance": 2,
+   "evidence_text": "Collapsed in Switzerland; months of bed rest for heart condition.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-02-einstein",
+   "event_date": "1933",
+   "event_category": "career_change",
+   "event_type": "relocation",
+   "event_description": "Emigrated from Nazi Germany to Institute for Advanced Study, Princeton",
+   "event_significance": 2,
+   "evidence_text": "Left Germany, renounced citizenship, joined Princeton institute.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-02-einstein",
+   "event_date": "1948-12",
+   "event_category": "health_event",
+   "event_type": "surgery",
+   "event_description": "Surgery revealing abdominal aortic aneurysm",
+   "event_significance": 2,
+   "evidence_text": "Operation found aortic aneurysm, later cause of death.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-03-thatcher",
+   "event_date": "1950-02-23",
+   "event_category": "failure",
+   "event_type": "election_loss",
+   "event_description": "Lost Dartford general election contest",
+   "event_significance": 2,
+   "evidence_text": "Youngest woman Conservative candidate; lost Dartford to Labour.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Margaret_Thatcher",
+    "https://www.britannica.com/biography/Margaret-Thatcher"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-03-thatcher",
+   "event_date": "1951-10-25",
+   "event_category": "failure",
+   "event_type": "election_loss",
+   "event_description": "Lost Dartford again",
+   "event_significance": 1,
+   "evidence_text": "Second defeat at Dartford in 1951 election.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Margaret_Thatcher",
+    "https://www.britannica.com/biography/Margaret-Thatcher"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-03-thatcher",
+   "event_date": "1951-12-13",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Married Denis Thatcher",
+   "event_significance": 2,
+   "evidence_text": "Married businessman Denis Thatcher in London.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Margaret_Thatcher",
+    "https://www.britannica.com/biography/Margaret-Thatcher"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-03-thatcher",
+   "event_date": "1953-08-15",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "Twins Carol and Mark born",
+   "event_significance": 1,
+   "evidence_text": "Gave birth to twins Carol and Mark.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Margaret_Thatcher",
+    "https://www.britannica.com/biography/Margaret-Thatcher"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-03-thatcher",
+   "event_date": "1959-10-08",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Elected MP for Finchley",
+   "event_significance": 2,
+   "evidence_text": "Won Finchley seat in the House of Commons.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Margaret_Thatcher",
+    "https://www.britannica.com/biography/Margaret-Thatcher"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-03-thatcher",
+   "event_date": "1970-06-20",
+   "event_category": "career_change",
+   "event_type": "new_role",
+   "event_description": "Appointed Education Secretary",
+   "event_significance": 2,
+   "evidence_text": "Joined Heath cabinet as Secretary of State for Education.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Margaret_Thatcher",
+    "https://www.britannica.com/biography/Margaret-Thatcher"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-03-thatcher",
+   "event_date": "1971",
+   "event_category": "failure",
+   "event_type": "public_criticism",
+   "event_description": "Branded \"Thatcher, Milk Snatcher\" over school milk cuts",
+   "event_significance": 1,
+   "evidence_text": "Widely criticized for ending free school milk.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Margaret_Thatcher",
+    "https://www.britannica.com/biography/Margaret-Thatcher"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-03-thatcher",
+   "event_date": "1975-02-11",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Elected Conservative Party leader",
+   "event_significance": 3,
+   "evidence_text": "Defeated Heath to lead the Conservative Party.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Margaret_Thatcher",
+    "https://www.britannica.com/biography/Margaret-Thatcher"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-03-thatcher",
+   "event_date": "1979-05-04",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Became first female UK Prime Minister",
+   "event_significance": 3,
+   "evidence_text": "Won general election, first woman prime minister.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Margaret_Thatcher",
+    "https://www.britannica.com/biography/Margaret-Thatcher"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-03-thatcher",
+   "event_date": "1982-06-14",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Victory in Falklands War",
+   "event_significance": 2,
+   "evidence_text": "Argentine surrender ended Falklands conflict, boosting her standing.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Margaret_Thatcher",
+    "https://www.britannica.com/biography/Margaret-Thatcher"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-03-thatcher",
+   "event_date": "1983-06-09",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Landslide re-election",
+   "event_significance": 2,
+   "evidence_text": "Won large majority in 1983 general election.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Margaret_Thatcher",
+    "https://www.britannica.com/biography/Margaret-Thatcher"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-03-thatcher",
+   "event_date": "1987-06-11",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Third consecutive general election victory",
+   "event_significance": 2,
+   "evidence_text": "Won third term, rare in modern British politics.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Margaret_Thatcher",
+    "https://www.britannica.com/biography/Margaret-Thatcher"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-03-thatcher",
+   "event_date": "1990-11-22",
+   "event_category": "failure",
+   "event_type": "ousted",
+   "event_description": "Forced to resign after leadership challenge",
+   "event_significance": 3,
+   "evidence_text": "Withdrew from leadership contest and resigned as prime minister.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Margaret_Thatcher",
+    "https://www.britannica.com/biography/Margaret-Thatcher"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-03-thatcher",
+   "event_date": "2002-03-22",
+   "event_category": "health_event",
+   "event_type": "illness",
+   "event_description": "Series of small strokes; ended public speaking",
+   "event_significance": 2,
+   "evidence_text": "Doctors advised her to stop public speaking after strokes.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Margaret_Thatcher",
+    "https://www.britannica.com/biography/Margaret-Thatcher"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-04-armstrong",
+   "event_date": "1956-01-28",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Married Janet Shearon",
+   "event_significance": 2,
+   "evidence_text": "Married Janet Shearon in Wilmette, Illinois.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Neil_Armstrong",
+    "https://www.britannica.com/biography/Neil-Armstrong"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-04-armstrong",
+   "event_date": "1957-03-08",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "Son Eric born",
+   "event_significance": 1,
+   "evidence_text": "First son Eric born in 1957.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Neil_Armstrong",
+    "https://www.britannica.com/biography/Neil-Armstrong"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-04-armstrong",
+   "event_date": "1962-09-17",
+   "event_category": "career_change",
+   "event_type": "new_role",
+   "event_description": "Selected as NASA astronaut",
+   "event_significance": 2,
+   "evidence_text": "Named in NASA second astronaut group.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Neil_Armstrong",
+    "https://www.britannica.com/biography/Neil-Armstrong"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-04-armstrong",
+   "event_date": "1966-03-16",
+   "event_category": "achievement",
+   "event_type": "landmark_discovery",
+   "event_description": "Gemini 8: first docking in orbit, then emergency abort",
+   "event_significance": 2,
+   "evidence_text": "Commanded first space docking; safely recovered from thruster malfunction.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Neil_Armstrong",
+    "https://en.wikipedia.org/wiki/Gemini_8"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-04-armstrong",
+   "event_date": "1969-07-20",
+   "event_category": "achievement",
+   "event_type": "landmark_discovery",
+   "event_description": "First human to walk on the Moon (Apollo 11)",
+   "event_significance": 3,
+   "evidence_text": "Apollo 11 commander, first person on the lunar surface.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Neil_Armstrong",
+    "https://en.wikipedia.org/wiki/Apollo_11"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-04-armstrong",
+   "event_date": "1969-08-13",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "Presidential Medal of Freedom",
+   "event_significance": 2,
+   "evidence_text": "Apollo 11 crew honored with Medal of Freedom.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Neil_Armstrong",
+    "https://www.britannica.com/biography/Neil-Armstrong"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-04-armstrong",
+   "event_date": "1971-08",
+   "event_category": "career_change",
+   "event_type": "new_role",
+   "event_description": "Resigned NASA, became engineering professor at University of Cincinnati",
+   "event_significance": 2,
+   "evidence_text": "Left NASA to teach aerospace engineering in Cincinnati.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Neil_Armstrong",
+    "https://www.britannica.com/biography/Neil-Armstrong"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-04-armstrong",
+   "event_date": "1986",
+   "event_category": "career_change",
+   "event_type": "new_role",
+   "event_description": "Vice chairman of Rogers Commission on Challenger disaster",
+   "event_significance": 1,
+   "evidence_text": "Served as vice chairman of the Challenger investigation commission.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Neil_Armstrong",
+    "https://www.britannica.com/biography/Neil-Armstrong"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-04-armstrong",
+   "event_date": "1991-02",
+   "event_category": "health_event",
+   "event_type": "illness",
+   "event_description": "Mild heart attack while skiing",
+   "event_significance": 2,
+   "evidence_text": "Suffered mild heart attack skiing in Aspen.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Neil_Armstrong",
+    "https://www.britannica.com/biography/Neil-Armstrong"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-04-armstrong",
+   "event_date": "1994",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Divorced Janet after 38 years",
+   "event_significance": 2,
+   "evidence_text": "Separated in 1990, divorced 1994.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Neil_Armstrong",
+    "https://www.britannica.com/biography/Neil-Armstrong"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-04-armstrong",
+   "event_date": "1994-06",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Married Carol Held Knight",
+   "event_significance": 2,
+   "evidence_text": "Married Carol Held Knight, met at golf tournament 1992.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Neil_Armstrong",
+    "https://www.britannica.com/biography/Neil-Armstrong"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-04-armstrong",
+   "event_date": "2012-08-07",
+   "event_category": "health_event",
+   "event_type": "surgery",
+   "event_description": "Coronary bypass surgery; died of complications",
+   "event_significance": 3,
+   "evidence_text": "Bypass surgery; died August 25, 2012 of complications.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Neil_Armstrong",
+    "https://www.britannica.com/biography/Neil-Armstrong"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-05-curie",
+   "event_date": "1891-11",
+   "event_category": "career_change",
+   "event_type": "relocation",
+   "event_description": "Moved to Paris to study at the Sorbonne",
+   "event_significance": 2,
+   "evidence_text": "Left Warsaw to enroll at the University of Paris.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marie_Curie",
+    "https://www.nobelprize.org/prizes/physics/1903/marie-curie/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-05-curie",
+   "event_date": "1895-07-26",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Married Pierre Curie",
+   "event_significance": 2,
+   "evidence_text": "Married physicist Pierre Curie in Sceaux.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marie_Curie",
+    "https://www.nobelprize.org/prizes/physics/1903/marie-curie/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-05-curie",
+   "event_date": "1897-09-12",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "Daughter Irène born",
+   "event_significance": 1,
+   "evidence_text": "First daughter Irène born, later a Nobel laureate.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marie_Curie",
+    "https://www.nobelprize.org/prizes/physics/1903/marie-curie/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-05-curie",
+   "event_date": "1898-12-26",
+   "event_category": "achievement",
+   "event_type": "landmark_discovery",
+   "event_description": "Announced discovery of radium (after polonium in July)",
+   "event_significance": 3,
+   "evidence_text": "Curies announced radium discovery to the Academy of Sciences.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marie_Curie",
+    "https://www.nobelprize.org/prizes/physics/1903/marie-curie/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-05-curie",
+   "event_date": "1903-12-10",
+   "event_category": "achievement",
+   "event_type": "nobel_prize",
+   "event_description": "Nobel Prize in Physics (shared)",
+   "event_significance": 3,
+   "evidence_text": "First woman awarded a Nobel Prize, for radiation research.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marie_Curie",
+    "https://www.nobelprize.org/prizes/physics/1903/marie-curie/facts/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "A"
+  },
+  {
+   "person_id": "p2-professional-05-curie",
+   "event_date": "1904-12-06",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "Daughter Ève born",
+   "event_significance": 1,
+   "evidence_text": "Second daughter Ève born.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marie_Curie",
+    "https://www.nobelprize.org/prizes/physics/1903/marie-curie/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-05-curie",
+   "event_date": "1906-05-13",
+   "event_category": "career_change",
+   "event_type": "new_role",
+   "event_description": "Took Pierre's chair: first woman professor at the Sorbonne",
+   "event_significance": 2,
+   "evidence_text": "Appointed to late husband's professorship, first female professor there.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marie_Curie",
+    "https://www.nobelprize.org/prizes/physics/1903/marie-curie/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-05-curie",
+   "event_date": "1911-01-23",
+   "event_category": "failure",
+   "event_type": "election_loss",
+   "event_description": "Defeated in election to French Academy of Sciences",
+   "event_significance": 2,
+   "evidence_text": "Lost Academy seat by narrow vote amid hostility.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marie_Curie",
+    "https://www.nobelprize.org/prizes/physics/1903/marie-curie/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-05-curie",
+   "event_date": "1911-11",
+   "event_category": "failure",
+   "event_type": "public_criticism",
+   "event_description": "Press scandal over relationship with Paul Langevin",
+   "event_significance": 2,
+   "evidence_text": "Tabloids attacked her over affair with married physicist Langevin.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marie_Curie",
+    "https://www.nobelprize.org/prizes/physics/1903/marie-curie/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-05-curie",
+   "event_date": "1911-12-10",
+   "event_category": "achievement",
+   "event_type": "nobel_prize",
+   "event_description": "Nobel Prize in Chemistry",
+   "event_significance": 3,
+   "evidence_text": "Second Nobel, for discovering radium and polonium.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marie_Curie",
+    "https://www.nobelprize.org/prizes/chemistry/1911/marie-curie/facts/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "A"
+  },
+  {
+   "person_id": "p2-professional-05-curie",
+   "event_date": "1912",
+   "event_category": "health_event",
+   "event_type": "surgery",
+   "event_description": "Kidney illness and surgery, depression; withdrew from work",
+   "event_significance": 2,
+   "evidence_text": "Hospitalized late 1911, underwent kidney surgery, months of recovery.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marie_Curie",
+    "https://www.nobelprize.org/prizes/physics/1903/marie-curie/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-05-curie",
+   "event_date": "1914",
+   "event_category": "career_change",
+   "event_type": "founding",
+   "event_description": "Founded mobile radiology service in WWI; Radium Institute",
+   "event_significance": 1,
+   "evidence_text": "Organized X-ray vehicles for front-line wartime medicine.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marie_Curie",
+    "https://www.nobelprize.org/prizes/physics/1903/marie-curie/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-05-curie",
+   "event_date": "1934-07",
+   "event_category": "health_event",
+   "event_type": "illness",
+   "event_description": "Aplastic anemia from radiation exposure; died",
+   "event_significance": 3,
+   "evidence_text": "Died of aplastic anemia linked to radiation exposure.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Marie_Curie",
+    "https://www.nobelprize.org/prizes/physics/1903/marie-curie/biographical/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-06-wright",
+   "event_date": "1887",
+   "event_category": "career_change",
+   "event_type": "relocation",
+   "event_description": "Moved to Chicago to work as draftsman (Silsbee, then Adler & Sullivan)",
+   "event_significance": 1,
+   "evidence_text": "Began architecture career in Chicago offices.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Frank_Lloyd_Wright",
+    "https://www.britannica.com/biography/Frank-Lloyd-Wright"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-06-wright",
+   "event_date": "1889-06-01",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Married Catherine Tobin",
+   "event_significance": 2,
+   "evidence_text": "Married Catherine Tobin in Chicago.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Frank_Lloyd_Wright",
+    "https://www.britannica.com/biography/Frank-Lloyd-Wright"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-06-wright",
+   "event_date": "1893",
+   "event_category": "career_change",
+   "event_type": "founding",
+   "event_description": "Left Adler & Sullivan over moonlighting; opened own practice",
+   "event_significance": 2,
+   "evidence_text": "Sullivan fired him over private commissions; started own firm.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Frank_Lloyd_Wright",
+    "https://www.britannica.com/biography/Frank-Lloyd-Wright"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-06-wright",
+   "event_date": "1909",
+   "event_category": "failure",
+   "event_type": "public_criticism",
+   "event_description": "Abandoned family and practice for Europe with Mamah Borthwick; public scandal",
+   "event_significance": 2,
+   "evidence_text": "Left wife for client's wife, causing major scandal.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Frank_Lloyd_Wright",
+    "https://www.britannica.com/biography/Frank-Lloyd-Wright"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-06-wright",
+   "event_date": "1922-11",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Divorce from Catherine finalized",
+   "event_significance": 2,
+   "evidence_text": "Catherine finally granted divorce in 1922.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Frank_Lloyd_Wright",
+    "https://www.britannica.com/biography/Frank-Lloyd-Wright"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-06-wright",
+   "event_date": "1923-09-01",
+   "event_category": "achievement",
+   "event_type": "acclaimed_work",
+   "event_description": "Imperial Hotel Tokyo survived Great Kanto earthquake",
+   "event_significance": 2,
+   "evidence_text": "His hotel withstood the 1923 earthquake, boosting reputation.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Frank_Lloyd_Wright",
+    "https://www.britannica.com/biography/Frank-Lloyd-Wright"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-06-wright",
+   "event_date": "1923-11-19",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Married Miriam Noel",
+   "event_significance": 2,
+   "evidence_text": "Married sculptor Miriam Noel; marriage failed within a year.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Frank_Lloyd_Wright",
+    "https://www.britannica.com/biography/Frank-Lloyd-Wright"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-06-wright",
+   "event_date": "1925-04",
+   "event_category": "financial_event",
+   "event_type": "financial_loss",
+   "event_description": "Second Taliesin fire destroyed living quarters",
+   "event_significance": 2,
+   "evidence_text": "Electrical fire destroyed much of Taliesin home.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Frank_Lloyd_Wright",
+    "https://www.britannica.com/biography/Frank-Lloyd-Wright"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-06-wright",
+   "event_date": "1926-10",
+   "event_category": "failure",
+   "event_type": "arrest",
+   "event_description": "Arrested with Olgivanna under Mann Act; bank foreclosure on Taliesin",
+   "event_significance": 2,
+   "evidence_text": "Arrested in Minnesota; charges later dropped.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Frank_Lloyd_Wright",
+    "https://www.britannica.com/biography/Frank-Lloyd-Wright"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-06-wright",
+   "event_date": "1927-08",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Divorce from Miriam Noel finalized",
+   "event_significance": 2,
+   "evidence_text": "Divorce from Miriam Noel finalized in 1927.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Frank_Lloyd_Wright",
+    "https://www.britannica.com/biography/Frank-Lloyd-Wright"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-06-wright",
+   "event_date": "1928-08-25",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Married Olgivanna Lazovich",
+   "event_significance": 2,
+   "evidence_text": "Married Olgivanna in 1928.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Frank_Lloyd_Wright",
+    "https://www.britannica.com/biography/Frank-Lloyd-Wright"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-06-wright",
+   "event_date": "1932",
+   "event_category": "career_change",
+   "event_type": "founding",
+   "event_description": "Founded Taliesin Fellowship",
+   "event_significance": 2,
+   "evidence_text": "Launched apprenticeship program with Olgivanna.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Frank_Lloyd_Wright",
+    "https://www.britannica.com/biography/Frank-Lloyd-Wright"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-06-wright",
+   "event_date": "1938-01-17",
+   "event_category": "achievement",
+   "event_type": "acclaimed_work",
+   "event_description": "Fallingwater acclaim; Time magazine cover",
+   "event_significance": 3,
+   "evidence_text": "Fallingwater revived career; featured on Time cover.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Frank_Lloyd_Wright",
+    "https://www.britannica.com/biography/Frank-Lloyd-Wright"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-06-wright",
+   "event_date": "1949-03",
+   "event_category": "achievement",
+   "event_type": "major_award",
+   "event_description": "AIA Gold Medal",
+   "event_significance": 2,
+   "evidence_text": "American Institute of Architects awarded him its Gold Medal.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Frank_Lloyd_Wright",
+    "https://www.britannica.com/biography/Frank-Lloyd-Wright"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-07-ginsburg",
+   "event_date": "1954-06-23",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Married Martin Ginsburg",
+   "event_significance": 2,
+   "evidence_text": "Married Martin Ginsburg after Cornell graduation.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg",
+    "https://www.supremecourt.gov/about/biographies.aspx"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-07-ginsburg",
+   "event_date": "1955-07",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "Daughter Jane born",
+   "event_significance": 1,
+   "evidence_text": "Daughter Jane born 1955.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg",
+    "https://www.supremecourt.gov/about/biographies.aspx"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-07-ginsburg",
+   "event_date": "1959",
+   "event_category": "failure",
+   "event_type": "public_criticism",
+   "event_description": "Despite top grades, rejected for clerkships and law firm jobs as a woman",
+   "event_significance": 1,
+   "evidence_text": "Turned down for Frankfurter clerkship because she was a woman.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg",
+    "https://www.supremecourt.gov/about/biographies.aspx"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-07-ginsburg",
+   "event_date": "1963",
+   "event_category": "career_change",
+   "event_type": "new_role",
+   "event_description": "Joined Rutgers Law School faculty",
+   "event_significance": 2,
+   "evidence_text": "Became professor at Rutgers Law School.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg",
+    "https://www.supremecourt.gov/about/biographies.aspx"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-07-ginsburg",
+   "event_date": "1965-09-08",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "Son James born",
+   "event_significance": 1,
+   "evidence_text": "Son James born 1965.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg",
+    "https://www.supremecourt.gov/about/biographies.aspx"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-07-ginsburg",
+   "event_date": "1972",
+   "event_category": "career_change",
+   "event_type": "founding",
+   "event_description": "Co-founded ACLU Women's Rights Project; first tenured woman at Columbia Law",
+   "event_significance": 2,
+   "evidence_text": "Led ACLU women's rights litigation and joined Columbia faculty.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg",
+    "https://www.supremecourt.gov/about/biographies.aspx"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-07-ginsburg",
+   "event_date": "1980-06-30",
+   "event_category": "achievement",
+   "event_type": "major_appointment",
+   "event_description": "Appointed to US Court of Appeals, D.C. Circuit",
+   "event_significance": 2,
+   "evidence_text": "Carter appointed her to the D.C. Circuit.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg",
+    "https://www.supremecourt.gov/about/biographies.aspx"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-07-ginsburg",
+   "event_date": "1993-08-10",
+   "event_category": "achievement",
+   "event_type": "major_appointment",
+   "event_description": "Sworn in as Supreme Court Justice",
+   "event_significance": 3,
+   "evidence_text": "Second woman to serve on the US Supreme Court.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg",
+    "https://www.supremecourt.gov/about/biographies.aspx"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-07-ginsburg",
+   "event_date": "1999",
+   "event_category": "health_event",
+   "event_type": "surgery",
+   "event_description": "Colon cancer surgery and chemotherapy",
+   "event_significance": 3,
+   "evidence_text": "Diagnosed with colon cancer; surgery, chemo, radiation.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg",
+    "https://www.supremecourt.gov/about/biographies.aspx"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-07-ginsburg",
+   "event_date": "2009-02-05",
+   "event_category": "health_event",
+   "event_type": "surgery",
+   "event_description": "Pancreatic cancer surgery",
+   "event_significance": 3,
+   "evidence_text": "Surgery for early-stage pancreatic cancer.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg",
+    "https://www.supremecourt.gov/about/biographies.aspx"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-07-ginsburg",
+   "event_date": "2018-12-21",
+   "event_category": "health_event",
+   "event_type": "surgery",
+   "event_description": "Lung cancer surgery after fall broke ribs",
+   "event_significance": 3,
+   "evidence_text": "Nodules found after rib fracture; lung surgery December 2018.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg",
+    "https://www.supremecourt.gov/about/biographies.aspx"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-07-ginsburg",
+   "event_date": "2019-08",
+   "event_category": "health_event",
+   "event_type": "illness",
+   "event_description": "Radiation therapy for pancreatic tumor",
+   "event_significance": 2,
+   "evidence_text": "Court announced completion of radiation for pancreatic tumor.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg",
+    "https://www.supremecourt.gov/about/biographies.aspx"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-07-ginsburg",
+   "event_date": "2020-07",
+   "event_category": "health_event",
+   "event_type": "illness",
+   "event_description": "Cancer recurrence; chemotherapy",
+   "event_significance": 2,
+   "evidence_text": "Announced liver lesions and ongoing chemotherapy.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg",
+    "https://www.supremecourt.gov/about/biographies.aspx"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-08-barnard",
+   "event_date": "1948",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Married nurse Aletta Louw",
+   "event_significance": 2,
+   "evidence_text": "Married nurse Aletta Louw while practicing in Ceres.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Christiaan_Barnard",
+    "https://www.britannica.com/biography/Christiaan-Barnard"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-08-barnard",
+   "event_date": "1956",
+   "event_category": "career_change",
+   "event_type": "new_role",
+   "event_description": "Postgraduate work at University of Minnesota",
+   "event_significance": 2,
+   "evidence_text": "Trained in heart surgery under Wangensteen and Lillehei.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Christiaan_Barnard",
+    "https://www.britannica.com/biography/Christiaan-Barnard"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-08-barnard",
+   "event_date": "1956",
+   "event_category": "health_event",
+   "event_type": "illness",
+   "event_description": "Diagnosed with rheumatoid arthritis",
+   "event_significance": 2,
+   "evidence_text": "Arthritis diagnosed during postgraduate work in the US.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Christiaan_Barnard",
+    "https://www.britannica.com/biography/Christiaan-Barnard"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-08-barnard",
+   "event_date": "1958",
+   "event_category": "career_change",
+   "event_type": "relocation",
+   "event_description": "Returned to Groote Schuur Hospital as head of experimental surgery",
+   "event_significance": 2,
+   "evidence_text": "Appointed head of experimental surgery in Cape Town.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Christiaan_Barnard",
+    "https://www.britannica.com/biography/Christiaan-Barnard"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-08-barnard",
+   "event_date": "1967-12-03",
+   "event_category": "achievement",
+   "event_type": "landmark_discovery",
+   "event_description": "Performed world's first human heart transplant",
+   "event_significance": 3,
+   "evidence_text": "Transplanted heart into Louis Washkansky at Groote Schuur.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Christiaan_Barnard",
+    "https://en.wikipedia.org/wiki/Louis_Washkansky"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-08-barnard",
+   "event_date": "1967-12-21",
+   "event_category": "failure",
+   "event_type": "professional_setback",
+   "event_description": "First transplant patient died after 18 days",
+   "event_significance": 2,
+   "evidence_text": "Washkansky died of pneumonia eighteen days after surgery.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Christiaan_Barnard",
+    "https://www.britannica.com/biography/Christiaan-Barnard"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-08-barnard",
+   "event_date": "1969",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Divorced Aletta",
+   "event_significance": 2,
+   "evidence_text": "Fame strained family; divorced in 1969.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Christiaan_Barnard",
+    "https://www.britannica.com/biography/Christiaan-Barnard"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-08-barnard",
+   "event_date": "1970",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Married Barbara Zoellner",
+   "event_significance": 2,
+   "evidence_text": "Married 19-year-old heiress Barbara Zoellner.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Christiaan_Barnard",
+    "https://www.britannica.com/biography/Christiaan-Barnard"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-08-barnard",
+   "event_date": "1974-11-25",
+   "event_category": "achievement",
+   "event_type": "landmark_discovery",
+   "event_description": "First heterotopic (\"piggyback\") heart transplant",
+   "event_significance": 2,
+   "evidence_text": "Pioneered heterotopic heart transplant procedure.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Christiaan_Barnard",
+    "https://www.britannica.com/biography/Christiaan-Barnard"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-08-barnard",
+   "event_date": "1982",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Divorced Barbara Zoellner",
+   "event_significance": 2,
+   "evidence_text": "Second marriage ended in divorce in 1982.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Christiaan_Barnard",
+    "https://www.britannica.com/biography/Christiaan-Barnard"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-08-barnard",
+   "event_date": "1983",
+   "event_category": "retirement",
+   "event_type": "retirement",
+   "event_description": "Retired from surgery due to arthritis",
+   "event_significance": 3,
+   "evidence_text": "Rheumatoid arthritis in hands ended surgical career.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Christiaan_Barnard",
+    "https://www.britannica.com/biography/Christiaan-Barnard"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-08-barnard",
+   "event_date": "1986",
+   "event_category": "failure",
+   "event_type": "public_criticism",
+   "event_description": "Reputation damaged by endorsing Glycel anti-aging cream",
+   "event_significance": 1,
+   "evidence_text": "Criticized for promoting unproven anti-aging skin cream.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Christiaan_Barnard",
+    "https://www.britannica.com/biography/Christiaan-Barnard"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-08-barnard",
+   "event_date": "1988",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Married model Karin Setzkorn",
+   "event_significance": 2,
+   "evidence_text": "Third marriage, to Karin Setzkorn.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Christiaan_Barnard",
+    "https://www.britannica.com/biography/Christiaan-Barnard"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-08-barnard",
+   "event_date": "2000",
+   "event_category": "relationship_event",
+   "event_type": "divorce",
+   "event_description": "Divorced Karin Setzkorn",
+   "event_significance": 2,
+   "evidence_text": "Third marriage ended in divorce in 2000.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Christiaan_Barnard",
+    "https://www.britannica.com/biography/Christiaan-Barnard"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-09-obama",
+   "event_date": "1990-02-05",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Elected first Black president of Harvard Law Review",
+   "event_significance": 2,
+   "evidence_text": "First African American Harvard Law Review president.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Barack_Obama",
+    "https://www.obamalibrary.gov/obamas/president-barack-obama"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-09-obama",
+   "event_date": "1992-10-03",
+   "event_category": "relationship_event",
+   "event_type": "marriage",
+   "event_description": "Married Michelle Robinson",
+   "event_significance": 2,
+   "evidence_text": "Married Michelle Robinson in Chicago.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Barack_Obama",
+    "https://www.obamalibrary.gov/obamas/president-barack-obama"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-09-obama",
+   "event_date": "1996-11-05",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Elected to Illinois State Senate",
+   "event_significance": 2,
+   "evidence_text": "Won Illinois Senate seat for 13th district.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Barack_Obama",
+    "https://www.obamalibrary.gov/obamas/president-barack-obama"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-09-obama",
+   "event_date": "1998-07-04",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "Daughter Malia born",
+   "event_significance": 1,
+   "evidence_text": "First daughter Malia born July 1998.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Barack_Obama",
+    "https://www.obamalibrary.gov/obamas/president-barack-obama"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-09-obama",
+   "event_date": "2000-03-21",
+   "event_category": "failure",
+   "event_type": "election_loss",
+   "event_description": "Lost Democratic primary for US House to Bobby Rush",
+   "event_significance": 2,
+   "evidence_text": "Defeated roughly two to one by incumbent Bobby Rush.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Barack_Obama",
+    "https://www.obamalibrary.gov/obamas/president-barack-obama"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-09-obama",
+   "event_date": "2001-06-10",
+   "event_category": "relationship_event",
+   "event_type": "child_birth",
+   "event_description": "Daughter Sasha born",
+   "event_significance": 1,
+   "evidence_text": "Second daughter Sasha born June 2001.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Barack_Obama",
+    "https://www.obamalibrary.gov/obamas/president-barack-obama"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-09-obama",
+   "event_date": "2004-07-27",
+   "event_category": "achievement",
+   "event_type": "acclaimed_work",
+   "event_description": "Keynote speech at Democratic National Convention",
+   "event_significance": 2,
+   "evidence_text": "Convention keynote brought national prominence.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Barack_Obama",
+    "https://www.obamalibrary.gov/obamas/president-barack-obama"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-09-obama",
+   "event_date": "2004-11-02",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Elected US Senator from Illinois",
+   "event_significance": 2,
+   "evidence_text": "Won Senate seat with 70 percent of vote.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Barack_Obama",
+    "https://www.obamalibrary.gov/obamas/president-barack-obama"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-09-obama",
+   "event_date": "2008-11-04",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Elected 44th President of the United States",
+   "event_significance": 3,
+   "evidence_text": "First African American elected US president.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Barack_Obama",
+    "https://www.obamalibrary.gov/obamas/president-barack-obama"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-09-obama",
+   "event_date": "2009-10-09",
+   "event_category": "achievement",
+   "event_type": "nobel_prize",
+   "event_description": "Awarded Nobel Peace Prize",
+   "event_significance": 3,
+   "evidence_text": "Nobel committee honored efforts on international diplomacy.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Barack_Obama",
+    "https://www.nobelprize.org/prizes/peace/2009/obama/facts/"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "A"
+  },
+  {
+   "person_id": "p2-professional-09-obama",
+   "event_date": "2010-03-23",
+   "event_category": "achievement",
+   "event_type": "acclaimed_work",
+   "event_description": "Signed Affordable Care Act",
+   "event_significance": 2,
+   "evidence_text": "Signed landmark health care reform into law.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Barack_Obama",
+    "https://www.obamalibrary.gov/obamas/president-barack-obama"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-09-obama",
+   "event_date": "2010-11-02",
+   "event_category": "failure",
+   "event_type": "election_loss",
+   "event_description": "Democrats lost House in midterm \"shellacking\"",
+   "event_significance": 2,
+   "evidence_text": "Party lost 63 House seats; he called it a shellacking.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Barack_Obama",
+    "https://www.obamalibrary.gov/obamas/president-barack-obama"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-09-obama",
+   "event_date": "2012-11-06",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Re-elected president",
+   "event_significance": 2,
+   "evidence_text": "Defeated Mitt Romney for second term.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Barack_Obama",
+    "https://www.obamalibrary.gov/obamas/president-barack-obama"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-09-obama",
+   "event_date": "2017-01-20",
+   "event_category": "retirement",
+   "event_type": "term_end",
+   "event_description": "Left office at end of second term",
+   "event_significance": 2,
+   "evidence_text": "Term ended; succeeded by Donald Trump.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Barack_Obama",
+    "https://www.obamalibrary.gov/obamas/president-barack-obama"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-09-obama",
+   "event_date": "2017-02-28",
+   "event_category": "financial_event",
+   "event_type": "financial_gain",
+   "event_description": "Record joint book deal with Penguin Random House",
+   "event_significance": 2,
+   "evidence_text": "Obamas reportedly signed book deal worth over $60 million.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Barack_Obama",
+    "https://www.obamalibrary.gov/obamas/president-barack-obama"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-10-park-geun-hye",
+   "event_date": "1974-08",
+   "event_category": "career_change",
+   "event_type": "new_role",
+   "event_description": "Acted as first lady after mother's death",
+   "event_significance": 1,
+   "evidence_text": "Served as acting first lady for father Park Chung-hee.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Park_Geun-hye",
+    "https://ko.wikipedia.org/wiki/%EB%B0%95%EA%B7%BC%ED%98%9C"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-10-park-geun-hye",
+   "event_date": "1998-04-02",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Elected to National Assembly in Dalseong by-election",
+   "event_significance": 2,
+   "evidence_text": "Entered parliament in Daegu Dalseong by-election.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Park_Geun-hye",
+    "https://ko.wikipedia.org/wiki/%EB%B0%95%EA%B7%BC%ED%98%9C"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-10-park-geun-hye",
+   "event_date": "2004-03-23",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Elected chair of Grand National Party",
+   "event_significance": 2,
+   "evidence_text": "Became party leader amid impeachment backlash crisis.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Park_Geun-hye",
+    "https://ko.wikipedia.org/wiki/%EB%B0%95%EA%B7%BC%ED%98%9C"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-10-park-geun-hye",
+   "event_date": "2006-05-20",
+   "event_category": "health_event",
+   "event_type": "surgery",
+   "event_description": "Face slashed by attacker; 60 stitches surgery",
+   "event_significance": 2,
+   "evidence_text": "Attacked with utility knife; 11 cm wound needing surgery.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Park_Geun-hye",
+    "https://ko.wikipedia.org/wiki/%EB%B0%95%EA%B7%BC%ED%98%9C"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-10-park-geun-hye",
+   "event_date": "2007-08-20",
+   "event_category": "failure",
+   "event_type": "election_loss",
+   "event_description": "Lost GNP presidential primary to Lee Myung-bak",
+   "event_significance": 2,
+   "evidence_text": "Narrowly lost party nomination to Lee Myung-bak.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Park_Geun-hye",
+    "https://ko.wikipedia.org/wiki/%EB%B0%95%EA%B7%BC%ED%98%9C"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-10-park-geun-hye",
+   "event_date": "2012-04-11",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Led Saenuri Party to legislative election win",
+   "event_significance": 2,
+   "evidence_text": "Emergency committee chair; party kept majority.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Park_Geun-hye",
+    "https://ko.wikipedia.org/wiki/%EB%B0%95%EA%B7%BC%ED%98%9C"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-10-park-geun-hye",
+   "event_date": "2012-12-19",
+   "event_category": "achievement",
+   "event_type": "election_won",
+   "event_description": "Elected first female President of South Korea",
+   "event_significance": 3,
+   "evidence_text": "Won presidency over Moon Jae-in.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Park_Geun-hye",
+    "https://ko.wikipedia.org/wiki/%EB%B0%95%EA%B7%BC%ED%98%9C"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-10-park-geun-hye",
+   "event_date": "2014-04-16",
+   "event_category": "failure",
+   "event_type": "public_criticism",
+   "event_description": "Heavy criticism over Sewol ferry disaster response",
+   "event_significance": 2,
+   "evidence_text": "Government response to ferry sinking widely condemned.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Park_Geun-hye",
+    "https://ko.wikipedia.org/wiki/%EB%B0%95%EA%B7%BC%ED%98%9C"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-10-park-geun-hye",
+   "event_date": "2016-12-09",
+   "event_category": "failure",
+   "event_type": "impeachment",
+   "event_description": "Impeached by National Assembly over Choi Soon-sil scandal",
+   "event_significance": 3,
+   "evidence_text": "Assembly voted 234 to 56 to impeach her.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Park_Geun-hye",
+    "https://en.wikipedia.org/wiki/Impeachment_of_Park_Geun-hye"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-10-park-geun-hye",
+   "event_date": "2017-03-10",
+   "event_category": "failure",
+   "event_type": "impeachment",
+   "event_description": "Removed from office by Constitutional Court",
+   "event_significance": 3,
+   "evidence_text": "Court unanimously upheld impeachment, first president removed.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Park_Geun-hye",
+    "https://en.wikipedia.org/wiki/Impeachment_of_Park_Geun-hye"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-10-park-geun-hye",
+   "event_date": "2017-03-31",
+   "event_category": "failure",
+   "event_type": "arrest",
+   "event_description": "Arrested on corruption charges",
+   "event_significance": 2,
+   "evidence_text": "Arrested and held in pre-trial detention.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Park_Geun-hye",
+    "https://ko.wikipedia.org/wiki/%EB%B0%95%EA%B7%BC%ED%98%9C"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-10-park-geun-hye",
+   "event_date": "2018-04-06",
+   "event_category": "failure",
+   "event_type": "conviction",
+   "event_description": "Sentenced to 24 years for corruption and abuse of power",
+   "event_significance": 3,
+   "evidence_text": "Seoul court convicted her on 16 of 18 charges.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Park_Geun-hye",
+    "https://ko.wikipedia.org/wiki/%EB%B0%95%EA%B7%BC%ED%98%9C"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-10-park-geun-hye",
+   "event_date": "2021-01-14",
+   "event_category": "failure",
+   "event_type": "conviction",
+   "event_description": "Supreme Court finalized 20-year sentence",
+   "event_significance": 2,
+   "evidence_text": "Supreme Court upheld retrial sentence, ending legal process.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Park_Geun-hye",
+    "https://ko.wikipedia.org/wiki/%EB%B0%95%EA%B7%BC%ED%98%9C"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  },
+  {
+   "person_id": "p2-professional-10-park-geun-hye",
+   "event_date": "2021-12-24",
+   "event_category": "retirement",
+   "event_type": "released_pardon",
+   "event_description": "Pardoned on health grounds; released after hospitalization",
+   "event_significance": 1,
+   "evidence_text": "Moon Jae-in pardoned her citing deteriorating health.",
+   "evidence_urls": [
+    "https://en.wikipedia.org/wiki/Park_Geun-hye",
+    "https://ko.wikipedia.org/wiki/%EB%B0%95%EA%B7%BC%ED%98%9C"
+   ],
+   "evidence_confidence": "high",
+   "source_grade": "C"
+  }
+ ]
+}
