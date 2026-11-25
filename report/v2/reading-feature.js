@@ -210,6 +210,7 @@ function build(c){var f=c&&c.readingFeature,id=c&&(c.editorialContractId||c.id),
   if(part.custom==='late'){var lt=lateLuck(f);if(lt)scenes.push(lt);return;}
   if(part.custom==='timing'){var t=timingRank(f,part.kind,part.scope);if(t)scenes.push(t);return;}
   if(part.custom&&R.FateBlocks&&R.FateBlocks.has(part.custom)){var fb=R.FateBlocks.render(part,f,id);if(fb)scenes.push(fb);return;}   // fate-blocks.js(구성 다양화)
+  if(part.custom&&R.WeaponChapters&&R.WeaponChapters.has(part.custom)){var wp=R.WeaponChapters.render(part,f,id);if(wp)scenes.push(wp);return;}   // 주무기 블록(2026-11-26, weapon-chapters.js — 스위치 weaponChapters, 장별 연결 /api/weapon-links)
   if(part.custom&&R.TopicDeep&&R.TopicDeep.has(part.custom)){var td=R.TopicDeep.render(part,f,id);if(td)scenes.push(td);return;}   // topic-deep.js(스위치 topicDeep)
   var fn=D.SECTIONS[part.sec];if(!fn)return;var list=(fn(f).scenes||[]).map(function(s){return embed(s.html);});
   if(part.take)list=part.take.map(function(i){return list[i];}).filter(Boolean);

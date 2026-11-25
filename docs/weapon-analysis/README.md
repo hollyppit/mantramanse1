@@ -12,6 +12,8 @@
 | `results-300-head-engine.json` | 같은 표본, HEAD 엔진 |
 | `summary.json` · `summary-head-engine.json` | 집계·예외 사례 묶음 |
 | `stats.json` | 분포·민감도·병존 영향·운별 교차표 |
+| `PAID_CONTENT_INTEGRATION_REPORT.md` | 유료 상세풀이(종합·재물·커리어·인연·개운) 주무기 연결 보고서 (2026-11-26) |
+| `paid-content-300.json` | 유료 블록 300명식 검증 결과 |
 
 코드: `weapon.js`(판정) · `weapon-data.js`(문안) · `weapon-view.js`(화면) · `index.html` `wpBlock()` · 스위치 `feature-flags.js` `weapon`(2026-11-26 사용자 승인으로 기본 켬·배포)
 

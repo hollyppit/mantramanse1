@@ -639,6 +639,8 @@
     // 건강·사고수 상세 장 6개(health-chapters.js, 스위치 healthChapters): 종합풀이 '건강 및 사고수' 장 바로 뒤
     if(!PREVIEW&&R.HealthChapters){try{if(await R.HealthChapters.readyWithin(2500))S.rep=R.HealthChapters.add(S.rep,S.sd,S.name,window.Manse,S.ch);}catch(e){elog('caught','health.chapters');}}
     // 특기·적성 장 3개(aptitude-chapters.js, 스위치 aptChapters): 종합풀이 '타고난 강점과 맞는 일' 뒤 1장, 커리어 '내 재능의 값' 뒤 1장·'앞으로 10년 일의 흐름 그래프' 뒤 1장
+    // 주무기 블록(weapon-chapters.js, 스위치 weaponChapters): 장을 새로 끼우지 않고 기존 장 끝에 블록만 붙인다 — 첫 풀이가 그려지기 전에 스위치·장별 설정을 받아 둔다
+    if(!PREVIEW&&R.WeaponChapters){try{await R.WeaponChapters.readyWithin(2500);}catch(e){elog('caught','weapon.chapters');}}
     if(!PREVIEW&&R.AptChapters){try{if(await R.AptChapters.readyWithin(2500))S.rep=R.AptChapters.add(S.rep,S.sd,S.name,window.Manse,S.ch);}catch(e){elog('caught','apt.chapters');}}
     // 인연운 심화 마지막 장 '그 사람과 나의 궁합'(love-compat.js, /api/love-compat): 보유 기간 동안 하루 10회 궁합. 스크립트는 여기서만 불러 index.html 은 그대로 둔다
     if(!PREVIEW){try{await loveCompatScript();if(R.LoveCompat)S.rep=R.LoveCompat.add(S.rep,S.sd,S.name,window.Manse,S.ch);}catch(e){elog('caught','love.compat');}}

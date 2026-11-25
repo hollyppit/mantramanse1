@@ -31,6 +31,7 @@
     hourVariants: [[0, 40], [2, 0], [4, 0], [6, 0], [8, 0], [10, 0], [12, 0], [14, 0], [16, 0], [18, 0], [20, 0], [22, 0]],   // 시진 12개(한국 시각 → 보정 후 각 시진 안쪽)
   };
   var mod = function (a, n) { return ((a % n) + n) % n; };
+  var objJ = function (w) { var c = String(w).charCodeAt(String(w).length - 1) - 0xAC00; return w + (c >= 0 && c <= 11171 && c % 28 !== 0 ? '을' : '를'); };   // 목·화·토·금·수 + 을/를
   var genOf = function (e) { return mod(e + 4, 5); }, ctrlOf = function (e) { return mod(e + 3, 5); }, outOf = function (e) { return mod(e + 1, 5); };
   var pairKey = function (a, b) { var i = POS.indexOf(a), j = POS.indexOf(b); return i < j ? a + '|' + b : b + '|' + a; };
   var anyAdj = function (a) { return a.some(function (x, i) { return a.slice(i + 1).some(function (y) { return ADJ[pairKey(x, y)]; }); }); };
@@ -239,9 +240,9 @@
     var hit = hitStem || bound.length || clash.length || rootHit.length; if (hit) types.push('adjust');
     if (stemSame) s.push({ t: 'strengthen', x: '운의 천간 ' + M.STEM[p.s] + '이(가) 같은 ' + w.elK + ' 기운 — 무기가 겉으로 드러나요' });
     if (rootAny) s.push({ t: 'strengthen', x: '운의 지지 ' + M.BR[p.b] + ' 속 ' + lab[rootIx] + ' ' + M.STEM[hid[rootIx][0]] + ' — 무기에 뿌리를 대 줘요' });
-    if (gen) s.push({ t: 'support', x: EL_K[genOf(w.el)] + ' 기운이 ' + w.elK + '을(를) 낳아 받쳐 줘요' });
+    if (gen) s.push({ t: 'support', x: EL_K[genOf(w.el)] + ' 기운이 ' + objJ(w.elK) + ' 낳아 받쳐 줘요' });
     if (out) s.push({ t: 'release', x: EL_K[outOf(w.el)] + ' 기운이 와서 무기를 밖으로 내보낼 쓰임처가 열려요' });
-    if (hitStem) cons.push('운의 천간 ' + M.STEM[p.s] + '(' + EL_K[se] + ')이(가) ' + w.elK + '을(를) 제어해요(극)');
+    if (hitStem) cons.push('운의 천간 ' + M.STEM[p.s] + '(' + EL_K[se] + ')이(가) ' + objJ(w.elK) + ' 제어해요(극)');
     bound.forEach(function (r) { cons.push(r.name + ' — 원국의 무기 천간이 운과 합으로 묶여요'); });
     clash.forEach(function (r) { cons.push(r.name + ' — 원국의 무기 천간이 운과 부딪혀요'); });
     rootHit.forEach(function (r) { cons.push(r.name + ' — 무기의 뿌리 자리가 흔들려요'); });

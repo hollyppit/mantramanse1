@@ -135,6 +135,7 @@
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>60갑자 일주 적합도 2판</b> — 현재: <b style="color:' + (fl && fl.dayCompat ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.dayCompat ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leDC"' + (fl ? '' : ' disabled') + '>' + (fl && fl.dayCompat ? '일주 적합도 2판 끄기' : '일주 적합도 2판 켜기') + '</button><a class="btn" href="/?mantraFlags=dayCompat" target="_blank" rel="noopener">미리보기 주소</a></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 오행·강약 탭 \'나와 잘 맞는 상대 일주\'와 무빙툰의 일주 궁합(끌림 포함)이 <b>약 1분 안에</b> 새 계산으로 바뀝니다. 통합 용신 하나로 필요한 기운을 보고, 부족한 오행을 무조건 더하지 않으며, 일지 충·형은 맞는 글자의 역할에 따라 조건부로 봅니다. 두 사람 궁합(궁합 탭) 점수와는 별개이고, 끄면 기존 계산으로 돌아갑니다.</p></div>';
+    flagBox += '<div class="card" style="margin-top:12px" id="leWP"><p class="muted" style="margin:0">주무기 상세풀이 연결 불러오는 중…</p></div>';   // 주무기 상세풀이 질문별 연결(2026-11-26, v2-weapon-links.js)
     root.innerHTML = flagBox + '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">운세 환경 문구 게시</h3>' +
       '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 12px;margin:0 0 8px;line-height:1.7"><b>사용법</b><br>① 목록의 문구를 읽어 봅니다.<br>② 괜찮으면 체크하고 <b>[선택 게시]</b>, 전부 괜찮으면 <b>[목록 전체 게시]</b>를 누릅니다.<br>③ 고치려면 문구를 눌러 본문을 수정한 뒤 <b>[저장하고 게시]</b>를 누릅니다.</div>' +
       '<p class="muted" style="margin:0 0 8px">게시한 문구만 사용자 화면에 반영되고, 수정하면 게시본에서 빠집니다(사용자에게는 기본 문구). 단정·반말 표현이나 같은 문구는 저장되지 않습니다. 운세 환경 해석 기능이 꺼져 있으면 게시해도 아직 사용자에게 보이지 않습니다. <b>전체 ' + S.phrases.length + '건 · 게시됨 ' + c.published + ' · 미게시 ' + c.unpub + '</b></p>' +
@@ -226,6 +227,7 @@
       if (v && !confirm('운명의 타임라인 종합풀이·커리어운 심화에 특기·적성 장 3개와 연결 블록을 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
       putFlags({ flags: { aptChapters: v } }, v ? '특기·적성 장을 켰습니다(약 1분 안에 반영)' : '특기·적성 장을 껐습니다(약 1분 안에 반영)');
     };
+    if (window.V2WeaponLinks && $('#leWP')) { try { window.V2WeaponLinks.mount($('#leWP'), { pw: pw, flags: S.flags, putFlags: putFlags, msg: msg }); } catch (e) { } }   // 주무기 상세풀이 연결 카드
     $('#leGC').onclick = function () {   // 여러 명 궁합 스위치(compat-group.js)
       var v = !(S.flags && S.flags.groupCompat);
       if (v && !confirm('만세력 궁합 탭의 여러 명 궁합을 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;

@@ -1,0 +1,6075 @@
+{
+ "version": "weapon-chapters-20261126-1",
+ "rows": {
+  "timeline_self_25": {
+   "on": true,
+   "topic": "self",
+   "use": {
+    "first": true,
+    "second": true,
+    "power": true,
+    "overlap": true,
+    "rootExp": true,
+    "tenGod": true,
+    "daeun": true,
+    "seun": true,
+    "wolun": false,
+    "activation": true,
+    "favor": true
+   }
+  },
+  "timeline_wealth_02": {
+   "on": true,
+   "topic": "wealth",
+   "use": {
+    "first": true,
+    "second": true,
+    "power": true,
+    "overlap": false,
+    "rootExp": false,
+    "tenGod": true,
+    "daeun": true,
+    "seun": true,
+    "wolun": true,
+    "activation": true,
+    "favor": true
+   }
+  },
+  "timeline_career_04": {
+   "on": true,
+   "topic": "career",
+   "use": {
+    "first": true,
+    "second": true,
+    "power": true,
+    "overlap": false,
+    "rootExp": false,
+    "tenGod": true,
+    "daeun": true,
+    "seun": true,
+    "wolun": true,
+    "activation": true,
+    "favor": true
+   }
+  },
+  "timeline_love_04": {
+   "on": true,
+   "topic": "love",
+   "use": {
+    "first": true,
+    "second": true,
+    "power": false,
+    "overlap": false,
+    "rootExp": false,
+    "tenGod": true,
+    "daeun": true,
+    "seun": true,
+    "wolun": false,
+    "activation": true,
+    "favor": true
+   }
+  },
+  "timeline_self_37": {
+   "on": true,
+   "topic": "remedy",
+   "use": {
+    "first": true,
+    "second": true,
+    "power": true,
+    "overlap": false,
+    "rootExp": false,
+    "tenGod": true,
+    "daeun": true,
+    "seun": true,
+    "wolun": true,
+    "activation": true,
+    "favor": true
+   }
+  }
+ },
+ "stat": {
+  "status": {
+   "single": 193,
+   "dual": 94,
+   "none": 13
+  },
+  "topicShown": {
+   "self": 396,
+   "wealth": 396,
+   "career": 396,
+   "love": 396,
+   "remedy": 396
+  },
+  "dupSentences": 0,
+  "dupExamples": [],
+  "buildShown": {
+   "timeline_self_25": 30,
+   "timeline_wealth_02": 30,
+   "timeline_career_04": 30,
+   "timeline_love_04": 30,
+   "timeline_self_37": 30
+  },
+  "avgChars": {
+   "self": 1669,
+   "wealth": 1599,
+   "career": 1492,
+   "love": 1355,
+   "remedy": 1054
+  },
+  "nohour": {
+   "selfNote": 191,
+   "others": 109
+  },
+  "linkedSeun": 4518
+ },
+ "results": [
+  {
+   "i": 0,
+   "chart": "1950-1-1 0시 F",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1720,
+    "wealth": 1719,
+    "career": 1612,
+    "love": 1465,
+    "remedy": 1047
+   }
+  },
+  {
+   "i": 1,
+   "chart": "1957-6-12 3시 M",
+   "status": "single",
+   "weapon": "화(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1701,
+    "wealth": 1298,
+    "career": 1242,
+    "love": 1256,
+    "remedy": 1041
+   }
+  },
+  {
+   "i": 2,
+   "chart": "1964-11-23 6시 F",
+   "status": "single",
+   "weapon": "목(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1702,
+    "wealth": 1338,
+    "career": 1246,
+    "love": 1294,
+    "remedy": 998
+   }
+  },
+  {
+   "i": 3,
+   "chart": "1971-4-6 9시 M",
+   "status": "dual",
+   "weapon": "수(식상)·금(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1891,
+    "wealth": 1960,
+    "career": 1793,
+    "love": 1458,
+    "remedy": 1206
+   }
+  },
+  {
+   "i": 4,
+   "chart": "1978-9-17 12시 F",
+   "status": "dual",
+   "weapon": "금(인성)·화(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1576,
+    "wealth": 1582,
+    "career": 1487,
+    "love": 1195,
+    "remedy": 1033
+   }
+  },
+  {
+   "i": 5,
+   "chart": "1985-2-28 15시 M",
+   "status": "dual",
+   "weapon": "토(비겁)·목(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1969,
+    "wealth": 1703,
+    "career": 1519,
+    "love": 1412,
+    "remedy": 1187
+   }
+  },
+  {
+   "i": 6,
+   "chart": "1992-7-11 18시 F",
+   "status": "single",
+   "weapon": "금(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1530,
+    "wealth": 1699,
+    "career": 1612,
+    "love": 1341,
+    "remedy": 885
+   }
+  },
+  {
+   "i": 7,
+   "chart": "1999-12-22 21시 M",
+   "status": "single",
+   "weapon": "토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1499,
+    "wealth": 1661,
+    "career": 1543,
+    "love": 1411,
+    "remedy": 869
+   }
+  },
+  {
+   "i": 8,
+   "chart": "1951-5-5 0시 F",
+   "status": "single",
+   "weapon": "수(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1434,
+    "wealth": 1410,
+    "career": 1355,
+    "love": 1249,
+    "remedy": 933
+   }
+  },
+  {
+   "i": 9,
+   "chart": "1958-10-16 3시 M",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1777,
+    "wealth": 1651,
+    "career": 1549,
+    "love": 1410,
+    "remedy": 1048
+   }
+  },
+  {
+   "i": 10,
+   "chart": "1965-3-27 6시 F",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1568,
+    "wealth": 1558,
+    "career": 1474,
+    "love": 1335,
+    "remedy": 953
+   }
+  },
+  {
+   "i": 11,
+   "chart": "1972-8-10 9시 M",
+   "status": "dual",
+   "weapon": "수(비겁)·토(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1637,
+    "wealth": 1749,
+    "career": 1584,
+    "love": 1260,
+    "remedy": 1131
+   }
+  },
+  {
+   "i": 12,
+   "chart": "1979-1-21 12시 F",
+   "status": "single",
+   "weapon": "토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1699,
+    "wealth": 1518,
+    "career": 1432,
+    "love": 1274,
+    "remedy": 997
+   }
+  },
+  {
+   "i": 13,
+   "chart": "1986-6-4 15시 M",
+   "status": "single",
+   "weapon": "화(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1547,
+    "wealth": 1122,
+    "career": 1063,
+    "love": 1086,
+    "remedy": 1132
+   }
+  },
+  {
+   "i": 14,
+   "chart": "1993-11-15 18시 F",
+   "status": "single",
+   "weapon": "수(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1699,
+    "wealth": 1747,
+    "career": 1640,
+    "love": 1486,
+    "remedy": 1117
+   }
+  },
+  {
+   "i": 15,
+   "chart": "2000-4-26 21시 M",
+   "status": "dual",
+   "weapon": "목(비겁)·금(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1828,
+    "wealth": 1919,
+    "career": 1741,
+    "love": 1429,
+    "remedy": 975
+   }
+  },
+  {
+   "i": 16,
+   "chart": "1952-9-9 0시 F",
+   "status": "dual",
+   "weapon": "수(재성)·토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1701,
+    "wealth": 1745,
+    "career": 1600,
+    "love": 1255,
+    "remedy": 1208
+   }
+  },
+  {
+   "i": 17,
+   "chart": "1959-2-20 3시 M",
+   "status": "single",
+   "weapon": "수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1487,
+    "wealth": 1564,
+    "career": 1438,
+    "love": 1304,
+    "remedy": 1139
+   }
+  },
+  {
+   "i": 18,
+   "chart": "1966-7-3 6시 F",
+   "status": "dual",
+   "weapon": "화(재성)·목(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1901,
+    "wealth": 1606,
+    "career": 1469,
+    "love": 1503,
+    "remedy": 1211
+   }
+  },
+  {
+   "i": 19,
+   "chart": "1973-12-14 9시 M",
+   "status": "single",
+   "weapon": "목(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1539,
+    "wealth": 1228,
+    "career": 1146,
+    "love": 1177,
+    "remedy": 940
+   }
+  },
+  {
+   "i": 20,
+   "chart": "1980-5-25 12시 F",
+   "status": "dual",
+   "weapon": "토(비겁)·금(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1978,
+    "wealth": 1877,
+    "career": 1699,
+    "love": 1450,
+    "remedy": 1151
+   }
+  },
+  {
+   "i": 21,
+   "chart": "1987-10-8 15시 M",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1489,
+    "wealth": 1550,
+    "career": 1483,
+    "love": 1328,
+    "remedy": 926
+   }
+  },
+  {
+   "i": 22,
+   "chart": "1994-3-19 18시 F",
+   "status": "single",
+   "weapon": "목(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1405,
+    "wealth": 1056,
+    "career": 979,
+    "love": 1011,
+    "remedy": 1038
+   }
+  },
+  {
+   "i": 23,
+   "chart": "2001-8-2 21시 M",
+   "status": "single",
+   "weapon": "금(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1756,
+    "wealth": 1903,
+    "career": 1777,
+    "love": 1461,
+    "remedy": 1069
+   }
+  },
+  {
+   "i": 24,
+   "chart": "1953-1-13 0시 F",
+   "status": "dual",
+   "weapon": "수(인성)·목(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1838,
+    "wealth": 1674,
+    "career": 1532,
+    "love": 1379,
+    "remedy": 1102
+   }
+  },
+  {
+   "i": 25,
+   "chart": "1960-6-24 3시 M",
+   "status": "single",
+   "weapon": "수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1826,
+    "wealth": 1764,
+    "career": 1628,
+    "love": 1496,
+    "remedy": 1120
+   }
+  },
+  {
+   "i": 26,
+   "chart": "1967-11-7 6시 F",
+   "status": "single",
+   "weapon": "토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1740,
+    "wealth": 1694,
+    "career": 1578,
+    "love": 1456,
+    "remedy": 1107
+   }
+  },
+  {
+   "i": 27,
+   "chart": "1974-4-18 9시 M",
+   "status": "single",
+   "weapon": "토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1807,
+    "wealth": 1706,
+    "career": 1563,
+    "love": 1456,
+    "remedy": 1064
+   }
+  },
+  {
+   "i": 28,
+   "chart": "1981-9-1 12시 F",
+   "status": "dual",
+   "weapon": "금(인성)·화(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1693,
+    "wealth": 1811,
+    "career": 1677,
+    "love": 1341,
+    "remedy": 1181
+   }
+  },
+  {
+   "i": 29,
+   "chart": "1988-2-12 15시 M",
+   "status": "dual",
+   "weapon": "목(인성)·화(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1795,
+    "wealth": 1577,
+    "career": 1429,
+    "love": 1475,
+    "remedy": 1185
+   }
+  },
+  {
+   "i": 30,
+   "chart": "1995-7-23 18시 F",
+   "status": "single",
+   "weapon": "목(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1761,
+    "wealth": 1361,
+    "career": 1263,
+    "love": 1303,
+    "remedy": 1055
+   }
+  },
+  {
+   "i": 31,
+   "chart": "2002-12-6 21시 M",
+   "status": "dual",
+   "weapon": "수(재성)·금(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1662,
+    "wealth": 1761,
+    "career": 1621,
+    "love": 1279,
+    "remedy": 1190
+   }
+  },
+  {
+   "i": 32,
+   "chart": "1954-5-17 0시 F",
+   "status": "dual",
+   "weapon": "수(비겁)·토(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1575,
+    "wealth": 1601,
+    "career": 1467,
+    "love": 1196,
+    "remedy": 1027
+   }
+  },
+  {
+   "i": 33,
+   "chart": "1961-10-28 3시 M",
+   "status": "single",
+   "weapon": "토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1840,
+    "wealth": 1682,
+    "career": 1566,
+    "love": 1438,
+    "remedy": 1118
+   }
+  },
+  {
+   "i": 34,
+   "chart": "1968-3-11 6시 F",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1419,
+    "wealth": 1343,
+    "career": 1300,
+    "love": 1128,
+    "remedy": 895
+   }
+  },
+  {
+   "i": 35,
+   "chart": "1975-8-22 9시 M",
+   "status": "dual",
+   "weapon": "금(비겁)·목(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1685,
+    "wealth": 1605,
+    "career": 1477,
+    "love": 1272,
+    "remedy": 1054
+   }
+  },
+  {
+   "i": 36,
+   "chart": "1982-1-5 12시 F",
+   "status": "single",
+   "weapon": "금(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1458,
+    "wealth": 1687,
+    "career": 1607,
+    "love": 1322,
+    "remedy": 1025
+   }
+  },
+  {
+   "i": 37,
+   "chart": "1989-6-16 15시 M",
+   "status": "dual",
+   "weapon": "화(비겁)·토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1798,
+    "wealth": 1743,
+    "career": 1559,
+    "love": 1454,
+    "remedy": 1172
+   }
+  },
+  {
+   "i": 38,
+   "chart": "1996-11-27 18시 F",
+   "status": "single",
+   "weapon": "토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1491,
+    "wealth": 1463,
+    "career": 1385,
+    "love": 1225,
+    "remedy": 819
+   }
+  },
+  {
+   "i": 39,
+   "chart": "2003-4-10 21시 M",
+   "status": "single",
+   "weapon": "수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1792,
+    "wealth": 1733,
+    "career": 1585,
+    "love": 1463,
+    "remedy": 1121
+   }
+  },
+  {
+   "i": 40,
+   "chart": "1955-9-21 0시 F",
+   "status": "single",
+   "weapon": "목(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1411,
+    "wealth": 1094,
+    "career": 1039,
+    "love": 1053,
+    "remedy": 931
+   }
+  },
+  {
+   "i": 41,
+   "chart": "1962-2-4 3시 M",
+   "status": "dual",
+   "weapon": "금(인성)·수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1766,
+    "wealth": 1952,
+    "career": 1788,
+    "love": 1466,
+    "remedy": 1165
+   }
+  },
+  {
+   "i": 42,
+   "chart": "1969-7-15 6시 F",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1651,
+    "wealth": 1711,
+    "career": 1608,
+    "love": 1481,
+    "remedy": 1083
+   }
+  },
+  {
+   "i": 43,
+   "chart": "1976-12-26 9시 M",
+   "status": "none",
+   "weapon": "",
+   "shown": [
+    "self"
+   ],
+   "chars": {
+    "self": 244,
+    "wealth": 0,
+    "career": 0,
+    "love": 0,
+    "remedy": 0
+   }
+  },
+  {
+   "i": 44,
+   "chart": "1983-5-9 12시 F",
+   "status": "single",
+   "weapon": "화(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1750,
+    "wealth": 1368,
+    "career": 1264,
+    "love": 1316,
+    "remedy": 1060
+   }
+  },
+  {
+   "i": 45,
+   "chart": "1990-10-20 15시 M",
+   "status": "single",
+   "weapon": "토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1700,
+    "wealth": 1578,
+    "career": 1476,
+    "love": 1343,
+    "remedy": 998
+   }
+  },
+  {
+   "i": 46,
+   "chart": "1997-3-3 18시 F",
+   "status": "single",
+   "weapon": "수(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1711,
+    "wealth": 1658,
+    "career": 1575,
+    "love": 1409,
+    "remedy": 1053
+   }
+  },
+  {
+   "i": 47,
+   "chart": "2004-8-14 21시 M",
+   "status": "single",
+   "weapon": "수(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1541,
+    "wealth": 1504,
+    "career": 1439,
+    "love": 1336,
+    "remedy": 859
+   }
+  },
+  {
+   "i": 48,
+   "chart": "1956-1-25 0시 F",
+   "status": "dual",
+   "weapon": "토(인성)·목(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1892,
+    "wealth": 1759,
+    "career": 1618,
+    "love": 1488,
+    "remedy": 1161
+   }
+  },
+  {
+   "i": 49,
+   "chart": "1963-6-8 3시 M",
+   "status": "dual",
+   "weapon": "토(관성)·수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1829,
+    "wealth": 1791,
+    "career": 1640,
+    "love": 1372,
+    "remedy": 1073
+   }
+  },
+  {
+   "i": 50,
+   "chart": "1970-11-19 6시 F",
+   "status": "single",
+   "weapon": "목(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1732,
+    "wealth": 1361,
+    "career": 1274,
+    "love": 1311,
+    "remedy": 1055
+   }
+  },
+  {
+   "i": 51,
+   "chart": "1977-4-2 9시 M",
+   "status": "single",
+   "weapon": "토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1629,
+    "wealth": 1607,
+    "career": 1475,
+    "love": 1355,
+    "remedy": 1021
+   }
+  },
+  {
+   "i": 52,
+   "chart": "1984-9-13 12시 F",
+   "status": "single",
+   "weapon": "수(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1441,
+    "wealth": 1384,
+    "career": 1342,
+    "love": 1217,
+    "remedy": 860
+   }
+  },
+  {
+   "i": 53,
+   "chart": "1991-2-24 15시 M",
+   "status": "single",
+   "weapon": "금(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1558,
+    "wealth": 1631,
+    "career": 1562,
+    "love": 1335,
+    "remedy": 839
+   }
+  },
+  {
+   "i": 54,
+   "chart": "1998-7-7 18시 F",
+   "status": "dual",
+   "weapon": "토(재성)·목(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1748,
+    "wealth": 1673,
+    "career": 1528,
+    "love": 1387,
+    "remedy": 1231
+   }
+  },
+  {
+   "i": 55,
+   "chart": "1950-12-18 21시 M",
+   "status": "single",
+   "weapon": "금(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1685,
+    "wealth": 1932,
+    "career": 1807,
+    "love": 1479,
+    "remedy": 1112
+   }
+  },
+  {
+   "i": 56,
+   "chart": "1957-5-1 0시 F",
+   "status": "single",
+   "weapon": "수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1655,
+    "wealth": 1733,
+    "career": 1598,
+    "love": 1464,
+    "remedy": 1122
+   }
+  },
+  {
+   "i": 57,
+   "chart": "1964-10-12 3시 M",
+   "status": "single",
+   "weapon": "목(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1569,
+    "wealth": 1213,
+    "career": 1134,
+    "love": 1162,
+    "remedy": 979
+   }
+  },
+  {
+   "i": 58,
+   "chart": "1971-3-23 6시 F",
+   "status": "none",
+   "weapon": "",
+   "shown": [
+    "self"
+   ],
+   "chars": {
+    "self": 244,
+    "wealth": 0,
+    "career": 0,
+    "love": 0,
+    "remedy": 0
+   }
+  },
+  {
+   "i": 59,
+   "chart": "1978-8-6 9시 M",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1801,
+    "wealth": 1721,
+    "career": 1617,
+    "love": 1496,
+    "remedy": 1061
+   }
+  },
+  {
+   "i": 60,
+   "chart": "1985-1-17 12시 F",
+   "status": "single",
+   "weapon": "목(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1661,
+    "wealth": 1276,
+    "career": 1213,
+    "love": 1235,
+    "remedy": 967
+   }
+  },
+  {
+   "i": 61,
+   "chart": "1992-6-28 15시 M",
+   "status": "single",
+   "weapon": "수(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1569,
+    "wealth": 1444,
+    "career": 1390,
+    "love": 1279,
+    "remedy": 887
+   }
+  },
+  {
+   "i": 62,
+   "chart": "1999-11-11 18시 F",
+   "status": "single",
+   "weapon": "목(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1637,
+    "wealth": 1279,
+    "career": 1216,
+    "love": 1238,
+    "remedy": 997
+   }
+  },
+  {
+   "i": 63,
+   "chart": "1951-4-22 21시 M",
+   "status": "dual",
+   "weapon": "수(비겁)·금(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1900,
+    "wealth": 1962,
+    "career": 1766,
+    "love": 1464,
+    "remedy": 1214
+   }
+  },
+  {
+   "i": 64,
+   "chart": "1958-9-5 0시 F",
+   "status": "single",
+   "weapon": "토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1768,
+    "wealth": 1715,
+    "career": 1603,
+    "love": 1468,
+    "remedy": 1043
+   }
+  },
+  {
+   "i": 65,
+   "chart": "1965-2-16 3시 M",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1645,
+    "wealth": 1596,
+    "career": 1509,
+    "love": 1425,
+    "remedy": 917
+   }
+  },
+  {
+   "i": 66,
+   "chart": "1972-7-27 6시 F",
+   "status": "single",
+   "weapon": "화(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1573,
+    "wealth": 1137,
+    "career": 1106,
+    "love": 1104,
+    "remedy": 1004
+   }
+  },
+  {
+   "i": 67,
+   "chart": "1979-12-10 9시 M",
+   "status": "single",
+   "weapon": "수(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1587,
+    "wealth": 1525,
+    "career": 1438,
+    "love": 1279,
+    "remedy": 1088
+   }
+  },
+  {
+   "i": 68,
+   "chart": "1986-5-21 12시 F",
+   "status": "single",
+   "weapon": "수(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1507,
+    "wealth": 1442,
+    "career": 1386,
+    "love": 1274,
+    "remedy": 857
+   }
+  },
+  {
+   "i": 69,
+   "chart": "1993-10-4 15시 M",
+   "status": "dual",
+   "weapon": "금(식상)·토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1632,
+    "wealth": 1728,
+    "career": 1595,
+    "love": 1242,
+    "remedy": 1223
+   }
+  },
+  {
+   "i": 70,
+   "chart": "2000-3-15 18시 F",
+   "status": "dual",
+   "weapon": "토(관성)·금(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1667,
+    "wealth": 1607,
+    "career": 1511,
+    "love": 1210,
+    "remedy": 972
+   }
+  },
+  {
+   "i": 71,
+   "chart": "1952-8-26 21시 M",
+   "status": "dual",
+   "weapon": "토(재성)·수(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1942,
+    "wealth": 1862,
+    "career": 1713,
+    "love": 1456,
+    "remedy": 1143
+   }
+  },
+  {
+   "i": 72,
+   "chart": "1959-1-9 0시 F",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1603,
+    "wealth": 1584,
+    "career": 1492,
+    "love": 1355,
+    "remedy": 1003
+   }
+  },
+  {
+   "i": 73,
+   "chart": "1966-6-20 3시 M",
+   "status": "single",
+   "weapon": "화(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1596,
+    "wealth": 1125,
+    "career": 1053,
+    "love": 1078,
+    "remedy": 1026
+   }
+  },
+  {
+   "i": 74,
+   "chart": "1973-11-3 6시 F",
+   "status": "dual",
+   "weapon": "수(비겁)·목(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1605,
+    "wealth": 1450,
+    "career": 1335,
+    "love": 1231,
+    "remedy": 1032
+   }
+  },
+  {
+   "i": 75,
+   "chart": "1980-4-14 9시 M",
+   "status": "dual",
+   "weapon": "금(재성)·목(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1771,
+    "wealth": 1819,
+    "career": 1674,
+    "love": 1324,
+    "remedy": 1111
+   }
+  },
+  {
+   "i": 76,
+   "chart": "1987-9-25 12시 F",
+   "status": "dual",
+   "weapon": "화(비겁)·토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1457,
+    "wealth": 1408,
+    "career": 1296,
+    "love": 1197,
+    "remedy": 850
+   }
+  },
+  {
+   "i": 77,
+   "chart": "1994-2-8 15시 M",
+   "status": "dual",
+   "weapon": "목(비겁)·화(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1700,
+    "wealth": 1439,
+    "career": 1297,
+    "love": 1340,
+    "remedy": 1124
+   }
+  },
+  {
+   "i": 78,
+   "chart": "2001-7-19 18시 F",
+   "status": "single",
+   "weapon": "금(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1629,
+    "wealth": 1788,
+    "career": 1682,
+    "love": 1425,
+    "remedy": 912
+   }
+  },
+  {
+   "i": 79,
+   "chart": "1953-12-2 21시 M",
+   "status": "single",
+   "weapon": "수(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1667,
+    "wealth": 1459,
+    "career": 1403,
+    "love": 1273,
+    "remedy": 889
+   }
+  },
+  {
+   "i": 80,
+   "chart": "1960-5-13 0시 F",
+   "status": "dual",
+   "weapon": "금(비겁)·화(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1575,
+    "wealth": 1639,
+    "career": 1514,
+    "love": 1299,
+    "remedy": 978
+   }
+  },
+  {
+   "i": 81,
+   "chart": "1967-10-24 3시 M",
+   "status": "dual",
+   "weapon": "금(비겁)·토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1771,
+    "wealth": 1844,
+    "career": 1674,
+    "love": 1373,
+    "remedy": 1044
+   }
+  },
+  {
+   "i": 82,
+   "chart": "1974-3-7 6시 F",
+   "status": "single",
+   "weapon": "목(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1499,
+    "wealth": 1148,
+    "career": 1088,
+    "love": 1123,
+    "remedy": 1070
+   }
+  },
+  {
+   "i": 83,
+   "chart": "1981-8-18 9시 M",
+   "status": "single",
+   "weapon": "금(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1685,
+    "wealth": 1866,
+    "career": 1751,
+    "love": 1423,
+    "remedy": 1134
+   }
+  },
+  {
+   "i": 84,
+   "chart": "1988-1-1 12시 F",
+   "status": "single",
+   "weapon": "수(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1527,
+    "wealth": 1377,
+    "career": 1344,
+    "love": 1214,
+    "remedy": 856
+   }
+  },
+  {
+   "i": 85,
+   "chart": "1995-6-12 15시 M",
+   "status": "single",
+   "weapon": "목(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1504,
+    "wealth": 1193,
+    "career": 1106,
+    "love": 1145,
+    "remedy": 934
+   }
+  },
+  {
+   "i": 86,
+   "chart": "2002-11-23 18시 F",
+   "status": "single",
+   "weapon": "수(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1651,
+    "wealth": 1743,
+    "career": 1635,
+    "love": 1492,
+    "remedy": 1117
+   }
+  },
+  {
+   "i": 87,
+   "chart": "1954-4-6 21시 M",
+   "status": "single",
+   "weapon": "토(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1686,
+    "wealth": 1638,
+    "career": 1530,
+    "love": 1394,
+    "remedy": 1019
+   }
+  },
+  {
+   "i": 88,
+   "chart": "1961-9-17 0시 F",
+   "status": "single",
+   "weapon": "금(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1435,
+    "wealth": 1703,
+    "career": 1596,
+    "love": 1272,
+    "remedy": 1085
+   }
+  },
+  {
+   "i": 89,
+   "chart": "1968-2-28 3시 M",
+   "status": "single",
+   "weapon": "목(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1545,
+    "wealth": 1207,
+    "career": 1145,
+    "love": 1157,
+    "remedy": 971
+   }
+  },
+  {
+   "i": 90,
+   "chart": "1975-7-11 6시 F",
+   "status": "single",
+   "weapon": "목(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1620,
+    "wealth": 1211,
+    "career": 1156,
+    "love": 1157,
+    "remedy": 1024
+   }
+  },
+  {
+   "i": 91,
+   "chart": "1982-12-22 9시 M",
+   "status": "single",
+   "weapon": "수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1816,
+    "wealth": 1736,
+    "career": 1631,
+    "love": 1470,
+    "remedy": 1127
+   }
+  },
+  {
+   "i": 92,
+   "chart": "1989-5-5 12시 F",
+   "status": "single",
+   "weapon": "토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1823,
+    "wealth": 1714,
+    "career": 1612,
+    "love": 1466,
+    "remedy": 1097
+   }
+  },
+  {
+   "i": 93,
+   "chart": "1996-10-16 15시 M",
+   "status": "dual",
+   "weapon": "토(식상)·화(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1822,
+    "wealth": 1656,
+    "career": 1516,
+    "love": 1374,
+    "remedy": 1129
+   }
+  },
+  {
+   "i": 94,
+   "chart": "2003-3-27 18시 F",
+   "status": "dual",
+   "weapon": "목(관성)·수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1754,
+    "wealth": 1798,
+    "career": 1649,
+    "love": 1492,
+    "remedy": 1139
+   }
+  },
+  {
+   "i": 95,
+   "chart": "1955-8-10 21시 M",
+   "status": "dual",
+   "weapon": "수(비겁)·목(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1762,
+    "wealth": 1783,
+    "career": 1598,
+    "love": 1475,
+    "remedy": 1228
+   }
+  },
+  {
+   "i": 96,
+   "chart": "1962-1-21 0시 F",
+   "status": "single",
+   "weapon": "금(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1747,
+    "wealth": 1912,
+    "career": 1797,
+    "love": 1457,
+    "remedy": 1104
+   }
+  },
+  {
+   "i": 97,
+   "chart": "1969-6-4 3시 M",
+   "status": "dual",
+   "weapon": "토(인성)·화(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1755,
+    "wealth": 1613,
+    "career": 1497,
+    "love": 1346,
+    "remedy": 1027
+   }
+  },
+  {
+   "i": 98,
+   "chart": "1976-11-15 6시 F",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1494,
+    "wealth": 1493,
+    "career": 1432,
+    "love": 1275,
+    "remedy": 983
+   }
+  },
+  {
+   "i": 99,
+   "chart": "1983-4-26 9시 M",
+   "status": "single",
+   "weapon": "토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1782,
+    "wealth": 1674,
+    "career": 1585,
+    "love": 1431,
+    "remedy": 1038
+   }
+  },
+  {
+   "i": 100,
+   "chart": "1990-9-9 12시 F",
+   "status": "single",
+   "weapon": "화(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1593,
+    "wealth": 1251,
+    "career": 1157,
+    "love": 1201,
+    "remedy": 965
+   }
+  },
+  {
+   "i": 101,
+   "chart": "1997-2-20 15시 M",
+   "status": "single",
+   "weapon": "토(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1769,
+    "wealth": 1636,
+    "career": 1524,
+    "love": 1393,
+    "remedy": 1083
+   }
+  },
+  {
+   "i": 102,
+   "chart": "2004-7-3 18시 F",
+   "status": "single",
+   "weapon": "금(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1526,
+    "wealth": 1698,
+    "career": 1626,
+    "love": 1341,
+    "remedy": 944
+   }
+  },
+  {
+   "i": 103,
+   "chart": "1956-12-14 21시 M",
+   "status": "single",
+   "weapon": "금(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1455,
+    "wealth": 1628,
+    "career": 1568,
+    "love": 1267,
+    "remedy": 971
+   }
+  },
+  {
+   "i": 104,
+   "chart": "1963-5-25 0시 F",
+   "status": "dual",
+   "weapon": "화(인성)·수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1677,
+    "wealth": 1607,
+    "career": 1490,
+    "love": 1401,
+    "remedy": 1137
+   }
+  },
+  {
+   "i": 105,
+   "chart": "1970-10-8 3시 M",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1519,
+    "wealth": 1556,
+    "career": 1482,
+    "love": 1324,
+    "remedy": 934
+   }
+  },
+  {
+   "i": 106,
+   "chart": "1977-3-19 6시 F",
+   "status": "none",
+   "weapon": "",
+   "shown": [
+    "self"
+   ],
+   "chars": {
+    "self": 244,
+    "wealth": 0,
+    "career": 0,
+    "love": 0,
+    "remedy": 0
+   }
+  },
+  {
+   "i": 107,
+   "chart": "1984-8-2 9시 M",
+   "status": "none",
+   "weapon": "",
+   "shown": [
+    "self"
+   ],
+   "chars": {
+    "self": 244,
+    "wealth": 0,
+    "career": 0,
+    "love": 0,
+    "remedy": 0
+   }
+  },
+  {
+   "i": 108,
+   "chart": "1991-1-13 12시 F",
+   "status": "single",
+   "weapon": "토(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1785,
+    "wealth": 1559,
+    "career": 1475,
+    "love": 1325,
+    "remedy": 1020
+   }
+  },
+  {
+   "i": 109,
+   "chart": "1998-6-24 15시 M",
+   "status": "single",
+   "weapon": "토(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1756,
+    "wealth": 1694,
+    "career": 1587,
+    "love": 1448,
+    "remedy": 1107
+   }
+  },
+  {
+   "i": 110,
+   "chart": "1950-11-7 18시 F",
+   "status": "dual",
+   "weapon": "화(비겁)·금(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1910,
+    "wealth": 1893,
+    "career": 1720,
+    "love": 1410,
+    "remedy": 1179
+   }
+  },
+  {
+   "i": 111,
+   "chart": "1957-4-18 21시 M",
+   "status": "single",
+   "weapon": "화(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1511,
+    "wealth": 1165,
+    "career": 1106,
+    "love": 1116,
+    "remedy": 860
+   }
+  },
+  {
+   "i": 112,
+   "chart": "1964-9-1 0시 F",
+   "status": "single",
+   "weapon": "수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1760,
+    "wealth": 1756,
+    "career": 1626,
+    "love": 1501,
+    "remedy": 1090
+   }
+  },
+  {
+   "i": 113,
+   "chart": "1971-2-12 3시 M",
+   "status": "single",
+   "weapon": "금(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1695,
+    "wealth": 1912,
+    "career": 1782,
+    "love": 1454,
+    "remedy": 1144
+   }
+  },
+  {
+   "i": 114,
+   "chart": "1978-7-23 6시 F",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1810,
+    "wealth": 1704,
+    "career": 1598,
+    "love": 1459,
+    "remedy": 1102
+   }
+  },
+  {
+   "i": 115,
+   "chart": "1985-12-6 9시 M",
+   "status": "dual",
+   "weapon": "목(관성)·토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1677,
+    "wealth": 1583,
+    "career": 1443,
+    "love": 1290,
+    "remedy": 1144
+   }
+  },
+  {
+   "i": 116,
+   "chart": "1992-5-17 12시 F",
+   "status": "single",
+   "weapon": "수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1406,
+    "wealth": 1409,
+    "career": 1339,
+    "love": 1234,
+    "remedy": 812
+   }
+  },
+  {
+   "i": 117,
+   "chart": "1999-10-28 15시 M",
+   "status": "dual",
+   "weapon": "토(관성)·목(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1881,
+    "wealth": 1627,
+    "career": 1479,
+    "love": 1345,
+    "remedy": 1118
+   }
+  },
+  {
+   "i": 118,
+   "chart": "1951-3-11 18시 F",
+   "status": "dual",
+   "weapon": "목(재성)·금(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1770,
+    "wealth": 1875,
+    "career": 1719,
+    "love": 1396,
+    "remedy": 1157
+   }
+  },
+  {
+   "i": 119,
+   "chart": "1958-8-22 21시 M",
+   "status": "dual",
+   "weapon": "금(비겁)·토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1779,
+    "wealth": 1816,
+    "career": 1661,
+    "love": 1406,
+    "remedy": 916
+   }
+  },
+  {
+   "i": 120,
+   "chart": "1965-1-5 0시 F",
+   "status": "single",
+   "weapon": "목(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1777,
+    "wealth": 1344,
+    "career": 1251,
+    "love": 1291,
+    "remedy": 1024
+   }
+  },
+  {
+   "i": 121,
+   "chart": "1972-6-16 3시 M",
+   "status": "dual",
+   "weapon": "화(인성)·수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1655,
+    "wealth": 1473,
+    "career": 1381,
+    "love": 1273,
+    "remedy": 1022
+   }
+  },
+  {
+   "i": 122,
+   "chart": "1979-11-27 6시 F",
+   "status": "dual",
+   "weapon": "목(관성)·토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1703,
+    "wealth": 1638,
+    "career": 1487,
+    "love": 1349,
+    "remedy": 1059
+   }
+  },
+  {
+   "i": 123,
+   "chart": "1986-4-10 9시 M",
+   "status": "single",
+   "weapon": "토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1697,
+    "wealth": 1626,
+    "career": 1535,
+    "love": 1383,
+    "remedy": 942
+   }
+  },
+  {
+   "i": 124,
+   "chart": "1993-9-21 12시 F",
+   "status": "single",
+   "weapon": "금(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1647,
+    "wealth": 1755,
+    "career": 1669,
+    "love": 1387,
+    "remedy": 1002
+   }
+  },
+  {
+   "i": 125,
+   "chart": "2000-2-4 15시 M",
+   "status": "single",
+   "weapon": "토(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1639,
+    "wealth": 1560,
+    "career": 1468,
+    "love": 1327,
+    "remedy": 1050
+   }
+  },
+  {
+   "i": 126,
+   "chart": "1952-7-15 18시 F",
+   "status": "single",
+   "weapon": "토(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1637,
+    "wealth": 1584,
+    "career": 1482,
+    "love": 1345,
+    "remedy": 1005
+   }
+  },
+  {
+   "i": 127,
+   "chart": "1959-12-26 21시 M",
+   "status": "none",
+   "weapon": "",
+   "shown": [
+    "self"
+   ],
+   "chars": {
+    "self": 244,
+    "wealth": 0,
+    "career": 0,
+    "love": 0,
+    "remedy": 0
+   }
+  },
+  {
+   "i": 128,
+   "chart": "1966-5-9 0시 F",
+   "status": "dual",
+   "weapon": "화(인성)·수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1738,
+    "wealth": 1659,
+    "career": 1528,
+    "love": 1446,
+    "remedy": 1146
+   }
+  },
+  {
+   "i": 129,
+   "chart": "1973-10-20 3시 M",
+   "status": "single",
+   "weapon": "수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1799,
+    "wealth": 1788,
+    "career": 1674,
+    "love": 1527,
+    "remedy": 1113
+   }
+  },
+  {
+   "i": 130,
+   "chart": "1980-3-3 6시 F",
+   "status": "single",
+   "weapon": "토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1602,
+    "wealth": 1468,
+    "career": 1400,
+    "love": 1296,
+    "remedy": 920
+   }
+  },
+  {
+   "i": 131,
+   "chart": "1987-8-14 9시 M",
+   "status": "single",
+   "weapon": "토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1667,
+    "wealth": 1690,
+    "career": 1572,
+    "love": 1452,
+    "remedy": 1106
+   }
+  },
+  {
+   "i": 132,
+   "chart": "1994-1-25 12시 F",
+   "status": "dual",
+   "weapon": "수(식상)·목(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1750,
+    "wealth": 1788,
+    "career": 1639,
+    "love": 1493,
+    "remedy": 1190
+   }
+  },
+  {
+   "i": 133,
+   "chart": "2001-6-8 15시 M",
+   "status": "single",
+   "weapon": "화(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1790,
+    "wealth": 1354,
+    "career": 1282,
+    "love": 1301,
+    "remedy": 1095
+   }
+  },
+  {
+   "i": 134,
+   "chart": "1953-11-19 18시 F",
+   "status": "single",
+   "weapon": "수(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1634,
+    "wealth": 1676,
+    "career": 1593,
+    "love": 1429,
+    "remedy": 1008
+   }
+  },
+  {
+   "i": 135,
+   "chart": "1960-4-2 21시 M",
+   "status": "single",
+   "weapon": "금(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1380,
+    "wealth": 1505,
+    "career": 1415,
+    "love": 1150,
+    "remedy": 978
+   }
+  },
+  {
+   "i": 136,
+   "chart": "1967-9-13 0시 F",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1482,
+    "wealth": 1495,
+    "career": 1433,
+    "love": 1283,
+    "remedy": 992
+   }
+  },
+  {
+   "i": 137,
+   "chart": "1974-2-24 3시 M",
+   "status": "dual",
+   "weapon": "화(비겁)·목(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1668,
+    "wealth": 1474,
+    "career": 1338,
+    "love": 1375,
+    "remedy": 1026
+   }
+  },
+  {
+   "i": 138,
+   "chart": "1981-7-7 6시 F",
+   "status": "dual",
+   "weapon": "금(재성)·목(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1745,
+    "wealth": 1827,
+    "career": 1695,
+    "love": 1348,
+    "remedy": 1106
+   }
+  },
+  {
+   "i": 139,
+   "chart": "1988-12-18 9시 M",
+   "status": "dual",
+   "weapon": "목(인성)·토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1634,
+    "wealth": 1448,
+    "career": 1357,
+    "love": 1196,
+    "remedy": 1100
+   }
+  },
+  {
+   "i": 140,
+   "chart": "1995-5-1 12시 F",
+   "status": "none",
+   "weapon": "",
+   "shown": [
+    "self"
+   ],
+   "chars": {
+    "self": 244,
+    "wealth": 0,
+    "career": 0,
+    "love": 0,
+    "remedy": 0
+   }
+  },
+  {
+   "i": 141,
+   "chart": "2002-10-12 15시 M",
+   "status": "dual",
+   "weapon": "토(관성)·금(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1829,
+    "wealth": 1723,
+    "career": 1606,
+    "love": 1309,
+    "remedy": 1013
+   }
+  },
+  {
+   "i": 142,
+   "chart": "1954-3-23 18시 F",
+   "status": "dual",
+   "weapon": "목(관성)·화(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1632,
+    "wealth": 1429,
+    "career": 1323,
+    "love": 1342,
+    "remedy": 1108
+   }
+  },
+  {
+   "i": 143,
+   "chart": "1961-8-6 21시 M",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1999,
+    "wealth": 1657,
+    "career": 1554,
+    "love": 1426,
+    "remedy": 1067
+   }
+  },
+  {
+   "i": 144,
+   "chart": "1968-1-17 0시 F",
+   "status": "dual",
+   "weapon": "수(관성)·토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1780,
+    "wealth": 1829,
+    "career": 1669,
+    "love": 1416,
+    "remedy": 1063
+   }
+  },
+  {
+   "i": 145,
+   "chart": "1975-6-28 3시 M",
+   "status": "single",
+   "weapon": "목(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1437,
+    "wealth": 1101,
+    "career": 1045,
+    "love": 1057,
+    "remedy": 963
+   }
+  },
+  {
+   "i": 146,
+   "chart": "1982-11-11 6시 F",
+   "status": "single",
+   "weapon": "수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1642,
+    "wealth": 1770,
+    "career": 1647,
+    "love": 1509,
+    "remedy": 1117
+   }
+  },
+  {
+   "i": 147,
+   "chart": "1989-4-22 9시 M",
+   "status": "single",
+   "weapon": "토(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1716,
+    "wealth": 1563,
+    "career": 1480,
+    "love": 1323,
+    "remedy": 949
+   }
+  },
+  {
+   "i": 148,
+   "chart": "1996-9-5 12시 F",
+   "status": "dual",
+   "weapon": "화(식상)·수(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1803,
+    "wealth": 1597,
+    "career": 1482,
+    "love": 1388,
+    "remedy": 1097
+   }
+  },
+  {
+   "i": 149,
+   "chart": "2003-2-16 15시 M",
+   "status": "dual",
+   "weapon": "목(재성)·수(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1637,
+    "wealth": 1464,
+    "career": 1358,
+    "love": 1254,
+    "remedy": 981
+   }
+  },
+  {
+   "i": 150,
+   "chart": "1955-7-27 18시 F",
+   "status": "single",
+   "weapon": "수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1577,
+    "wealth": 1529,
+    "career": 1463,
+    "love": 1346,
+    "remedy": 957
+   }
+  },
+  {
+   "i": 151,
+   "chart": "1962-12-10 21시 M",
+   "status": "single",
+   "weapon": "수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1735,
+    "wealth": 1777,
+    "career": 1640,
+    "love": 1513,
+    "remedy": 1104
+   }
+  },
+  {
+   "i": 152,
+   "chart": "1969-5-21 0시 F",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1828,
+    "wealth": 1743,
+    "career": 1637,
+    "love": 1493,
+    "remedy": 1079
+   }
+  },
+  {
+   "i": 153,
+   "chart": "1976-10-4 3시 M",
+   "status": "none",
+   "weapon": "",
+   "shown": [
+    "self"
+   ],
+   "chars": {
+    "self": 246,
+    "wealth": 0,
+    "career": 0,
+    "love": 0,
+    "remedy": 0
+   }
+  },
+  {
+   "i": 154,
+   "chart": "1983-3-15 6시 F",
+   "status": "dual",
+   "weapon": "목(식상)·수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1770,
+    "wealth": 1727,
+    "career": 1589,
+    "love": 1423,
+    "remedy": 1115
+   }
+  },
+  {
+   "i": 155,
+   "chart": "1990-8-26 9시 M",
+   "status": "single",
+   "weapon": "금(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1450,
+    "wealth": 1499,
+    "career": 1469,
+    "love": 1209,
+    "remedy": 907
+   }
+  },
+  {
+   "i": 156,
+   "chart": "1997-1-9 12시 F",
+   "status": "single",
+   "weapon": "금(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1752,
+    "wealth": 1953,
+    "career": 1804,
+    "love": 1491,
+    "remedy": 1125
+   }
+  },
+  {
+   "i": 157,
+   "chart": "2004-6-20 15시 M",
+   "status": "single",
+   "weapon": "금(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1373,
+    "wealth": 1431,
+    "career": 1366,
+    "love": 1142,
+    "remedy": 892
+   }
+  },
+  {
+   "i": 158,
+   "chart": "1956-11-3 18시 F",
+   "status": "single",
+   "weapon": "토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1783,
+    "wealth": 1728,
+    "career": 1617,
+    "love": 1481,
+    "remedy": 1078
+   }
+  },
+  {
+   "i": 159,
+   "chart": "1963-4-14 21시 M",
+   "status": "dual",
+   "weapon": "화(비겁)·수(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1751,
+    "wealth": 1725,
+    "career": 1559,
+    "love": 1487,
+    "remedy": 1136
+   }
+  },
+  {
+   "i": 160,
+   "chart": "1970-9-25 0시 F",
+   "status": "single",
+   "weapon": "수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1684,
+    "wealth": 1751,
+    "career": 1627,
+    "love": 1489,
+    "remedy": 1106
+   }
+  },
+  {
+   "i": 161,
+   "chart": "1977-2-8 3시 M",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1839,
+    "wealth": 1695,
+    "career": 1598,
+    "love": 1440,
+    "remedy": 1047
+   }
+  },
+  {
+   "i": 162,
+   "chart": "1984-7-19 6시 F",
+   "status": "dual",
+   "weapon": "목(비겁)·화(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1744,
+    "wealth": 1468,
+    "career": 1326,
+    "love": 1368,
+    "remedy": 1081
+   }
+  },
+  {
+   "i": 163,
+   "chart": "1991-12-2 9시 M",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1765,
+    "wealth": 1740,
+    "career": 1629,
+    "love": 1498,
+    "remedy": 1094
+   }
+  },
+  {
+   "i": 164,
+   "chart": "1998-5-13 12시 F",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1886,
+    "wealth": 1691,
+    "career": 1589,
+    "love": 1458,
+    "remedy": 1080
+   }
+  },
+  {
+   "i": 165,
+   "chart": "1950-10-24 15시 M",
+   "status": "single",
+   "weapon": "화(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1800,
+    "wealth": 1328,
+    "career": 1240,
+    "love": 1278,
+    "remedy": 1127
+   }
+  },
+  {
+   "i": 166,
+   "chart": "1957-3-7 18시 F",
+   "status": "single",
+   "weapon": "금(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1760,
+    "wealth": 1896,
+    "career": 1768,
+    "love": 1451,
+    "remedy": 1091
+   }
+  },
+  {
+   "i": 167,
+   "chart": "1964-8-18 21시 M",
+   "status": "single",
+   "weapon": "수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1771,
+    "wealth": 1756,
+    "career": 1633,
+    "love": 1495,
+    "remedy": 1103
+   }
+  },
+  {
+   "i": 168,
+   "chart": "1971-1-1 0시 F",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1705,
+    "wealth": 1676,
+    "career": 1560,
+    "love": 1431,
+    "remedy": 1080
+   }
+  },
+  {
+   "i": 169,
+   "chart": "1978-6-12 3시 M",
+   "status": "dual",
+   "weapon": "화(식상)·토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1885,
+    "wealth": 1755,
+    "career": 1603,
+    "love": 1483,
+    "remedy": 1160
+   }
+  },
+  {
+   "i": 170,
+   "chart": "1985-11-23 6시 F",
+   "status": "single",
+   "weapon": "화(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1652,
+    "wealth": 1310,
+    "career": 1214,
+    "love": 1255,
+    "remedy": 960
+   }
+  },
+  {
+   "i": 171,
+   "chart": "1992-4-6 9시 M",
+   "status": "dual",
+   "weapon": "수(비겁)·목(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1851,
+    "wealth": 1724,
+    "career": 1565,
+    "love": 1423,
+    "remedy": 1097
+   }
+  },
+  {
+   "i": 172,
+   "chart": "1999-9-17 12시 F",
+   "status": "single",
+   "weapon": "수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1650,
+    "wealth": 1749,
+    "career": 1613,
+    "love": 1481,
+    "remedy": 1087
+   }
+  },
+  {
+   "i": 173,
+   "chart": "1951-2-28 15시 M",
+   "status": "none",
+   "weapon": "",
+   "shown": [
+    "self"
+   ],
+   "chars": {
+    "self": 244,
+    "wealth": 0,
+    "career": 0,
+    "love": 0,
+    "remedy": 0
+   }
+  },
+  {
+   "i": 174,
+   "chart": "1958-7-11 18시 F",
+   "status": "single",
+   "weapon": "토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1866,
+    "wealth": 1654,
+    "career": 1538,
+    "love": 1404,
+    "remedy": 1063
+   }
+  },
+  {
+   "i": 175,
+   "chart": "1965-12-22 21시 M",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1691,
+    "wealth": 1627,
+    "career": 1534,
+    "love": 1391,
+    "remedy": 890
+   }
+  },
+  {
+   "i": 176,
+   "chart": "1972-5-5 0시 F",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1663,
+    "wealth": 1697,
+    "career": 1585,
+    "love": 1457,
+    "remedy": 1077
+   }
+  },
+  {
+   "i": 177,
+   "chart": "1979-10-16 3시 M",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 2014,
+    "wealth": 1667,
+    "career": 1564,
+    "love": 1432,
+    "remedy": 1121
+   }
+  },
+  {
+   "i": 178,
+   "chart": "1986-3-27 6시 F",
+   "status": "single",
+   "weapon": "화(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1629,
+    "wealth": 1315,
+    "career": 1229,
+    "love": 1263,
+    "remedy": 1045
+   }
+  },
+  {
+   "i": 179,
+   "chart": "1993-8-10 9시 M",
+   "status": "dual",
+   "weapon": "금(인성)·수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1808,
+    "wealth": 1967,
+    "career": 1807,
+    "love": 1471,
+    "remedy": 1167
+   }
+  },
+  {
+   "i": 180,
+   "chart": "2000-1-21 12시 F",
+   "status": "dual",
+   "weapon": "토(비겁)·화(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1833,
+    "wealth": 1670,
+    "career": 1512,
+    "love": 1381,
+    "remedy": 1150
+   }
+  },
+  {
+   "i": 181,
+   "chart": "1952-6-4 15시 M",
+   "status": "single",
+   "weapon": "목(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1688,
+    "wealth": 1366,
+    "career": 1280,
+    "love": 1310,
+    "remedy": 1004
+   }
+  },
+  {
+   "i": 182,
+   "chart": "1959-11-15 18시 F",
+   "status": "single",
+   "weapon": "목(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1573,
+    "wealth": 1281,
+    "career": 1199,
+    "love": 1233,
+    "remedy": 972
+   }
+  },
+  {
+   "i": 183,
+   "chart": "1966-4-26 21시 M",
+   "status": "single",
+   "weapon": "화(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1571,
+    "wealth": 1149,
+    "career": 1084,
+    "love": 1112,
+    "remedy": 1095
+   }
+  },
+  {
+   "i": 184,
+   "chart": "1973-9-9 0시 F",
+   "status": "dual",
+   "weapon": "금(식상)·수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1789,
+    "wealth": 1953,
+    "career": 1784,
+    "love": 1469,
+    "remedy": 1157
+   }
+  },
+  {
+   "i": 185,
+   "chart": "1980-2-20 3시 M",
+   "status": "dual",
+   "weapon": "수(비겁)·토(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1841,
+    "wealth": 1847,
+    "career": 1661,
+    "love": 1414,
+    "remedy": 1154
+   }
+  },
+  {
+   "i": 186,
+   "chart": "1987-7-3 6시 F",
+   "status": "dual",
+   "weapon": "화(재성)·목(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1851,
+    "wealth": 1479,
+    "career": 1368,
+    "love": 1384,
+    "remedy": 1219
+   }
+  },
+  {
+   "i": 187,
+   "chart": "1994-12-14 9시 M",
+   "status": "dual",
+   "weapon": "목(비겁)·토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1677,
+    "wealth": 1663,
+    "career": 1499,
+    "love": 1379,
+    "remedy": 1133
+   }
+  },
+  {
+   "i": 188,
+   "chart": "2001-5-25 12시 F",
+   "status": "dual",
+   "weapon": "토(비겁)·수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1739,
+    "wealth": 1762,
+    "career": 1614,
+    "love": 1348,
+    "remedy": 1064
+   }
+  },
+  {
+   "i": 189,
+   "chart": "1953-10-8 15시 M",
+   "status": "single",
+   "weapon": "금(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1653,
+    "wealth": 1900,
+    "career": 1791,
+    "love": 1455,
+    "remedy": 1128
+   }
+  },
+  {
+   "i": 190,
+   "chart": "1960-3-19 18시 F",
+   "status": "single",
+   "weapon": "화(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1517,
+    "wealth": 1292,
+    "career": 1197,
+    "love": 1239,
+    "remedy": 1034
+   }
+  },
+  {
+   "i": 191,
+   "chart": "1967-8-2 21시 M",
+   "status": "single",
+   "weapon": "화(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1785,
+    "wealth": 1268,
+    "career": 1203,
+    "love": 1230,
+    "remedy": 985
+   }
+  },
+  {
+   "i": 192,
+   "chart": "1974-1-13 0시 F",
+   "status": "dual",
+   "weapon": "목(비겁)·수(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1759,
+    "wealth": 1817,
+    "career": 1650,
+    "love": 1511,
+    "remedy": 1090
+   }
+  },
+  {
+   "i": 193,
+   "chart": "1981-6-24 3시 M",
+   "status": "dual",
+   "weapon": "금(인성)·수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1832,
+    "wealth": 1920,
+    "career": 1753,
+    "love": 1432,
+    "remedy": 1196
+   }
+  },
+  {
+   "i": 194,
+   "chart": "1988-11-7 6시 F",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1741,
+    "wealth": 1683,
+    "career": 1577,
+    "love": 1438,
+    "remedy": 1058
+   }
+  },
+  {
+   "i": 195,
+   "chart": "1995-4-18 9시 M",
+   "status": "single",
+   "weapon": "토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1799,
+    "wealth": 1715,
+    "career": 1577,
+    "love": 1463,
+    "remedy": 1052
+   }
+  },
+  {
+   "i": 196,
+   "chart": "2002-9-1 12시 F",
+   "status": "single",
+   "weapon": "토(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1543,
+    "wealth": 1509,
+    "career": 1438,
+    "love": 1271,
+    "remedy": 944
+   }
+  },
+  {
+   "i": 197,
+   "chart": "1954-2-12 15시 M",
+   "status": "dual",
+   "weapon": "목(관성)·화(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1794,
+    "wealth": 1577,
+    "career": 1447,
+    "love": 1468,
+    "remedy": 1141
+   }
+  },
+  {
+   "i": 198,
+   "chart": "1961-7-23 18시 F",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1746,
+    "wealth": 1698,
+    "career": 1593,
+    "love": 1460,
+    "remedy": 1090
+   }
+  },
+  {
+   "i": 199,
+   "chart": "1968-12-6 21시 M",
+   "status": "dual",
+   "weapon": "수(식상)·토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1683,
+    "wealth": 1836,
+    "career": 1688,
+    "love": 1365,
+    "remedy": 1127
+   }
+  },
+  {
+   "i": 200,
+   "chart": "1975-5-17 0시 F",
+   "status": "single",
+   "weapon": "수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1602,
+    "wealth": 1541,
+    "career": 1434,
+    "love": 1359,
+    "remedy": 940
+   }
+  },
+  {
+   "i": 201,
+   "chart": "1982-10-28 3시 M",
+   "status": "single",
+   "weapon": "금(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1809,
+    "wealth": 1921,
+    "career": 1792,
+    "love": 1479,
+    "remedy": 1062
+   }
+  },
+  {
+   "i": 202,
+   "chart": "1989-3-11 6시 F",
+   "status": "dual",
+   "weapon": "화(관성)·토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1688,
+    "wealth": 1646,
+    "career": 1505,
+    "love": 1368,
+    "remedy": 1172
+   }
+  },
+  {
+   "i": 203,
+   "chart": "1996-8-22 9시 M",
+   "status": "single",
+   "weapon": "수(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1741,
+    "wealth": 1698,
+    "career": 1593,
+    "love": 1447,
+    "remedy": 1115
+   }
+  },
+  {
+   "i": 204,
+   "chart": "2003-1-5 12시 F",
+   "status": "single",
+   "weapon": "토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1552,
+    "wealth": 1548,
+    "career": 1435,
+    "love": 1304,
+    "remedy": 910
+   }
+  },
+  {
+   "i": 205,
+   "chart": "1955-6-16 15시 M",
+   "status": "single",
+   "weapon": "토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1780,
+    "wealth": 1746,
+    "career": 1609,
+    "love": 1498,
+    "remedy": 1080
+   }
+  },
+  {
+   "i": 206,
+   "chart": "1962-11-27 18시 F",
+   "status": "single",
+   "weapon": "금(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1721,
+    "wealth": 1907,
+    "career": 1791,
+    "love": 1462,
+    "remedy": 1126
+   }
+  },
+  {
+   "i": 207,
+   "chart": "1969-4-10 21시 M",
+   "status": "single",
+   "weapon": "토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1790,
+    "wealth": 1688,
+    "career": 1582,
+    "love": 1444,
+    "remedy": 1086
+   }
+  },
+  {
+   "i": 208,
+   "chart": "1976-9-21 0시 F",
+   "status": "none",
+   "weapon": "",
+   "shown": [
+    "self"
+   ],
+   "chars": {
+    "self": 246,
+    "wealth": 0,
+    "career": 0,
+    "love": 0,
+    "remedy": 0
+   }
+  },
+  {
+   "i": 209,
+   "chart": "1983-2-4 3시 M",
+   "status": "single",
+   "weapon": "수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1805,
+    "wealth": 1754,
+    "career": 1606,
+    "love": 1490,
+    "remedy": 1104
+   }
+  },
+  {
+   "i": 210,
+   "chart": "1990-7-15 6시 F",
+   "status": "single",
+   "weapon": "금(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1505,
+    "wealth": 1592,
+    "career": 1511,
+    "love": 1296,
+    "remedy": 911
+   }
+  },
+  {
+   "i": 211,
+   "chart": "1997-12-26 9시 M",
+   "status": "single",
+   "weapon": "수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1746,
+    "wealth": 1749,
+    "career": 1619,
+    "love": 1476,
+    "remedy": 1113
+   }
+  },
+  {
+   "i": 212,
+   "chart": "2004-5-9 12시 F",
+   "status": "single",
+   "weapon": "토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1714,
+    "wealth": 1580,
+    "career": 1481,
+    "love": 1332,
+    "remedy": 1053
+   }
+  },
+  {
+   "i": 213,
+   "chart": "1956-10-20 15시 M",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1626,
+    "wealth": 1616,
+    "career": 1537,
+    "love": 1390,
+    "remedy": 998
+   }
+  },
+  {
+   "i": 214,
+   "chart": "1963-3-3 18시 F",
+   "status": "single",
+   "weapon": "목(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1622,
+    "wealth": 1225,
+    "career": 1144,
+    "love": 1178,
+    "remedy": 1028
+   }
+  },
+  {
+   "i": 215,
+   "chart": "1970-8-14 21시 M",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1709,
+    "wealth": 1653,
+    "career": 1543,
+    "love": 1413,
+    "remedy": 985
+   }
+  },
+  {
+   "i": 216,
+   "chart": "1977-1-25 0시 F",
+   "status": "single",
+   "weapon": "금(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1510,
+    "wealth": 1534,
+    "career": 1475,
+    "love": 1243,
+    "remedy": 968
+   }
+  },
+  {
+   "i": 217,
+   "chart": "1984-6-8 3시 M",
+   "status": "single",
+   "weapon": "수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1750,
+    "wealth": 1788,
+    "career": 1661,
+    "love": 1519,
+    "remedy": 1128
+   }
+  },
+  {
+   "i": 218,
+   "chart": "1991-11-19 6시 F",
+   "status": "single",
+   "weapon": "목(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1637,
+    "wealth": 1317,
+    "career": 1241,
+    "love": 1272,
+    "remedy": 1079
+   }
+  },
+  {
+   "i": 219,
+   "chart": "1998-4-2 9시 M",
+   "status": "dual",
+   "weapon": "목(관성)·토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1613,
+    "wealth": 1513,
+    "career": 1393,
+    "love": 1223,
+    "remedy": 1036
+   }
+  },
+  {
+   "i": 220,
+   "chart": "1950-9-13 12시 F",
+   "status": "dual",
+   "weapon": "금(비겁)·목(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1696,
+    "wealth": 1817,
+    "career": 1656,
+    "love": 1406,
+    "remedy": 1017
+   }
+  },
+  {
+   "i": 221,
+   "chart": "1957-2-24 15시 M",
+   "status": "single",
+   "weapon": "화(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1518,
+    "wealth": 1097,
+    "career": 1053,
+    "love": 1056,
+    "remedy": 965
+   }
+  },
+  {
+   "i": 222,
+   "chart": "1964-7-7 18시 F",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1704,
+    "wealth": 1714,
+    "career": 1603,
+    "love": 1476,
+    "remedy": 1123
+   }
+  },
+  {
+   "i": 223,
+   "chart": "1971-12-18 21시 M",
+   "status": "single",
+   "weapon": "금(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1725,
+    "wealth": 1939,
+    "career": 1805,
+    "love": 1491,
+    "remedy": 1111
+   }
+  },
+  {
+   "i": 224,
+   "chart": "1978-5-1 0시 F",
+   "status": "dual",
+   "weapon": "수(비겁)·토(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1695,
+    "wealth": 1668,
+    "career": 1516,
+    "love": 1254,
+    "remedy": 1082
+   }
+  },
+  {
+   "i": 225,
+   "chart": "1985-10-12 3시 M",
+   "status": "none",
+   "weapon": "",
+   "shown": [
+    "self"
+   ],
+   "chars": {
+    "self": 246,
+    "wealth": 0,
+    "career": 0,
+    "love": 0,
+    "remedy": 0
+   }
+  },
+  {
+   "i": 226,
+   "chart": "1992-3-23 6시 F",
+   "status": "dual",
+   "weapon": "목(관성)·수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1760,
+    "wealth": 1759,
+    "career": 1605,
+    "love": 1456,
+    "remedy": 1156
+   }
+  },
+  {
+   "i": 227,
+   "chart": "1999-8-6 9시 M",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1700,
+    "wealth": 1665,
+    "career": 1567,
+    "love": 1438,
+    "remedy": 1112
+   }
+  },
+  {
+   "i": 228,
+   "chart": "1951-1-17 12시 F",
+   "status": "dual",
+   "weapon": "토(식상)·화(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1815,
+    "wealth": 1656,
+    "career": 1511,
+    "love": 1363,
+    "remedy": 1208
+   }
+  },
+  {
+   "i": 229,
+   "chart": "1958-6-28 15시 M",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1804,
+    "wealth": 1665,
+    "career": 1562,
+    "love": 1430,
+    "remedy": 1080
+   }
+  },
+  {
+   "i": 230,
+   "chart": "1965-11-11 18시 F",
+   "status": "single",
+   "weapon": "수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1450,
+    "wealth": 1516,
+    "career": 1420,
+    "love": 1263,
+    "remedy": 1110
+   }
+  },
+  {
+   "i": 231,
+   "chart": "1972-4-22 21시 M",
+   "status": "dual",
+   "weapon": "수(비겁)·목(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1811,
+    "wealth": 1785,
+    "career": 1607,
+    "love": 1474,
+    "remedy": 1153
+   }
+  },
+  {
+   "i": 232,
+   "chart": "1979-9-5 0시 F",
+   "status": "single",
+   "weapon": "토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1480,
+    "wealth": 1470,
+    "career": 1403,
+    "love": 1244,
+    "remedy": 911
+   }
+  },
+  {
+   "i": 233,
+   "chart": "1986-2-16 3시 M",
+   "status": "single",
+   "weapon": "금(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1449,
+    "wealth": 1646,
+    "career": 1544,
+    "love": 1352,
+    "remedy": 825
+   }
+  },
+  {
+   "i": 234,
+   "chart": "1993-7-27 6시 F",
+   "status": "single",
+   "weapon": "토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1525,
+    "wealth": 1489,
+    "career": 1395,
+    "love": 1251,
+    "remedy": 1027
+   }
+  },
+  {
+   "i": 235,
+   "chart": "2000-12-10 9시 M",
+   "status": "single",
+   "weapon": "토(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1606,
+    "wealth": 1562,
+    "career": 1478,
+    "love": 1317,
+    "remedy": 887
+   }
+  },
+  {
+   "i": 236,
+   "chart": "1952-5-21 12시 F",
+   "status": "single",
+   "weapon": "목(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1685,
+    "wealth": 1357,
+    "career": 1281,
+    "love": 1316,
+    "remedy": 1040
+   }
+  },
+  {
+   "i": 237,
+   "chart": "1959-10-4 15시 M",
+   "status": "single",
+   "weapon": "금(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1387,
+    "wealth": 1710,
+    "career": 1597,
+    "love": 1278,
+    "remedy": 1079
+   }
+  },
+  {
+   "i": 238,
+   "chart": "1966-3-15 18시 F",
+   "status": "dual",
+   "weapon": "금(인성)·화(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1842,
+    "wealth": 1869,
+    "career": 1722,
+    "love": 1394,
+    "remedy": 1193
+   }
+  },
+  {
+   "i": 239,
+   "chart": "1973-8-26 21시 M",
+   "status": "single",
+   "weapon": "수(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1457,
+    "wealth": 1449,
+    "career": 1396,
+    "love": 1285,
+    "remedy": 874
+   }
+  },
+  {
+   "i": 240,
+   "chart": "1980-1-9 0시 F",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1817,
+    "wealth": 1702,
+    "career": 1598,
+    "love": 1473,
+    "remedy": 1082
+   }
+  },
+  {
+   "i": 241,
+   "chart": "1987-6-20 3시 M",
+   "status": "single",
+   "weapon": "화(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1774,
+    "wealth": 1344,
+    "career": 1273,
+    "love": 1288,
+    "remedy": 1062
+   }
+  },
+  {
+   "i": 242,
+   "chart": "1994-11-3 6시 F",
+   "status": "single",
+   "weapon": "목(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1694,
+    "wealth": 1367,
+    "career": 1286,
+    "love": 1318,
+    "remedy": 1082
+   }
+  },
+  {
+   "i": 243,
+   "chart": "2001-4-14 9시 M",
+   "status": "single",
+   "weapon": "목(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1545,
+    "wealth": 1215,
+    "career": 1152,
+    "love": 1178,
+    "remedy": 866
+   }
+  },
+  {
+   "i": 244,
+   "chart": "1953-9-25 12시 F",
+   "status": "single",
+   "weapon": "금(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1606,
+    "wealth": 1851,
+    "career": 1748,
+    "love": 1403,
+    "remedy": 1076
+   }
+  },
+  {
+   "i": 245,
+   "chart": "1960-2-8 15시 M",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1589,
+    "wealth": 1617,
+    "career": 1528,
+    "love": 1379,
+    "remedy": 994
+   }
+  },
+  {
+   "i": 246,
+   "chart": "1967-7-19 18시 F",
+   "status": "single",
+   "weapon": "화(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1714,
+    "wealth": 1369,
+    "career": 1285,
+    "love": 1329,
+    "remedy": 1097
+   }
+  },
+  {
+   "i": 247,
+   "chart": "1974-12-2 21시 M",
+   "status": "single",
+   "weapon": "목(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1804,
+    "wealth": 1345,
+    "career": 1254,
+    "love": 1300,
+    "remedy": 994
+   }
+  },
+  {
+   "i": 248,
+   "chart": "1981-5-13 0시 F",
+   "status": "single",
+   "weapon": "금(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1707,
+    "wealth": 1876,
+    "career": 1726,
+    "love": 1432,
+    "remedy": 1096
+   }
+  },
+  {
+   "i": 249,
+   "chart": "1988-10-24 3시 M",
+   "status": "dual",
+   "weapon": "토(관성)·수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1710,
+    "wealth": 1809,
+    "career": 1670,
+    "love": 1315,
+    "remedy": 1064
+   }
+  },
+  {
+   "i": 250,
+   "chart": "1995-3-7 6시 F",
+   "status": "single",
+   "weapon": "목(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1734,
+    "wealth": 1344,
+    "career": 1277,
+    "love": 1299,
+    "remedy": 1067
+   }
+  },
+  {
+   "i": 251,
+   "chart": "2002-8-18 9시 M",
+   "status": "single",
+   "weapon": "토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1603,
+    "wealth": 1497,
+    "career": 1403,
+    "love": 1253,
+    "remedy": 1068
+   }
+  },
+  {
+   "i": 252,
+   "chart": "1954-1-1 12시 F",
+   "status": "single",
+   "weapon": "화(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1415,
+    "wealth": 1084,
+    "career": 996,
+    "love": 1045,
+    "remedy": 1011
+   }
+  },
+  {
+   "i": 253,
+   "chart": "1961-6-12 15시 M",
+   "status": "single",
+   "weapon": "목(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1484,
+    "wealth": 1080,
+    "career": 1062,
+    "love": 1046,
+    "remedy": 917
+   }
+  },
+  {
+   "i": 254,
+   "chart": "1968-11-23 18시 F",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1738,
+    "wealth": 1751,
+    "career": 1645,
+    "love": 1497,
+    "remedy": 1064
+   }
+  },
+  {
+   "i": 255,
+   "chart": "1975-4-6 21시 M",
+   "status": "dual",
+   "weapon": "목(식상)·금(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1755,
+    "wealth": 1695,
+    "career": 1577,
+    "love": 1294,
+    "remedy": 1152
+   }
+  },
+  {
+   "i": 256,
+   "chart": "1982-9-17 0시 F",
+   "status": "single",
+   "weapon": "수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1729,
+    "wealth": 1789,
+    "career": 1662,
+    "love": 1521,
+    "remedy": 1124
+   }
+  },
+  {
+   "i": 257,
+   "chart": "1989-2-28 3시 M",
+   "status": "single",
+   "weapon": "토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1852,
+    "wealth": 1700,
+    "career": 1557,
+    "love": 1456,
+    "remedy": 1106
+   }
+  },
+  {
+   "i": 258,
+   "chart": "1996-7-11 6시 F",
+   "status": "dual",
+   "weapon": "화(인성)·목(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1851,
+    "wealth": 1522,
+    "career": 1403,
+    "love": 1431,
+    "remedy": 1206
+   }
+  },
+  {
+   "i": 259,
+   "chart": "2003-12-22 9시 M",
+   "status": "dual",
+   "weapon": "수(재성)·토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1639,
+    "wealth": 1721,
+    "career": 1586,
+    "love": 1238,
+    "remedy": 1151
+   }
+  },
+  {
+   "i": 260,
+   "chart": "1955-5-5 12시 F",
+   "status": "none",
+   "weapon": "",
+   "shown": [
+    "self"
+   ],
+   "chars": {
+    "self": 246,
+    "wealth": 0,
+    "career": 0,
+    "love": 0,
+    "remedy": 0
+   }
+  },
+  {
+   "i": 261,
+   "chart": "1962-10-16 15시 M",
+   "status": "single",
+   "weapon": "금(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1679,
+    "wealth": 1947,
+    "career": 1824,
+    "love": 1494,
+    "remedy": 1104
+   }
+  },
+  {
+   "i": 262,
+   "chart": "1969-3-27 18시 F",
+   "status": "none",
+   "weapon": "",
+   "shown": [
+    "self"
+   ],
+   "chars": {
+    "self": 246,
+    "wealth": 0,
+    "career": 0,
+    "love": 0,
+    "remedy": 0
+   }
+  },
+  {
+   "i": 263,
+   "chart": "1976-8-10 21시 M",
+   "status": "single",
+   "weapon": "화(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1688,
+    "wealth": 1333,
+    "career": 1249,
+    "love": 1293,
+    "remedy": 1056
+   }
+  },
+  {
+   "i": 264,
+   "chart": "1983-1-21 0시 F",
+   "status": "single",
+   "weapon": "수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1693,
+    "wealth": 1766,
+    "career": 1661,
+    "love": 1499,
+    "remedy": 1126
+   }
+  },
+  {
+   "i": 265,
+   "chart": "1990-6-4 3시 M",
+   "status": "dual",
+   "weapon": "화(관성)·금(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1622,
+    "wealth": 1854,
+    "career": 1707,
+    "love": 1361,
+    "remedy": 1091
+   }
+  },
+  {
+   "i": 266,
+   "chart": "1997-11-15 6시 F",
+   "status": "single",
+   "weapon": "금(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1769,
+    "wealth": 1945,
+    "career": 1799,
+    "love": 1497,
+    "remedy": 1123
+   }
+  },
+  {
+   "i": 267,
+   "chart": "2004-4-26 9시 M",
+   "status": "single",
+   "weapon": "토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1515,
+    "wealth": 1389,
+    "career": 1350,
+    "love": 1162,
+    "remedy": 900
+   }
+  },
+  {
+   "i": 268,
+   "chart": "1956-9-9 12시 F",
+   "status": "dual",
+   "weapon": "토(비겁)·화(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1914,
+    "wealth": 1823,
+    "career": 1647,
+    "love": 1515,
+    "remedy": 1181
+   }
+  },
+  {
+   "i": 269,
+   "chart": "1963-2-20 15시 M",
+   "status": "single",
+   "weapon": "목(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1511,
+    "wealth": 1220,
+    "career": 1137,
+    "love": 1173,
+    "remedy": 1028
+   }
+  },
+  {
+   "i": 270,
+   "chart": "1970-7-3 18시 F",
+   "status": "single",
+   "weapon": "수(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1508,
+    "wealth": 1508,
+    "career": 1442,
+    "love": 1339,
+    "remedy": 860
+   }
+  },
+  {
+   "i": 271,
+   "chart": "1977-12-14 21시 M",
+   "status": "dual",
+   "weapon": "수(인성)·화(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1609,
+    "wealth": 1617,
+    "career": 1490,
+    "love": 1334,
+    "remedy": 1144
+   }
+  },
+  {
+   "i": 272,
+   "chart": "1984-5-25 0시 F",
+   "status": "dual",
+   "weapon": "토(비겁)·목(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1843,
+    "wealth": 1741,
+    "career": 1557,
+    "love": 1450,
+    "remedy": 1174
+   }
+  },
+  {
+   "i": 273,
+   "chart": "1991-10-8 3시 M",
+   "status": "single",
+   "weapon": "금(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1746,
+    "wealth": 1922,
+    "career": 1787,
+    "love": 1475,
+    "remedy": 1098
+   }
+  },
+  {
+   "i": 274,
+   "chart": "1998-3-19 6시 F",
+   "status": "dual",
+   "weapon": "목(비겁)·토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1778,
+    "wealth": 1696,
+    "career": 1534,
+    "love": 1466,
+    "remedy": 1075
+   }
+  },
+  {
+   "i": 275,
+   "chart": "1950-8-2 9시 M",
+   "status": "single",
+   "weapon": "토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1705,
+    "wealth": 1650,
+    "career": 1533,
+    "love": 1401,
+    "remedy": 1006
+   }
+  },
+  {
+   "i": 276,
+   "chart": "1957-1-13 12시 F",
+   "status": "dual",
+   "weapon": "금(관성)·수(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1695,
+    "wealth": 1801,
+    "career": 1673,
+    "love": 1390,
+    "remedy": 1050
+   }
+  },
+  {
+   "i": 277,
+   "chart": "1964-6-24 15시 M",
+   "status": "single",
+   "weapon": "목(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1623,
+    "wealth": 1230,
+    "career": 1150,
+    "love": 1179,
+    "remedy": 1008
+   }
+  },
+  {
+   "i": 278,
+   "chart": "1971-11-7 18시 F",
+   "status": "dual",
+   "weapon": "토(식상)·화(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1670,
+    "wealth": 1592,
+    "career": 1457,
+    "love": 1308,
+    "remedy": 1075
+   }
+  },
+  {
+   "i": 279,
+   "chart": "1978-4-18 21시 M",
+   "status": "dual",
+   "weapon": "토(인성)·화(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1852,
+    "wealth": 1748,
+    "career": 1600,
+    "love": 1467,
+    "remedy": 1166
+   }
+  },
+  {
+   "i": 280,
+   "chart": "1985-9-1 0시 F",
+   "status": "dual",
+   "weapon": "수(비겁)·목(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1812,
+    "wealth": 1754,
+    "career": 1575,
+    "love": 1455,
+    "remedy": 1231
+   }
+  },
+  {
+   "i": 281,
+   "chart": "1992-2-12 3시 M",
+   "status": "single",
+   "weapon": "수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1817,
+    "wealth": 1757,
+    "career": 1652,
+    "love": 1491,
+    "remedy": 1143
+   }
+  },
+  {
+   "i": 282,
+   "chart": "1999-7-23 6시 F",
+   "status": "single",
+   "weapon": "토(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1681,
+    "wealth": 1682,
+    "career": 1572,
+    "love": 1447,
+    "remedy": 1100
+   }
+  },
+  {
+   "i": 283,
+   "chart": "1951-12-6 9시 M",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1583,
+    "wealth": 1473,
+    "career": 1403,
+    "love": 1253,
+    "remedy": 952
+   }
+  },
+  {
+   "i": 284,
+   "chart": "1958-5-17 12시 F",
+   "status": "dual",
+   "weapon": "화(식상)·토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1871,
+    "wealth": 1714,
+    "career": 1566,
+    "love": 1439,
+    "remedy": 1165
+   }
+  },
+  {
+   "i": 285,
+   "chart": "1965-10-28 15시 M",
+   "status": "dual",
+   "weapon": "목(비겁)·화(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1614,
+    "wealth": 1391,
+    "career": 1269,
+    "love": 1294,
+    "remedy": 974
+   }
+  },
+  {
+   "i": 286,
+   "chart": "1972-3-11 18시 F",
+   "status": "single",
+   "weapon": "수(식상)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1773,
+    "wealth": 1755,
+    "career": 1647,
+    "love": 1501,
+    "remedy": 1112
+   }
+  },
+  {
+   "i": 287,
+   "chart": "1979-8-22 21시 M",
+   "status": "single",
+   "weapon": "토(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1840,
+    "wealth": 1698,
+    "career": 1605,
+    "love": 1468,
+    "remedy": 1084
+   }
+  },
+  {
+   "i": 288,
+   "chart": "1986-1-5 0시 F",
+   "status": "single",
+   "weapon": "토(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1499,
+    "wealth": 1517,
+    "career": 1424,
+    "love": 1335,
+    "remedy": 950
+   }
+  },
+  {
+   "i": 289,
+   "chart": "1993-6-16 3시 M",
+   "status": "dual",
+   "weapon": "토(비겁)·수(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1811,
+    "wealth": 1749,
+    "career": 1602,
+    "love": 1338,
+    "remedy": 1072
+   }
+  },
+  {
+   "i": 290,
+   "chart": "2000-11-27 6시 F",
+   "status": "none",
+   "weapon": "",
+   "shown": [
+    "self"
+   ],
+   "chars": {
+    "self": 248,
+    "wealth": 0,
+    "career": 0,
+    "love": 0,
+    "remedy": 0
+   }
+  },
+  {
+   "i": 291,
+   "chart": "1952-4-10 9시 M",
+   "status": "dual",
+   "weapon": "목(인성)·수(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1650,
+    "wealth": 1524,
+    "career": 1409,
+    "love": 1312,
+    "remedy": 931
+   }
+  },
+  {
+   "i": 292,
+   "chart": "1959-9-21 12시 F",
+   "status": "single",
+   "weapon": "수(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1648,
+    "wealth": 1755,
+    "career": 1645,
+    "love": 1487,
+    "remedy": 1066
+   }
+  },
+  {
+   "i": 293,
+   "chart": "1966-2-4 15시 M",
+   "status": "dual",
+   "weapon": "토(재성)·목(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1870,
+    "wealth": 1719,
+    "career": 1560,
+    "love": 1430,
+    "remedy": 1173
+   }
+  },
+  {
+   "i": 294,
+   "chart": "1973-7-15 18시 F",
+   "status": "single",
+   "weapon": "수(비겁)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1301,
+    "wealth": 1174,
+    "career": 1110,
+    "love": 1008,
+    "remedy": 916
+   }
+  },
+  {
+   "i": 295,
+   "chart": "1980-12-26 21시 M",
+   "status": "dual",
+   "weapon": "수(비겁)·금(인성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1731,
+    "wealth": 1942,
+    "career": 1753,
+    "love": 1444,
+    "remedy": 1183
+   }
+  },
+  {
+   "i": 296,
+   "chart": "1987-5-9 0시 F",
+   "status": "single",
+   "weapon": "목(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1430,
+    "wealth": 1138,
+    "career": 1087,
+    "love": 1090,
+    "remedy": 987
+   }
+  },
+  {
+   "i": 297,
+   "chart": "1994-10-20 3시 M",
+   "status": "single",
+   "weapon": "목(관성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1440,
+    "wealth": 1073,
+    "career": 1049,
+    "love": 1030,
+    "remedy": 893
+   }
+  },
+  {
+   "i": 298,
+   "chart": "2001-3-3 6시 F",
+   "status": "single",
+   "weapon": "토(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1593,
+    "wealth": 1630,
+    "career": 1532,
+    "love": 1447,
+    "remedy": 956
+   }
+  },
+  {
+   "i": 299,
+   "chart": "1953-8-14 9시 M",
+   "status": "single",
+   "weapon": "금(재성)",
+   "shown": [
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
+   ],
+   "chars": {
+    "self": 1754,
+    "wealth": 1914,
+    "career": 1801,
+    "love": 1461,
+    "remedy": 1114
+   }
+  }
+ ]
+}
