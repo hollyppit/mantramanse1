@@ -94,17 +94,22 @@
     if (use.activation) bits.push('주무기 활성도 ' + a.levelK);
     if (use.favor && r.favor) bits.push('활용 유리도 ' + r.favor.n);
     var cls = /strong|on|shaky/.test(a.level) ? 'on' : /sup|quiet/.test(a.level) ? 'prep' : 'guard';   // 활성도 단계에 맞는 문장(조용한 때를 '좋은 때'로 읽지 않게)
-    var lens = topic === 'remedy' ? d.remedy.now[r.read] : topic === 'self' ? wd.combo[r.read] : fill(d[topic].time[cls], { s: wd.el[w.el].strengths.slice(0, 2).join('·') });
+    // 2판(2026-11-26): 주제 × 작용 유형(강화·지원·발산·조정·조용함) + 주제 × 들어오는 십성 — 같은 해라도 주제마다, 해마다 다른 풀이
+    var typ = !a.types.length ? 'quiet' : (a.types.indexOf('adjust') >= 0 && cls !== 'on') ? 'adjust' : a.types[0];
+    var lens = topic === 'remedy' ? d.remedy.now[r.read] : topic === 'self' ? wd.combo[r.read] : d.typeLens[topic][typ];
     if (B.seenLens) { if (B.seenLens[topic + lens]) lens = ''; else B.seenLens[topic + lens] = 1; }   // 같은 블록 안에서 같은 문장 반복 안 함
     var P = d.period[topic];   // 주제마다 다른 말로 — 같은 시기라도 주제 사이에 같은 문장이 나오지 않게
-    var dir = use.tenGod ? ' ' + fill(P.dir, { tg: a.use.tg + '(' + a.use.groupName + ')', way: wd.use[a.use.group] }) : '';
-    var sup = use.tenGod && (a.roles.stem || a.roles.branch) ? ' ' + fill(P.sup, { s: a.roles.stem || '—', b: a.roles.branch || '—' }) : '';
-    var con = a.constraints.length ? ' ' + fill(P.con, { c: a.constraints[0] }) : '';
+    var dir = use.tenGod ? ' ' + d.useLens[topic][a.use.group] + '(운 천간 ' + a.use.tg + ').' : '';
+    if (dir && B.seenLens) { var ug = 'g' + a.use.group; if (B.seenLens[ug]) { dir = ' ' + fill(d.contUse[topic], { tg: a.use.tg }); if (B.seenLens['u' + dir]) dir = ''; else B.seenLens['u' + dir] = 1; } else B.seenLens[ug] = 1; }   // 같은 십성 묶음이 다시 오면 '이어져요' 한 줄로
+    var rk = (a.roles.stem || '—') + '|' + (a.roles.branch || '—');   // 지원(용신 역할)은 앞 줄과 같으면 생략
+    var sup = use.tenGod && (a.roles.stem || a.roles.branch) && !(B.seenLens && B.seenLens['r' + rk]) ? ' ' + fill(P.sup, { s: a.roles.stem || '—', b: a.roles.branch || '—' }) : ''; B.lastRole = rk; if (B.seenLens) B.seenLens['r' + rk] = 1;
+    var cc = a.constraints.filter(function (c) { return !(B.seenLens && B.seenLens['c' + c]); })[0];   // 같은 제약은 블록 안에서 처음 한 번만
+    var con = cc ? ' ' + fill(P.con, { c: cc }) : ''; if (cc) { B.hasCon = true; if (B.seenLens) B.seenLens['c' + cc] = 1; }
     return '<li><b>' + esc(label + ' ' + r.gz) + '</b>' + (bits.length ? ' <span class="dp-mi">' + esc(bits.join(' · ')) + '</span>' : '') + '<br>' + esc((lens + dir + sup + con).trim()) + '</li>';
   }
   function timingBlock(B, topic, use, w) {
     var tl = B.tl, d = DD(); if (!tl || !w) return '';
-    B.seenLens = {}; var lines = [], on = function (r) { return r && r.best && /strong|on|shaky/.test(r.best.level); };
+    B.seenLens = {}; B.lastRole = null; B.hasCon = false; var lines = [], on = function (r) { return r && r.best && /strong|on|shaky/.test(r.best.level); };
     if (use.daeun) {
       var di = curIdx(tl.daeun, B.now), cur = tl.daeun[di];
       if (cur) lines.push(periodLine(B, cur, '지금 대운(' + (cur.startAge) + '세~)', topic, use, w));
@@ -120,7 +125,7 @@
       pick.forEach(function (r) { lines.push(periodLine(B, r, r.month + '월(' + r.termName + ')', topic, use, w)); });
     }
     lines = lines.filter(Boolean); if (!lines.length) return '';
-    return '<h4>' + esc(d.timing[topic]) + '</h4><ul class="dp-ul">' + lines.join('') + '</ul>' + ((use.activation && use.favor && topic === 'self') ? '<p class="dp-mi">' + esc('활성도는 운이 주무기를 켜는 정도, 유리도는 그 시기 전체 흐름 등급이에요. 서로 다른 지표라 합쳐 보지 않아요.') + '</p>' : '');
+    return '<h4>' + esc(d.timing[topic]) + '</h4><ul class="dp-ul">' + lines.join('') + '</ul>' + (B.hasCon ? '<p>' + esc(d.conTail[topic]) + '</p>' : '') + ((use.activation && use.favor && topic === 'self') ? '<p class="dp-mi">' + esc('활성도는 운이 주무기를 켜는 정도, 유리도는 그 시기 전체 흐름 등급이에요. 서로 다른 지표라 합쳐 보지 않아요.') + '</p>' : '');
   }
   function evidence(w, use) {
     var keep = (w.reasons || []).filter(function (t) {
@@ -185,7 +190,7 @@
     var sgEl = (dEl + (male ? 2 : 3)) % 5, sTg = M.tenGod(ch.pillars.day.s, M.mainHidden(ch.pillars.day.b));
     var lead = esc(d.love.show[g]);
     var body = '<h4>' + esc('애정 표현과 의사소통') + '</h4><p>' + esc(d.love.talk[g]) + '</p>';
-    body += '<h4>' + esc('상대방과의 상호작용') + '</h4><p>' + esc(d.love.partner) + '</p>';
+    body += '<h4>' + esc('상대방과의 상호작용') + '</h4><p>' + esc(d.partnerBy[g]) + '</p>';   // 내 주무기 십성별로 맞물리는 상대·부딪히는 지점
     if (use.tenGod) body += '<p>' + esc(fill(d.love.spouseLine, { tg: J.이(sTg), sg: (male ? '재성' : '관성') + ' ' + EL_K[sgEl], pct: B.A.facts[sgEl].pct })) + '</p>';
     body += '<h4>' + esc('관계에서 주의할 성향') + '</h4><p>' + esc(d.love.over[g]) + '</p>';
     body += timingBlock(B, 'love', use, w);

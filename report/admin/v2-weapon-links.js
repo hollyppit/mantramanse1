@@ -5,7 +5,7 @@
    · 사용: V2WeaponLinks.mount(el, { pw, flags, putFlags, msg }) */
 (function (G) {
   'use strict';
-  var DEPS = ['/luck-grade.js?v=20261125-strict', '/weapon-data.js?v=20261126-wc', '/weapon.js?v=20261126-wc', '/report/v2/weapon-chapters-data.js?v=20261126-wg', '/report/v2/weapon-chapters.js?v=20261126-wg'];
+  var DEPS = ['/luck-grade.js?v=20261125-strict', '/weapon-data.js?v=20261126-wc', '/weapon.js?v=20261126-wc', '/report/v2/weapon-chapters-data.js?v=20261126-wd', '/report/v2/weapon-chapters.js?v=20261126-wd'];
   var TOPIC_K = { self: '종합풀이', wealth: '재물운', career: '커리어운', love: '인연운', remedy: '개운법' };
   var USE_KEYS = ['first', 'second', 'power', 'overlap', 'rootExp', 'tenGod', 'daeun', 'seun', 'wolun', 'activation', 'favor'];
   var USE_S = { first: '1순위', second: '2순위', power: '세력', overlap: '병존·간여지동', rootExp: '통근·투간', tenGod: '십성', daeun: '대운', seun: '세운', wolun: '월운', activation: '활성도', favor: '유리도' };
