@@ -14,7 +14,7 @@
      · aptitude: 만세력 '특기·적성' 탭(aptitude.js·aptitude-data.js·aptitude-view.js) — 특기 5영역·적성 6분야·운동 상세·최종 추천. 표시 전용, 엔진 불변. 관리자 스위치(/api/luck-flags aptitude)
      · psych: 만세력 '심리 솔루션' 탭(psych.js·psych-data.js·psych-view.js) — 한눈에 보기·잠재적 트라우마(명리 상처 패턴)·시기별 스트레스와 감정(대운→세운→월운)·심리 솔루션. 표시 전용, 엔진 불변. 관리자 스위치(/api/luck-flags psych)
      · groupCompat: 만세력 궁합 탭 '여러 명' 보기(compat-group.js) — 3~6명 관계 지도·기운 방향·무리 오행 균형·이어 주는 사람·함께 좋은 달. 표시 전용, 두 사람 궁합 계산 불변. 관리자 스위치(/api/luck-flags groupCompat)
-     · pairFlow: 만세력 궁합 탭 '두 사람의 운 흐름 겹쳐 보기'(compat-flow.js) — 두 사람 각자의 세운 흐름 점수를 같은 연도 축에 두 곡선으로. 표시 전용, 궁합 점수·엔진 불변. 관리자 스위치(/api/luck-flags pairFlow)
+     · pairFlow: 만세력 궁합 탭 '두 사람의 운 흐름 겹쳐 보기'(compat-flow.js) — 두 사람 각자의 세운 흐름 점수를 같은 연도 축에 두 곡선으로. 여러 명 궁합에서도 3~6명 곡선. 표시 전용, 궁합 점수·엔진 불변. 관리자 스위치(/api/luck-flags pairFlow)
      · weapon: 만세력 '나의 주무기'(weapon.js·weapon-data.js·weapon-view.js) — 원국 탭 카드·오행·강약 판정표·특기·적성 맨 위·운세 흐름 '주무기 발현 타이밍'. 표시 전용, 엔진·점수 불변. 2026-11-26 사용자 승인으로 기본 켬(끄려면 false로 바꿔 배포)
      · timelineCopy: 운명의 타임라인 카드 첫머리 문안(report/hub/hub-timeline.js). 관리자 화면 스위치(/api/luck-flags timelineCopy)로도 켠다
      · tlSimple: 운명의 타임라인 간단 보기(2026-11-26) — 무료 콘텐츠 맨 위·시기 카드 핵심만·자세히 접기·읽기 정리(색·테마는 그대로)(report/hub/hub-timeline.js·timeline-occult.css). 관리자 화면 스위치(/api/luck-flags tlSimple)로도 켠다

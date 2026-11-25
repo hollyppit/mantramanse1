@@ -80,7 +80,44 @@
     return base + g +(r.move === 'diverge' ? ' 전년보다 한 사람은 오르고 한 사람은 내려가는 해예요.' : '');
   }
 
-  var api = { VERSION: VERSION, MOVE: MOVE, build: build, yearLine: yearLine };
+  /* 여러 명(3~6명) — buildGroup(M, members[{name,ch}], opt{from,to,LG})
+   *  rows: [{year, vals:[point|null], good, ok, care, n, kind, top}]
+   *  kind: 'many'(절반 이상 좋음·조심 없음) · 'care'(절반 이상 조심·좋음 없음) · 'split'(좋음과 조심이 섞임) · 'mixed' · null(비교할 사람 2명 미만)
+   *  top: 그해 흐름 점수가 가장 높은 사람 번호(동점이면 앞 사람). topChanges: 맨 위 사람이 바뀌는 해
+   */
+  function buildGroup(M, members, opt) {
+    opt = opt || {};
+    var LG = opt.LG || root.MantraLuckGrade, mem = members || [];
+    var lo = Math.max(M.MIN_Y || 1, opt.from), hi = Math.min((M.MAX_Y || 2100) - 1, opt.to);
+    var names = mem.map(function (m, i) { return m.name || ('사람' + (i + 1)); });
+    var rows = [];
+    for (var Y = lo; Y <= hi; Y++) {
+      var vals = mem.map(function (m) { return point(M, LG, m.ch, Y); }), c = { good: 0, ok: 0, care: 0 }, n = 0, top = -1;
+      vals.forEach(function (p, i) { if (!p) return; n++; c[p.g]++; if (top < 0 || p.v > vals[top].v) top = i; });
+      var half = Math.ceil(n / 2), kind = null;
+      if (n >= 2) kind = c.good >= half && c.care === 0 ? 'many' : c.care >= half && c.good === 0 ? 'care' : c.good && c.care ? 'split' : 'mixed';
+      rows.push({ year: Y, vals: vals, good: c.good, ok: c.ok, care: c.care, n: n, kind: kind, top: top });
+    }
+    var topChanges = [];
+    for (var i = 1; i < rows.length; i++) { var p = rows[i - 1], q = rows[i]; if (p.n >= 2 && q.n >= 2 && p.top >= 0 && q.top >= 0 && p.top !== q.top) topChanges.push({ year: q.year, from: p.top, to: q.top }); }
+    var pick = function (k) { return runs(rows.filter(function (r) { return r.kind === k; }).map(function (r) { return r.year; })); };
+    var groups = { many: pick('many'), care: pick('care'), split: pick('split') };
+    var lines = [];
+    if (groups.many.length) lines.push({ k: 'both', t: groups.many.slice(0, 3).map(span).join(', ') + '에는 절반 넘는 사람이 좋음 구간이고 조심 구간인 사람이 없어요. 함께 무언가를 시작하거나 모이기에 서로 여유가 있는 때로 볼 수 있어요.' });
+    else lines.push({ k: 'both', t: '이 기간에는 절반 넘는 사람이 함께 좋음 구간에 드는 해가 없어요. 사람마다 좋은 때가 번갈아 와서, 그때그때 여유 있는 사람이 무리를 받쳐 주는 흐름이에요.' });
+    if (groups.split.length) lines.push({ k: 'split', t: groups.split.slice(0, 3).map(span).join(', ') + '에는 좋음 구간인 사람과 조심 구간인 사람이 함께 있어요. 같은 일을 해도 체감 속도가 달라, 일정과 기대치를 서로 맞춰 보면 편해요.' });
+    if (groups.care.length) lines.push({ k: 'care', t: groups.care.slice(0, 3).map(span).join(', ') + '에는 절반 넘는 사람이 조심 구간이에요. 무리 전체가 큰 결정을 할 때는 한 번 더 확인하고 일정을 넉넉히 잡는 편이 편해요.' });
+    if (topChanges.length) lines.push({ k: 'cross', t: '흐름 점수가 가장 높은 사람이 ' + topChanges.length + '번 바뀌어요(' + topChanges.slice(0, 4).map(function (c) { return c.year + '년 ' + names[c.to]; }).join(', ') + '). 해마다 여유 있는 사람이 달라지니, 기대는 쪽도 돌아가며 바뀐다고 생각하면 편해요.' });
+    var dm = function (ch) { return ch && ch.daeun && ch.daeun.list ? ch.daeun.list.filter(function (d, k) { return k > 0 && d.startYear >= lo && d.startYear <= hi; }).map(function (d) { return { year: d.startYear, gz: M.gzName(d) }; }) : []; };
+    return { version: VERSION, from: lo, to: hi, names: names, rows: rows, groups: groups, topChanges: topChanges, lines: lines, daeunMarks: mem.map(function (m) { return dm(m.ch); }) };
+  }
+  function groupYearLine(r, names) {
+    if (!r || r.n < 2) return '이 해에는 비교할 사람이 2명보다 적어요.';
+    var base = r.kind === 'many' ? '절반 넘는 사람이 좋음 구간이고 조심 구간인 사람이 없어요.' : r.kind === 'care' ? '절반 넘는 사람이 조심 구간이에요.' : r.kind === 'split' ? '좋음 구간인 사람과 조심 구간인 사람이 함께 있어 체감 속도가 달라요.' : '큰 쏠림 없이 무난 구간인 사람이 많은 해예요.';
+    return base + ' (좋음 ' + r.good + '명 · 무난 ' + r.ok + '명 · 조심 ' + r.care + '명)';
+  }
+
+  var api = { VERSION: VERSION, MOVE: MOVE, build: build, yearLine: yearLine, buildGroup: buildGroup, groupYearLine: groupYearLine };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.MantraPairFlow = api;
 })(typeof window !== 'undefined' ? window : globalThis);

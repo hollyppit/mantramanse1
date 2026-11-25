@@ -52,6 +52,28 @@ for (let k = 0; k < N; k++) {
 // 경계: 태어나기 전 기간만 → 비교 없음
 { const late = mk(2030, 3, 3, 12, 'F'), D = PF.build(M, charts[0], late, { from: 2021, to: 2029, names: { a: '나', b: '아이' }, LG });
   ok(D.rows.every(r => r.b === null && r.kind === null), '태어나기 전 기간'); ok(!BAN.test(JSON.stringify(D.lines)), '빈 기간 문구'); }
+// 여러 명(3~6명): 엔진 값 그대로 · 분류·맨 위 사람 · 순서를 바꿔도 해마다 인원 수 같음 · 금지 표현
+const gs = { many: 0, split: 0, care: 0, yrs: 0, tops: 0 };
+for (let k = 0; k < 120; k++) {
+  const size = 3 + (k % 4), idx = []; while (idx.length < size) { const i = Math.floor(rnd() * charts.length); if (!idx.includes(i)) idx.push(i); }
+  const mem = idx.map((i, j) => ({ name: ['가람', '나래', '다온', '라희', '마루', '바다'][j], ch: charts[i] }));
+  const o = { from: curY - 5, to: curY + 10, LG }, D = PF.buildGroup(M, mem, o), Rv = PF.buildGroup(M, mem.slice().reverse(), o);
+  ok(JSON.stringify(D) === JSON.stringify(PF.buildGroup(M, mem, o)), `무리 결정론 #${k}`);
+  D.rows.forEach((r, i) => {
+    r.vals.forEach((p, j) => { const ch = mem[j].ch; if (r.year < ch.solar.y) ok(p === null, `무리 태어나기 전 #${k}`); else { const x = M.seunRange(ch, r.year, r.year)[0]; ok(p && p.v === x.combined && p.g === LG.flow(x.combined, M).k, `무리 엔진 값 #${k} ${r.year}`); } });
+    const ps = r.vals.filter(Boolean), c = { good: 0, ok: 0, care: 0 }; ps.forEach(p => c[p.g]++);
+    ok(r.n === ps.length && r.good === c.good && r.care === c.care && r.ok === c.ok, `무리 인원 #${k}`);
+    const half = Math.ceil(ps.length / 2), exp = ps.length < 2 ? null : c.good >= half && !c.care ? 'many' : c.care >= half && !c.good ? 'care' : c.good && c.care ? 'split' : 'mixed';
+    ok(r.kind === exp, `무리 분류 #${k} ${r.year}`);
+    ok(Rv.rows[i].kind === r.kind && Rv.rows[i].good === r.good, `무리 순서 바꿈 #${k}`);
+    if (r.top >= 0) ok(ps.every(p => p.v <= r.vals[r.top].v), `맨 위 사람 #${k}`);
+    if (r.n >= 2) { gs.yrs++; if (r.kind === 'many') gs.many++; if (r.kind === 'split') gs.split++; if (r.kind === 'care') gs.care++; }
+    ok(!BAN.test(PF.groupYearLine(r, D.names)), `무리 금지 표현(연도) #${k}`);
+  });
+  gs.tops += D.topChanges.length;
+  ok(D.lines.length >= 1 && !BAN.test(JSON.stringify(D.lines)), `무리 금지 표현 #${k}: ${JSON.stringify(D.lines)}`);
+}
+console.log(`무리 120개 · 비교 연도 ${gs.yrs} · 절반 넘게 좋음 ${(gs.many / gs.yrs * 100).toFixed(1)}% · 섞임 ${(gs.split / gs.yrs * 100).toFixed(1)}% · 절반 넘게 조심 ${(gs.care / gs.yrs * 100).toFixed(1)}% · 무리당 맨 위 바뀜 ${(gs.tops / 120).toFixed(2)}번`);
 console.log(`쌍 ${N}개 · 비교 연도 ${stats.yrs} · 함께 좋음 ${(stats.both / stats.yrs * 100).toFixed(1)}% · 한쪽 좋음·한쪽 조심 ${(stats.split / stats.yrs * 100).toFixed(1)}% · 함께 조심 ${(stats.care / stats.yrs * 100).toFixed(1)}% · 방향 엇갈림 ${(stats.diverge / stats.yrs * 100).toFixed(1)}% · 쌍당 교차 ${(stats.cross / N).toFixed(2)}번`);
 if (fails.length) { console.log('실패 ' + fails.length + '건'); console.log(fails.slice(0, 15).join('\n')); process.exit(1); }
 console.log('compat-flow-sim: 모두 통과');
