@@ -201,7 +201,7 @@
  var TIERS=[{k:'good',n:'좋음',min:65},{k:'ok',n:'무난',min:45},{k:'care',n:'조심',min:-1}],SEASON_KW={opportunity:'기회',expansion:'확장',harvest:'수확',accumulation:'축적',transition:'전환',defense:'방어'};
  function tierOf(n){for(var i=0;i<TIERS.length;i++)if(n>=TIERS[i].min)return TIERS[i];return TIERS[TIERS.length-1];}
  function stemEl(gz){return STEM_EL[String(gz||'').charAt(0)]||'';}
- var EL_ORD=['목','화','토','금','수'],EL_HJ=['木','火','土','金','水'],EL_WORDS=['성장·기획','표현·창작','안정·관리','실행·계약','탐구·전략'],EL_COL=['#46C27E','#F2604F','#EDBB3A','#C9CED9','#6A8FEA'];
+ var EL_ORD=['목','화','토','금','수'],EL_HJ=['木','火','土','金','水'],EL_WORDS=['자라나고 뻗어 가는 기운','드러나고 퍼지는 기운','받쳐 주고 다지는 기운','정리되고 완성되는 기운','모이고 깊어지는 기운'],EL_COL=['#46C27E','#F2604F','#EDBB3A','#C9CED9','#6A8FEA'];
  // 간지 글자(한글·한자) → 주요 오행 번호. 엔진·공용 모듈이 없으면 천간 오행으로
  function elIdx(gz){gz=String(gz||'');var Mn=root.Manse,T=root.MantraLuckTheme;if(Mn&&T&&gz.length>=2){var s=Mn.STEM_K.indexOf(gz.charAt(0)),b=Mn.BR_K.indexOf(gz.charAt(1));if(s<0)s=Mn.STEM.indexOf(gz.charAt(0));if(b<0)b=Mn.BR.indexOf(gz.charAt(1));if(s>=0&&b>=0){try{var m=T.mainEl(Mn,{s:s,b:b});if(m)return m.el;}catch(e){}}}var e=stemEl(gz);return e?EL_ORD.indexOf(e):-1;}
  function colorOf(gz){var i=elIdx(gz);return i>=0?EL_COL[i]:'#d5b97f';}

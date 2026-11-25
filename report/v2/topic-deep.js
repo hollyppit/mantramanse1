@@ -53,7 +53,7 @@
   var EL_COL = ['#46C27E', '#F2604F', '#EDBB3A', '#C9CED9', '#6A8FEA'];
   function LT() { return root.MantraLuckTheme || null; }
   function elOf(M, x) { var T = LT(); if (!T || !x) return null; try { var m = T.mainEl(M, x); return m ? m.el : null; } catch (e) { return null; } }
-  function elLegend(key) { var T = LT(); if (!T) return ''; var L = T.legendFor ? T.legendFor(key) : T.LEGEND; return '<p class="td-elleg">' + L.map(function (g) { return '<span><i style="background:' + EL_COL[g.el] + '"></i><b>' + g.hanja + ' ' + g.name + '</b> ' + esc(g.words.slice(0, 2).join('·')) + '</span>'; }).join('') + '<small>막대 색 = 그 시기에 두드러지는 기운(길흉 아님) · 막대 길이 = 점수 · 숫자 옆 좋음·무난·조심 = 점수 등급(보조)</small></p>'; }
+  function elLegend(key) { var T = LT(); if (!T) return ''; var L = T.legendFor ? T.legendFor(key) : T.LEGEND; return '<p class="td-elleg">' + L.map(function (g) { return '<span><i style="background:' + EL_COL[g.el] + '"></i><b>' + g.hanja + ' ' + g.name + '</b> ' + esc(g.nature || g.words.slice(0, 2).join('·')) + (g.nature ? ' <small style="opacity:.7">' + esc(g.words.slice(0, 2).join('·')) + '</small>' : '') + '</span>'; }).join('') + '<small>막대 색 = 그 시기에 두드러지는 기운(길흉 아님) · 막대 길이 = 점수 · 숫자 옆 좋음·무난·조심 = 점수 등급(보조)</small></p>'; }
   function chip(s) { return '<span class="td-chip" style="background:' + s.c + '">' + esc(s.n) + '</span>'; }
   function who(H) { return H.name ? esc(H.name) + '님' : '당신'; }
   function rolesOf(ch) { var u = ch.unified && ch.unified.roles; if (u) { var o = {}; Object.keys(u).forEach(function (k) { o[k] = u[k] ? String(u[k]).replace(/^조건부 /, '') : u[k]; }); return o; } return (ch.yong && ch.yong.roles) || (ch.yongAll && ch.yongAll.eokbu && ch.yongAll.eokbu.roles) || {}; }   // 2026-11-20: 통합 용신 우선(만세력·서사와 같은 출처)

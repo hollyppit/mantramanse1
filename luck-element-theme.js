@@ -24,6 +24,8 @@
     { words: ['실행', '계약', '의사결정', '결과물 완성'], use: '결정하고 마무리해 결과를 내는 일', acts: ['미뤄 둔 결정 내리기', '계약·조건 정리', '기술 다듬기', '결과물 마감'], over: '단호함이 지나쳐 관계가 날카로워지기 쉬워요. 결정 전에 한 번 더 들어 보세요.' },
     { words: ['탐구', '연구', '정보 수집', '전략 수립'], use: '알아보고 궁리해 다음 수를 준비하는 일', acts: ['조사·연구', '정보·자료 모으기', '전략·계획 다듬기', '혼자 깊이 생각하는 시간'], over: '생각만 깊어지고 행동이 늦어지기 쉬워요. 알아본 것 중 하나는 바로 해 보세요.' }
   ];
+  // 오행의 기운 이름(2026-11-25 사용자 요청): 활동 단어보다 넓게, 그 기운이 하는 일 자체를 한 줄로. 범례·요약 첫머리에 쓴다
+  var NATURE = ['자라나고 뻗어 가는 기운', '드러나고 퍼지는 기운', '받쳐 주고 다지는 기운', '정리되고 완성되는 기운', '모이고 깊어지는 기운'];
   var J = function (w, a, b) { var c = String(w || '').charCodeAt(String(w || '').length - 1) - 0xAC00; return w + (c >= 0 && c <= 11171 && c % 28 ? a : b); };
   var elN = function (e) { return EL_K[e] + '(' + EL_H[e] + ')'; };
   var elJ = function (e, a, b) { var c = EL_K[e].charCodeAt(0) - 0xAC00; return elN(e) + (c % 28 ? a : b); };
@@ -85,10 +87,10 @@
     if (fit != null) basis.push('흐름 점수 ' + (fit > 0 ? '+' : '') + Math.round(fit) + '(막대 높이, 엔진 값 그대로)');
     // 중복 주의 문장 정리
     caution = caution.filter(function (t, i, a) { return a.indexOf(t) === i; });
-    var summary = elN(e) + ' 기운이 두드러지는 시기 — ' + T.words.join('·') + (state === 'use' ? ' 쪽을 적극 활용해 보세요.' : state === 'mixed' ? ' 쪽을 단계적으로 활용하세요.' : state === 'careful' ? ' 쪽 일이 늘지만 과하지 않게 조절하세요.' : state === 'steady' ? ' 쪽 일이 늘어나니 속도를 조절하세요.' : ' 쪽을 무리 없이 해 보세요.');
-    return { version: VERSION, kind: kind || '', el: e, elName: EL_K[e], hanja: EL_H[e], words: T.words, weights: m.weights, second: m.second, role: role, natal: natal, fit: fit, state: state, summary: summary, interact: interact, recommend: recommend, caution: caution, basis: basis };
+    var summary = elJ(e, '이', '가') + ' 두드러지는 시기 — ' + NATURE[e] + '이라 ' + T.words.join('·') + (state === 'use' ? ' 쪽을 적극 활용해 보세요.' : state === 'mixed' ? ' 쪽을 단계적으로 활용하세요.' : state === 'careful' ? ' 쪽 일이 늘지만 과하지 않게 조절하세요.' : state === 'steady' ? ' 쪽 일이 늘어나니 속도를 조절하세요.' : ' 쪽을 무리 없이 해 보세요.');
+    return { version: VERSION, kind: kind || '', el: e, elName: EL_K[e], hanja: EL_H[e], nature: NATURE[e], words: T.words, weights: m.weights, second: m.second, role: role, natal: natal, fit: fit, state: state, summary: summary, interact: interact, recommend: recommend, caution: caution, basis: basis };
   }
-  var LEGEND = EL_K.map(function (k, e) { return { el: e, name: k, hanja: EL_H[e], words: THEME[e].words }; });
+  var LEGEND = EL_K.map(function (k, e) { return { el: e, name: k, hanja: EL_H[e], nature: NATURE[e], words: THEME[e].words }; });
 
   // ── 분야 지표 그래프(2026-11-25): 같은 주요 오행·같은 색, 말만 그 지표에 맞게 바꾼다
   //  한 칸 = '핵심어1·핵심어2|활용 방향(…하는 일)|추천1 / 추천2' · 목·화·토·금·수 순서 · 오행 테마(성장/표현/안정/실행/탐구)를 그 분야 말로 옮긴 것
@@ -191,9 +193,28 @@
       '기회 매듭짓기·정산|기회를 조건으로 매듭짓고 정산하는 일|조건 확인 뒤 매듭짓기 / 받을 돈 정산',
       '정보·기회 알아보기|정보를 모아 기회를 알아보는 일|정보 모으기 / 확인 안 된 제안 거르기']]
   };
+  // 지표별 기운 이름(2026-11-25): 같은 오행의 기운 이름을 그 분야 말로 옮긴 것(목·화·토·금·수 순서)
+  var DOMAIN_NATURE = {
+    love: ['인연이 자라고 넓어지는 기운', '마음이 드러나는 기운', '관계가 다져지는 기운', '관계가 정리되고 매듭지어지는 기운', '속마음이 깊어지는 기운'],
+    wealth: ['수입의 씨앗이 자라는 기운', '돈이 드러나고 오가는 기운', '돈이 모이고 다져지는 기운', '수익이 정산되고 손에 쥐어지는 기운', '돈의 흐름이 읽히는 기운'],
+    health: ['몸이 깨어나고 움직이는 기운', '열과 활력이 오르는 기운', '생활 리듬이 다져지는 기운', '습관이 정리되고 조여지는 기운', '쉬며 회복되는 기운'],
+    accident: ['활동이 바깥으로 뻗는 기운', '열기와 속도가 오르는 기운', '생활 환경이 굳어지는 기운', '날이 서고 단단해지는 기운', '주의가 흐려지기 쉬운 기운'],
+    job: ['기회의 폭이 넓어지는 기운', '내가 드러나 보이는 기운', '준비가 차곡차곡 쌓이는 기운', '결과가 정해지고 매듭지어지는 기운', '정보가 모여 판단이 깊어지는 기운'],
+    move: ['새 자리로 뻗어 가는 기운', '경력이 드러나는 기운', '지금 자리가 다져지는 기운', '조건이 정리되고 결정되는 기운', '정보를 모아 견주는 기운'],
+    career: ['일이 자라고 넓어지는 기운', '성과가 드러나는 기운', '일이 체계로 다져지는 기운', '일이 마무리되고 완성되는 기운', '다음 수를 궁리하는 기운'],
+    business: ['사업이 뻗어 가는 기운', '이름이 알려지는 기운', '운영이 단단해지는 기운', '거래가 매듭지어지는 기운', '시장을 깊이 읽는 기운'],
+    child: ['아이가 자라고 배우는 기운', '마음이 표현되는 기운', '돌봄이 다져지는 기운', '규칙이 세워지는 기운', '속마음이 들리는 기운'],
+    marriage: ['함께 그릴 앞날이 자라는 기운', '관계가 드러나고 알려지는 기운', '살림의 바탕이 다져지는 기운', '약속이 매듭지어지는 기운', '서로를 깊이 알아 가는 기운'],
+    noble: ['인연이 넓어지는 기운', '내가 알려지는 기운', '믿음이 쌓이는 기운', '도움이 분명해지는 기운', '지혜를 구하고 얻는 기운'],
+    study: ['배움이 자라는 기운', '배운 것이 드러나는 기운', '기초가 다져지는 기운', '공부가 마무리되는 기운', '이해가 깊어지는 기운'],
+    estate: ['새 거처를 향해 뻗는 기운', '조건이 드러나는 기운', '집과 서류가 다져지는 기운', '계약이 매듭지어지는 기운', '정보가 모이는 기운'],
+    social: ['교류가 넓어지는 기운', '말과 표현이 퍼지는 기운', '사이가 조율되는 기운', '관계의 선이 분명해지는 기운', '듣고 살피는 기운'],
+    family: ['함께하는 시간이 자라는 기운', '마음이 오가는 기운', '살림과 돌봄이 다져지는 기운', '집안 일이 결정되는 기운', '속 이야기가 깊어지는 기운'],
+    windfall: ['새 기회가 뻗어 오는 기운', '재주가 드러나 돈이 되는 기운', '들어온 것이 쌓이는 기운', '기회가 매듭지어지는 기운', '기회를 알아보는 기운']
+  };
   var DOMAIN = {};
   Object.keys(DOMAIN_RAW).forEach(function (k) {
-    DOMAIN[k] = { area: DOMAIN_RAW[k][0], e: DOMAIN_RAW[k][1].map(function (row) { var p = row.split('|'); return { words: p[0].split('·'), use: p[1], acts: p[2].split(' / ') }; }) };
+    DOMAIN[k] = { area: DOMAIN_RAW[k][0], e: DOMAIN_RAW[k][1].map(function (row) { var p = row.split('|'); return { words: p[0].split('·'), use: p[1], acts: p[2].split(' / ') }; }).map(function (x, e) { x.nature = (DOMAIN_NATURE[k] || NATURE)[e]; return x; }) };
   });
   // 분야별 끝맺음 주의(그 지표가 예측이 아니라는 점) — 건강·사고수·횡재만
   var DOMAIN_NOTE = { health: '몸 상태는 진단이 아니라 생활 관리 방향으로만 봐 주세요.', accident: '사고를 예측하는 값이 아니라 조심할 쪽을 알려 주는 참고예요.', windfall: '투자·도박의 수익을 뜻하지 않아요. 뜻밖의 돈일수록 확인하고 지키는 쪽이 먼저예요.' };
@@ -257,16 +278,16 @@
       recommend = [D.area + '에서는 ' + E.use + '을 ' + (hard ? '평소보다 더 ' : '') + '챙겨 주세요.', '챙길 것: ' + acts.join(' · ')];
       caution = caution.filter(function (t) { return !/쏠리지 않게/.test(t); });
     }
-    var summary = elN(e) + ' 기운이 두드러지는 시기 — ' + D.area + '에서는 ' + w2 + tail;
+    var summary = elJ(e, '이', '가') + ' 두드러지는 시기 — ' + D.area + '에서는 ' + E.nature + '이라 ' + w2 + tail;
     var out = {}; Object.keys(base).forEach(function (k) { out[k] = base[k]; });
-    out.domain = key; out.area = D.area; out.words = E.words; out.use = E.use; out.acts = acts; out.summary = summary; out.recommend = recommend; out.caution = caution; out.basis = basis;
+    out.domain = key; out.area = D.area; out.nature = E.nature; out.words = E.words; out.use = E.use; out.acts = acts; out.summary = summary; out.recommend = recommend; out.caution = caution; out.basis = basis;
     return out;
   }
   function legendFor(key) {
     var D = DOMAIN[key]; if (!D) return LEGEND;
-    return EL_K.map(function (k, e) { return { el: e, name: k, hanja: EL_H[e], words: D.e[e].words, area: D.area }; });
+    return EL_K.map(function (k, e) { return { el: e, name: k, hanja: EL_H[e], nature: D.e[e].nature, words: D.e[e].words, area: D.area }; });
   }
-  var api = { VERSION: VERSION, EL_K: EL_K, EL_H: EL_H, THEME: THEME, LEGEND: LEGEND, DOMAIN: DOMAIN, mainEl: mainEl, read: read, readDomain: readDomain, legendFor: legendFor, GRADE_LINE: GRADE_LINE, gradeLine: gradeLine };
+  var api = { VERSION: VERSION, EL_K: EL_K, EL_H: EL_H, THEME: THEME, NATURE: NATURE, DOMAIN_NATURE: DOMAIN_NATURE, LEGEND: LEGEND, DOMAIN: DOMAIN, mainEl: mainEl, read: read, readDomain: readDomain, legendFor: legendFor, GRADE_LINE: GRADE_LINE, gradeLine: gradeLine };
   root.MantraLuckTheme = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
