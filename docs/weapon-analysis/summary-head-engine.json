@@ -1,0 +1,571 @@
+{
+ "engine": "C:\\Users\\user\\AppData\\Local\\Temp\\claude\\c872101d788b358e\\fcd24097-acee-470f-a2d9-d589b2e9416a\\scratchpad\\engine-head.js",
+ "n": 300,
+ "fails": 0,
+ "confidence": {
+  "high": 197,
+  "low": 147,
+  "mid": 37
+ },
+ "types": {
+  "strengthen": 6027,
+  "support": 3197,
+  "adjust": 3394,
+  "release": 3088
+ },
+ "typesByKind": {
+  "daeun": {
+   "strengthen": 1915,
+   "support": 1024,
+   "adjust": 1071,
+   "release": 919
+  },
+  "seun": {
+   "strengthen": 1716,
+   "support": 931,
+   "adjust": 948,
+   "release": 940
+  },
+  "wolun": {
+   "strengthen": 2396,
+   "release": 1229,
+   "adjust": 1375,
+   "support": 1242
+  }
+ },
+ "status": {
+  "single": 193,
+  "dual": 94,
+  "none": 13
+ },
+ "exceptions": {
+  "strongest-not-weapon": 97,
+  "yong-not-weapon": 236,
+  "weapon-is-gisin": 175,
+  "hidden-power": 166,
+  "byeongjon-not-core": 78,
+  "day-ganyeo-weak": 22,
+  "bigeop-weapon": 111,
+  "multi-candidate": 162,
+  "shaky-weapon": 99,
+  "yong-is-weapon": 51,
+  "tie-cut": 3,
+  "jong": 6
+ },
+ "act": {
+  "on": 1753,
+  "shaky": 1315,
+  "sup": 1871,
+  "quiet": 2071,
+  "trim": 592,
+  "strong": 1173,
+  "hit": 409
+ },
+ "actByKind": {
+  "daeun": {
+   "on": 582,
+   "shaky": 408,
+   "sup": 644,
+   "quiet": 583,
+   "trim": 196,
+   "hit": 130,
+   "strong": 327
+  },
+  "seun": {
+   "sup": 437,
+   "shaky": 205,
+   "strong": 560,
+   "on": 494,
+   "quiet": 743,
+   "trim": 248,
+   "hit": 183
+  },
+  "wolun": {
+   "quiet": 745,
+   "on": 677,
+   "shaky": 702,
+   "sup": 790,
+   "strong": 286,
+   "trim": 148,
+   "hit": 96
+  }
+ },
+ "favorByAct": {
+  "on": {
+   "조심": 601,
+   "좋음": 275,
+   "무난": 877
+  },
+  "shaky": {
+   "무난": 739,
+   "조심": 371,
+   "좋음": 205
+  },
+  "sup": {
+   "조심": 504,
+   "무난": 954,
+   "좋음": 413
+  },
+  "quiet": {
+   "무난": 942,
+   "좋음": 641,
+   "조심": 488
+  },
+  "trim": {
+   "무난": 192,
+   "좋음": 370,
+   "조심": 30
+  },
+  "strong": {
+   "조심": 508,
+   "무난": 472,
+   "좋음": 193
+  },
+  "hit": {
+   "조심": 183,
+   "무난": 158,
+   "좋음": 68
+  }
+ },
+ "weaponGroups": {
+  "식상": 70,
+  "인성": 84,
+  "비겁": 111,
+  "재성": 63,
+  "관성": 53
+ },
+ "nWeapons": {
+  "0": 13,
+  "1": 193,
+  "2": 94
+ },
+ "nohour": {
+  "status": {
+   "undetermined": 191,
+   "single": 104,
+   "dual": 5
+  },
+  "keepFirst": {
+   "2": 1,
+   "3": 2,
+   "4": 4,
+   "5": 7,
+   "6": 16,
+   "7": 9,
+   "8": 21,
+   "9": 22,
+   "10": 34,
+   "11": 37,
+   "12": 109,
+   "none": 38
+  }
+ },
+ "nohourAgreeFirstWithFull": 194,
+ "examples": {
+  "strongest-not-weapon": [
+   {
+    "chart": "1950-1-1 0시 F",
+    "pillars": "己丑 丙子 丙申 戊子",
+    "status": "single",
+    "weapons": "토(식상)",
+    "strongest": "수 49.6% (주무기 아님: notExposed)",
+    "yong": "목",
+    "strength": "극약 16%"
+   },
+   {
+    "chart": "1992-7-11 18시 F",
+    "pillars": "壬申 丁未 戊子 辛酉",
+    "status": "single",
+    "weapons": "금(식상)",
+    "strongest": "토 32.1% (주무기 아님: dayOnly)",
+    "yong": "금 (=주무기)",
+    "strength": "중화 55.7%"
+   },
+   {
+    "chart": "1999-12-22 21시 M",
+    "pillars": "己卯 丙子 戊申 壬戌",
+    "status": "single",
+    "weapons": "토(비겁)",
+    "strongest": "수 42.5% (주무기 아님: shaky)",
+    "yong": "토 (=주무기)",
+    "strength": "신약 37.9%"
+   }
+  ],
+  "yong-not-weapon": [
+   {
+    "chart": "1950-1-1 0시 F",
+    "pillars": "己丑 丙子 丙申 戊子",
+    "status": "single",
+    "weapons": "토(식상)",
+    "strongest": "수 49.6% (주무기 아님: notExposed)",
+    "yong": "목",
+    "strength": "극약 16%"
+   },
+   {
+    "chart": "1957-6-12 3시 M",
+    "pillars": "丁酉 丙午 乙卯 丁丑",
+    "status": "single",
+    "weapons": "화(식상)",
+    "strongest": "화 55.6%",
+    "yong": "수",
+    "strength": "태약 23.9%"
+   },
+   {
+    "chart": "1964-11-23 6시 F",
+    "pillars": "甲辰 乙亥 丙子 辛卯",
+    "status": "single",
+    "weapons": "목(인성)",
+    "strongest": "목 42.8%",
+    "yong": "수",
+    "strength": "중화 50.4%"
+   }
+  ],
+  "weapon-is-gisin": [
+   {
+    "chart": "1950-1-1 0시 F",
+    "pillars": "己丑 丙子 丙申 戊子",
+    "status": "single",
+    "weapons": "토(식상)",
+    "strongest": "수 49.6% (주무기 아님: notExposed)",
+    "yong": "목",
+    "strength": "극약 16%"
+   },
+   {
+    "chart": "1957-6-12 3시 M",
+    "pillars": "丁酉 丙午 乙卯 丁丑",
+    "status": "single",
+    "weapons": "화(식상)",
+    "strongest": "화 55.6%",
+    "yong": "수",
+    "strength": "태약 23.9%"
+   },
+   {
+    "chart": "1971-4-6 9시 M",
+    "pillars": "辛亥 壬辰 辛酉 壬辰",
+    "status": "dual",
+    "weapons": "수(식상)·금(비겁)",
+    "strongest": "수 35.1%",
+    "yong": "화",
+    "strength": "중화 49.5%"
+   }
+  ],
+  "hidden-power": [
+   {
+    "chart": "1950-1-1 0시 F",
+    "pillars": "己丑 丙子 丙申 戊子",
+    "status": "single",
+    "weapons": "토(식상)",
+    "strongest": "수 49.6% (주무기 아님: notExposed)",
+    "yong": "목",
+    "strength": "극약 16%"
+   },
+   {
+    "chart": "1957-6-12 3시 M",
+    "pillars": "丁酉 丙午 乙卯 丁丑",
+    "status": "single",
+    "weapons": "화(식상)",
+    "strongest": "화 55.6%",
+    "yong": "수",
+    "strength": "태약 23.9%"
+   },
+   {
+    "chart": "1964-11-23 6시 F",
+    "pillars": "甲辰 乙亥 丙子 辛卯",
+    "status": "single",
+    "weapons": "목(인성)",
+    "strongest": "목 42.8%",
+    "yong": "수",
+    "strength": "중화 50.4%"
+   }
+  ],
+  "byeongjon-not-core": [
+   {
+    "chart": "1950-1-1 0시 F",
+    "pillars": "己丑 丙子 丙申 戊子",
+    "status": "single",
+    "weapons": "토(식상)",
+    "strongest": "수 49.6% (주무기 아님: notExposed)",
+    "yong": "목",
+    "strength": "극약 16%"
+   },
+   {
+    "chart": "1971-4-6 9시 M",
+    "pillars": "辛亥 壬辰 辛酉 壬辰",
+    "status": "dual",
+    "weapons": "수(식상)·금(비겁)",
+    "strongest": "수 35.1%",
+    "yong": "화",
+    "strength": "중화 49.5%"
+   },
+   {
+    "chart": "1979-1-21 12시 F",
+    "pillars": "戊午 乙丑 戊子 戊午",
+    "status": "single",
+    "weapons": "토(비겁)",
+    "strongest": "토 63.6%",
+    "yong": "금",
+    "strength": "태강 75%"
+   }
+  ],
+  "day-ganyeo-weak": [
+   {
+    "chart": "1957-6-12 3시 M",
+    "pillars": "丁酉 丙午 乙卯 丁丑",
+    "status": "single",
+    "weapons": "화(식상)",
+    "strongest": "화 55.6%",
+    "yong": "수",
+    "strength": "태약 23.9%"
+   },
+   {
+    "chart": "2000-4-26 21시 M",
+    "pillars": "庚辰 庚辰 甲寅 甲戌",
+    "status": "dual",
+    "weapons": "목(비겁)·금(관성)",
+    "strongest": "목 35.3%",
+    "yong": "목 (=주무기)",
+    "strength": "신약 37.6%"
+   },
+   {
+    "chart": "1966-7-3 6시 F",
+    "pillars": "丙午 甲午 癸亥 乙卯",
+    "status": "dual",
+    "weapons": "화(재성)·목(식상)",
+    "strongest": "화 37.4%",
+    "yong": "수",
+    "strength": "극약 19.1%"
+   }
+  ],
+  "bigeop-weapon": [
+   {
+    "chart": "1971-4-6 9시 M",
+    "pillars": "辛亥 壬辰 辛酉 壬辰",
+    "status": "dual",
+    "weapons": "수(식상)·금(비겁)",
+    "strongest": "수 35.1%",
+    "yong": "화",
+    "strength": "중화 49.5%"
+   },
+   {
+    "chart": "1985-2-28 15시 M",
+    "pillars": "乙丑 戊寅 戊戌 己未",
+    "status": "dual",
+    "weapons": "토(비겁)·목(관성)",
+    "strongest": "토 50%",
+    "yong": "목 (=주무기)",
+    "strength": "신강 61.1%"
+   },
+   {
+    "chart": "1999-12-22 21시 M",
+    "pillars": "己卯 丙子 戊申 壬戌",
+    "status": "single",
+    "weapons": "토(비겁)",
+    "strongest": "수 42.5% (주무기 아님: shaky)",
+    "yong": "토 (=주무기)",
+    "strength": "신약 37.9%"
+   }
+  ],
+  "multi-candidate": [
+   {
+    "chart": "1971-4-6 9시 M",
+    "pillars": "辛亥 壬辰 辛酉 壬辰",
+    "status": "dual",
+    "weapons": "수(식상)·금(비겁)",
+    "strongest": "수 35.1%",
+    "yong": "화",
+    "strength": "중화 49.5%"
+   },
+   {
+    "chart": "1978-9-17 12시 F",
+    "pillars": "戊午 辛酉 壬午 丙午",
+    "status": "dual",
+    "weapons": "금(인성)·화(재성)",
+    "strongest": "금 43.7%",
+    "yong": "토",
+    "strength": "중화 54.3%"
+   },
+   {
+    "chart": "1985-2-28 15시 M",
+    "pillars": "乙丑 戊寅 戊戌 己未",
+    "status": "dual",
+    "weapons": "토(비겁)·목(관성)",
+    "strongest": "토 50%",
+    "yong": "목 (=주무기)",
+    "strength": "신강 61.1%"
+   }
+  ],
+  "shaky-weapon": [
+   {
+    "chart": "1978-9-17 12시 F",
+    "pillars": "戊午 辛酉 壬午 丙午",
+    "status": "dual",
+    "weapons": "금(인성)·화(재성)",
+    "strongest": "금 43.7%",
+    "yong": "토",
+    "strength": "중화 54.3%"
+   },
+   {
+    "chart": "1951-5-5 0시 F",
+    "pillars": "辛卯 壬辰 乙巳 丙子",
+    "status": "single",
+    "weapons": "수(인성)",
+    "strongest": "목 26.6% (주무기 아님: dayOnly)",
+    "yong": "목",
+    "strength": "중화 46.8%"
+   },
+   {
+    "chart": "1972-8-10 9시 M",
+    "pillars": "壬子 戊申 癸酉 丙辰",
+    "status": "dual",
+    "weapons": "수(비겁)·토(관성)",
+    "strongest": "수 40.1%",
+    "yong": "토 (=주무기)",
+    "strength": "신강 68.2%"
+   }
+  ],
+  "yong-is-weapon": [
+   {
+    "chart": "1985-2-28 15시 M",
+    "pillars": "乙丑 戊寅 戊戌 己未",
+    "status": "dual",
+    "weapons": "토(비겁)·목(관성)",
+    "strongest": "토 50%",
+    "yong": "목 (=주무기)",
+    "strength": "신강 61.1%"
+   },
+   {
+    "chart": "1992-7-11 18시 F",
+    "pillars": "壬申 丁未 戊子 辛酉",
+    "status": "single",
+    "weapons": "금(식상)",
+    "strongest": "토 32.1% (주무기 아님: dayOnly)",
+    "yong": "금 (=주무기)",
+    "strength": "중화 55.7%"
+   },
+   {
+    "chart": "1999-12-22 21시 M",
+    "pillars": "己卯 丙子 戊申 壬戌",
+    "status": "single",
+    "weapons": "토(비겁)",
+    "strongest": "수 42.5% (주무기 아님: shaky)",
+    "yong": "토 (=주무기)",
+    "strength": "신약 37.9%"
+   }
+  ],
+  "status-none": [
+   {
+    "chart": "1976-12-26 9시 M",
+    "pillars": "丙辰 庚子 壬子 甲辰",
+    "hidden": [
+     "수"
+    ],
+    "thin": [
+     "목"
+    ],
+    "strongest": "수 58.2% (주무기 아님: undefined)"
+   },
+   {
+    "chart": "1971-3-23 6시 F",
+    "pillars": "辛亥 辛卯 丁未 癸卯",
+    "hidden": [
+     "목"
+    ],
+    "thin": [
+     "수"
+    ],
+    "strongest": "목 54.1% (주무기 아님: undefined)"
+   },
+   {
+    "chart": "1977-3-19 6시 F",
+    "pillars": "丁巳 癸卯 乙亥 己卯",
+    "hidden": [
+     "목"
+    ],
+    "thin": [
+     "화",
+     "토",
+     "수"
+    ],
+    "strongest": "목 55.3% (주무기 아님: undefined)"
+   }
+  ],
+  "tie-cut": [
+   {
+    "chart": "1990-10-20 15시 M",
+    "pillars": "庚午 丙戌 戊午 己未",
+    "status": "single",
+    "weapons": "토(비겁)",
+    "strongest": "토 48.9%",
+    "yong": "금",
+    "strength": "태강 78.6%"
+   },
+   {
+    "chart": "1959-10-4 15시 M",
+    "pillars": "己亥 癸酉 己未 辛未",
+    "status": "single",
+    "weapons": "금(식상)",
+    "strongest": "금 38.1%",
+    "yong": "화",
+    "strength": "신약 38.3%"
+   },
+   {
+    "chart": "1989-2-28 3시 M",
+    "pillars": "己巳 丙寅 己未 乙丑",
+    "status": "single",
+    "weapons": "토(비겁)",
+    "strongest": "토 34.9%",
+    "yong": "목",
+    "strength": "신강 64.9%"
+   }
+  ],
+  "jong": [
+   {
+    "chart": "1967-10-24 3시 M",
+    "pillars": "丁未 庚戌 辛酉 己丑",
+    "status": "dual",
+    "weapons": "금(비겁)·토(인성)",
+    "strongest": "금 47.2%",
+    "yong": "금 (=주무기)",
+    "strength": "극왕 83.5%"
+   },
+   {
+    "chart": "1988-1-1 12시 F",
+    "pillars": "丁卯 壬子 乙卯 壬午",
+    "status": "single",
+    "weapons": "수(인성)",
+    "strongest": "수 49.6%",
+    "yong": "수 (=주무기)",
+    "strength": "극왕 85.5%"
+   },
+   {
+    "chart": "1970-10-8 3시 M",
+    "pillars": "庚戌 乙酉 辛酉 己丑",
+    "status": "single",
+    "weapons": "토(인성)",
+    "strongest": "금 68.4% (주무기 아님: shaky)",
+    "yong": "금",
+    "strength": "극왕 88.6%"
+   }
+  ],
+  "status-undetermined": [
+   {
+    "chart": "1950-1-1 시간 모름",
+    "cand": "토",
+    "keepFirst": "8/12",
+    "withHour": "single:토"
+   },
+   {
+    "chart": "1971-4-6 시간 모름",
+    "cand": "금·수",
+    "keepFirst": "10/12",
+    "withHour": "dual:수·금"
+   },
+   {
+    "chart": "1985-2-28 시간 모름",
+    "cand": "토·목",
+    "keepFirst": "10/12",
+    "withHour": "dual:토·목"
+   }
+  ]
+ }
+}
