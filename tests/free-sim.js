@@ -86,6 +86,25 @@ const MODES = Object.keys(T.modes);
   ok(saved.daily.act['축적기'].length === 1 && saved.daily.cta.work.to === '#/go?to=career' && !saved.daily.cta.life && !saved.daily['bad key!'], '일일 정리·외부 주소 차단: ' + JSON.stringify(saved.daily));
   const g = await (await API.onRequestGet({ env })).json(); ok(g.content.version === p.d.version, 'GET 은 공개');
 
+  // 분야 지표 풀이(2026-11-25): 등급·오행 모듈이 있으면 분야마다 만세력과 같은 등급(좋음·무난·조심)으로 문장을 고르고, 등급 한 줄·그날 오행을 그 분야 말로
+  { globalThis.MantraLuckGrade = require(path.join(root, 'luck-grade.js')); globalThis.MantraLuckTheme = require(path.join(root, 'luck-element-theme.js'));
+    const LGm = globalThis.MantraLuckGrade, LTm = globalThis.MantraLuckTheme, DK = { money: 'wealth', love: 'love', health: 'health', work: 'career' };
+    let n = 0; const seen = {};
+    for (let p = 0; p < 6; p++) { const chP = M.compute({ year: 1960 + p * 8, month: 1 + p * 2, day: 3 + p * 4, hour: (p * 5) % 24, minute: 0, calendar: 'solar', gender: p % 2 ? 'M' : 'F', city: '서울' });
+      for (let day = 0; day < 20; day++) { const td = FC.todayData(M, chP, Date.UTC(2026, 10, 1 + day, 3), Core.DAYMODE), r = FC.buildDaily(td, { seed: 's' + p + day });
+        for (const k of ['money', 'love', 'health', 'work']) { const f = r.fields[k]; if (!f) continue; n++;
+          ok(f.theme && f.theme.area === LTm.DOMAIN[DK[k]].area && f.theme.words.length && f.theme.rec, '그날 오행을 분야 말로 ' + k);
+          if (k === 'work') { ok(!f.grade, '일·사업운은 등급 기준 없음(엔진 단계)'); continue; }
+          const g = LGm.metric(DK[k], td.fields[k].s); ok(f.gradeKey === g.k && f.grade === g.n, '등급 = 공용 기준 ' + k);
+          ok(f.level === { good: 'high', ok: 'mid', care: 'low' }[g.k], '문장 단계가 등급과 맞음 ' + k + ' ' + f.level + ' ' + g.k);
+          ok(f.hook === LTm.gradeLine(DK[k], g.k), '등급 한 줄 ' + k);
+          ok(!(g.k !== 'ok' && /무난|뚜렷한 쏠림이 없/.test(f.summary)), '요약이 등급과 엇갈림 ' + k + ' ' + f.summary);
+          [f.summary, f.hook, f.theme.rec, ...f.detail].forEach(t => ok(!/undefined|NaN/.test(t), '깨진 값 ' + k));
+          seen[k + g.k] = 1; } } }
+    ok(n > 400, '분야 풀이 수 ' + n); ok(['good', 'ok', 'care'].every(g => seen['money' + g] && seen['love' + g]), '세 등급이 모두 나옴 ' + Object.keys(seen).join(','));
+    const hs = fs.readFileSync(path.join(root, 'report/hub/hub-saju.js'), 'utf8');
+    ok(hs.includes("esc(v.grade || v.band)") && hs.includes("<p class=\"dd-hook\">") && hs.includes("<p class=\"dd-el\">") && hs.includes("key = 'mt_daily_v2'"), '오늘의 운 화면 연결');
+    delete globalThis.MantraLuckGrade; delete globalThis.MantraLuckTheme; }
   console.log(fails.length ? '\n실패 ' + fails.length + '건\n' + [...new Set(fails)].slice(0, 20).join('\n') : '\n전부 통과');
   process.exit(fails.length ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });

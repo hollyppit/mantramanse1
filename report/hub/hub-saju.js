@@ -23,7 +23,7 @@
   };
   var dailyMem = null;
   Saju.daily = function (ch) { // → Promise<DailyFortuneResult>
-    var t = Saju.todayData(ch), day = t.y + '-' + t.mo + '-' + t.d, sig = P.sig(), key = 'mt_daily_v1';
+    var t = Saju.todayData(ch), day = t.y + '-' + t.mo + '-' + t.d, sig = P.sig(), key = 'mt_daily_v2';
     return H.freeContent().then(function (ov) {
       var ver = (ov && ov.version) || '', id = day + '|' + sig + '|' + ver;
       if (dailyMem && dailyMem.id === id) return dailyMem.r;
@@ -226,10 +226,12 @@
       cal.paint = function (d) {
         if (!H.alive(ctx)) return; var nm = P.name();
         var meta = function (k) { return FLD.filter(function (x) { return x[0] === k; })[0]; };
-        var cards = d.order.map(function (k) { var v = d.fields[k], f = meta(k); return '<a class="dc' + (q.f === k ? ' hl' : '') + '" id="d-' + k + '" href="#dd-' + k + '" data-jump="' + k + '"><small>' + f[2] + '</small><b>' + f[1] + '</b><span>' + esc(v.band) + '</span><div class="bar"><i style="width:' + clamp(v.score) + '%"></i></div></a>'; }).join('');
+        var cards = d.order.map(function (k) { var v = d.fields[k], f = meta(k); return '<a class="dc' + (q.f === k ? ' hl' : '') + '" id="d-' + k + '" href="#dd-' + k + '" data-jump="' + k + '"><small>' + f[2] + '</small><b>' + f[1] + '</b><span>' + esc(v.grade || v.band) + '</span><div class="bar"><i style="width:' + clamp(v.score) + '%"></i></div></a>'; }).join('');
         var detail = d.order.map(function (k) {
           var v = d.fields[k], f = meta(k);
-          return '<details class="dd" id="dd-' + k + '" data-f="' + k + '"' + (q.f === k ? ' open' : '') + '><summary><span><small>' + f[2] + '</small><b>' + f[1] + ' · ' + esc(v.band) + '</b><em>' + esc(v.summary) + '</em></span><i class="chev" aria-hidden="true"></i></summary><div class="ddb">' +
+          return '<details class="dd" id="dd-' + k + '" data-f="' + k + '"' + (q.f === k ? ' open' : '') + '><summary><span><small>' + f[2] + '</small><b>' + f[1] + ' · ' + esc(v.grade || v.band) + '</b><em>' + esc(v.summary) + '</em></span><i class="chev" aria-hidden="true"></i></summary><div class="ddb">' +
+            (v.hook && v.hook !== v.summary ? '<p class="dd-hook"><b>' + esc(v.hook) + '</b></p>' : '') +
+            (v.theme ? '<p class="dd-el"><small>' + esc(v.theme.hanja + ' ' + v.theme.el + ' 기운 · ' + v.theme.area + ' 쪽: ' + v.theme.words.join('·')) + '</small><br>' + esc(v.theme.rec) + '</p>' : '') +
             v.detail.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') + (v.examples ? '<div class="chips ex">' + v.examples.map(function (x) { return '<i>' + esc(x.trim()) + '</i>'; }).join('') + '</div>' : '') +
             '<div class="gc"><div class="g"><h5>좋은 행동</h5>' + lis(v.goodActions) + '</div><div class="c"><h5>주의할 행동</h5>' + lis(v.cautions) + '</div></div></div></details>';
         }).join('');

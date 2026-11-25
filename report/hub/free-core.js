@@ -127,7 +127,14 @@
     return {
       y: y, mo: mo, d: d, dow: DOW[k.getUTCDay()], gz: M.gzName(il), score: clamp((ev.fitScore + 100) / 2), flowKey: key, phase: ev.phase, flowLabel: M.flowLabel(ev, { overlay: 'top' }), tg: il.stemTG || '', tgBranch: il.branchTG || '', cond: cond, grade: gr ? gr.n : cond, gradeDay: gr ? { good: '좋은 날', ok: '무난한 날', care: '조심할 날' }[gr.k] : cond + '의 날',
       line: (root.MantraTenGodLuck && root.MantraTenGodLuck.DAY[il.stemTG] ? '오늘은 ' + root.MantraTenGodLuck.DAY[il.stemTG] + '이에요.' : FLOW_LINE[key] || ''), notes: note, todo: mode[2] || '', meaning: mode[1] || '',
-      fields: { money: { s: dm.wealth.score, b: dm.wealth.band }, work: career == null ? null : { s: career, b: M.domainBand('careerActivation', career) }, love: { s: dm.love.score, b: dm.love.band }, health: { s: dm.health.score, b: dm.health.band } },
+      fields: (function () {
+        // 2026-11-25 분야 지표 풀이: 등급 g(좋음·무난·조심 — 이 사주의 평소 수준과 견준 값, /luck-grade.js 지표 기준)와 그날 오행을 그 분야 말로(th, /luck-element-theme.js). 점수·단계(b)는 엔진 값 그대로
+        var LT = root.MantraLuckTheme, DK = { money: 'wealth', work: 'career', love: 'love', health: 'health' };
+        var gOf = function (dk, sc) { if (!LG || dk === 'career') return null; try { var g = LG.metric(dk, sc); return { k: g.k, n: g.n }; } catch (e) { return null; } };
+        var thOf = function (dk, sc, g) { if (!LT || !LT.readDomain) return null; try { var r = LT.readDomain(M, ch, il, 'ilun', dk, { score: sc, grade: g ? g.k : null }); return r ? { hanja: r.hanja, el: r.elName, area: r.area, words: r.words, rec: String(r.recommend[0] || '').replace(/이 시기에?/g, '이날'), care: String((r.caution || [])[0] || '').replace(/이 시기에?/g, '이날') } : null; } catch (e) { return null; } };
+        var mk = function (k, sc, b) { var dk = DK[k], g = gOf(dk, sc); return { s: sc, b: b, g: g, hook: g && LT && LT.gradeLine ? LT.gradeLine(dk, g.k) : '', th: thOf(dk, sc, g) }; };
+        return { money: mk('money', dm.wealth.score, dm.wealth.band), work: career == null ? null : mk('work', career, M.domainBand('careerActivation', career)), love: mk('love', dm.love.score, dm.love.band), health: mk('health', dm.health.score, dm.health.band) };
+      })(),
       // 근거 표시용(엔진이 이미 계산한 값을 옮겨 담기만 함)
       ev: { gz: M.gzNameK ? M.gzNameK(il) : '', stemTG: il.stemTG, branchTG: il.branchTG, flows: f.flows || {}, secondary: f.secondaryFlow, reasons: (f.reasons || []).slice(0, 6), relations: (ev.relations || []).slice(0, 8),
         volatile: !!f.overlays.volatility.active, defense: !!f.overlays.defense.active, domain: { money: { summary: dm.wealth.summary, reasons: (dm.wealth.reasons || []).slice(0, 4) }, love: { summary: dm.love.summary, reasons: (dm.love.reasons || []).slice(0, 4) }, health: { summary: dm.health.summary, reasons: (dm.health.reasons || []).slice(0, 4) } } },
@@ -199,9 +206,10 @@
       headline: S(['head', ph, tone]), summary: S(['core', ph, tone]), summary2: S(['summary2', tone]), notes: td.notes, name: o.name || '', fields: {} };
     var order = [];
     BAND_FIELDS.forEach(function (f) {
-      var k = f[0], v = td.fields[k]; if (!v) return; var lv = lvOf(v.b), engineSummary = td.ev && td.ev.domain && td.ev.domain[k] ? td.ev.domain[k].summary : '';
+      var k = f[0], v = td.fields[k]; if (!v) return; var lv = v.g ? { good: 'high', ok: 'mid', care: 'low' }[v.g.k] : lvOf(v.b), engineSummary = td.ev && td.ev.domain && td.ev.domain[k] ? td.ev.domain[k].summary : '';
+      if (v.g && v.hook && (!engineSummary || (/무난|뚜렷한 쏠림이 없/.test(engineSummary) && v.g.k !== 'ok'))) engineSummary = v.hook;
       var det = S(['fields', k, lv, 'detail'], 2); if (k === 'work') det = [frag(ov, ['workMode', ph])[1] || D.workMode[ph][1]].concat(det.slice(0, 1));
-      res.fields[k] = { label: f[1], score: clamp(v.s), band: v.b, level: lv, levelKo: LV_KO[lv], summary: engineSummary || det[0], detail: det, goodActions: S(['fields', k, lv, 'good'], 3), cautions: S(['fields', k, lv, 'caution'], 2), examples: k === 'work' ? String(frag(ov, ['workMode', ph])[0] || D.workMode[ph][0]).split('·') : null };
+      res.fields[k] = { label: f[1], score: clamp(v.s), band: v.b, grade: v.g ? v.g.n : '', gradeKey: v.g ? v.g.k : '', hook: v.hook || '', theme: v.th || null, level: lv, levelKo: LV_KO[lv], summary: engineSummary || det[0], detail: det, goodActions: S(['fields', k, lv, 'good'], 3), cautions: S(['fields', k, lv, 'caution'], 2), examples: k === 'work' ? String(frag(ov, ['workMode', ph])[0] || D.workMode[ph][0]).split('·') : null };
       order.push(k);
     });
     res.todayActions = S(['act', ph], 3); res.avoidActions = S(['avoid', tone], 2); res.closingMessage = S(['close', ph]);
