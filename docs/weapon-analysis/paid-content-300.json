@@ -184,16 +184,16 @@
  },
  "stat": {
   "status": {
-   "single": 193,
-   "dual": 94,
-   "none": 13
+   "single": 172,
+   "dual": 121,
+   "none": 7
   },
   "topicShown": {
-   "self": 549,
-   "wealth": 549,
-   "career": 549,
-   "love": 549,
-   "remedy": 549
+   "self": 564,
+   "wealth": 564,
+   "career": 564,
+   "love": 564,
+   "remedy": 564
   },
   "dupSentences": 0,
   "dupExamples": [],
@@ -210,18 +210,18 @@
    "timeline_love_14": 30
   },
   "avgChars": {
-   "self": 1679,
-   "wealth": 1583,
-   "career": 1583,
-   "love": 1442,
-   "remedy": 1009
+   "self": 1870,
+   "wealth": 1642,
+   "career": 1650,
+   "love": 1439,
+   "remedy": 1068
   },
   "nohour": {
-   "selfNote": 38,
-   "others": 262
+   "selfNote": 29,
+   "others": 271
   },
-  "graphShown": 2745,
-  "linkedSeun": 6078
+  "graphShown": 2820,
+  "linkedSeun": 6240
  },
  "results": [
   {
@@ -237,11 +237,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1685,
-    "wealth": 1659,
-    "career": 1750,
+    "self": 1871,
+    "wealth": 1711,
+    "career": 1821,
     "love": 1510,
-    "remedy": 1017
+    "remedy": 1092
    }
   },
   {
@@ -257,11 +257,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1672,
-    "wealth": 1344,
-    "career": 1406,
+    "self": 1825,
+    "wealth": 1400,
+    "career": 1503,
     "love": 1363,
-    "remedy": 1013
+    "remedy": 1079
    }
   },
   {
@@ -277,9 +277,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1668,
+    "self": 1784,
     "wealth": 1434,
-    "career": 1439,
+    "career": 1373,
     "love": 1393,
     "remedy": 968
    }
@@ -297,11 +297,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1743,
-    "wealth": 1609,
-    "career": 1630,
+    "self": 2054,
+    "wealth": 1747,
+    "career": 1796,
     "love": 1505,
-    "remedy": 1105
+    "remedy": 1173
    }
   },
   {
@@ -317,11 +317,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1650,
-    "wealth": 1724,
-    "career": 1721,
+    "self": 1891,
+    "wealth": 1821,
+    "career": 1797,
     "love": 1452,
-    "remedy": 1052
+    "remedy": 1120
    }
   },
   {
@@ -337,11 +337,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 2010,
-    "wealth": 1740,
-    "career": 1716,
+    "self": 2194,
+    "wealth": 1795,
+    "career": 1801,
     "love": 1630,
-    "remedy": 1130
+    "remedy": 1196
    }
   },
   {
@@ -357,11 +357,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1555,
-    "wealth": 1660,
-    "career": 1701,
+    "self": 1689,
+    "wealth": 1709,
+    "career": 1760,
     "love": 1540,
-    "remedy": 848
+    "remedy": 916
    }
   },
   {
@@ -377,11 +377,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1621,
-    "wealth": 1735,
-    "career": 1679,
+    "self": 1881,
+    "wealth": 1830,
+    "career": 1788,
     "love": 1528,
-    "remedy": 832
+    "remedy": 900
    }
   },
   {
@@ -397,11 +397,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1476,
-    "wealth": 1525,
-    "career": 1527,
+    "self": 1716,
+    "wealth": 1624,
+    "career": 1610,
     "love": 1308,
-    "remedy": 885
+    "remedy": 957
    }
   },
   {
@@ -417,11 +417,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1852,
-    "wealth": 1618,
-    "career": 1797,
+    "self": 2005,
+    "wealth": 1674,
+    "career": 1894,
     "love": 1438,
-    "remedy": 1018
+    "remedy": 1084
    }
   },
   {
@@ -437,9 +437,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1604,
+    "self": 1776,
     "wealth": 1730,
-    "career": 1675,
+    "career": 1609,
     "love": 1400,
     "remedy": 933
    }
@@ -457,11 +457,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1650,
-    "wealth": 1533,
-    "career": 1478,
+    "self": 1834,
+    "wealth": 1588,
+    "career": 1563,
     "love": 1465,
-    "remedy": 1118
+    "remedy": 1184
    }
   },
   {
@@ -477,9 +477,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1640,
+    "self": 1814,
     "wealth": 1574,
-    "career": 1570,
+    "career": 1573,
     "love": 1477,
     "remedy": 962
    }
@@ -497,11 +497,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1478,
-    "wealth": 1268,
-    "career": 1271,
+    "self": 1628,
+    "wealth": 1327,
+    "career": 1275,
     "love": 1309,
-    "remedy": 1098
+    "remedy": 1170
    }
   },
   {
@@ -517,18 +517,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1764,
-    "wealth": 1656,
-    "career": 1718,
+    "self": 1898,
+    "wealth": 1705,
+    "career": 1777,
     "love": 1586,
-    "remedy": 1042
+    "remedy": 1110
    }
   },
   {
    "i": 15,
    "chart": "2000-4-26 21시 M",
    "status": "dual",
-   "weapon": "목(비겁)·금(관성)",
+   "weapon": "금(관성)·목(비겁)",
    "shown": [
     "self",
     "wealth",
@@ -537,11 +537,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1785,
-    "wealth": 1470,
-    "career": 1344,
-    "love": 1290,
-    "remedy": 893
+    "self": 2156,
+    "wealth": 2068,
+    "career": 2076,
+    "love": 1437,
+    "remedy": 1238
    }
   },
   {
@@ -557,18 +557,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1731,
-    "wealth": 1674,
-    "career": 1565,
+    "self": 1939,
+    "wealth": 1763,
+    "career": 1667,
     "love": 1520,
-    "remedy": 1091
+    "remedy": 1163
    }
   },
   {
    "i": 17,
    "chart": "1959-2-20 3시 M",
-   "status": "single",
-   "weapon": "수(비겁)",
+   "status": "dual",
+   "weapon": "수(비겁)·화(재성)",
    "shown": [
     "self",
     "wealth",
@@ -577,11 +577,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1519,
-    "wealth": 1497,
-    "career": 1539,
+    "self": 1851,
+    "wealth": 1630,
+    "career": 1667,
     "love": 1463,
-    "remedy": 1047
+    "remedy": 1193
    }
   },
   {
@@ -597,11 +597,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1773,
-    "wealth": 1570,
-    "career": 1458,
+    "self": 1944,
+    "wealth": 1619,
+    "career": 1517,
     "love": 1383,
-    "remedy": 1080
+    "remedy": 1152
    }
   },
   {
@@ -617,11 +617,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1465,
-    "wealth": 1297,
-    "career": 1262,
+    "self": 1725,
+    "wealth": 1392,
+    "career": 1371,
     "love": 1313,
-    "remedy": 912
+    "remedy": 980
    }
   },
   {
@@ -637,11 +637,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1917,
-    "wealth": 1826,
-    "career": 1771,
+    "self": 2104,
+    "wealth": 1878,
+    "career": 1845,
     "love": 1650,
-    "remedy": 1114
+    "remedy": 1186
    }
   },
   {
@@ -657,11 +657,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1490,
-    "wealth": 1578,
-    "career": 1642,
+    "self": 1725,
+    "wealth": 1677,
+    "career": 1723,
     "love": 1355,
-    "remedy": 886
+    "remedy": 952
    }
   },
   {
@@ -677,11 +677,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1481,
-    "wealth": 1260,
-    "career": 1254,
+    "self": 1758,
+    "wealth": 1356,
+    "career": 1374,
     "love": 1331,
-    "remedy": 1016
+    "remedy": 1088
    }
   },
   {
@@ -697,11 +697,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1735,
-    "wealth": 1884,
-    "career": 1846,
+    "self": 1961,
+    "wealth": 1979,
+    "career": 1953,
     "love": 1531,
-    "remedy": 1044
+    "remedy": 1116
    }
   },
   {
@@ -717,11 +717,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1795,
-    "wealth": 1661,
-    "career": 1685,
+    "self": 1944,
+    "wealth": 1716,
+    "career": 1684,
     "love": 1593,
-    "remedy": 1123
+    "remedy": 1198
    }
   },
   {
@@ -737,9 +737,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1742,
+    "self": 1894,
     "wealth": 1634,
-    "career": 1626,
+    "career": 1629,
     "love": 1549,
     "remedy": 1028
    }
@@ -747,8 +747,8 @@
   {
    "i": 26,
    "chart": "1967-11-7 6시 F",
-   "status": "single",
-   "weapon": "토(재성)",
+   "status": "dual",
+   "weapon": "토(재성)·화(식상)",
    "shown": [
     "self",
     "wealth",
@@ -757,11 +757,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1555,
-    "wealth": 1734,
-    "career": 1667,
+    "self": 1883,
+    "wealth": 1870,
+    "career": 1777,
     "love": 1450,
-    "remedy": 1081
+    "remedy": 1235
    }
   },
   {
@@ -777,11 +777,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1953,
-    "wealth": 1788,
-    "career": 1804,
+    "self": 2137,
+    "wealth": 1843,
+    "career": 1889,
     "love": 1572,
-    "remedy": 1027
+    "remedy": 1093
    }
   },
   {
@@ -797,11 +797,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1506,
-    "wealth": 1570,
-    "career": 1570,
+    "self": 1657,
+    "wealth": 1627,
+    "career": 1569,
     "love": 1294,
-    "remedy": 1052
+    "remedy": 1120
    }
   },
   {
@@ -817,11 +817,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1747,
-    "wealth": 1422,
-    "career": 1472,
+    "self": 1982,
+    "wealth": 1525,
+    "career": 1491,
     "love": 1419,
-    "remedy": 1007
+    "remedy": 1082
    }
   },
   {
@@ -837,11 +837,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1751,
-    "wealth": 1439,
-    "career": 1516,
+    "self": 1936,
+    "wealth": 1494,
+    "career": 1582,
     "love": 1499,
-    "remedy": 1029
+    "remedy": 1097
    }
   },
   {
@@ -857,18 +857,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1650,
-    "wealth": 1661,
-    "career": 1543,
+    "self": 1821,
+    "wealth": 1710,
+    "career": 1602,
     "love": 1338,
-    "remedy": 1101
+    "remedy": 1173
    }
   },
   {
    "i": 32,
    "chart": "1954-5-17 0시 F",
    "status": "dual",
-   "weapon": "수(비겁)·토(관성)",
+   "weapon": "토(관성)·수(비겁)",
    "shown": [
     "self",
     "wealth",
@@ -877,11 +877,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1443,
-    "wealth": 1327,
-    "career": 1297,
-    "love": 1225,
-    "remedy": 937
+    "self": 1865,
+    "wealth": 1703,
+    "career": 1751,
+    "love": 1389,
+    "remedy": 1169
    }
   },
   {
@@ -897,11 +897,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1739,
-    "wealth": 1781,
-    "career": 1719,
+    "self": 1991,
+    "wealth": 1880,
+    "career": 1830,
     "love": 1506,
-    "remedy": 1089
+    "remedy": 1164
    }
   },
   {
@@ -917,18 +917,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1326,
-    "wealth": 1497,
-    "career": 1418,
+    "self": 1508,
+    "wealth": 1554,
+    "career": 1417,
     "love": 1163,
-    "remedy": 874
+    "remedy": 942
    }
   },
   {
    "i": 35,
    "chart": "1975-8-22 9시 M",
    "status": "dual",
-   "weapon": "금(비겁)·목(재성)",
+   "weapon": "목(재성)·금(비겁)",
    "shown": [
     "self",
     "wealth",
@@ -937,11 +937,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1532,
-    "wealth": 1562,
-    "career": 1486,
-    "love": 1352,
-    "remedy": 1018
+    "self": 2063,
+    "wealth": 1517,
+    "career": 1467,
+    "love": 1368,
+    "remedy": 1221
    }
   },
   {
@@ -957,18 +957,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1548,
-    "wealth": 1778,
-    "career": 1717,
+    "self": 1784,
+    "wealth": 1878,
+    "career": 1841,
     "love": 1542,
-    "remedy": 992
+    "remedy": 1060
    }
   },
   {
    "i": 37,
    "chart": "1989-6-16 15시 M",
    "status": "dual",
-   "weapon": "화(비겁)·토(식상)",
+   "weapon": "토(식상)·화(비겁)",
    "shown": [
     "self",
     "wealth",
@@ -977,11 +977,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1589,
-    "wealth": 1388,
-    "career": 1304,
-    "love": 1401,
-    "remedy": 1116
+    "self": 1936,
+    "wealth": 1830,
+    "career": 1798,
+    "love": 1572,
+    "remedy": 1211
    }
   },
   {
@@ -997,11 +997,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1498,
-    "wealth": 1645,
-    "career": 1555,
+    "self": 1685,
+    "wealth": 1697,
+    "career": 1629,
     "love": 1410,
-    "remedy": 785
+    "remedy": 857
    }
   },
   {
@@ -1017,11 +1017,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1694,
-    "wealth": 1466,
-    "career": 1553,
+    "self": 1864,
+    "wealth": 1517,
+    "career": 1616,
     "love": 1454,
-    "remedy": 1042
+    "remedy": 1110
    }
   },
   {
@@ -1037,11 +1037,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1412,
-    "wealth": 1260,
-    "career": 1228,
+    "self": 1599,
+    "wealth": 1312,
+    "career": 1302,
     "love": 1257,
-    "remedy": 902
+    "remedy": 974
    }
   },
   {
@@ -1057,11 +1057,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1730,
-    "wealth": 1894,
-    "career": 1865,
+    "self": 1879,
+    "wealth": 1949,
+    "career": 1831,
     "love": 1625,
-    "remedy": 1145
+    "remedy": 1220
    }
   },
   {
@@ -1077,11 +1077,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1476,
-    "wealth": 1698,
-    "career": 1694,
+    "self": 1625,
+    "wealth": 1753,
+    "career": 1660,
     "love": 1473,
-    "remedy": 1070
+    "remedy": 1145
    }
   },
   {
@@ -1113,18 +1113,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1865,
-    "wealth": 1478,
-    "career": 1559,
+    "self": 2049,
+    "wealth": 1533,
+    "career": 1644,
     "love": 1501,
-    "remedy": 1037
+    "remedy": 1103
    }
   },
   {
    "i": 45,
    "chart": "1990-10-20 15시 M",
-   "status": "single",
-   "weapon": "토(비겁)",
+   "status": "dual",
+   "weapon": "토(비겁)·금(식상)",
    "shown": [
     "self",
     "wealth",
@@ -1133,11 +1133,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1597,
-    "wealth": 1709,
-    "career": 1638,
+    "self": 1968,
+    "wealth": 1844,
+    "career": 1758,
     "love": 1549,
-    "remedy": 963
+    "remedy": 1117
    }
   },
   {
@@ -1153,9 +1153,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1664,
+    "self": 1816,
     "wealth": 1571,
-    "career": 1649,
+    "career": 1552,
     "love": 1551,
     "remedy": 1031
    }
@@ -1173,11 +1173,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1580,
-    "wealth": 1625,
-    "career": 1607,
+    "self": 1910,
+    "wealth": 1768,
+    "career": 1734,
     "love": 1485,
-    "remedy": 837
+    "remedy": 903
    }
   },
   {
@@ -1193,11 +1193,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1766,
-    "wealth": 1687,
-    "career": 1726,
+    "self": 1917,
+    "wealth": 1744,
+    "career": 1694,
     "love": 1506,
-    "remedy": 1147
+    "remedy": 1215
    }
   },
   {
@@ -1213,11 +1213,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1756,
-    "wealth": 1761,
-    "career": 1656,
+    "self": 1906,
+    "wealth": 1812,
+    "career": 1782,
     "love": 1467,
-    "remedy": 1082
+    "remedy": 1150
    }
   },
   {
@@ -1233,11 +1233,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1653,
-    "wealth": 1444,
-    "career": 1421,
+    "self": 1878,
+    "wealth": 1541,
+    "career": 1533,
     "love": 1503,
-    "remedy": 1022
+    "remedy": 1090
    }
   },
   {
@@ -1253,11 +1253,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1762,
-    "wealth": 1624,
-    "career": 1703,
+    "self": 2022,
+    "wealth": 1719,
+    "career": 1812,
     "love": 1434,
-    "remedy": 990
+    "remedy": 1058
    }
   },
   {
@@ -1273,7 +1273,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1515,
+    "self": 1636,
     "wealth": 1572,
     "career": 1547,
     "love": 1531,
@@ -1293,11 +1293,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1666,
-    "wealth": 1649,
-    "career": 1708,
+    "self": 1908,
+    "wealth": 1748,
+    "career": 1885,
     "love": 1460,
-    "remedy": 813
+    "remedy": 881
    }
   },
   {
@@ -1313,11 +1313,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1701,
-    "wealth": 1779,
-    "career": 1650,
+    "self": 1869,
+    "wealth": 1830,
+    "career": 1710,
     "love": 1518,
-    "remedy": 1144
+    "remedy": 1219
    }
   },
   {
@@ -1333,11 +1333,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1635,
-    "wealth": 1822,
-    "career": 1817,
+    "self": 1806,
+    "wealth": 1871,
+    "career": 1876,
     "love": 1540,
-    "remedy": 1082
+    "remedy": 1154
    }
   },
   {
@@ -1353,11 +1353,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1575,
-    "wealth": 1575,
-    "career": 1551,
+    "self": 1762,
+    "wealth": 1627,
+    "career": 1625,
     "love": 1473,
-    "remedy": 1064
+    "remedy": 1136
    }
   },
   {
@@ -1373,9 +1373,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1620,
+    "self": 1772,
     "wealth": 1401,
-    "career": 1391,
+    "career": 1394,
     "love": 1414,
     "remedy": 934
    }
@@ -1409,11 +1409,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1717,
-    "wealth": 1695,
-    "career": 1704,
+    "self": 1902,
+    "wealth": 1750,
+    "career": 1701,
     "love": 1556,
-    "remedy": 1041
+    "remedy": 1116
    }
   },
   {
@@ -1429,11 +1429,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1555,
-    "wealth": 1418,
-    "career": 1402,
+    "self": 1877,
+    "wealth": 1513,
+    "career": 1478,
     "love": 1369,
-    "remedy": 942
+    "remedy": 1008
    }
   },
   {
@@ -1449,11 +1449,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1554,
-    "wealth": 1478,
-    "career": 1547,
+    "self": 1699,
+    "wealth": 1537,
+    "career": 1520,
     "love": 1343,
-    "remedy": 839
+    "remedy": 911
    }
   },
   {
@@ -1469,18 +1469,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1587,
-    "wealth": 1404,
-    "career": 1399,
-    "love": 1358,
-    "remedy": 975
+    "self": 1873,
+    "wealth": 1501,
+    "career": 1483,
+    "love": 1402,
+    "remedy": 1041
    }
   },
   {
    "i": 63,
    "chart": "1951-4-22 21시 M",
    "status": "dual",
-   "weapon": "수(비겁)·금(인성)",
+   "weapon": "금(인성)·수(비겁)",
    "shown": [
     "self",
     "wealth",
@@ -1489,11 +1489,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1735,
-    "wealth": 1610,
-    "career": 1562,
-    "love": 1551,
-    "remedy": 1098
+    "self": 1676,
+    "wealth": 1696,
+    "career": 1605,
+    "love": 1420,
+    "remedy": 1251
    }
   },
   {
@@ -1509,11 +1509,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1735,
-    "wealth": 1803,
-    "career": 1813,
+    "self": 1951,
+    "wealth": 1902,
+    "career": 1924,
     "love": 1484,
-    "remedy": 1021
+    "remedy": 1087
    }
   },
   {
@@ -1529,11 +1529,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1772,
-    "wealth": 1685,
-    "career": 1729,
+    "self": 1954,
+    "wealth": 1742,
+    "career": 1728,
     "love": 1478,
-    "remedy": 896
+    "remedy": 964
    }
   },
   {
@@ -1549,9 +1549,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1609,
+    "self": 1730,
     "wealth": 1288,
-    "career": 1373,
+    "career": 1276,
     "love": 1198,
     "remedy": 967
    }
@@ -1569,11 +1569,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1583,
-    "wealth": 1587,
-    "career": 1695,
+    "self": 1813,
+    "wealth": 1646,
+    "career": 1765,
     "love": 1456,
-    "remedy": 1049
+    "remedy": 1117
    }
   },
   {
@@ -1589,11 +1589,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1599,
-    "wealth": 1556,
-    "career": 1591,
+    "self": 1757,
+    "wealth": 1615,
+    "career": 1597,
     "love": 1432,
-    "remedy": 829
+    "remedy": 901
    }
   },
   {
@@ -1609,11 +1609,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1721,
-    "wealth": 1750,
-    "career": 1720,
+    "self": 1957,
+    "wealth": 1850,
+    "career": 1844,
     "love": 1567,
-    "remedy": 1130
+    "remedy": 1198
    }
   },
   {
@@ -1629,11 +1629,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1637,
-    "wealth": 1685,
-    "career": 1693,
+    "self": 1782,
+    "wealth": 1736,
+    "career": 1754,
     "love": 1328,
-    "remedy": 939
+    "remedy": 1007
    }
   },
   {
@@ -1649,11 +1649,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1767,
-    "wealth": 1674,
-    "career": 1680,
+    "self": 2069,
+    "wealth": 1819,
+    "career": 1839,
     "love": 1465,
-    "remedy": 1137
+    "remedy": 1203
    }
   },
   {
@@ -1669,11 +1669,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1599,
-    "wealth": 1641,
-    "career": 1724,
+    "self": 1745,
+    "wealth": 1698,
+    "career": 1692,
     "love": 1493,
-    "remedy": 983
+    "remedy": 1051
    }
   },
   {
@@ -1689,18 +1689,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1679,
-    "wealth": 1350,
-    "career": 1344,
+    "self": 1824,
+    "wealth": 1401,
+    "career": 1470,
     "love": 1352,
-    "remedy": 948
+    "remedy": 1016
    }
   },
   {
    "i": 74,
    "chart": "1973-11-3 6시 F",
    "status": "dual",
-   "weapon": "수(비겁)·목(식상)",
+   "weapon": "목(식상)·수(비겁)",
    "shown": [
     "self",
     "wealth",
@@ -1709,11 +1709,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1660,
-    "wealth": 1649,
-    "career": 1549,
-    "love": 1472,
-    "remedy": 1005
+    "self": 1787,
+    "wealth": 1393,
+    "career": 1488,
+    "love": 1252,
+    "remedy": 1199
    }
   },
   {
@@ -1729,18 +1729,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1862,
-    "wealth": 1736,
-    "career": 1759,
+    "self": 2088,
+    "wealth": 1831,
+    "career": 1866,
     "love": 1512,
-    "remedy": 1143
+    "remedy": 1215
    }
   },
   {
    "i": 76,
    "chart": "1987-9-25 12시 F",
    "status": "dual",
-   "weapon": "화(비겁)·토(식상)",
+   "weapon": "토(식상)·화(비겁)",
    "shown": [
     "self",
     "wealth",
@@ -1749,18 +1749,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1546,
-    "wealth": 1474,
-    "career": 1327,
-    "love": 1408,
-    "remedy": 866
+    "self": 1883,
+    "wealth": 1812,
+    "career": 1720,
+    "love": 1501,
+    "remedy": 1055
    }
   },
   {
    "i": 77,
    "chart": "1994-2-8 15시 M",
    "status": "dual",
-   "weapon": "목(비겁)·화(식상)",
+   "weapon": "화(식상)·목(비겁)",
    "shown": [
     "self",
     "wealth",
@@ -1769,11 +1769,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1731,
-    "wealth": 1438,
-    "career": 1454,
-    "love": 1460,
-    "remedy": 1065
+    "self": 1959,
+    "wealth": 1510,
+    "career": 1551,
+    "love": 1355,
+    "remedy": 1132
    }
   },
   {
@@ -1789,18 +1789,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1691,
-    "wealth": 1625,
-    "career": 1716,
+    "self": 1931,
+    "wealth": 1724,
+    "career": 1797,
     "love": 1420,
-    "remedy": 879
+    "remedy": 945
    }
   },
   {
    "i": 79,
    "chart": "1953-12-2 21시 M",
-   "status": "single",
-   "weapon": "수(관성)",
+   "status": "dual",
+   "weapon": "수(관성)·금(재성)",
    "shown": [
     "self",
     "wealth",
@@ -1809,18 +1809,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1792,
-    "wealth": 1455,
-    "career": 1503,
+    "self": 2128,
+    "wealth": 1592,
+    "career": 1680,
     "love": 1371,
-    "remedy": 867
+    "remedy": 1013
    }
   },
   {
    "i": 80,
    "chart": "1960-5-13 0시 F",
    "status": "dual",
-   "weapon": "금(비겁)·화(관성)",
+   "weapon": "화(관성)·금(비겁)",
    "shown": [
     "self",
     "wealth",
@@ -1829,11 +1829,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1671,
-    "wealth": 1791,
-    "career": 1717,
-    "love": 1432,
-    "remedy": 1009
+    "self": 1761,
+    "wealth": 1419,
+    "career": 1521,
+    "love": 1122,
+    "remedy": 1038
    }
   },
   {
@@ -1849,11 +1849,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1762,
-    "wealth": 1794,
-    "career": 1753,
+    "self": 2036,
+    "wealth": 1893,
+    "career": 1884,
     "love": 1600,
-    "remedy": 1003
+    "remedy": 1069
    }
   },
   {
@@ -1869,11 +1869,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1484,
-    "wealth": 1327,
-    "career": 1305,
+    "self": 1669,
+    "wealth": 1382,
+    "career": 1271,
     "love": 1301,
-    "remedy": 1039
+    "remedy": 1114
    }
   },
   {
@@ -1889,11 +1889,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1594,
-    "wealth": 1678,
-    "career": 1715,
+    "self": 1775,
+    "wealth": 1737,
+    "career": 1785,
     "love": 1536,
-    "remedy": 1099
+    "remedy": 1167
    }
   },
   {
@@ -1909,9 +1909,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1701,
+    "self": 1853,
     "wealth": 1519,
-    "career": 1533,
+    "career": 1436,
     "love": 1450,
     "remedy": 827
    }
@@ -1919,8 +1919,8 @@
   {
    "i": 85,
    "chart": "1995-6-12 15시 M",
-   "status": "single",
-   "weapon": "목(비겁)",
+   "status": "dual",
+   "weapon": "목(비겁)·수(인성)",
    "shown": [
     "self",
     "wealth",
@@ -1929,11 +1929,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1463,
-    "wealth": 1282,
-    "career": 1250,
+    "self": 1829,
+    "wealth": 1420,
+    "career": 1381,
     "love": 1309,
-    "remedy": 906
+    "remedy": 1050
    }
   },
   {
@@ -1949,11 +1949,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1541,
-    "wealth": 1628,
-    "career": 1621,
+    "self": 1780,
+    "wealth": 1723,
+    "career": 1697,
     "love": 1466,
-    "remedy": 1028
+    "remedy": 1103
    }
   },
   {
@@ -1969,11 +1969,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1763,
-    "wealth": 1685,
-    "career": 1793,
+    "self": 2001,
+    "wealth": 1781,
+    "career": 1934,
     "love": 1526,
-    "remedy": 983
+    "remedy": 1051
    }
   },
   {
@@ -1989,11 +1989,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1462,
-    "wealth": 1687,
-    "career": 1738,
+    "self": 1611,
+    "wealth": 1742,
+    "career": 1704,
     "love": 1391,
-    "remedy": 1056
+    "remedy": 1131
    }
   },
   {
@@ -2009,11 +2009,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1563,
-    "wealth": 1317,
-    "career": 1341,
+    "self": 1880,
+    "wealth": 1461,
+    "career": 1598,
     "love": 1257,
-    "remedy": 935
+    "remedy": 1003
    }
   },
   {
@@ -2029,11 +2029,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1686,
-    "wealth": 1401,
-    "career": 1394,
+    "self": 1831,
+    "wealth": 1452,
+    "career": 1520,
     "love": 1388,
-    "remedy": 993
+    "remedy": 1061
    }
   },
   {
@@ -2049,11 +2049,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1780,
-    "wealth": 1776,
-    "career": 1714,
+    "self": 1948,
+    "wealth": 1827,
+    "career": 1774,
     "love": 1581,
-    "remedy": 1090
+    "remedy": 1165
    }
   },
   {
@@ -2069,11 +2069,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1793,
-    "wealth": 1827,
-    "career": 1764,
+    "self": 1938,
+    "wealth": 1884,
+    "career": 1829,
     "love": 1514,
-    "remedy": 1068
+    "remedy": 1136
    }
   },
   {
@@ -2089,11 +2089,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1829,
-    "wealth": 1685,
-    "career": 1847,
+    "self": 2065,
+    "wealth": 1785,
+    "career": 1971,
     "love": 1533,
-    "remedy": 1140
+    "remedy": 1208
    }
   },
   {
@@ -2109,11 +2109,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1712,
-    "wealth": 1465,
-    "career": 1432,
+    "self": 2029,
+    "wealth": 1609,
+    "career": 1689,
     "love": 1418,
-    "remedy": 1021
+    "remedy": 1089
    }
   },
   {
@@ -2129,11 +2129,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1669,
-    "wealth": 1685,
-    "career": 1586,
+    "self": 1856,
+    "wealth": 1737,
+    "career": 1660,
     "love": 1610,
-    "remedy": 1081
+    "remedy": 1153
    }
   },
   {
@@ -2149,11 +2149,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1399,
-    "wealth": 1455,
-    "career": 1516,
+    "self": 1538,
+    "wealth": 1504,
+    "career": 1575,
     "love": 1419,
-    "remedy": 951
+    "remedy": 1019
    }
   },
   {
@@ -2169,11 +2169,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1871,
-    "wealth": 1859,
-    "career": 1790,
+    "self": 2020,
+    "wealth": 1910,
+    "career": 1818,
     "love": 1619,
-    "remedy": 1098
+    "remedy": 1164
    }
   },
   {
@@ -2189,11 +2189,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1547,
-    "wealth": 1727,
-    "career": 1637,
+    "self": 1782,
+    "wealth": 1830,
+    "career": 1687,
     "love": 1482,
-    "remedy": 963
+    "remedy": 1035
    }
   },
   {
@@ -2209,11 +2209,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1696,
-    "wealth": 1598,
-    "career": 1592,
-    "love": 1383,
-    "remedy": 1009
+    "self": 1930,
+    "wealth": 1696,
+    "career": 1698,
+    "love": 1382,
+    "remedy": 1081
    }
   },
   {
@@ -2229,9 +2229,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1601,
+    "self": 1753,
     "wealth": 1445,
-    "career": 1365,
+    "career": 1368,
     "love": 1430,
     "remedy": 942
    }
@@ -2249,11 +2249,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1770,
-    "wealth": 1653,
-    "career": 1695,
+    "self": 1915,
+    "wealth": 1704,
+    "career": 1821,
     "love": 1447,
-    "remedy": 1052
+    "remedy": 1120
    }
   },
   {
@@ -2269,11 +2269,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1544,
-    "wealth": 1684,
-    "career": 1718,
+    "self": 1689,
+    "wealth": 1743,
+    "career": 1722,
     "love": 1424,
-    "remedy": 913
+    "remedy": 985
    }
   },
   {
@@ -2289,11 +2289,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1510,
-    "wealth": 1663,
-    "career": 1674,
+    "self": 1753,
+    "wealth": 1759,
+    "career": 1878,
     "love": 1462,
-    "remedy": 945
+    "remedy": 1013
    }
   },
   {
@@ -2309,11 +2309,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1713,
-    "wealth": 1514,
-    "career": 1511,
+    "self": 1864,
+    "wealth": 1571,
+    "career": 1510,
     "love": 1403,
-    "remedy": 1066
+    "remedy": 1134
    }
   },
   {
@@ -2329,9 +2329,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1580,
+    "self": 1732,
     "wealth": 1747,
-    "career": 1708,
+    "career": 1611,
     "love": 1548,
     "remedy": 921
    }
@@ -2355,17 +2355,21 @@
   {
    "i": 107,
    "chart": "1984-8-2 9시 M",
-   "status": "none",
-   "weapon": "",
+   "status": "single",
+   "weapon": "목(관성)",
    "shown": [
-    "self"
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
    ],
    "chars": {
-    "self": 244,
-    "wealth": 0,
-    "career": 0,
-    "love": 0,
-    "remedy": 0
+    "self": 1772,
+    "wealth": 1492,
+    "career": 1609,
+    "love": 1428,
+    "remedy": 924
    }
   },
   {
@@ -2381,11 +2385,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1832,
-    "wealth": 1618,
-    "career": 1677,
+    "self": 1977,
+    "wealth": 1669,
+    "career": 1803,
     "love": 1484,
-    "remedy": 984
+    "remedy": 1052
    }
   },
   {
@@ -2401,18 +2405,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1685,
-    "wealth": 1792,
-    "career": 1741,
+    "self": 1916,
+    "wealth": 1896,
+    "career": 1921,
     "love": 1425,
-    "remedy": 1075
+    "remedy": 1147
    }
   },
   {
    "i": 110,
    "chart": "1950-11-7 18시 F",
    "status": "dual",
-   "weapon": "화(비겁)·금(재성)",
+   "weapon": "금(재성)·화(비겁)",
    "shown": [
     "self",
     "wealth",
@@ -2421,11 +2425,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1879,
-    "wealth": 1481,
-    "career": 1446,
-    "love": 1499,
-    "remedy": 1132
+    "self": 1694,
+    "wealth": 1777,
+    "career": 1785,
+    "love": 1417,
+    "remedy": 1165
    }
   },
   {
@@ -2441,11 +2445,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1446,
-    "wealth": 1241,
-    "career": 1303,
+    "self": 1688,
+    "wealth": 1340,
+    "career": 1482,
     "love": 1255,
-    "remedy": 846
+    "remedy": 914
    }
   },
   {
@@ -2461,9 +2465,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1735,
+    "self": 1887,
     "wealth": 1777,
-    "career": 1727,
+    "career": 1730,
     "love": 1597,
     "remedy": 1054
    }
@@ -2481,11 +2485,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1542,
-    "wealth": 1594,
-    "career": 1767,
+    "self": 1783,
+    "wealth": 1688,
+    "career": 1906,
     "love": 1387,
-    "remedy": 1050
+    "remedy": 1118
    }
   },
   {
@@ -2501,11 +2505,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1764,
-    "wealth": 1727,
-    "career": 1787,
+    "self": 1984,
+    "wealth": 1824,
+    "career": 1899,
     "love": 1663,
-    "remedy": 1072
+    "remedy": 1140
    }
   },
   {
@@ -2521,11 +2525,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1606,
-    "wealth": 1400,
-    "career": 1332,
+    "self": 1916,
+    "wealth": 1543,
+    "career": 1574,
     "love": 1317,
-    "remedy": 1046
+    "remedy": 1114
    }
   },
   {
@@ -2541,11 +2545,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1423,
-    "wealth": 1531,
-    "career": 1463,
+    "self": 1699,
+    "wealth": 1627,
+    "career": 1602,
     "love": 1412,
-    "remedy": 754
+    "remedy": 826
    }
   },
   {
@@ -2561,11 +2565,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1938,
-    "wealth": 1649,
-    "career": 1632,
+    "self": 2181,
+    "wealth": 1745,
+    "career": 1836,
     "love": 1504,
-    "remedy": 1060
+    "remedy": 1128
    }
   },
   {
@@ -2581,7 +2585,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1464,
+    "self": 1638,
     "wealth": 1247,
     "career": 1124,
     "love": 1213,
@@ -2601,11 +2605,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1673,
-    "wealth": 1813,
-    "career": 1685,
+    "self": 1897,
+    "wealth": 1908,
+    "career": 1794,
     "love": 1552,
-    "remedy": 936
+    "remedy": 1004
    }
   },
   {
@@ -2621,11 +2625,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1754,
-    "wealth": 1494,
-    "career": 1424,
+    "self": 1904,
+    "wealth": 1545,
+    "career": 1550,
     "love": 1339,
-    "remedy": 988
+    "remedy": 1056
    }
   },
   {
@@ -2641,11 +2645,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1771,
-    "wealth": 1467,
-    "career": 1464,
+    "self": 1922,
+    "wealth": 1524,
+    "career": 1465,
     "love": 1394,
-    "remedy": 1077
+    "remedy": 1145
    }
   },
   {
@@ -2661,11 +2665,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1768,
-    "wealth": 1456,
-    "career": 1418,
+    "self": 1999,
+    "wealth": 1551,
+    "career": 1609,
     "love": 1411,
-    "remedy": 1049
+    "remedy": 1117
    }
   },
   {
@@ -2681,11 +2685,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1742,
-    "wealth": 1695,
-    "career": 1738,
+    "self": 1963,
+    "wealth": 1790,
+    "career": 1845,
     "love": 1509,
-    "remedy": 916
+    "remedy": 988
    }
   },
   {
@@ -2701,11 +2705,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1711,
-    "wealth": 1733,
-    "career": 1743,
+    "self": 1954,
+    "wealth": 1829,
+    "career": 1947,
     "love": 1531,
-    "remedy": 930
+    "remedy": 998
    }
   },
   {
@@ -2721,11 +2725,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1659,
-    "wealth": 1652,
-    "career": 1667,
+    "self": 1883,
+    "wealth": 1751,
+    "career": 1844,
     "love": 1360,
-    "remedy": 1014
+    "remedy": 1082
    }
   },
   {
@@ -2741,27 +2745,31 @@
     "remedy"
    ],
    "chars": {
-    "self": 1595,
-    "wealth": 1624,
-    "career": 1648,
+    "self": 1740,
+    "wealth": 1675,
+    "career": 1774,
     "love": 1453,
-    "remedy": 974
+    "remedy": 1042
    }
   },
   {
    "i": 127,
    "chart": "1959-12-26 21시 M",
-   "status": "none",
-   "weapon": "",
+   "status": "single",
+   "weapon": "토(관성)",
    "shown": [
-    "self"
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
    ],
    "chars": {
-    "self": 244,
-    "wealth": 0,
-    "career": 0,
-    "love": 0,
-    "remedy": 0
+    "self": 1733,
+    "wealth": 1681,
+    "career": 1823,
+    "love": 1426,
+    "remedy": 1088
    }
   },
   {
@@ -2777,11 +2785,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1697,
-    "wealth": 1432,
-    "career": 1478,
+    "self": 1848,
+    "wealth": 1489,
+    "career": 1446,
     "love": 1409,
-    "remedy": 1128
+    "remedy": 1196
    }
   },
   {
@@ -2797,7 +2805,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1590,
+    "self": 1706,
     "wealth": 1526,
     "career": 1524,
     "love": 1432,
@@ -2817,11 +2825,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1597,
-    "wealth": 1543,
-    "career": 1542,
+    "self": 1745,
+    "wealth": 1602,
+    "career": 1610,
     "love": 1437,
-    "remedy": 898
+    "remedy": 964
    }
   },
   {
@@ -2837,11 +2845,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1594,
-    "wealth": 1708,
-    "career": 1626,
+    "self": 1813,
+    "wealth": 1805,
+    "career": 1736,
     "love": 1459,
-    "remedy": 1084
+    "remedy": 1156
    }
   },
   {
@@ -2857,18 +2865,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1761,
-    "wealth": 1715,
-    "career": 1698,
+    "self": 1895,
+    "wealth": 1764,
+    "career": 1757,
     "love": 1581,
-    "remedy": 1118
+    "remedy": 1186
    }
   },
   {
    "i": 133,
    "chart": "2001-6-8 15시 M",
-   "status": "single",
-   "weapon": "화(재성)",
+   "status": "dual",
+   "weapon": "화(재성)·목(식상)",
    "shown": [
     "self",
     "wealth",
@@ -2877,11 +2885,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1719,
-    "wealth": 1571,
-    "career": 1504,
+    "self": 2043,
+    "wealth": 1659,
+    "career": 1563,
     "love": 1451,
-    "remedy": 1063
+    "remedy": 1217
    }
   },
   {
@@ -2897,9 +2905,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1667,
+    "self": 1788,
     "wealth": 1664,
-    "career": 1676,
+    "career": 1610,
     "love": 1434,
     "remedy": 925
    }
@@ -2907,8 +2915,8 @@
   {
    "i": 135,
    "chart": "1960-4-2 21시 M",
-   "status": "single",
-   "weapon": "금(비겁)",
+   "status": "dual",
+   "weapon": "금(비겁)·화(관성)",
    "shown": [
     "self",
     "wealth",
@@ -2917,18 +2925,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1493,
-    "wealth": 1600,
-    "career": 1579,
+    "self": 1870,
+    "wealth": 1741,
+    "career": 1710,
     "love": 1377,
-    "remedy": 921
+    "remedy": 1063
    }
   },
   {
    "i": 136,
    "chart": "1967-9-13 0시 F",
-   "status": "single",
-   "weapon": "토(인성)",
+   "status": "dual",
+   "weapon": "토(인성)·화(관성)",
    "shown": [
     "self",
     "wealth",
@@ -2937,11 +2945,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1510,
-    "wealth": 1609,
-    "career": 1594,
+    "self": 1842,
+    "wealth": 1750,
+    "career": 1675,
     "love": 1383,
-    "remedy": 972
+    "remedy": 1114
    }
   },
   {
@@ -2957,11 +2965,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1699,
-    "wealth": 1458,
-    "career": 1377,
+    "self": 1976,
+    "wealth": 1554,
+    "career": 1497,
     "love": 1449,
-    "remedy": 927
+    "remedy": 999
    }
   },
   {
@@ -2977,11 +2985,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1851,
-    "wealth": 1699,
-    "career": 1711,
+    "self": 2077,
+    "wealth": 1794,
+    "career": 1818,
     "love": 1549,
-    "remedy": 1070
+    "remedy": 1142
    }
   },
   {
@@ -2997,11 +3005,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1688,
-    "wealth": 1463,
-    "career": 1386,
+    "self": 1923,
+    "wealth": 1562,
+    "career": 1467,
     "love": 1350,
-    "remedy": 1062
+    "remedy": 1128
    }
   },
   {
@@ -3033,11 +3041,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1772,
-    "wealth": 1691,
-    "career": 1733,
+    "self": 2039,
+    "wealth": 1786,
+    "career": 1924,
     "love": 1482,
-    "remedy": 1071
+    "remedy": 1146
    }
   },
   {
@@ -3053,11 +3061,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1486,
-    "wealth": 1310,
-    "career": 1200,
+    "self": 1724,
+    "wealth": 1406,
+    "career": 1406,
     "love": 1220,
-    "remedy": 1063
+    "remedy": 1131
    }
   },
   {
@@ -3073,11 +3081,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1775,
-    "wealth": 1639,
-    "career": 1767,
+    "self": 2047,
+    "wealth": 1740,
+    "career": 1781,
     "love": 1493,
-    "remedy": 1057
+    "remedy": 1132
    }
   },
   {
@@ -3093,11 +3101,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1752,
-    "wealth": 1605,
-    "career": 1632,
+    "self": 2081,
+    "wealth": 1745,
+    "career": 1838,
     "love": 1451,
-    "remedy": 969
+    "remedy": 1037
    }
   },
   {
@@ -3113,11 +3121,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1445,
-    "wealth": 1187,
-    "career": 1211,
+    "self": 1722,
+    "wealth": 1283,
+    "career": 1331,
     "love": 1193,
-    "remedy": 937
+    "remedy": 1009
    }
   },
   {
@@ -3133,11 +3141,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1555,
-    "wealth": 1702,
-    "career": 1623,
+    "self": 1774,
+    "wealth": 1799,
+    "career": 1733,
     "love": 1481,
-    "remedy": 954
+    "remedy": 1026
    }
   },
   {
@@ -3153,11 +3161,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1776,
-    "wealth": 1684,
-    "career": 1692,
+    "self": 2014,
+    "wealth": 1780,
+    "career": 1898,
     "love": 1515,
-    "remedy": 913
+    "remedy": 981
    }
   },
   {
@@ -3173,11 +3181,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1865,
-    "wealth": 1404,
-    "career": 1548,
+    "self": 2015,
+    "wealth": 1463,
+    "career": 1618,
     "love": 1420,
-    "remedy": 1139
+    "remedy": 1207
    }
   },
   {
@@ -3193,11 +3201,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1806,
-    "wealth": 1536,
-    "career": 1425,
+    "self": 1946,
+    "wealth": 1585,
+    "career": 1484,
     "love": 1397,
-    "remedy": 1095
+    "remedy": 1167
    }
   },
   {
@@ -3213,11 +3221,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1638,
-    "wealth": 1581,
-    "career": 1615,
+    "self": 1794,
+    "wealth": 1640,
+    "career": 1683,
     "love": 1473,
-    "remedy": 922
+    "remedy": 988
    }
   },
   {
@@ -3233,11 +3241,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1618,
-    "wealth": 1678,
-    "career": 1565,
+    "self": 1882,
+    "wealth": 1733,
+    "career": 1631,
     "love": 1572,
-    "remedy": 1012
+    "remedy": 1080
    }
   },
   {
@@ -3253,7 +3261,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1670,
+    "self": 1786,
     "wealth": 1556,
     "career": 1604,
     "love": 1483,
@@ -3263,17 +3271,21 @@
   {
    "i": 153,
    "chart": "1976-10-4 3시 M",
-   "status": "none",
-   "weapon": "",
+   "status": "single",
+   "weapon": "목(관성)",
    "shown": [
-    "self"
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
    ],
    "chars": {
-    "self": 246,
-    "wealth": 0,
-    "career": 0,
-    "love": 0,
-    "remedy": 0
+    "self": 1638,
+    "wealth": 1364,
+    "career": 1488,
+    "love": 1306,
+    "remedy": 959
    }
   },
   {
@@ -3289,11 +3301,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1692,
-    "wealth": 1410,
-    "career": 1344,
+    "self": 1842,
+    "wealth": 1462,
+    "career": 1415,
     "love": 1424,
-    "remedy": 1065
+    "remedy": 1140
    }
   },
   {
@@ -3309,18 +3321,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1480,
-    "wealth": 1534,
-    "career": 1582,
+    "self": 1717,
+    "wealth": 1639,
+    "career": 1634,
     "love": 1323,
-    "remedy": 876
+    "remedy": 948
    }
   },
   {
    "i": 156,
    "chart": "1997-1-9 12시 F",
-   "status": "single",
-   "weapon": "금(비겁)",
+   "status": "dual",
+   "weapon": "금(비겁)·목(재성)",
    "shown": [
     "self",
     "wealth",
@@ -3329,11 +3341,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1613,
-    "wealth": 1639,
-    "career": 1676,
+    "self": 1882,
+    "wealth": 1728,
+    "career": 1739,
     "love": 1493,
-    "remedy": 1043
+    "remedy": 1189
    }
   },
   {
@@ -3349,18 +3361,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1361,
-    "wealth": 1415,
-    "career": 1497,
+    "self": 1623,
+    "wealth": 1507,
+    "career": 1614,
     "love": 1310,
-    "remedy": 871
+    "remedy": 943
    }
   },
   {
    "i": 158,
    "chart": "1956-11-3 18시 F",
-   "status": "single",
-   "weapon": "토(재성)",
+   "status": "dual",
+   "weapon": "토(재성)·화(식상)",
    "shown": [
     "self",
     "wealth",
@@ -3369,11 +3381,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1824,
-    "wealth": 1796,
-    "career": 1716,
+    "self": 2073,
+    "wealth": 1884,
+    "career": 1775,
     "love": 1459,
-    "remedy": 1056
+    "remedy": 1210
    }
   },
   {
@@ -3389,11 +3401,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1656,
-    "wealth": 1446,
-    "career": 1518,
+    "self": 1915,
+    "wealth": 1541,
+    "career": 1646,
     "love": 1458,
-    "remedy": 1126
+    "remedy": 1194
    }
   },
   {
@@ -3409,7 +3421,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1711,
+    "self": 1827,
     "wealth": 1713,
     "career": 1710,
     "love": 1633,
@@ -3429,7 +3441,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1831,
+    "self": 1983,
     "wealth": 1726,
     "career": 1752,
     "love": 1636,
@@ -3449,11 +3461,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1533,
-    "wealth": 1173,
-    "career": 1162,
+    "self": 1720,
+    "wealth": 1225,
+    "career": 1236,
     "love": 1210,
-    "remedy": 1042
+    "remedy": 1114
    }
   },
   {
@@ -3469,11 +3481,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1571,
-    "wealth": 1619,
-    "career": 1732,
+    "self": 1724,
+    "wealth": 1675,
+    "career": 1829,
     "love": 1486,
-    "remedy": 1072
+    "remedy": 1138
    }
   },
   {
@@ -3489,11 +3501,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1717,
-    "wealth": 1774,
-    "career": 1801,
+    "self": 1949,
+    "wealth": 1825,
+    "career": 1829,
     "love": 1538,
-    "remedy": 1060
+    "remedy": 1126
    }
   },
   {
@@ -3509,11 +3521,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1760,
-    "wealth": 1511,
-    "career": 1445,
+    "self": 1941,
+    "wealth": 1568,
+    "career": 1510,
     "love": 1390,
-    "remedy": 1030
+    "remedy": 1098
    }
   },
   {
@@ -3529,11 +3541,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1724,
-    "wealth": 1518,
-    "career": 1738,
+    "self": 1949,
+    "wealth": 1615,
+    "career": 1850,
     "love": 1373,
-    "remedy": 1030
+    "remedy": 1098
    }
   },
   {
@@ -3549,18 +3561,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1656,
-    "wealth": 1785,
-    "career": 1710,
+    "self": 1799,
+    "wealth": 1844,
+    "career": 1778,
     "love": 1493,
-    "remedy": 1072
+    "remedy": 1138
    }
   },
   {
    "i": 168,
    "chart": "1971-1-1 0시 F",
-   "status": "single",
-   "weapon": "토(식상)",
+   "status": "dual",
+   "weapon": "토(식상)·금(재성)",
    "shown": [
     "self",
     "wealth",
@@ -3569,11 +3581,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1686,
-    "wealth": 1647,
-    "career": 1865,
+    "self": 1963,
+    "wealth": 1734,
+    "career": 1924,
     "love": 1475,
-    "remedy": 1055
+    "remedy": 1201
    }
   },
   {
@@ -3589,11 +3601,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1825,
-    "wealth": 1606,
-    "career": 1615,
+    "self": 1959,
+    "wealth": 1655,
+    "career": 1674,
     "love": 1390,
-    "remedy": 1129
+    "remedy": 1197
    }
   },
   {
@@ -3609,18 +3621,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1572,
-    "wealth": 1409,
-    "career": 1495,
+    "self": 1832,
+    "wealth": 1504,
+    "career": 1604,
     "love": 1430,
-    "remedy": 933
+    "remedy": 1001
    }
   },
   {
    "i": 171,
    "chart": "1992-4-6 9시 M",
    "status": "dual",
-   "weapon": "수(비겁)·목(식상)",
+   "weapon": "목(식상)·수(비겁)",
    "shown": [
     "self",
     "wealth",
@@ -3629,18 +3641,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1828,
-    "wealth": 1826,
-    "career": 1727,
-    "love": 1680,
-    "remedy": 1147
+    "self": 1686,
+    "wealth": 1423,
+    "career": 1334,
+    "love": 1332,
+    "remedy": 1092
    }
   },
   {
    "i": 172,
    "chart": "1999-9-17 12시 F",
-   "status": "single",
-   "weapon": "수(비겁)",
+   "status": "dual",
+   "weapon": "수(비겁)·토(관성)",
    "shown": [
     "self",
     "wealth",
@@ -3649,11 +3661,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1526,
-    "wealth": 1531,
-    "career": 1616,
+    "self": 1888,
+    "wealth": 1668,
+    "career": 1744,
     "love": 1407,
-    "remedy": 932
+    "remedy": 1076
    }
   },
   {
@@ -3675,8 +3687,8 @@
   {
    "i": 174,
    "chart": "1958-7-11 18시 F",
-   "status": "single",
-   "weapon": "토(비겁)",
+   "status": "dual",
+   "weapon": "토(비겁)·수(재성)",
    "shown": [
     "self",
     "wealth",
@@ -3685,11 +3697,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1889,
-    "wealth": 1700,
-    "career": 1723,
+    "self": 2164,
+    "wealth": 1738,
+    "career": 1726,
     "love": 1627,
-    "remedy": 1027
+    "remedy": 1105
    }
   },
   {
@@ -3705,11 +3717,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1595,
-    "wealth": 1647,
-    "career": 1658,
+    "self": 1744,
+    "wealth": 1698,
+    "career": 1688,
     "love": 1475,
-    "remedy": 869
+    "remedy": 935
    }
   },
   {
@@ -3725,11 +3737,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1502,
-    "wealth": 1620,
-    "career": 1774,
+    "self": 1741,
+    "wealth": 1724,
+    "career": 1924,
     "love": 1440,
-    "remedy": 1047
+    "remedy": 1113
    }
   },
   {
@@ -3745,7 +3757,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1981,
+    "self": 2133,
     "wealth": 1694,
     "career": 1727,
     "love": 1566,
@@ -3765,11 +3777,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1571,
-    "wealth": 1421,
-    "career": 1367,
+    "self": 1721,
+    "wealth": 1472,
+    "career": 1493,
     "love": 1342,
-    "remedy": 1031
+    "remedy": 1099
    }
   },
   {
@@ -3785,11 +3797,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1771,
-    "wealth": 1829,
-    "career": 1845,
+    "self": 1920,
+    "wealth": 1884,
+    "career": 1811,
     "love": 1556,
-    "remedy": 1130
+    "remedy": 1205
    }
   },
   {
@@ -3805,11 +3817,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1863,
-    "wealth": 1740,
-    "career": 1710,
+    "self": 2048,
+    "wealth": 1795,
+    "career": 1776,
     "love": 1540,
-    "remedy": 1104
+    "remedy": 1172
    }
   },
   {
@@ -3825,18 +3837,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1665,
-    "wealth": 1415,
-    "career": 1411,
+    "self": 1889,
+    "wealth": 1512,
+    "career": 1521,
     "love": 1306,
-    "remedy": 983
+    "remedy": 1055
    }
   },
   {
    "i": 182,
    "chart": "1959-11-15 18시 F",
-   "status": "single",
-   "weapon": "목(재성)",
+   "status": "dual",
+   "weapon": "목(재성)·토(인성)",
    "shown": [
     "self",
     "wealth",
@@ -3845,11 +3857,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1622,
-    "wealth": 1451,
-    "career": 1455,
+    "self": 1951,
+    "wealth": 1585,
+    "career": 1562,
     "love": 1463,
-    "remedy": 958
+    "remedy": 1108
    }
   },
   {
@@ -3865,11 +3877,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1705,
-    "wealth": 1303,
-    "career": 1315,
+    "self": 1930,
+    "wealth": 1400,
+    "career": 1427,
     "love": 1291,
-    "remedy": 1067
+    "remedy": 1135
    }
   },
   {
@@ -3885,11 +3897,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1802,
-    "wealth": 1900,
-    "career": 1835,
+    "self": 1936,
+    "wealth": 1949,
+    "career": 1894,
     "love": 1653,
-    "remedy": 1126
+    "remedy": 1194
    }
   },
   {
@@ -3905,11 +3917,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1886,
-    "wealth": 1687,
-    "career": 1641,
+    "self": 2160,
+    "wealth": 1786,
+    "career": 1772,
     "love": 1605,
-    "remedy": 1130
+    "remedy": 1196
    }
   },
   {
@@ -3925,18 +3937,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1755,
-    "wealth": 1485,
-    "career": 1357,
+    "self": 1890,
+    "wealth": 1534,
+    "career": 1416,
     "love": 1240,
-    "remedy": 1137
+    "remedy": 1209
    }
   },
   {
    "i": 187,
    "chart": "1994-12-14 9시 M",
    "status": "dual",
-   "weapon": "목(비겁)·토(재성)",
+   "weapon": "토(재성)·목(비겁)",
    "shown": [
     "self",
     "wealth",
@@ -3945,11 +3957,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1645,
-    "wealth": 1450,
-    "career": 1418,
-    "love": 1420,
-    "remedy": 1114
+    "self": 1983,
+    "wealth": 1748,
+    "career": 1760,
+    "love": 1481,
+    "remedy": 1018
    }
   },
   {
@@ -3965,11 +3977,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1749,
-    "wealth": 1681,
-    "career": 1658,
+    "self": 2011,
+    "wealth": 1773,
+    "career": 1775,
     "love": 1543,
-    "remedy": 1090
+    "remedy": 1162
    }
   },
   {
@@ -3985,11 +3997,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1668,
-    "wealth": 1753,
-    "career": 1865,
+    "self": 1904,
+    "wealth": 1854,
+    "career": 1910,
     "love": 1562,
-    "remedy": 1092
+    "remedy": 1167
    }
   },
   {
@@ -4005,11 +4017,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1616,
-    "wealth": 1393,
-    "career": 1437,
+    "self": 1878,
+    "wealth": 1485,
+    "career": 1554,
     "love": 1480,
-    "remedy": 1009
+    "remedy": 1081
    }
   },
   {
@@ -4025,9 +4037,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1728,
+    "self": 1849,
     "wealth": 1483,
-    "career": 1470,
+    "career": 1373,
     "love": 1446,
     "remedy": 935
    }
@@ -4045,11 +4057,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1627,
-    "wealth": 1409,
-    "career": 1339,
+    "self": 1891,
+    "wealth": 1464,
+    "career": 1405,
     "love": 1346,
-    "remedy": 1037
+    "remedy": 1105
    }
   },
   {
@@ -4065,11 +4077,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1786,
-    "wealth": 1811,
-    "career": 1860,
+    "self": 2057,
+    "wealth": 1914,
+    "career": 1879,
     "love": 1534,
-    "remedy": 1154
+    "remedy": 1229
    }
   },
   {
@@ -4085,11 +4097,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1710,
-    "wealth": 1642,
-    "career": 1857,
+    "self": 1938,
+    "wealth": 1736,
+    "career": 1996,
     "love": 1520,
-    "remedy": 1028
+    "remedy": 1096
    }
   },
   {
@@ -4105,9 +4117,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1630,
+    "self": 1782,
     "wealth": 1603,
-    "career": 1587,
+    "career": 1590,
     "love": 1537,
     "remedy": 968
    }
@@ -4125,11 +4137,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1495,
-    "wealth": 1577,
-    "career": 1594,
+    "self": 1719,
+    "wealth": 1680,
+    "career": 1759,
     "love": 1329,
-    "remedy": 834
+    "remedy": 902
    }
   },
   {
@@ -4145,11 +4157,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1709,
-    "wealth": 1471,
-    "career": 1442,
+    "self": 1859,
+    "wealth": 1522,
+    "career": 1568,
     "love": 1450,
-    "remedy": 1041
+    "remedy": 1109
    }
   },
   {
@@ -4165,11 +4177,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1743,
-    "wealth": 1723,
-    "career": 1746,
+    "self": 1963,
+    "wealth": 1820,
+    "career": 1858,
     "love": 1624,
-    "remedy": 1065
+    "remedy": 1133
    }
   },
   {
@@ -4185,11 +4197,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1806,
-    "wealth": 1734,
-    "career": 1699,
+    "self": 1964,
+    "wealth": 1790,
+    "career": 1796,
     "love": 1561,
-    "remedy": 1066
+    "remedy": 1132
    }
   },
   {
@@ -4205,11 +4217,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1726,
-    "wealth": 1600,
-    "career": 1630,
+    "self": 2003,
+    "wealth": 1696,
+    "career": 1750,
     "love": 1617,
-    "remedy": 904
+    "remedy": 976
    }
   },
   {
@@ -4225,11 +4237,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1664,
-    "wealth": 1841,
-    "career": 1798,
+    "self": 1900,
+    "wealth": 1936,
+    "career": 1989,
     "love": 1433,
-    "remedy": 1040
+    "remedy": 1108
    }
   },
   {
@@ -4245,11 +4257,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1675,
-    "wealth": 1529,
-    "career": 1428,
+    "self": 1820,
+    "wealth": 1580,
+    "career": 1554,
     "love": 1319,
-    "remedy": 1173
+    "remedy": 1241
    }
   },
   {
@@ -4265,11 +4277,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1631,
-    "wealth": 1520,
-    "career": 1682,
+    "self": 1875,
+    "wealth": 1624,
+    "career": 1832,
     "love": 1517,
-    "remedy": 1094
+    "remedy": 1162
    }
   },
   {
@@ -4285,18 +4297,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1581,
-    "wealth": 1558,
-    "career": 1480,
+    "self": 1751,
+    "wealth": 1609,
+    "career": 1543,
     "love": 1433,
-    "remedy": 849
+    "remedy": 917
    }
   },
   {
    "i": 205,
    "chart": "1955-6-16 15시 M",
-   "status": "single",
-   "weapon": "토(비겁)",
+   "status": "dual",
+   "weapon": "토(비겁)·수(재성)",
    "shown": [
     "self",
     "wealth",
@@ -4305,11 +4317,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1670,
-    "wealth": 1638,
-    "career": 1670,
+    "self": 1995,
+    "wealth": 1771,
+    "career": 1798,
     "love": 1448,
-    "remedy": 1047
+    "remedy": 1193
    }
   },
   {
@@ -4325,11 +4337,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1671,
-    "wealth": 1838,
-    "career": 1917,
+    "self": 1805,
+    "wealth": 1887,
+    "career": 1976,
     "love": 1571,
-    "remedy": 1093
+    "remedy": 1161
    }
   },
   {
@@ -4345,27 +4357,31 @@
     "remedy"
    ],
    "chars": {
-    "self": 1789,
-    "wealth": 1787,
-    "career": 1729,
+    "self": 1960,
+    "wealth": 1836,
+    "career": 1788,
     "love": 1510,
-    "remedy": 1057
+    "remedy": 1129
    }
   },
   {
    "i": 208,
    "chart": "1976-9-21 0시 F",
-   "status": "none",
-   "weapon": "",
+   "status": "single",
+   "weapon": "토(식상)",
    "shown": [
-    "self"
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
    ],
    "chars": {
-    "self": 246,
-    "wealth": 0,
-    "career": 0,
-    "love": 0,
-    "remedy": 0
+    "self": 1626,
+    "wealth": 1580,
+    "career": 1704,
+    "love": 1407,
+    "remedy": 1006
    }
   },
   {
@@ -4381,9 +4397,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1801,
+    "self": 1953,
     "wealth": 1690,
-    "career": 1676,
+    "career": 1679,
     "love": 1562,
     "remedy": 1012
    }
@@ -4401,9 +4417,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1489,
+    "self": 1641,
     "wealth": 1620,
-    "career": 1676,
+    "career": 1679,
     "love": 1482,
     "remedy": 890
    }
@@ -4411,8 +4427,8 @@
   {
    "i": 211,
    "chart": "1997-12-26 9시 M",
-   "status": "single",
-   "weapon": "수(비겁)",
+   "status": "dual",
+   "weapon": "수(비겁)·목(식상)",
    "shown": [
     "self",
     "wealth",
@@ -4421,11 +4437,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1805,
-    "wealth": 1749,
-    "career": 1722,
+    "self": 2095,
+    "wealth": 1840,
+    "career": 1796,
     "love": 1612,
-    "remedy": 1082
+    "remedy": 1236
    }
   },
   {
@@ -4441,9 +4457,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1750,
+    "self": 1924,
     "wealth": 1693,
-    "career": 1686,
+    "career": 1689,
     "love": 1576,
     "remedy": 1019
    }
@@ -4451,8 +4467,8 @@
   {
    "i": 213,
    "chart": "1956-10-20 15시 M",
-   "status": "single",
-   "weapon": "토(인성)",
+   "status": "dual",
+   "weapon": "토(인성)·화(관성)",
    "shown": [
     "self",
     "wealth",
@@ -4461,11 +4477,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1669,
-    "wealth": 1691,
-    "career": 1739,
+    "self": 2006,
+    "wealth": 1832,
+    "career": 1789,
     "love": 1471,
-    "remedy": 978
+    "remedy": 1126
    }
   },
   {
@@ -4481,9 +4497,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1673,
+    "self": 1825,
     "wealth": 1429,
-    "career": 1408,
+    "career": 1411,
     "love": 1478,
     "remedy": 1005
    }
@@ -4501,11 +4517,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1753,
-    "wealth": 1739,
-    "career": 1679,
+    "self": 1973,
+    "wealth": 1836,
+    "career": 1791,
     "love": 1519,
-    "remedy": 905
+    "remedy": 973
    }
   },
   {
@@ -4521,11 +4537,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1490,
-    "wealth": 1541,
-    "career": 1598,
+    "self": 1639,
+    "wealth": 1592,
+    "career": 1626,
     "love": 1387,
-    "remedy": 938
+    "remedy": 1004
    }
   },
   {
@@ -4541,18 +4557,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1649,
-    "wealth": 1565,
-    "career": 1621,
+    "self": 1834,
+    "wealth": 1620,
+    "career": 1687,
     "love": 1537,
-    "remedy": 1031
+    "remedy": 1099
    }
   },
   {
    "i": 218,
    "chart": "1991-11-19 6시 F",
-   "status": "single",
-   "weapon": "목(식상)",
+   "status": "dual",
+   "weapon": "목(식상)·토(관성)",
    "shown": [
     "self",
     "wealth",
@@ -4561,11 +4577,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1539,
-    "wealth": 1319,
-    "career": 1310,
+    "self": 1854,
+    "wealth": 1465,
+    "career": 1460,
     "love": 1332,
-    "remedy": 1050
+    "remedy": 1192
    }
   },
   {
@@ -4581,11 +4597,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1774,
-    "wealth": 1495,
-    "career": 1440,
+    "self": 2005,
+    "wealth": 1590,
+    "career": 1631,
     "love": 1383,
-    "remedy": 1028
+    "remedy": 1096
    }
   },
   {
@@ -4601,9 +4617,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1558,
+    "self": 1732,
     "wealth": 1746,
-    "career": 1649,
+    "career": 1652,
     "love": 1468,
     "remedy": 1066
    }
@@ -4621,9 +4637,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1539,
+    "self": 1713,
     "wealth": 1356,
-    "career": 1255,
+    "career": 1258,
     "love": 1349,
     "remedy": 935
    }
@@ -4631,8 +4647,8 @@
   {
    "i": 222,
    "chart": "1964-7-7 18시 F",
-   "status": "single",
-   "weapon": "토(식상)",
+   "status": "dual",
+   "weapon": "토(식상)·금(재성)",
    "shown": [
     "self",
     "wealth",
@@ -4641,11 +4657,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1654,
-    "wealth": 1670,
-    "career": 1733,
+    "self": 1986,
+    "wealth": 1805,
+    "career": 1845,
     "love": 1613,
-    "remedy": 1093
+    "remedy": 1239
    }
   },
   {
@@ -4661,7 +4677,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1667,
+    "self": 1819,
     "wealth": 1844,
     "career": 1768,
     "love": 1538,
@@ -4672,7 +4688,7 @@
    "i": 224,
    "chart": "1978-5-1 0시 F",
    "status": "dual",
-   "weapon": "수(비겁)·토(관성)",
+   "weapon": "토(관성)·수(비겁)",
    "shown": [
     "self",
     "wealth",
@@ -4681,27 +4697,31 @@
     "remedy"
    ],
    "chars": {
-    "self": 1664,
-    "wealth": 1450,
-    "career": 1491,
-    "love": 1295,
-    "remedy": 1036
+    "self": 1965,
+    "wealth": 1699,
+    "career": 1756,
+    "love": 1362,
+    "remedy": 1149
    }
   },
   {
    "i": 225,
    "chart": "1985-10-12 3시 M",
-   "status": "none",
-   "weapon": "",
+   "status": "single",
+   "weapon": "화(식상)",
    "shown": [
-    "self"
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
    ],
    "chars": {
-    "self": 246,
-    "wealth": 0,
-    "career": 0,
-    "love": 0,
-    "remedy": 0
+    "self": 1847,
+    "wealth": 1543,
+    "career": 1650,
+    "love": 1244,
+    "remedy": 1031
    }
   },
   {
@@ -4717,11 +4737,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1628,
-    "wealth": 1336,
-    "career": 1290,
+    "self": 1852,
+    "wealth": 1435,
+    "career": 1467,
     "love": 1297,
-    "remedy": 1042
+    "remedy": 1110
    }
   },
   {
@@ -4737,11 +4757,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1591,
-    "wealth": 1636,
-    "career": 1737,
+    "self": 1740,
+    "wealth": 1691,
+    "career": 1736,
     "love": 1500,
-    "remedy": 1091
+    "remedy": 1166
    }
   },
   {
@@ -4757,11 +4777,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1862,
-    "wealth": 1665,
-    "career": 1702,
+    "self": 2087,
+    "wealth": 1755,
+    "career": 1815,
     "love": 1600,
-    "remedy": 1146
+    "remedy": 1214
    }
   },
   {
@@ -4777,11 +4797,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1733,
-    "wealth": 1722,
-    "career": 1741,
+    "self": 1878,
+    "wealth": 1781,
+    "career": 1811,
     "love": 1605,
-    "remedy": 1050
+    "remedy": 1118
    }
   },
   {
@@ -4797,11 +4817,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1485,
-    "wealth": 1568,
-    "career": 1498,
+    "self": 1795,
+    "wealth": 1711,
+    "career": 1656,
     "love": 1365,
-    "remedy": 1012
+    "remedy": 1084
    }
   },
   {
@@ -4817,11 +4837,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1781,
-    "wealth": 1686,
-    "career": 1649,
+    "self": 1968,
+    "wealth": 1738,
+    "career": 1723,
     "love": 1612,
-    "remedy": 1134
+    "remedy": 1206
    }
   },
   {
@@ -4837,18 +4857,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1490,
-    "wealth": 1537,
-    "career": 1561,
+    "self": 1747,
+    "wealth": 1632,
+    "career": 1668,
     "love": 1271,
-    "remedy": 896
+    "remedy": 968
    }
   },
   {
    "i": 233,
    "chart": "1986-2-16 3시 M",
-   "status": "single",
-   "weapon": "금(비겁)",
+   "status": "dual",
+   "weapon": "금(비겁)·토(인성)",
    "shown": [
     "self",
     "wealth",
@@ -4857,11 +4877,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1461,
-    "wealth": 1804,
-    "career": 1744,
+    "self": 1834,
+    "wealth": 1942,
+    "career": 1875,
     "love": 1440,
-    "remedy": 805
+    "remedy": 949
    }
   },
   {
@@ -4877,11 +4897,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1541,
-    "wealth": 1636,
-    "career": 1599,
+    "self": 1726,
+    "wealth": 1691,
+    "career": 1665,
     "love": 1510,
-    "remedy": 990
+    "remedy": 1058
    }
   },
   {
@@ -4897,11 +4917,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1547,
-    "wealth": 1638,
-    "career": 1783,
+    "self": 1699,
+    "wealth": 1694,
+    "career": 1816,
     "love": 1408,
-    "remedy": 855
+    "remedy": 927
    }
   },
   {
@@ -4917,18 +4937,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1549,
-    "wealth": 1393,
-    "career": 1430,
+    "self": 1788,
+    "wealth": 1488,
+    "career": 1473,
     "love": 1342,
-    "remedy": 1010
+    "remedy": 1076
    }
   },
   {
    "i": 237,
    "chart": "1959-10-4 15시 M",
-   "status": "single",
-   "weapon": "금(식상)",
+   "status": "dual",
+   "weapon": "금(식상)·수(재성)",
    "shown": [
     "self",
     "wealth",
@@ -4937,18 +4957,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1421,
-    "wealth": 1665,
-    "career": 1675,
+    "self": 1750,
+    "wealth": 1793,
+    "career": 1788,
     "love": 1344,
-    "remedy": 1045
+    "remedy": 1191
    }
   },
   {
    "i": 238,
    "chart": "1966-3-15 18시 F",
    "status": "dual",
-   "weapon": "금(인성)·화(재성)",
+   "weapon": "화(재성)·금(인성)",
    "shown": [
     "self",
     "wealth",
@@ -4957,11 +4977,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1863,
-    "wealth": 1756,
-    "career": 1743,
-    "love": 1510,
-    "remedy": 1147
+    "self": 1880,
+    "wealth": 1513,
+    "career": 1514,
+    "love": 1453,
+    "remedy": 1023
    }
   },
   {
@@ -4977,18 +4997,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1531,
-    "wealth": 1559,
-    "career": 1532,
+    "self": 1856,
+    "wealth": 1702,
+    "career": 1659,
     "love": 1438,
-    "remedy": 852
+    "remedy": 918
    }
   },
   {
    "i": 240,
    "chart": "1980-1-9 0시 F",
-   "status": "single",
-   "weapon": "토(인성)",
+   "status": "dual",
+   "weapon": "토(인성)·화(관성)",
    "shown": [
     "self",
     "wealth",
@@ -4997,11 +5017,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1787,
-    "wealth": 1681,
-    "career": 1705,
+    "self": 2161,
+    "wealth": 1774,
+    "career": 1733,
     "love": 1392,
-    "remedy": 1069
+    "remedy": 1211
    }
   },
   {
@@ -5017,11 +5037,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1732,
-    "wealth": 1436,
-    "career": 1439,
+    "self": 1882,
+    "wealth": 1487,
+    "career": 1565,
     "love": 1450,
-    "remedy": 1041
+    "remedy": 1109
    }
   },
   {
@@ -5037,7 +5057,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1625,
+    "self": 1777,
     "wealth": 1340,
     "career": 1512,
     "love": 1314,
@@ -5047,8 +5067,8 @@
   {
    "i": 243,
    "chart": "2001-4-14 9시 M",
-   "status": "single",
-   "weapon": "목(인성)",
+   "status": "dual",
+   "weapon": "목(인성)·금(재성)",
    "shown": [
     "self",
     "wealth",
@@ -5057,11 +5077,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1479,
-    "wealth": 1289,
-    "career": 1340,
+    "self": 1908,
+    "wealth": 1472,
+    "career": 1471,
     "love": 1252,
-    "remedy": 836
+    "remedy": 980
    }
   },
   {
@@ -5077,11 +5097,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1648,
-    "wealth": 1781,
-    "career": 1807,
+    "self": 1887,
+    "wealth": 1885,
+    "career": 1957,
     "love": 1625,
-    "remedy": 1045
+    "remedy": 1111
    }
   },
   {
@@ -5097,11 +5117,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1560,
-    "wealth": 1675,
-    "career": 1690,
+    "self": 1705,
+    "wealth": 1734,
+    "career": 1760,
     "love": 1468,
-    "remedy": 964
+    "remedy": 1032
    }
   },
   {
@@ -5117,11 +5137,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1644,
-    "wealth": 1373,
-    "career": 1485,
+    "self": 1794,
+    "wealth": 1432,
+    "career": 1555,
     "love": 1294,
-    "remedy": 1068
+    "remedy": 1136
    }
   },
   {
@@ -5137,11 +5157,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1793,
-    "wealth": 1418,
-    "career": 1493,
+    "self": 2034,
+    "wealth": 1515,
+    "career": 1569,
     "love": 1439,
-    "remedy": 966
+    "remedy": 1032
    }
   },
   {
@@ -5157,11 +5177,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1762,
-    "wealth": 1686,
-    "career": 1763,
+    "self": 2039,
+    "wealth": 1782,
+    "career": 1883,
     "love": 1567,
-    "remedy": 1082
+    "remedy": 1154
    }
   },
   {
@@ -5177,11 +5197,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1682,
-    "wealth": 1672,
-    "career": 1637,
+    "self": 1913,
+    "wealth": 1767,
+    "career": 1828,
     "love": 1477,
-    "remedy": 990
+    "remedy": 1065
    }
   },
   {
@@ -5197,11 +5217,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1674,
-    "wealth": 1489,
-    "career": 1518,
+    "self": 1906,
+    "wealth": 1540,
+    "career": 1546,
     "love": 1435,
-    "remedy": 992
+    "remedy": 1058
    }
   },
   {
@@ -5217,11 +5237,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1572,
-    "wealth": 1512,
-    "career": 1542,
+    "self": 1832,
+    "wealth": 1607,
+    "career": 1651,
     "love": 1441,
-    "remedy": 1007
+    "remedy": 1075
    }
   },
   {
@@ -5237,11 +5257,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1566,
-    "wealth": 1340,
-    "career": 1306,
+    "self": 1840,
+    "wealth": 1439,
+    "career": 1437,
     "love": 1221,
-    "remedy": 986
+    "remedy": 1052
    }
   },
   {
@@ -5257,11 +5277,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1435,
-    "wealth": 1196,
-    "career": 1182,
+    "self": 1598,
+    "wealth": 1255,
+    "career": 1188,
     "love": 1267,
-    "remedy": 895
+    "remedy": 967
    }
   },
   {
@@ -5277,11 +5297,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1600,
-    "wealth": 1522,
-    "career": 1661,
+    "self": 1766,
+    "wealth": 1578,
+    "career": 1758,
     "love": 1406,
-    "remedy": 955
+    "remedy": 1021
    }
   },
   {
@@ -5297,18 +5317,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1644,
-    "wealth": 1242,
-    "career": 1372,
+    "self": 1794,
+    "wealth": 1301,
+    "career": 1442,
     "love": 1266,
-    "remedy": 1154
+    "remedy": 1222
    }
   },
   {
    "i": 256,
    "chart": "1982-9-17 0시 F",
-   "status": "single",
-   "weapon": "수(비겁)",
+   "status": "dual",
+   "weapon": "수(비겁)·토(관성)",
    "shown": [
     "self",
     "wealth",
@@ -5317,18 +5337,18 @@
     "remedy"
    ],
    "chars": {
-    "self": 1632,
-    "wealth": 1571,
-    "career": 1544,
+    "self": 1884,
+    "wealth": 1668,
+    "career": 1629,
     "love": 1476,
-    "remedy": 966
+    "remedy": 1108
    }
   },
   {
    "i": 257,
    "chart": "1989-2-28 3시 M",
-   "status": "single",
-   "weapon": "토(비겁)",
+   "status": "dual",
+   "weapon": "화(인성)·목(관성)",
    "shown": [
     "self",
     "wealth",
@@ -5337,11 +5357,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1882,
-    "wealth": 1767,
-    "career": 1816,
-    "love": 1644,
-    "remedy": 1069
+    "self": 1879,
+    "wealth": 1526,
+    "career": 1450,
+    "love": 1409,
+    "remedy": 1089
    }
   },
   {
@@ -5357,11 +5377,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1660,
-    "wealth": 1439,
-    "career": 1431,
+    "self": 1892,
+    "wealth": 1490,
+    "career": 1428,
     "love": 1328,
-    "remedy": 1142
+    "remedy": 1208
    }
   },
   {
@@ -5377,11 +5397,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1586,
-    "wealth": 1622,
-    "career": 1512,
+    "self": 1807,
+    "wealth": 1721,
+    "career": 1623,
     "love": 1309,
-    "remedy": 1183
+    "remedy": 1249
    }
   },
   {
@@ -5413,11 +5433,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1595,
-    "wealth": 1747,
-    "career": 1745,
+    "self": 1887,
+    "wealth": 1884,
+    "career": 1898,
     "love": 1501,
-    "remedy": 1039
+    "remedy": 1111
    }
   },
   {
@@ -5449,11 +5469,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1759,
-    "wealth": 1504,
-    "career": 1521,
+    "self": 1909,
+    "wealth": 1556,
+    "career": 1592,
     "love": 1466,
-    "remedy": 1012
+    "remedy": 1087
    }
   },
   {
@@ -5469,11 +5489,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1645,
-    "wealth": 1611,
-    "career": 1616,
+    "self": 1780,
+    "wealth": 1660,
+    "career": 1675,
     "love": 1570,
-    "remedy": 1034
+    "remedy": 1106
    }
   },
   {
@@ -5489,11 +5509,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1620,
-    "wealth": 1494,
-    "career": 1406,
+    "self": 1851,
+    "wealth": 1589,
+    "career": 1597,
     "love": 1400,
-    "remedy": 969
+    "remedy": 1037
    }
   },
   {
@@ -5509,9 +5529,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1657,
+    "self": 1809,
     "wealth": 1734,
-    "career": 1812,
+    "career": 1815,
     "love": 1649,
     "remedy": 1103
    }
@@ -5529,11 +5549,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1461,
-    "wealth": 1430,
-    "career": 1428,
+    "self": 1677,
+    "wealth": 1529,
+    "career": 1539,
     "love": 1223,
-    "remedy": 878
+    "remedy": 944
    }
   },
   {
@@ -5549,11 +5569,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1755,
-    "wealth": 1676,
-    "career": 1602,
+    "self": 1940,
+    "wealth": 1731,
+    "career": 1668,
     "love": 1558,
-    "remedy": 1066
+    "remedy": 1134
    }
   },
   {
@@ -5569,9 +5589,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1586,
+    "self": 1738,
     "wealth": 1305,
-    "career": 1352,
+    "career": 1355,
     "love": 1374,
     "remedy": 1000
    }
@@ -5589,11 +5609,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1549,
-    "wealth": 1588,
-    "career": 1643,
+    "self": 1797,
+    "wealth": 1687,
+    "career": 1724,
     "love": 1489,
-    "remedy": 834
+    "remedy": 900
    }
   },
   {
@@ -5609,11 +5629,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1747,
-    "wealth": 1604,
-    "career": 1624,
+    "self": 1897,
+    "wealth": 1663,
+    "career": 1628,
     "love": 1423,
-    "remedy": 1088
+    "remedy": 1160
    }
   },
   {
@@ -5629,11 +5649,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1852,
-    "wealth": 1689,
-    "career": 1701,
+    "self": 2036,
+    "wealth": 1744,
+    "career": 1786,
     "love": 1450,
-    "remedy": 1141
+    "remedy": 1207
    }
   },
   {
@@ -5649,11 +5669,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1703,
-    "wealth": 1842,
-    "career": 1856,
+    "self": 1977,
+    "wealth": 1941,
+    "career": 1987,
     "love": 1603,
-    "remedy": 1078
+    "remedy": 1144
    }
   },
   {
@@ -5669,9 +5689,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1693,
+    "self": 1867,
     "wealth": 1477,
-    "career": 1371,
+    "career": 1374,
     "love": 1365,
     "remedy": 1113
    }
@@ -5679,8 +5699,8 @@
   {
    "i": 275,
    "chart": "1950-8-2 9시 M",
-   "status": "single",
-   "weapon": "토(비겁)",
+   "status": "dual",
+   "weapon": "토(비겁)·금(식상)",
    "shown": [
     "self",
     "wealth",
@@ -5689,11 +5709,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1737,
-    "wealth": 1666,
-    "career": 1753,
+    "self": 2018,
+    "wealth": 1757,
+    "career": 1827,
     "love": 1555,
-    "remedy": 971
+    "remedy": 1125
    }
   },
   {
@@ -5709,11 +5729,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1719,
-    "wealth": 1746,
-    "career": 1791,
+    "self": 1962,
+    "wealth": 1842,
+    "career": 1995,
     "love": 1530,
-    "remedy": 1028
+    "remedy": 1096
    }
   },
   {
@@ -5729,11 +5749,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1627,
-    "wealth": 1415,
-    "career": 1402,
+    "self": 1811,
+    "wealth": 1470,
+    "career": 1487,
     "love": 1413,
-    "remedy": 982
+    "remedy": 1048
    }
   },
   {
@@ -5749,11 +5769,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1679,
-    "wealth": 1752,
-    "career": 1764,
+    "self": 1998,
+    "wealth": 1887,
+    "career": 1957,
     "love": 1545,
-    "remedy": 1038
+    "remedy": 1104
    }
   },
   {
@@ -5769,11 +5789,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1853,
-    "wealth": 1776,
-    "career": 1762,
+    "self": 2002,
+    "wealth": 1827,
+    "career": 1790,
     "love": 1605,
-    "remedy": 1145
+    "remedy": 1211
    }
   },
   {
@@ -5789,11 +5809,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1794,
-    "wealth": 1744,
-    "career": 1616,
+    "self": 1981,
+    "wealth": 1796,
+    "career": 1690,
     "love": 1548,
-    "remedy": 1128
+    "remedy": 1200
    }
   },
   {
@@ -5809,7 +5829,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1722,
+    "self": 1874,
     "wealth": 1609,
     "career": 1606,
     "love": 1515,
@@ -5829,11 +5849,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1549,
-    "wealth": 1602,
-    "career": 1745,
+    "self": 1769,
+    "wealth": 1699,
+    "career": 1857,
     "love": 1520,
-    "remedy": 1070
+    "remedy": 1138
    }
   },
   {
@@ -5849,11 +5869,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1554,
-    "wealth": 1533,
-    "career": 1548,
+    "self": 1739,
+    "wealth": 1588,
+    "career": 1514,
     "love": 1387,
-    "remedy": 931
+    "remedy": 1006
    }
   },
   {
@@ -5869,11 +5889,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1835,
-    "wealth": 1496,
-    "career": 1399,
+    "self": 1969,
+    "wealth": 1545,
+    "career": 1458,
     "love": 1456,
-    "remedy": 1135
+    "remedy": 1203
    }
   },
   {
@@ -5889,11 +5909,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1666,
-    "wealth": 1417,
-    "career": 1342,
+    "self": 1853,
+    "wealth": 1469,
+    "career": 1416,
     "love": 1372,
-    "remedy": 954
+    "remedy": 1026
    }
   },
   {
@@ -5909,7 +5929,7 @@
     "remedy"
    ],
    "chars": {
-    "self": 1749,
+    "self": 1870,
     "wealth": 1575,
     "career": 1570,
     "love": 1555,
@@ -5919,8 +5939,8 @@
   {
    "i": 287,
    "chart": "1979-8-22 21시 M",
-   "status": "single",
-   "weapon": "토(인성)",
+   "status": "dual",
+   "weapon": "토(인성)·수(식상)",
    "shown": [
     "self",
     "wealth",
@@ -5929,11 +5949,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1791,
-    "wealth": 1787,
-    "career": 1853,
+    "self": 2007,
+    "wealth": 1885,
+    "career": 1826,
     "love": 1644,
-    "remedy": 1070
+    "remedy": 1224
    }
   },
   {
@@ -5949,11 +5969,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1552,
-    "wealth": 1731,
-    "career": 1669,
+    "self": 1736,
+    "wealth": 1786,
+    "career": 1754,
     "love": 1509,
-    "remedy": 913
+    "remedy": 979
    }
   },
   {
@@ -5969,9 +5989,9 @@
     "remedy"
    ],
    "chars": {
-    "self": 1856,
+    "self": 2030,
     "wealth": 1797,
-    "career": 1667,
+    "career": 1670,
     "love": 1515,
     "remedy": 1099
    }
@@ -5979,17 +5999,21 @@
   {
    "i": 290,
    "chart": "2000-11-27 6시 F",
-   "status": "none",
-   "weapon": "",
+   "status": "single",
+   "weapon": "금(식상)",
    "shown": [
-    "self"
+    "self",
+    "wealth",
+    "career",
+    "love",
+    "remedy"
    ],
    "chars": {
-    "self": 248,
-    "wealth": 0,
-    "career": 0,
-    "love": 0,
-    "remedy": 0
+    "self": 1675,
+    "wealth": 1717,
+    "career": 1860,
+    "love": 1360,
+    "remedy": 1000
    }
   },
   {
@@ -6005,11 +6029,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1661,
-    "wealth": 1397,
-    "career": 1350,
+    "self": 1815,
+    "wealth": 1448,
+    "career": 1378,
     "love": 1398,
-    "remedy": 894
+    "remedy": 960
    }
   },
   {
@@ -6025,11 +6049,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1513,
-    "wealth": 1607,
-    "career": 1614,
+    "self": 1751,
+    "wealth": 1703,
+    "career": 1820,
     "love": 1497,
-    "remedy": 952
+    "remedy": 1020
    }
   },
   {
@@ -6045,11 +6069,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1943,
-    "wealth": 1827,
-    "career": 1718,
+    "self": 2195,
+    "wealth": 1926,
+    "career": 1829,
     "love": 1547,
-    "remedy": 1144
+    "remedy": 1219
    }
   },
   {
@@ -6065,11 +6089,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1369,
-    "wealth": 1345,
-    "career": 1347,
+    "self": 1553,
+    "wealth": 1400,
+    "career": 1432,
     "love": 1261,
-    "remedy": 880
+    "remedy": 946
    }
   },
   {
@@ -6085,11 +6109,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1571,
-    "wealth": 1559,
-    "career": 1510,
+    "self": 1845,
+    "wealth": 1658,
+    "career": 1641,
     "love": 1499,
-    "remedy": 1120
+    "remedy": 1186
    }
   },
   {
@@ -6105,11 +6129,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1397,
-    "wealth": 1249,
-    "career": 1291,
+    "self": 1621,
+    "wealth": 1348,
+    "career": 1468,
     "love": 1300,
-    "remedy": 956
+    "remedy": 1024
    }
   },
   {
@@ -6125,11 +6149,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1511,
-    "wealth": 1272,
-    "career": 1242,
+    "self": 1656,
+    "wealth": 1323,
+    "career": 1368,
     "love": 1306,
-    "remedy": 859
+    "remedy": 927
    }
   },
   {
@@ -6145,11 +6169,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1615,
-    "wealth": 1661,
-    "career": 1698,
+    "self": 1758,
+    "wealth": 1720,
+    "career": 1766,
     "love": 1426,
-    "remedy": 927
+    "remedy": 993
    }
   },
   {
@@ -6165,11 +6189,11 @@
     "remedy"
    ],
    "chars": {
-    "self": 1801,
-    "wealth": 1862,
-    "career": 1804,
+    "self": 2066,
+    "wealth": 1967,
+    "career": 1920,
     "love": 1569,
-    "remedy": 1039
+    "remedy": 1105
    }
   }
  ]

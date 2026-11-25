@@ -6,7 +6,7 @@
 const fs = require('fs'), path = require('path'), vm = require('vm'), assert = require('assert/strict');
 const root = path.join(__dirname, '..');
 vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8'), { filename: 'engine.js' }); globalThis.window = globalThis;
-['luck-grade', 'gyeok-structure', 'wealth-career-data', 'wealth-career-data-2', 'wealth-career-data-3', 'wealth-career-jobs', 'wealth-career', 'element-strategy', 'aptitude-data', 'aptitude'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, f + '.js'), 'utf8'), { filename: f }));
+['luck-grade', 'ten-god-roles', 'gyeok-structure', 'wealth-career-data', 'wealth-career-data-2', 'wealth-career-data-3', 'wealth-career-jobs', 'wealth-career', 'element-strategy', 'aptitude-data', 'aptitude'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, f + '.js'), 'utf8'), { filename: f }));
 ['ilju-data', 'saju-data', 'deep', 'deep-life', 'deep-time', 'deep-wealth', 'deep-love', 'reading-feature-data-1', 'reading-feature-data-2', 'reading-feature', 'reading-text', 'aptitude-chapters-data', 'aptitude-chapters'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8'), { filename: f }));
 const M = globalThis.Manse, R = globalThis.ReportV2, FEAT = R.ReadingFeature, now = Date.UTC(2026, 10, 26);
 const wf = (c, H) => { Object.defineProperty(c, 'readingFeature', { value: H, writable: true, configurable: true, enumerable: false }); return c; };

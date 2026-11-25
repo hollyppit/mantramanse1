@@ -1,144 +1,208 @@
 {
  "n": 300,
- "version": "weapon-20261126-2",
+ "version": "weapon-20261126-4",
  "distribution": {
   "status": {
-   "single": 193,
-   "dual": 94,
-   "none": 13
+   "single": 172,
+   "dual": 121,
+   "none": 7
   },
   "first": {
-   "토": 94,
-   "화": 35,
-   "목": 50,
-   "수": 60,
-   "금": 48
+   "토": 100,
+   "화": 37,
+   "목": 52,
+   "수": 55,
+   "금": 49
   },
   "second": {
-   "금": 12,
-   "화": 18,
-   "목": 21,
+   "금": 18,
+   "화": 25,
+   "목": 25,
    "토": 22,
-   "수": 21
+   "수": 31
   },
   "firstGroup": {
-   "식상": 51,
-   "인성": 64,
-   "비겁": 89,
-   "재성": 43,
-   "관성": 40
+   "식상": 59,
+   "인성": 65,
+   "비겁": 75,
+   "관성": 47,
+   "재성": 47
   },
   "secondGroup": {
-   "비겁": 22,
-   "재성": 20,
-   "관성": 13,
-   "식상": 19,
-   "인성": 20
+   "비겁": 35,
+   "재성": 25,
+   "관성": 17,
+   "식상": 21,
+   "인성": 23
   },
   "pairs": {
-   "식상+비겁": 6,
+   "식상+비겁": 11,
    "인성+재성": 7,
-   "비겁+관성": 9,
-   "재성+비겁": 5,
-   "재성+식상": 4,
-   "비겁+식상": 11,
-   "인성+비겁": 5,
-   "비겁+재성": 7,
-   "관성+비겁": 6,
-   "비겁+인성": 8,
+   "비겁+관성": 8,
+   "관성+비겁": 10,
+   "재성+비겁": 8,
+   "비겁+재성": 8,
+   "재성+식상": 7,
+   "비겁+식상": 9,
+   "인성+비겁": 6,
    "관성+인성": 6,
-   "재성+인성": 3,
-   "관성+재성": 2,
-   "인성+관성": 4,
+   "재성+인성": 5,
+   "관성+재성": 3,
+   "비겁+인성": 9,
+   "인성+관성": 8,
    "관성+식상": 2,
-   "식상+재성": 4,
-   "인성+식상": 2,
-   "식상+인성": 3
+   "식상+재성": 7,
+   "인성+식상": 3,
+   "식상+인성": 3,
+   "식상+관성": 1
   },
   "conf": {
-   "high": 157,
-   "low": 107,
-   "mid": 23
+   "mid": 37,
+   "high": 148,
+   "low": 108
   },
   "level": {
-   "clear": 246,
-   "plain": 41
+   "clear": 275,
+   "plain": 18
   }
  },
  "ratios": {
-  "first": 95.7,
-  "second": 31.3,
+  "first": 97.7,
+  "second": 40.3,
   "complex": 0,
-  "none": 4.3
+  "none": 2.3
  },
- "strongestIsWeapon": 66.2,
+ "strongestIsWeapon": 64.5,
  "yongIsWeapon": {
-  "same": 51,
-  "differ": 236,
+  "same": 63,
+  "differ": 230,
   "weaponRole": {
-   "구신": 122,
-   "한신": 84,
-   "기신": 67,
-   "희신": 57,
-   "용신": 51
+   "구신": 123,
+   "한신": 96,
+   "기신": 71,
+   "희신": 61,
+   "용신": 63
   }
  },
  "sensitivity": [
   {
    "name": "forceMin 15%",
-   "changedSelection": 48,
-   "changedFirst": 26,
+   "changedSelection": 44,
+   "changedFirst": 27,
    "status": {
-    "single": 176,
-    "dual": 119,
-    "none": 5
+    "single": 169,
+    "dual": 129,
+    "none": 2
    }
   },
   {
    "name": "forceMin 25%",
-   "changedSelection": 82,
-   "changedFirst": 42,
+   "changedSelection": 66,
+   "changedFirst": 39,
    "status": {
-    "single": 207,
-    "dual": 56,
-    "none": 37
+    "single": 180,
+    "dual": 99,
+    "none": 21
    }
   },
   {
    "name": "온전함 먼저 안 봄",
-   "changedSelection": 66,
-   "changedFirst": 36,
+   "changedSelection": 65,
+   "changedFirst": 35,
    "status": {
-    "single": 130,
-    "dual": 157,
-    "none": 13
+    "single": 110,
+    "dual": 183,
+    "none": 7
    }
   },
   {
    "name": "보탬에서 병존·간여지동 뺌",
-   "changedSelection": 6,
-   "changedFirst": 4,
+   "changedSelection": 8,
+   "changedFirst": 8,
    "status": {
-    "single": 190,
-    "dual": 96,
-    "none": 13,
-    "complex": 1
+    "single": 172,
+    "dual": 121,
+    "none": 7
    }
   },
   {
    "name": "병존·간여지동 두 배",
-   "changedSelection": 2,
-   "changedFirst": 0,
+   "changedSelection": 10,
+   "changedFirst": 9,
    "status": {
-    "single": 191,
-    "dual": 96,
-    "none": 13
+    "single": 173,
+    "dual": 119,
+    "none": 7,
+    "complex": 1
    }
   },
   {
    "name": "보탬에서 득령 뺌",
-   "changedSelection": 6,
-   "changedFirst": 2,
+   "changedSelection": 14,
+   "changedFirst": 12,
+   "status": {
+    "single": 174,
+    "dual": 118,
+    "none": 7,
+    "complex": 1
+   }
+  },
+  {
+   "name": "보탬에서 세력 1위 뺌",
+   "changedSelection": 13,
+   "changedFirst": 13,
+   "status": {
+    "single": 173,
+    "dual": 120,
+    "none": 7
+   }
+  },
+  {
+   "name": "보탬에서 깊은 뿌리 뺌",
+   "changedSelection": 4,
+   "changedFirst": 3,
+   "status": {
+    "single": 173,
+    "dual": 120,
+    "none": 7
+   }
+  },
+  {
+   "name": "보탬에서 격국·상신 뺌",
+   "changedSelection": 14,
+   "changedFirst": 13,
+   "status": {
+    "single": 173,
+    "dual": 119,
+    "none": 7,
+    "complex": 1
+   }
+  },
+  {
+   "name": "보탬에서 실제 작용 뺌(= 2판)",
+   "changedSelection": 12,
+   "changedFirst": 12,
+   "status": {
+    "single": 172,
+    "dual": 120,
+    "none": 7,
+    "complex": 1
+   }
+  },
+  {
+   "name": "십신형 경로 끔",
+   "changedSelection": 30,
+   "changedFirst": 6,
+   "status": {
+    "single": 190,
+    "dual": 97,
+    "none": 13
+   }
+  },
+  {
+   "name": "1판과 같게(구조·실제 작용·십신형 경로 모두 끔)",
+   "changedSelection": 47,
+   "changedFirst": 21,
    "status": {
     "single": 193,
     "dual": 94,
@@ -146,246 +210,228 @@
    }
   },
   {
-   "name": "보탬에서 세력 1위 뺌",
-   "changedSelection": 7,
-   "changedFirst": 7,
-   "status": {
-    "single": 190,
-    "dual": 94,
-    "none": 13,
-    "complex": 3
-   }
-  },
-  {
-   "name": "보탬에서 깊은 뿌리 뺌",
-   "changedSelection": 3,
-   "changedFirst": 2,
-   "status": {
-    "single": 194,
-    "dual": 93,
-    "none": 13
-   }
-  },
-  {
    "name": "보탬 조건 없이 세력 %만",
-   "changedSelection": 9,
-   "changedFirst": 9,
+   "changedSelection": 21,
+   "changedFirst": 21,
    "status": {
-    "single": 190,
-    "dual": 91,
+    "single": 172,
+    "dual": 115,
     "complex": 6,
-    "none": 13
+    "none": 7
    }
   }
  ],
  "hourRule": {
   "strict": {
-   "undetermined": 191,
-   "single": 104,
-   "dual": 5
+   "undetermined": 189,
+   "single": 96,
+   "dual": 15
   },
   "loose": {
-   "undetermined": 98,
-   "single": 156,
-   "dual": 46
+   "undetermined": 91,
+   "single": 150,
+   "dual": 59
   },
   "provisional": {
-   "single": 202,
-   "dual": 60,
-   "none": 38
+   "single": 193,
+   "dual": 78,
+   "none": 29
   }
  },
  "overlap": {
   "weaponsWithOverlap": 253,
-  "weapons": 381,
-  "overlapOnlyPlus": 12,
+  "weapons": 414,
+  "overlapOnlyPlus": 7,
   "elementsWithByeongjon": 285,
   "byeongjonNotCore": 86,
   "ganyeoPillars": 260,
   "ganyeoWeapon": 171,
   "dayGanyeo": 69,
   "dayGanyeoWeak": 22,
-  "dayGanyeoWeaponIsDayEl": 32
+  "dayGanyeoWeaponIsDayEl": 31
  },
  "luckLevels": {
   "daeun": {
-   "on": 582,
-   "shaky": 408,
-   "sup": 644,
-   "quiet": 583,
-   "trim": 196,
-   "hit": 130,
-   "strong": 327
+   "on": 625,
+   "shaky": 432,
+   "sup": 653,
+   "quiet": 567,
+   "trim": 173,
+   "hit": 124,
+   "strong": 356
   },
   "seun": {
-   "sup": 437,
-   "shaky": 205,
-   "strong": 560,
-   "on": 494,
-   "quiet": 743,
-   "trim": 248,
-   "hit": 183
+   "sup": 458,
+   "shaky": 203,
+   "strong": 613,
+   "on": 519,
+   "quiet": 733,
+   "trim": 223,
+   "hit": 181
   },
   "wolun": {
-   "quiet": 745,
-   "on": 677,
-   "shaky": 702,
-   "sup": 790,
-   "strong": 286,
-   "trim": 148,
-   "hit": 96
+   "quiet": 710,
+   "on": 744,
+   "shaky": 736,
+   "sup": 785,
+   "strong": 309,
+   "trim": 135,
+   "hit": 97
   }
  },
  "luckTypes": {
   "daeun": {
-   "strengthen": 1915,
-   "support": 1024,
-   "adjust": 1071,
-   "release": 919
+   "strengthen": 2005,
+   "support": 1043,
+   "partner": 593,
+   "adjust": 1057,
+   "release": 924
   },
   "seun": {
-   "strengthen": 1716,
-   "support": 931,
-   "adjust": 948,
-   "release": 940
+   "strengthen": 1800,
+   "support": 958,
+   "partner": 583,
+   "adjust": 911,
+   "release": 970
   },
   "wolun": {
-   "strengthen": 2396,
-   "release": 1229,
-   "adjust": 1375,
-   "support": 1242
+   "strengthen": 2508,
+   "release": 1215,
+   "adjust": 1374,
+   "support": 1230,
+   "partner": 721
   }
  },
  "crosstab": {
   "daeun": {
    "on": {
-    "조심": 228,
-    "좋음": 107,
-    "무난": 247
+    "조심": 234,
+    "좋음": 124,
+    "무난": 267
    },
    "shaky": {
-    "무난": 238,
-    "조심": 120,
-    "좋음": 50
+    "무난": 252,
+    "조심": 122,
+    "좋음": 58
    },
    "sup": {
-    "조심": 182,
-    "무난": 288,
-    "좋음": 174
+    "조심": 179,
+    "무난": 293,
+    "좋음": 181
    },
    "quiet": {
-    "무난": 233,
-    "좋음": 211,
-    "조심": 139
+    "무난": 223,
+    "좋음": 202,
+    "조심": 142
    },
    "trim": {
-    "무난": 42,
-    "좋음": 143,
+    "무난": 39,
+    "좋음": 123,
     "조심": 11
    },
    "hit": {
-    "조심": 58,
-    "무난": 46,
-    "좋음": 26
+    "조심": 60,
+    "무난": 41,
+    "좋음": 23
    },
    "strong": {
-    "조심": 169,
-    "좋음": 73,
-    "무난": 85
+    "조심": 176,
+    "좋음": 88,
+    "무난": 92
    }
   },
   "seun": {
    "sup": {
-    "무난": 188,
-    "조심": 130,
-    "좋음": 119
+    "무난": 189,
+    "조심": 133,
+    "좋음": 136
    },
    "shaky": {
-    "무난": 96,
-    "조심": 70,
+    "무난": 90,
+    "조심": 74,
     "좋음": 39
    },
    "strong": {
-    "조심": 237,
-    "무난": 241,
-    "좋음": 82
+    "조심": 244,
+    "무난": 270,
+    "좋음": 99
    },
    "on": {
-    "조심": 178,
-    "무난": 229,
-    "좋음": 87
+    "조심": 182,
+    "무난": 247,
+    "좋음": 90
    },
    "quiet": {
-    "무난": 319,
-    "좋음": 236,
-    "조심": 188
+    "무난": 315,
+    "좋음": 229,
+    "조심": 189
    },
    "trim": {
-    "좋음": 161,
-    "무난": 78,
+    "좋음": 145,
+    "무난": 69,
     "조심": 9
    },
    "hit": {
-    "무난": 63,
-    "조심": 91,
-    "좋음": 29
+    "무난": 65,
+    "조심": 90,
+    "좋음": 26
    }
   },
   "wolun": {
    "quiet": {
-    "무난": 390,
-    "좋음": 193,
-    "조심": 162
+    "무난": 372,
+    "좋음": 179,
+    "조심": 159
    },
    "on": {
-    "무난": 398,
-    "조심": 195,
-    "좋음": 84
+    "무난": 438,
+    "조심": 208,
+    "좋음": 98
    },
    "shaky": {
-    "좋음": 117,
-    "무난": 404,
-    "조심": 181
+    "좋음": 126,
+    "무난": 425,
+    "조심": 185
    },
    "sup": {
-    "무난": 475,
-    "조심": 192,
-    "좋음": 123
+    "무난": 476,
+    "조심": 183,
+    "좋음": 126
    },
    "strong": {
-    "조심": 102,
-    "무난": 144,
-    "좋음": 40
+    "조심": 106,
+    "무난": 156,
+    "좋음": 47
    },
    "trim": {
-    "무난": 72,
+    "무난": 65,
     "조심": 10,
-    "좋음": 66
+    "좋음": 60
    },
    "hit": {
-    "무난": 48,
-    "조심": 34,
-    "좋음": 14
+    "무난": 47,
+    "조심": 37,
+    "좋음": 13
    }
   }
  },
  "independence": {
   "daeun": {
-   "goodShareOn": 19.8,
-   "goodShareRest": 30.8,
-   "careShareOn": 43.7,
-   "careShareRest": 26
+   "goodShareOn": 21.6,
+   "goodShareRest": 30.1,
+   "careShareOn": 41.8,
+   "careShareRest": 26.4
   },
   "seun": {
-   "goodShareOn": 16,
-   "goodShareRest": 32.2,
-   "careShareOn": 39.4,
-   "careShareRest": 26.9
+   "goodShareOn": 16.7,
+   "goodShareRest": 32,
+   "careShareOn": 37.6,
+   "careShareRest": 27.5
   },
   "wolun": {
-   "goodShareOn": 12.9,
-   "goodShareRest": 20.7,
-   "careShareOn": 30.8,
+   "goodShareOn": 13.8,
+   "goodShareRest": 20.5,
+   "careShareOn": 29.8,
    "careShareRest": 23.3
   }
  }

@@ -1,6 +1,6 @@
 // 나의 주무기(weapon.js · weapon-data.js · weapon-view.js) 검증:  node tests/weapon-sim.cjs [--write] [--engine=경로]
 //  표본: 운세 엔진 감사 dev 300 생성식(tools/luck-engine-audit-20261125/compare.cjs 와 같은 식) + 같은 300개를 시간 모름으로
-//  · 원국 판정 불변식: 무기 ≤2 · 상태와 개수 일치 · 무기는 핵심 조건(세력≥20%·투간·통근) 충족 · 없음이면 핵심 후보 없음 · 복합형이면 3개 이상 동률
+//  · 원국 판정 불변식: 무기 ≤2 · 상태와 개수 일치 · 무기는 핵심 조건(세력≥20%·투간·통근) 또는 십신형 경로(2판) 충족 · 유형·표시 이름 · 없음이면 후보 없음 · 복합형이면 3개 이상 동률
 //  · 네 탭 일치: 원국·오행·강약·특기·적성·운세 흐름 블록의 data-wp 가 analyze 결과와 같다
 //  · 운별 분석: 대운 전부·세운 10년·월운 12개월에 활성도 등급이 있고, 유리도는 엔진 흐름 점수 등급과 같다(합산 값 없음)
 //  · 엔진 불변: 주무기 모듈을 부르기 전후 · 모듈을 안 올린 VM과 운세 점수·용신·격국·종격·합충이 같다
@@ -10,7 +10,7 @@ const fs = require('fs'), path = require('path'), vm = require('vm'), assert = r
 const root = path.join(__dirname, '..');
 const arg = k => (process.argv.find(a => a.startsWith('--' + k + '=')) || '').split('=').slice(1).join('=');
 const ENGINE = arg('engine') || path.join(root, 'engine.js');
-const BASE = ['feature-flags.js', 'gyeok-structure.js', 'luck-grade.js', 'aptitude-data.js', 'aptitude.js'];
+const BASE = ['feature-flags.js', 'gyeok-structure.js', 'luck-grade.js', 'aptitude-data.js', 'aptitude.js', 'ten-god-roles.js'];   // ten-god-roles: 3판 생극제화 근거(운영 화면과 같은 로드)
 const WP = ['weapon-data.js', 'weapon.js', 'weapon-view.js'];
 const mk = withWp => { const c = { console }; c.window = c; vm.createContext(c); vm.runInContext(fs.readFileSync(ENGINE, 'utf8'), c, { filename: 'engine.js' }); [...BASE, ...(withWp ? WP : [])].forEach(f => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), c, { filename: f })); return c; };
 const X = mk(true), X2 = mk(true), Y = mk(false);
@@ -40,9 +40,11 @@ function check(inp, idx, tag) {
   const n = A.weapons.length;
   if (A.status === 'single') assert.equal(n, 1); if (A.status === 'dual') assert.equal(n, 2);
   if (A.status === 'complex') { assert.equal(n, 0); assert.ok(A.complex.length >= 3); }
-  if (A.rawStatus === 'none') assert.ok(!A.facts.some(f => f.cond.core), '없음이면 핵심 후보 없음');
-  A.weapons.forEach(w => { assert.ok(w.cond.force && w.cond.exposed && w.cond.rooted, '핵심 조건'); assert.ok(w.pct >= 20); assert.ok(w.stems.length && w.roots.length); });
-  if (A.weapons.length === 2) assert.ok(A.weapons[0].plusN >= A.weapons[1].plusN || A.weapons[0].cond.intact > A.weapons[1].cond.intact, '순위 규칙');
+  if (A.rawStatus === 'none') assert.ok(!A.facts.some(f => f.cond.core || (f.pct >= 10 && f.cond.exposed && f.roots.length && f.cond.intact && f.cond.structure)), '없음이면 핵심 후보·구조 후보 없음');
+  // 판정 2판: 핵심 조건(세력≥20%·투간·통근) 또는 십신형 경로(세력≥10%·투간·통근·온전함·격국·상신 구조 역할)
+  A.weapons.forEach(w => { if (w.path === 'structure') { assert.ok(w.pct >= 10 && w.cond.exposed && w.roots.length && w.cond.intact && w.cond.structure, '십신형 경로 조건'); assert.equal(w.confidence, 'low', '십신형 경로는 잠정'); } else { assert.ok(w.cond.force && w.cond.exposed && w.cond.rooted, '핵심 조건'); assert.ok(w.pct >= 20); } assert.ok(w.stems.length && w.roots.length); assert.ok(['element', 'tengod', 'complex'].includes(w.type), '유형'); if (w.type === 'element') assert.ok(!w.tgEvidence, '오행형은 십신 근거 없음'); else assert.ok(w.cond.structure || w.cond.act, '십신형·복합형은 구조 역할 또는 실제 작용'); if (A.label === '주무기' && w.order === 1) assert.ok(w.tgEvidence && w.path === 'core', '확정은 오행+십신 근거 둘 다'); });
+  assert.ok(['주무기', '잠정 주무기', '주무기 미확정'].includes(A.label), '표시 이름'); if (!A.weapons.length) assert.equal(A.label, '주무기 미확정');
+  if (A.weapons.length === 2 && A.weapons[1].path !== 'structure') assert.ok(A.weapons[0].plusN >= A.weapons[1].plusN || A.weapons[0].cond.intact > A.weapons[1].cond.intact, '순위 규칙');
   // 네 탭
   const o = { esc: s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]), now: Date.UTC(2026, 10, 26), curY: CUR_Y, wolY: CUR_Y };
   const H = { wonguk: V.wonguk(M, ch, o), ohaeng: V.ohaeng(M, ch, o), apt: V.apt(M, ch, o), luck: V.luck(M, ch, o), luckSummary: V.luck(M, ch, { ...o, part: 'summary' }) };

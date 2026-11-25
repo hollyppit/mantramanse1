@@ -16,7 +16,7 @@
    · 사용: MantraWeapon.analyze(M, ch) · MantraWeapon.luck(M, ch, pillar, kind) · MantraWeapon.timeline(M, ch, { fromY, years, wolY }) */
 (function (G) {
   'use strict';
-  var VERSION = 'weapon-20261126-2';
+  var VERSION = 'weapon-20261126-4';   // 3판: 생극제화(십성 상호작용 성립) 근거·오행+십신 둘 다 있어야 확정·발현 조합(짝 십성)·운의 조합형   // 판정 2판: 격국·상신 구조 조건, 십신형 경로, 파격 제약, 유형(오행형·십신형·복합형), 표시 이름(주무기·잠정·미확정)
   var EL_K = ['목', '화', '토', '금', '수'], EL_H = ['木', '火', '土', '金', '水'];
   var GN = ['비겁', '식상', '재성', '관성', '인성'];
   var POS = ['year', 'month', 'day', 'hour'], POSK = { year: '년', month: '월', day: '일', hour: '시', luck: '운' };
@@ -25,7 +25,8 @@
     forceMin: 20,                 // 평균 몫(100% ÷ 오행 5개). 이 이상이어야 '실제 세력이 있다'
     maxWeapons: 2,
     seasonOK: ['왕', '상'],        // 득령(월령에서 왕·상)
-    plusKeys: ['season', 'overlap', 'top', 'deepRoot'],   // 보탬 조건(같은 무게로 개수만 센다)
+    plusKeys: ['season', 'overlap', 'top', 'deepRoot', 'structure', 'act'],   // act(3판) = 주무기 십성이 성립한(on) 상호작용(좋음·섞임)에 참여 — ten-god-roles.js 판정 그대로   // 보탬 조건(같은 무게로 개수만 센다). structure = 격국의 격 오행(성립·부분) 또는 켜진 상신(2판)
+    structMin: 10,                // 십신형 경로: 세력이 평균 몫(20%)에 못 미쳐도 이 % 이상이면서 투간·통근·온전함·구조 역할(격·상신)을 갖추면 후보(평균 몫의 절반)
     intactFirst: true,            // 합·충으로 묶이지 않은 후보를 먼저
     hourKeepAll: true,            // (strict 모드에서만) 12시진 모두에서 첫 무기가 남아야 잠정 확정
     hourMode: 'provisional',      // 시간 모름(2026-11-26 사용자 결정): 'provisional' = 년·월·일 세 기둥으로 판정하고 12시진 유지 비율을 신뢰도·안내에 반영 / 'strict' = 예전처럼 다 유지돼야만 확정
@@ -41,7 +42,7 @@
   var opt0 = function (o) { var r = {}; for (var k in CFG) r[k] = CFG[k]; if (o) for (var j in o) r[j] = o[j]; return r; };
 
   // ── element-strength · pillar-patterns · root-exposure: 원국 한 오행의 조건 ──
-  function elementFacts(M, ch, e, rank, O) {
+  function elementFacts(M, ch, e, rank, O, GK, TR) {
     O = O || CFG;
     var P = ch.pillars, dEl = M.stemEl(P.day.s), pct = ch.weights.pct[e] || 0;
     var stems = [], roots = [], ganyeo = [], bStem = [], bBranch = [], surf = { stem: 0, branch: 0 };
@@ -80,6 +81,20 @@
       top: rank === 0,
       deepRoot: roots.some(function (r) { return r.depth === '정기' || r.pos === 'month'; }),
     };
+    // 2판: 격국·상신 구조(엔진 gyeokCore 그대로 읽음) — 격 오행(성립·부분 성립)이거나 켜진 상신이면 구조 역할, 켜진 파격 요인(구원 없음)이면 제약
+    var st = [], br = [];
+    // 건록격·양인격·월겁격(격 = 비겁, group 0)은 격 자체가 다스려야 할 힘이라 '격 오행' 조건에서 뺀다(상신만 인정)
+    if (GK && GK.el === e && GK.group !== 0 && (GK.status === 'seong' || GK.status === 'part')) st.push({ kind: 'gyeok', text: '월령 격국 ' + GK.kind + '의 격 오행' + (GK.status === 'part' ? '(부분 성립)' : '') });
+    (GK && GK.sang || []).forEach(function (x) { if (x.on && x.el === e) st.push({ kind: 'sang', text: '상신 — ' + x.text }); });
+    (GK && GK.pa || []).forEach(function (x) { if (x.on && x.el === e && !(x.rescue && x.rescue.on)) br.push(x.text); });
+    c.structure = st.length > 0;
+    // 3판: 생극제화 — 십성 작용 엔진(ten-god-roles.js)이 성립(on)으로 판정한 상호작용 중 이 오행의 십성 묶음이 참여한 것
+    var gg = mod(e - M.stemEl(P.day.s), 5), acts = [], actBad = [];
+    (TR && TR.interactions || []).forEach(function (o) {
+      if (o.status !== 'on' || (o.from !== gg && o.to !== gg)) return;
+      if (o.tone === 'bad') actBad.push({ name: o.name, from: o.from, to: o.to }); else if (o.from !== o.to) acts.push({ name: o.name, from: o.from, to: o.to, tone: o.tone });
+    });
+    c.act = acts.length > 0;
     var intactStem = stems.some(function (s) { return s.free; }), intactRoot = rootClash.some(function (r) { return !r.chung.length; });
     c.intact = c.exposed && intactStem && (roots.length ? intactRoot : false);
     c.core = c.force && c.exposed && c.rooted;
@@ -92,6 +107,8 @@
       dayRepeat: bStem.some(function (b) { return b.withDay; }),
       tgs: stems.map(function (s) { return s.tg; }).filter(function (t, i, a) { return a.indexOf(t) === i; }),
       cond: c, plus: plus, plusN: plus.length, isDayEl: e === dEl,
+      structure: st, breaks: br, acts: acts, actBad: actBad,
+      elemPlusN: plus.filter(function (k) { return k !== 'structure'; }).length,
     };
   }
 
@@ -106,38 +123,71 @@
     f.byeongjon.stem.forEach(function (b) { out.push('○ 천간 병존: ' + b.ch + ' ' + b.pos.length + '개(' + b.pos.map(function (k) { return POSK[k]; }).join('·') + (b.adj ? ', 붙어 있음' : ', 떨어져 있음') + (b.withDay ? ', 일간과 같은 글자' : '') + ')'); });
     f.byeongjon.branch.forEach(function (b) { out.push('○ 지지 병존: ' + b.ch + ' ' + b.pos.length + '개(' + b.pos.map(function (k) { return POSK[k]; }).join('·') + (b.adj ? ', 붙어 있음' : ', 떨어져 있음') + ')'); });
     f.stems.forEach(function (s) { if (s.bound.length) out.push('△ ' + POSK[s.pos] + '간 ' + s.ch + '이(가) 합으로 묶임: ' + s.bound.join(' · ')); if (s.clash.length) out.push('△ ' + POSK[s.pos] + '간 ' + s.ch + '이(가) 부딪힘: ' + s.clash.join(' · ')); });
+    f.structure.forEach(function (x) { out.push('○ 구조 역할: ' + x.text); });
+    f.breaks.forEach(function (t) { out.push('△ 격국을 흔드는 쪽: ' + t + ' (구원 없음)'); });
+    (f.acts || []).forEach(function (a) { out.push('○ 실제 작용: ' + a.name + ' 성립'); });
+    (f.actBad || []).forEach(function (a) { out.push('△ 부담 작용: ' + a.name + ' 성립'); });
     f.rootClash.forEach(function (r) { if (r.chung.length) out.push('△ 뿌리 자리 ' + POSK[r.pos] + '지가 충: ' + r.chung.join(' · ')); if (r.other.length) out.push('· 뿌리 자리 ' + POSK[r.pos] + '지 관계(길흉 판단 없음): ' + r.other.join(' · ')); });
     return out;
   }
 
+  // 3판 발현 조합: 주무기 십성 g 와 짝을 이루는 십성 — ① 성립(on)한 상호작용으로 묶인 묶음(좋음·섞임·부담 표시) ② 없으면 실제로 드러난(천간) 묶음 중 세력 보통 이상
+  function partnersOf(w, TR, facts) {
+    var g = w.group, out = [], seen = {};
+    (TR && TR.interactions || []).forEach(function (o) {
+      if (o.status !== 'on' || o.from === o.to || (o.from !== g && o.to !== g)) return;
+      var p = o.from === g ? o.to : o.from; if (seen[p]) return; seen[p] = 1;
+      out.push({ group: p, basis: 'act', name: o.name, tone: o.tone === 'bad' ? 'bad' : o.tone === 'good' ? 'good' : 'mixed' });
+    });
+    (TR && TR.groups || []).forEach(function (x) {
+      if (x.g === g || seen[x.g] || !x.exposed || !x.exposed.length || !/보통|강함|과다/.test(x.force || '')) return; seen[x.g] = 1;
+      out.push({ group: x.g, basis: 'coexist', name: '', tone: 'mixed' });
+    });
+    return out.slice(0, 3);
+  }
   function rankCmp(O) { return function (a, b) { return (O.intactFirst ? (b.cond.intact - a.cond.intact) : 0) || (b.plusN - a.plusN) || (b.pct - a.pct) || (a.el - b.el); }; }
 
   // ── weapon-selection: 원국 판정(시주 있는 그대로) ──
   function judge(M, ch, o) {
     var O = opt0(o);
     var pct = ch.weights.pct, order = [0, 1, 2, 3, 4].sort(function (a, b) { return (pct[b] - pct[a]) || (a - b); });
-    var facts = [0, 1, 2, 3, 4].map(function (e) { return elementFacts(M, ch, e, order.indexOf(e), O); });
+    var GK = null; try { GK = M.gyeokCore ? M.gyeokCore(ch) : null; } catch (e) { GK = null; }
+    var TR = null; try { TR = G.MantraTenGodRoles && G.MantraTenGodRoles.analyze ? G.MantraTenGodRoles.analyze(M, ch) : null; } catch (e) { TR = null; }
+    var facts = [0, 1, 2, 3, 4].map(function (e) { return elementFacts(M, ch, e, order.indexOf(e), O, GK, TR); });
     facts.forEach(function (f) { f.reasons = reasons(f); });
     var core = facts.filter(function (f) { return f.cond.core; }).sort(rankCmp(O));
     var intact = core.filter(function (f) { return f.cond.intact; });
     var pool = O.intactFirst ? (intact.length ? intact : core) : core, status, weapons = [], complex = [], near = [], log = [];
+    // 2판 십신형 경로: 세력 structMin~20% · 투간 · 통근 · 온전함 · 구조 역할 — 개수가 아니라 격국·상신 구조로 두드러지는 십신. 핵심 후보 뒤에 둔다
+    var structPath = O.structMin != null ? facts.filter(function (f) { return !f.cond.core && f.pct >= O.structMin && f.cond.exposed && f.roots.length && f.cond.intact && f.cond.structure; }).sort(rankCmp(O)) : [];
+    structPath.forEach(function (f) { f.path = 'structure'; });
     var X = O.maxWeapons, nm = function (f) { return EL_K[f.el] + '(' + f.groupName + ')'; };
     log.push('핵심 조건(세력 ' + O.forceMin + '% 이상 · 투간 · 통근)을 모두 갖춘 후보: ' + (core.length ? core.map(nm).join(' · ') : '없음'));
     if (O.intactFirst && core.length && intact.length !== core.length) log.push(intact.length ? '합·충으로 묶이지 않은 후보만 먼저 봄: ' + intact.map(nm).join(' · ') : '모든 후보가 원국 안에서 합·충으로 묶여 있어 그대로 비교함(다듬어 쓰는 무기)');
     if (pool.length > 1) log.push('보탬 조건 개수: ' + pool.map(function (f) { return nm(f) + ' ' + f.plusN + '개' + (f.plus.length ? '(' + f.plus.map(function (k) { return PLUS_K[k]; }).join('·') + ')' : ''); }).join(' / '));
-    if (!pool.length) { status = 'none'; log.push('핵심 조건을 갖춘 힘이 없어 주무기를 정하지 않음'); }
+    if (structPath.length) log.push('구조로 두드러지는 십신 후보(세력 ' + O.structMin + '~20%): ' + structPath.map(nm).join(' · '));
+    if (!pool.length && structPath.length) { pool = structPath.slice(); log.push('핵심 조건을 갖춘 힘이 없어 구조 후보로 판정'); }
+    if (!pool.length) { status = 'none'; log.push('핵심 조건을 갖춘 힘도, 구조로 두드러지는 십신도 없어 주무기를 정하지 않음'); }
     else if (pool.length > X && pool[X].plusN === pool[X - 1].plusN) {
       // 2번째와 3번째가 같은 조건 수 → 세력 %만으로 둘째를 고르지 않는다. 첫째가 앞서면 하나만, 첫째까지 같으면 복합형
       if (pool[0].plusN > pool[1].plusN) { weapons = [pool[0]]; status = 'single'; near = pool.slice(1).filter(function (f) { return f.plusN === pool[1].plusN; }).map(function (f) { return f.el; }); log.push('2순위 자리에 같은 조건 수의 후보가 ' + near.length + '개라 세력 %만으로 가르지 않고 1순위만 둠'); }
       else { status = 'complex'; complex = pool.filter(function (f) { return f.plusN === pool[0].plusN; }); log.push('후보 ' + complex.length + '개가 같은 조건 수로 서 있어 복합형'); }
     }
-    else { weapons = pool.slice(0, X); status = weapons.length === 1 ? 'single' : 'dual'; if (weapons.length === 2) log.push('1순위 ' + nm(weapons[0]) + ', 2순위(보조) ' + nm(weapons[1]) + (weapons[0].plusN === weapons[1].plusN ? ' — 조건 수가 같아 세력 %로 순서만 정함' : '')); }
-    weapons.forEach(function (w, i) { w.order = i + 1; w.level = w.plusN >= 2 ? 'clear' : 'plain'; w.shaky = !w.cond.intact; });
+    else { weapons = pool.slice(0, X); if (weapons.length < X && structPath.length && weapons[0].path !== 'structure') { weapons.push(structPath[0]); log.push('2순위 자리에 구조로 두드러지는 십신 ' + nm(structPath[0]) + '을(를) 보조 주무기로 둠'); } status = weapons.length === 1 ? 'single' : 'dual'; if (weapons.length === 2) log.push('1순위 ' + nm(weapons[0]) + ', 2순위(보조) ' + nm(weapons[1]) + (weapons[0].plusN === weapons[1].plusN && weapons[1].path !== 'structure' ? ' — 조건 수가 같아 세력 %로 순서만 정함' : weapons[1].path === 'structure' ? ' — 보조는 구조로 두드러지는 십신' : '')); }
+    weapons.forEach(function (w, i) {
+      w.order = i + 1; w.level = w.plusN >= 2 ? 'clear' : 'plain'; w.shaky = !w.cond.intact; w.path = w.path || 'core';
+      // 유형: 오행형(구조 역할 없음) · 십신형(구조 역할이 있고 오행 쪽 보탬이 없거나 십신 경로) · 복합형(오행 쪽 보탬과 구조 역할이 함께)
+      w.tgEvidence = w.cond.structure || w.cond.act;   // 3판: 십신 근거 = 격국·상신 또는 성립한 실제 작용
+      w.elemPlusN = w.plus.filter(function (k) { return k !== 'structure' && k !== 'act'; }).length;
+      w.type = !w.tgEvidence ? 'element' : (w.path === 'structure' || w.elemPlusN === 0) ? 'tengod' : 'complex';
+      w.partners = partnersOf(w, TR, facts);
+      w.typeK = { element: '오행형', tengod: '십신형', complex: '복합형' }[w.type];
+    });
     var hiddenPow = facts.filter(function (f) { return f.cond.force && !f.cond.exposed && f.roots.length; }).map(function (f) { return f.el; });
     var thinEdge = facts.filter(function (f) { return f.cond.exposed && f.roots.length && !f.cond.force; }).map(function (f) { return f.el; });
-    return { status: status, weapons: weapons, complex: complex, near: near, facts: facts, order: order, hiddenPow: hiddenPow, thinEdge: thinEdge, core: core.map(function (f) { return f.el; }), log: log };
+    return { status: status, weapons: weapons, complex: complex, near: near, facts: facts, order: order, hiddenPow: hiddenPow, thinEdge: thinEdge, core: core.map(function (f) { return f.el; }), log: log, tr: TR ? true : false };
   }
-  var PLUS_K = { season: '득령', overlap: '병존·간여지동', top: '세력 1위', deepRoot: '깊은 뿌리' };
+  var PLUS_K = { season: '득령', overlap: '병존·간여지동', top: '세력 1위', deepRoot: '깊은 뿌리', structure: '격국·상신', act: '실제 작용' };
 
   function sig(j) { return j.status + ':' + (j.weapons.length ? j.weapons : j.complex).map(function (w) { return w.el; }).join(','); }
 
@@ -161,6 +211,9 @@
     if (status === 'undetermined' || status === 'complex') return 'low';
     if (!hourKnown && hc && hc.keepFirst != null && hc.keepFirst < (O ? O.hourKeepMid : 9)) return 'low';   // 시간 모름: 시진에 따라 자주 바뀌면 약함
     if (!w.cond.intact || w.plusN === 0) return 'low';
+    if (w.path === 'structure') return 'low';   // 세력이 평균 몫에 못 미치는 십신형은 잠정
+    if (w.breaks && w.breaks.length) return 'mid';   // 격국을 흔드는 쪽이면 탄탄으로 보지 않음
+    if (w.actBad && w.actBad.length && !w.cond.act) return 'mid';   // 부담 작용만 성립하면 탄탄으로 보지 않음
     if (w.plusN >= 2 && hourKnown) return 'high';
     return 'mid';
   }
@@ -189,6 +242,7 @@
       weapons: j.weapons, complex: j.complex, near: j.near, facts: j.facts, hiddenPow: j.hiddenPow, thinEdge: j.thinEdge, core: j.core, log: j.log,
       candidates: (j.weapons.length ? j.weapons : j.complex).map(function (w) { return w.el; }),
       confidence: j.weapons.length ? j.weapons[0].confidence : 'low',
+      label: !j.weapons.length ? '주무기 미확정' : (j.weapons[0].confidence === 'low' || !j.weapons[0].tgEvidence || j.weapons[0].path === 'structure') ? '잠정 주무기' : '주무기',   // 3판: 오행 근거와 십신 근거가 둘 다 있어야 확정   // 2판 표시 이름
       strongest: { el: top, pct: Math.round(pct[top] * 10) / 10, isWeapon: wEls.indexOf(top) >= 0 },
       yong: u.yong != null ? { el: u.yong, isWeapon: wEls.indexOf(u.yong) >= 0, name: u.primaryName || '' } : null,
       strength: { zone: ch.strength.zone, help: Math.round(ch.strength.help * 10) / 10 },
@@ -224,7 +278,7 @@
     strong: { n: '강하게 켜짐', k: 'on2', o: 0, y: 4 }, on: { n: '켜짐', k: 'on1', o: 1, y: 3 }, shaky: { n: '켜지되 흔들림', k: 'shk', o: 2, y: 3 },
     sup: { n: '받쳐 줌', k: 'sup', o: 3, y: 2 }, quiet: { n: '조용함', k: 'qt', o: 4, y: 1 }, trim: { n: '정리', k: 'trm', o: 5, y: 0 }, hit: { n: '눌림', k: 'hit', o: 6, y: 0 },
   };
-  var TYPE_K = { strengthen: '강화형', support: '지원형', release: '발산형', adjust: '조정형' };
+  var TYPE_K = { strengthen: '강화형', support: '지원형', release: '발산형', adjust: '조정형', partner: '조합형' };
   function luckOne(M, ch, w, p) {
     var se = M.stemEl(p.s), be = M.BR_EL[p.b], hid = M.HIDDEN[p.b], lab = M.hiddenLabels(p.b), s = [], cons = [];
     var roles = ch.unified && ch.unified.roles || {}, role = function (e) { return String(roles[e] || '').replace(/^조건부 /, ''); };
@@ -242,6 +296,9 @@
     var rootOther = rr.filter(function (r) { return r.kind === 'branch' && /형|파|해|원진/.test(r.type) && r.members.some(function (m) { return rPos.indexOf(m) >= 0; }); });
     var types = [];
     if (stemSame || rootAny) types.push('strengthen'); if (gen) types.push('support'); if (out) types.push('release');
+    // 3판 조합형: 운 천간의 십성 묶음이 주무기의 짝 십성(발현 조합)이면 — 짝 능력이 켜지는 때(부담 조합이면 제약으로)
+    var lg = mod(se - M.stemEl(ch.pillars.day.s), 5), pt = (w.partners || []).filter(function (p) { return p.group === lg && se !== w.el; })[0];
+    if (pt && pt.tone !== 'bad') { types.push('partner'); s.push({ t: 'partner', x: '운의 천간이 ' + GN[lg] + ' — 주무기와 짝을 이루는 능력' + (pt.name ? '(' + pt.name + ')' : '') + '이 함께 켜져요' }); }
     var hit = hitStem || bound.length || clash.length || rootHit.length; if (hit) types.push('adjust');
     if (stemSame) s.push({ t: 'strengthen', x: '운의 천간 ' + M.STEM[p.s] + '이(가) 같은 ' + w.elK + ' 기운 — 무기가 겉으로 드러나요' });
     if (rootAny) s.push({ t: 'strengthen', x: '운의 지지 ' + M.BR[p.b] + ' 속 ' + lab[rootIx] + ' ' + M.STEM[hid[rootIx][0]] + ' — 무기에 뿌리를 대 줘요' });
@@ -252,6 +309,7 @@
     clash.forEach(function (r) { cons.push(r.name + ' — 원국의 무기 천간이 운과 부딪혀요'); });
     rootHit.forEach(function (r) { cons.push(r.name + ' — 무기의 뿌리 자리가 흔들려요'); });
     rootOther.forEach(function (r) { cons.push(r.name + ' — 뿌리 자리에 걸리는 관계(길흉 판단 없이 참고)'); });
+    if (pt && pt.tone === 'bad') cons.push(GN[lg] + ' 기운이 들어와 ' + pt.name + ' 같은 부담 조합이 커지기 쉬워요');
     if (excess && (stemSame || rootAny)) cons.push('주무기가 이 명식에서 이미 많은 쪽(' + wRole + ')이라, 더 세지면 과하게 쓰기 쉬워요');
     var on = (stemSame && rootAny) ? 'strong' : (stemSame || rootDeep) ? 'on' : null;
     var lv = on ? (hit ? 'shaky' : on) : (gen || rootAny) ? (hit ? 'quiet' : 'sup') : hit ? (excess ? 'trim' : 'hit') : 'quiet';
@@ -260,7 +318,7 @@
     return {
       el: w.el, level: lv, levelK: ACT[lv].n, key: ACT[lv].k, ord: ACT[lv].o, y: ACT[lv].y,
       types: types, typesK: types.map(function (t) { return TYPE_K[t]; }), signals: s, constraints: cons,
-      use: { tg: tg, group: tgG, groupName: GN[tgG] },
+      use: { tg: tg, group: tgG, groupName: GN[tgG] }, partner: pt || null,
       roles: { stem: role(se), branch: role(be), weapon: wRole },
     };
   }

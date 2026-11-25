@@ -3,164 +3,167 @@
  "n": 300,
  "fails": 0,
  "confidence": {
-  "high": 197,
-  "low": 147,
-  "mid": 37
+  "mid": 48,
+  "high": 196,
+  "low": 170
  },
  "types": {
-  "strengthen": 6027,
-  "support": 3197,
-  "adjust": 3394,
-  "release": 3088
+  "strengthen": 6313,
+  "support": 3231,
+  "partner": 1897,
+  "adjust": 3342,
+  "release": 3109
  },
  "typesByKind": {
   "daeun": {
-   "strengthen": 1915,
-   "support": 1024,
-   "adjust": 1071,
-   "release": 919
+   "strengthen": 2005,
+   "support": 1043,
+   "partner": 593,
+   "adjust": 1057,
+   "release": 924
   },
   "seun": {
-   "strengthen": 1716,
-   "support": 931,
-   "adjust": 948,
-   "release": 940
+   "strengthen": 1800,
+   "support": 958,
+   "partner": 583,
+   "adjust": 911,
+   "release": 970
   },
   "wolun": {
-   "strengthen": 2396,
-   "release": 1229,
-   "adjust": 1375,
-   "support": 1242
+   "strengthen": 2508,
+   "release": 1215,
+   "adjust": 1374,
+   "support": 1230,
+   "partner": 721
   }
  },
  "status": {
-  "single": 193,
-  "dual": 94,
-  "none": 13
+  "single": 172,
+  "dual": 121,
+  "none": 7
  },
  "exceptions": {
-  "strongest-not-weapon": 97,
-  "yong-not-weapon": 236,
-  "weapon-is-gisin": 175,
+  "strongest-not-weapon": 104,
+  "yong-not-weapon": 230,
+  "weapon-is-gisin": 177,
   "hidden-power": 166,
   "byeongjon-not-core": 78,
   "day-ganyeo-weak": 22,
-  "bigeop-weapon": 111,
+  "bigeop-weapon": 110,
   "multi-candidate": 162,
   "shaky-weapon": 99,
-  "yong-is-weapon": 51,
-  "tie-cut": 3,
+  "yong-is-weapon": 63,
   "jong": 6
  },
  "act": {
-  "on": 1753,
-  "shaky": 1315,
-  "sup": 1871,
-  "quiet": 2071,
-  "trim": 592,
-  "strong": 1173,
-  "hit": 409
+  "on": 1888,
+  "shaky": 1371,
+  "sup": 1896,
+  "quiet": 2010,
+  "trim": 531,
+  "strong": 1278,
+  "hit": 402
  },
  "actByKind": {
   "daeun": {
-   "on": 582,
-   "shaky": 408,
-   "sup": 644,
-   "quiet": 583,
-   "trim": 196,
-   "hit": 130,
-   "strong": 327
+   "on": 625,
+   "shaky": 432,
+   "sup": 653,
+   "quiet": 567,
+   "trim": 173,
+   "hit": 124,
+   "strong": 356
   },
   "seun": {
-   "sup": 437,
-   "shaky": 205,
-   "strong": 560,
-   "on": 494,
-   "quiet": 743,
-   "trim": 248,
-   "hit": 183
+   "sup": 458,
+   "shaky": 203,
+   "strong": 613,
+   "on": 519,
+   "quiet": 733,
+   "trim": 223,
+   "hit": 181
   },
   "wolun": {
-   "quiet": 745,
-   "on": 677,
-   "shaky": 702,
-   "sup": 790,
-   "strong": 286,
-   "trim": 148,
-   "hit": 96
+   "quiet": 710,
+   "on": 744,
+   "shaky": 736,
+   "sup": 785,
+   "strong": 309,
+   "trim": 135,
+   "hit": 97
   }
  },
  "favorByAct": {
   "on": {
-   "조심": 601,
-   "좋음": 278,
-   "무난": 874
+   "조심": 624,
+   "좋음": 312,
+   "무난": 952
   },
   "shaky": {
-   "무난": 738,
-   "조심": 371,
-   "좋음": 206
+   "무난": 767,
+   "조심": 381,
+   "좋음": 223
   },
   "sup": {
-   "조심": 504,
-   "무난": 951,
-   "좋음": 416
+   "조심": 495,
+   "무난": 958,
+   "좋음": 443
   },
   "quiet": {
-   "무난": 942,
-   "좋음": 640,
-   "조심": 489
+   "무난": 910,
+   "좋음": 610,
+   "조심": 490
   },
   "trim": {
-   "무난": 192,
-   "좋음": 370,
+   "무난": 173,
+   "좋음": 328,
    "조심": 30
   },
   "strong": {
-   "조심": 508,
-   "무난": 470,
-   "좋음": 195
+   "조심": 526,
+   "무난": 518,
+   "좋음": 234
   },
   "hit": {
-   "조심": 183,
-   "무난": 157,
-   "좋음": 69
+   "조심": 187,
+   "무난": 153,
+   "좋음": 62
   }
  },
  "weaponGroups": {
-  "식상": 70,
-  "인성": 84,
-  "비겁": 111,
-  "재성": 63,
-  "관성": 53
+  "식상": 80,
+  "인성": 88,
+  "비겁": 110,
+  "재성": 72,
+  "관성": 64
  },
  "nWeapons": {
-  "0": 13,
-  "1": 193,
-  "2": 94
+  "0": 7,
+  "1": 172,
+  "2": 121
  },
  "nohour": {
   "status": {
-   "single": 202,
-   "dual": 60,
-   "none": 38
+   "single": 193,
+   "dual": 78,
+   "none": 29
   },
   "keepFirst": {
    "2": 1,
-   "3": 2,
-   "4": 4,
-   "5": 7,
-   "6": 16,
-   "7": 9,
-   "8": 21,
-   "9": 22,
-   "10": 34,
-   "11": 37,
-   "12": 109,
-   "none": 38
+   "3": 1,
+   "4": 3,
+   "5": 4,
+   "6": 19,
+   "7": 8,
+   "8": 26,
+   "9": 29,
+   "10": 29,
+   "11": 40,
+   "12": 111,
+   "none": 29
   }
  },
- "nohourAgreeFirstWithFull": 194,
+ "nohourAgreeFirstWithFull": 198,
  "examples": {
   "strongest-not-weapon": [
    {
@@ -321,7 +324,7 @@
     "chart": "2000-4-26 21시 M",
     "pillars": "庚辰 庚辰 甲寅 甲戌",
     "status": "dual",
-    "weapons": "목(비겁)·금(관성)",
+    "weapons": "금(관성)·목(비겁)",
     "strongest": "목 35.3%",
     "yong": "목 (=주무기)",
     "strength": "신약 37.6%"
@@ -487,35 +490,6 @@
      "수"
     ],
     "strongest": "목 55.3% (주무기 아님: undefined)"
-   }
-  ],
-  "tie-cut": [
-   {
-    "chart": "1990-10-20 15시 M",
-    "pillars": "庚午 丙戌 戊午 己未",
-    "status": "single",
-    "weapons": "토(비겁)",
-    "strongest": "토 48.9%",
-    "yong": "금",
-    "strength": "태강 78.6%"
-   },
-   {
-    "chart": "1959-10-4 15시 M",
-    "pillars": "己亥 癸酉 己未 辛未",
-    "status": "single",
-    "weapons": "금(식상)",
-    "strongest": "금 38.1%",
-    "yong": "화",
-    "strength": "신약 38.3%"
-   },
-   {
-    "chart": "1989-2-28 3시 M",
-    "pillars": "己巳 丙寅 己未 乙丑",
-    "status": "single",
-    "weapons": "토(비겁)",
-    "strongest": "토 34.9%",
-    "yong": "목",
-    "strength": "신강 64.9%"
    }
   ],
   "jong": [

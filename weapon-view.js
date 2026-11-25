@@ -49,26 +49,65 @@
   function get(M, ch) { var w = W(); if (!w || !D()) return null; var A; try { A = w.analyze(M, ch); } catch (e) { return null; } return A && A.ok ? A : null; }
   function list(A) { return A.weapons.length ? A.weapons : A.complex; }
   function title(w) { return EL_K[w.el] + '(' + EL_H[w.el] + ') — ' + D().el[w.el].title; }
-  function rankLabel(A, w, i) { var d = D(); return A.status === 'complex' ? '복합형 후보' : A.status === 'undetermined' ? '유력 후보' : d.rank[i] || d.rank[1]; }
-  function headOf(A) { return D().status[A.status] || ''; }
+  function rankLabel(A, w, i) { var d = D(); return A.status === 'complex' ? '복합 후보' : A.status === 'undetermined' ? '유력 후보' : (i === 0 && A.label === '잠정 주무기') ? '잠정 주무기' : d.rank[i] || d.rank[1]; }
+  function headOf(A) { var d = D(); if (A.label === '잠정 주무기' && A.status !== 'undetermined') return d.status.provisionalHead; return (A.label === '주무기 미확정' && A.status !== 'none' && A.status !== 'complex' ? '주무기 미확정 · ' : '') + (d.status[A.status] || ''); }
+  // 십신 작용(기존 십성 작용 엔진 ten-god-roles.js 의 유형, 표시만)
+  var _tgr = typeof WeakMap === 'function' ? new WeakMap() : null;
+  function tgAct(M, ch, g) { var T = G.MantraTenGodRoles; if (!T || !T.analyze) return null; var r = _tgr && _tgr.get(ch); if (!r) { try { r = T.analyze(M, ch); } catch (e) { r = null; } if (_tgr && r) _tgr.set(ch, r); } var x = r && r.groups && r.groups[g]; return x && x.main ? x.main : null; }
 
   // 무기 한 개 카드 — part: 'origin'(원국: 형성 근거) | 'apt'(적성: 활용 방향)
-  function item(A, w, i, o, part) {
-    var d = D(), E = o.E, dl = d.el[w.el], gl = d.group[w.group];
-    var tags = '<span class="wp-tag cl">' + E(w.groupName) + ' · 세력 ' + w.pct + '%</span>' + (w.confidence ? '<span class="wp-tag" title="' + E(d.confidenceNote) + '">' + E(d.confidence[w.confidence]) + '</span>' : '') + (w.shaky ? '<span class="wp-tag">다듬어 쓰는 무기</span>' : '');
+  function item(A, w, i, o, part, M, ch) {
+    var d = D(), E = o.E, dl = d.el[w.el], gl = d.group[w.group], ta = M && ch ? tgAct(M, ch, w.group) : null, yk = A.yong ? EL_K[A.yong.el] : '';
+    var tags = (w.typeK ? '<span class="wp-tag cl" title="' + E(d.typeNote[w.type]) + '">' + E(w.typeK) + '</span>' : '') + '<span class="wp-tag cl">' + E(w.groupName) + ' · 세력 ' + w.pct + '%</span>' + (w.confidence ? '<span class="wp-tag" title="' + E(d.confidenceNote) + '">' + E(d.confidence[w.confidence]) + '</span>' : '') + (w.shaky ? '<span class="wp-tag">다듬어 쓰는 무기</span>' : '');
     var h = '<div class="wp-it wp-e' + w.el + '"><span class="wp-rk">' + E(rankLabel(A, w, i)) + '</span><div class="wp-n"><span class="wp-hj">' + EL_H[w.el] + '</span>' + E(title(w)) + '</div><div class="wp-n" style="font-weight:600">' + tags + '</div>' +
       '<div class="wp-kw">' + dl.strengths.map(function (k) { return '<span>' + E(k) + '</span>'; }).join('') + '</div>' +
       '<p><span class="wp-lb">발현 방식</span>' + E(EL_K[w.el] + ' + ' + w.groupName + ': ' + d.elGroup[w.el][w.group]) + '</p>' +
-      (w.tgs.length ? '<p class="wp-s"><span class="wp-lb">드러난 십성</span>' + E(w.tgs.map(function (t) { return t + ' — ' + d.tg[t]; }).join(' · ')) + '</p>' : '');
+      (w.tgs.length ? '<p class="wp-s"><span class="wp-lb">드러난 십성</span>' + E(w.tgs.map(function (t) { return t + ' — ' + d.tg[t]; }).join(' · ')) + '</p>' : '') +
+      (ta ? '<p class="wp-s"><span class="wp-lb">십신 작용</span>' + E(w.groupName + ' — ' + ta.name + (ta.why ? '(' + ta.why + ')' : '')) + '</p>' : '') +
+      (w.type ? '<p class="wp-note"><span class="wp-lb">유형</span>' + E(d.typeNote[w.type]) + '</p>' : '') +
+      '';   // 3판: 용신과의 관계·제약은 'C · 능력의 활용 조건'에서
     if (part === 'apt') h += '<p class="wp-s"><span class="wp-lb">활용 방향</span>' + E(gl.scene) + '</p><p class="wp-note"><span class="wp-lb">과잉 시</span>' + E(dl.overLine + ' ' + gl.over) + '</p>';
-    if (part === 'origin') h += '<p class="wp-note"><span class="wp-lb">과잉 시</span>' + E(dl.over) + '</p>' + (w.shaky ? '<p class="wp-note">' + E(d.shaky) + '</p>' : '');
+    if (part === 'origin' && w.shaky) h += '<p class="wp-note">' + E(d.shaky) + '</p>';   // 과잉 주의는 'B · 능력의 발현 방식'에서
     h += '<details' + (part === 'origin' && i === 0 ? ' open' : '') + '><summary class="wp-note">형성 근거 (병존·간여지동·통근·투간)</summary><ul class="wp-ev">' + w.reasons.map(function (r) { return '<li>' + E(r) + '</li>'; }).join('') + '</ul></details></div>';
     return h;
+  }
+  // ── 3판: B · 능력의 발현 방식 / C · 능력의 활용 조건 (네 탭·유료 블록이 같은 analyze 결과를 읽는다) ──
+  var pk = function (a, b) { return Math.min(a, b) + '-' + Math.max(a, b); };
+  var GNV = ['비겁', '식상', '재성', '관성', '인성'];
+  function secB(A, w, o) {
+    var d = D(), E = o.E, g = w.group, ps = w.partners || [], dl = d.el[w.el], gl = d.group[g];
+    var h = '<div class="wp-box wp-e' + w.el + '"><b>' + E(EL_K[w.el] + '(' + w.groupName + ')') + '</b> 기본 기능 — ' + E(d.fn[g]) + ' <span class="wp-note">(고정된 직업이 아니라 해석의 기본 요소예요)</span>';
+    if (ps.length) {
+      h += '<ul class="wp-ev" style="margin-top:6px">' + ps.map(function (p) { var P = d.pair[pk(g, p.group)]; if (!P) return ''; var bad = p.tone === 'bad' && P.tension; return '<li><b>' + E(w.groupName + ' + ' + GNV[p.group] + ' · ' + P.name) + '</b> <span class="wp-note">(' + E(d.pairBasis[p.basis] + (p.name ? ': ' + p.name : '')) + ')</span><br>' + E(bad ? P.tension : P.desc) + (bad ? '' : ' <span class="wp-note">활용 방향: ' + E(P.ways.join('·')) + '</span>') + '</li>'; }).join('') + '</ul>';
+      var mainF = ps.map(function (p) { return d.forms[g][p.group]; }).filter(Boolean), other = Object.keys(d.forms[g]).filter(function (k) { return !ps.some(function (p) { return String(p.group) === k; }); }).map(function (k) { return d.forms[g][k]; });
+      h += '<p class="wp-s" style="margin-top:6px"><span class="wp-lb">이 명식에서 주로 드러날 형태</span>' + E(mainF.join(' · ')) + (other.length ? ' <span class="wp-note">— 이 밖에 ' + E(other.join(' · ')) + '로도 드러날 수 있어요</span>' : '') + '</p>';
+      var envs = ps.filter(function (p) { return p.tone !== 'bad'; }).map(function (p) { var P = d.pair[pk(g, p.group)]; return P && P.env; }).filter(Boolean);
+      if (envs.length) h += '<p class="wp-s"><span class="wp-lb">강점이 드러나는 환경</span>' + E(envs.join(' · ')) + '</p>';
+    } else h += '<p class="wp-note" style="margin-top:6px">' + E(d.noPartner) + '</p>';
+    h += '<p class="wp-note"><span class="wp-lb">과잉 작용 시</span>' + E(dl.overLine + ' ' + gl.over) + '</p></div>';
+    return h;
+  }
+  function secC(A, w, o) {
+    var d = D(), E = o.E, yk = A.yong ? EL_K[A.yong.el] : '', P = { year: '년', month: '월', day: '일', hour: '시' }, sup = [], con = [];
+    (w.structure || []).forEach(function (x) { sup.push(x.text); });
+    (w.acts || []).forEach(function (x) { sup.push('실제 작용 ' + x.name + ' 성립'); });
+    if (w.cond.deepRoot) sup.push('깊은 뿌리(정기·월지)'); if (w.cond.season) sup.push('태어난 달의 계절 힘(' + w.season + ')');
+    if (/용신|희신/.test(w.role || '')) sup.push('균형에 필요한 쪽(' + w.role + ')');
+    (w.stems || []).forEach(function (x) { var nm = x.bound.concat(x.clash); if (nm.length) con.push(P[x.pos] + '간 ' + x.ch + ' — ' + nm.join('·')); });
+    (w.rootClash || []).forEach(function (r) { if (r.chung.length) con.push('뿌리 자리 ' + P[r.pos] + '지 충 — ' + r.chung.join('·')); });
+    (w.breaks || []).forEach(function (t) { con.push('격국을 흔드는 쪽 — ' + t); });
+    (w.actBad || []).forEach(function (x) { con.push('부담 작용 ' + x.name + ' 성립'); });
+    if (/기신|구신/.test(w.role || '')) con.push('균형상 이미 많은 쪽(' + w.role + ')');
+    if (A.provisional && A.hourKeep && A.hourKeep.keep < A.hourKeep.of) con.push('태어난 시간 모름 — 12시진 중 ' + A.hourKeep.keep + '개에서 같은 판정');
+    return '<div class="wp-box wp-e' + w.el + '"><b>' + E(EL_K[w.el] + '(' + w.groupName + ')') + '</b>' + (w.role && d.roleUse[w.role] ? '<p class="wp-s" style="margin-top:4px"><span class="wp-lb">용신과의 관계</span>' + E(d.roleUse[w.role].replace('{y}', yk)) + '</p>' : '') +
+      '<p class="wp-s"><span class="wp-lb">지원하는 요소</span>' + E(sup.length ? sup.join(' · ') : '두드러진 지원 요소 없음') + '</p>' +
+      '<p class="wp-s"><span class="wp-lb">제약하는 요소</span>' + E(con.length ? con.join(' · ') : '두드러진 제약 없음') + '</p></div>';
   }
   function extraNotes(ch, A, o, part) {
     var d = D(), E = o.E, out = [];
     if (A.provisional) { var hk = A.hourKeep; out.push(A.weapons.length && hk ? (hk.keep >= hk.of ? d.statusNote.provisional : d.statusNote.provisionalSome.replace('{k}', hk.keep)) : d.statusNote.provisionalNone); }   // 시간 모름: 세 기둥 잠정 판정 + 12시진 유지 수
     if (d.statusNote[A.status]) out.push(d.statusNote[A.status]);
+    if (A.label && d.labelNote[A.label] && A.status !== 'none') out.push(d.labelNote[A.label]);
     if (A.status === 'undetermined' && A.hourCheck) out.push('시진 12개를 넣어 보면 첫 후보가 주무기로 남는 경우가 ' + (A.hourCheck.keepFirst == null ? 0 : A.hourCheck.keepFirst) + '/' + A.hourCheck.variants + '이에요.');
     if (A.strongest && !A.strongest.isWeapon && A.weapons.length) out.push(d.strongestRel.replace('{top}', EL_K[A.strongest.el] + '(' + A.strongest.pct + '%)').replace('{why}', d.strongestWhy[A.strongest.why] || ''));
     if (A.near && A.near.length) out.push('그 뒤로 ' + A.near.map(function (e) { return EL_K[e]; }).join('·') + ' 기운도 같은 조건으로 서 있어요. 세력 %만으로 순서를 가르지 않아 보조 주무기는 두지 않았어요.');
@@ -88,11 +127,13 @@
   // ── 원국 탭: 나의 타고난 주무기(형성 근거만) ──
   function wonguk(M, ch, opt) {
     var A = get(M, ch); if (!A) return ''; var o = opts(opt), E = o.E, L = list(A);
-    var body = L.length ? '<div class="wp-list">' + L.map(function (w, i) { return item(A, w, i, o, 'origin'); }).join('') + '</div>' : noneBody(A, E);
+    var body = L.length ? '<p class="wp-sec">A · 타고난 핵심 역량</p><div class="wp-list">' + L.map(function (w, i) { return item(A, w, i, o, 'origin', M, ch); }).join('') + '</div>' +
+      '<p class="wp-sec">B · 능력의 발현 방식</p>' + L.map(function (w) { return secB(A, w, o); }).join('') +
+      '<p class="wp-sec">C · 능력의 활용 조건</p>' + L.map(function (w) { return secC(A, w, o); }).join('') : noneBody(A, E);
     var yl = yongLine(A);
-    return '<section class="card wp" id="weapon-wonguk" data-wp="' + E(sigOf(A)) + '"><div class="card-h"><h2>나의 타고난 주무기</h2><span class="note">드러나 있고 · 뿌리 있고 · 세력이 실린 힘</span></div>' +
+    return '<section class="card wp" id="weapon-wonguk" data-wp="' + E(sigOf(A)) + '"><div class="card-h"><h2>나의 타고난 주무기</h2><span class="note">드러남 · 뿌리 · 세력 · 격국 구조로 본 힘</span></div>' +
       '<p class="wp-head">' + E(headOf(A)) + '</p>' + body + extraNotes(ch, A, o, 'origin') + (yl ? '<p class="wp-note">' + E(yl) + '</p>' : '') +
-      '<p class="wp-note">' + o.L('ohaeng', '오행·강약에서 판정표 보기 ›') + ' ' + o.L('apt', '특기·적성에서 활용 방향 보기 ›') + '</p></section>';
+      '<p class="wp-note">' + o.L('ohaeng', '오행·강약에서 판정표 보기 ›') + ' ' + o.L('luck', '운에 따른 발현 환경은 운세 흐름에서 ›') + '</p></section>';
   }
 
   // ── 오행·강약 탭: 주무기 오행 분석 ──
@@ -102,7 +143,7 @@
     var lab = function (f) { var i = cand.indexOf(f.el); if (i < 0) return f.cond.core ? '후보' : ''; return A.status === 'complex' ? '복합' : A.status === 'undetermined' ? '유력 후보' : d.rank[i]; };
     var rows = A.facts.slice().sort(function (a, b) { return a.rank - b.rank; }).map(function (f) {
       var c = f.cond, on = cand.indexOf(f.el) >= 0, bj = f.byeongjon.stem.length + f.byeongjon.branch.length;
-      return '<tr class="wp-e' + f.el + (on ? ' on' : '') + '"><td>' + EL_H[f.el] + ' ' + EL_K[f.el] + ' <span class="wp-note">' + E(f.groupName) + '</span></td><td>' + f.pct + '%</td><td>' + f.surface.stem + '·' + f.surface.branch + '</td><td>' + mk(c.force) + '</td><td>' + mk(c.exposed) + '</td><td>' + mk(c.rooted) + '</td><td>' + mk(c.exposed && c.intact, c.exposed && !c.intact) + '</td><td>' + mk(c.season) + '</td><td>' + (bj ? '<span class="wp-y">' + bj + '</span>' : mk(false)) + '</td><td>' + mk(f.ganyeo.length) + '</td><td>' + mk(c.deepRoot) + '</td><td><b>' + E(lab(f)) + '</b></td></tr>';
+      return '<tr class="wp-e' + f.el + (on ? ' on' : '') + '"><td>' + EL_H[f.el] + ' ' + EL_K[f.el] + ' <span class="wp-note">' + E(f.groupName) + '</span></td><td>' + f.pct + '%</td><td>' + f.surface.stem + '·' + f.surface.branch + '</td><td>' + mk(c.force) + '</td><td>' + mk(c.exposed) + '</td><td>' + mk(c.rooted) + '</td><td>' + mk(c.exposed && c.intact, c.exposed && !c.intact) + '</td><td>' + mk(c.season) + '</td><td>' + (bj ? '<span class="wp-y">' + bj + '</span>' : mk(false)) + '</td><td>' + mk(f.ganyeo.length) + '</td><td>' + mk(c.deepRoot) + '</td><td>' + mk(c.structure, f.breaks && f.breaks.length) + '</td><td><b>' + E(lab(f)) + '</b></td></tr>';
     }).join('');
     var u = ch.unified || {}, wk = A.weapons.length ? A.weapons.map(function (w) { return EL_K[w.el]; }).join(' · ') : A.complex.length ? '복합형' : A.status === 'undetermined' ? '미확정' : '없음';
     var tri = '<div class="wp-tri"><div><b>오행 강약</b><span class="v">가장 큰 세력 ' + E(EL_K[A.strongest.el]) + ' ' + A.strongest.pct + '% · ' + E(A.strength.zone) + '</span><br>' + E(d.distinguish.strength) + '</div>' +
@@ -113,8 +154,8 @@
     return '<section class="card wp" id="weapon-ohaeng" data-wp="' + E(sigOf(A)) + '"><div class="card-h"><h2>주무기 오행 분석</h2><span class="note">강약 · 주무기 · 용신은 서로 다른 질문이에요</span></div>' + tri +
       '<p class="wp-note">' + E(d.distinguish.notTop) + '</p>' + (yl ? '<p class="wp-note">' + E(yl) + '</p>' : '') +
       (sum ? '<ul class="wp-dl">' + sum + '</ul>' : noneBody(A, E)) +
-      '<div style="overflow-x:auto"><table class="wp-tb"><thead><tr><th>오행</th><th>세력</th><th title="지장간 빼고 천간·지지 겉글자만 센 개수">겉글자 간·지</th><th title="평균 몫 20% 이상">세력≥20%</th><th>' + T('투간', '투간') + '</th><th>' + T('통근', '통근') + '</th><th title="드러난 천간이 합·충으로 묶이지 않고 뿌리 자리가 충을 맞지 않음">온전함</th><th title="월령에서 왕·상">' + T('득령', '득령') + '</th><th>' + T('병존', '병존') + '</th><th>' + T('간여지동', '간여지동') + '</th><th title="정기 또는 월지 뿌리">깊은 뿌리</th><th>판정</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      '<p class="wp-note">' + E(d.distinguish.numbers) + ' 판정 순서: ① 세력 20% 이상 · 천간에 드러남 · 지지에 뿌리 — 셋 다 맞아야 후보 ② 합·충으로 묶이지 않은 후보 먼저 ③ 득령·병존/간여지동·깊은 뿌리·세력 1위를 같은 무게로 센 개수 ④ 같으면 세력 %(단, 2·3순위가 같은 개수면 보조 주무기를 두지 않아요). 가중치 점수는 쓰지 않아요.</p>' +
+      '<div style="overflow-x:auto"><table class="wp-tb"><thead><tr><th>오행</th><th>세력</th><th title="지장간 빼고 천간·지지 겉글자만 센 개수">겉글자 간·지</th><th title="평균 몫 20% 이상">세력≥20%</th><th>' + T('투간', '투간') + '</th><th>' + T('통근', '통근') + '</th><th title="드러난 천간이 합·충으로 묶이지 않고 뿌리 자리가 충을 맞지 않음">온전함</th><th title="월령에서 왕·상">' + T('득령', '득령') + '</th><th>' + T('병존', '병존') + '</th><th>' + T('간여지동', '간여지동') + '</th><th title="정기 또는 월지 뿌리">깊은 뿌리</th><th title="월령 격국의 격 오행(성립·부분) 또는 켜진 상신">격국·상신</th><th>판정</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p class="wp-note">' + E(d.distinguish.numbers) + ' 판정 순서: ① 세력 20% 이상 · 천간에 드러남 · 지지에 뿌리 — 셋 다 맞아야 후보(세력 10~20%라도 격국·상신 역할이 있으면 십신형 후보로 뒤에 둠) ② 합·충으로 묶이지 않은 후보 먼저 ③ 득령·병존/간여지동·깊은 뿌리·세력 1위·격국·상신을 같은 무게로 센 개수 ④ 같으면 세력 %(단, 2·3순위가 같은 개수면 보조 주무기를 두지 않아요). 가중치 점수는 쓰지 않아요.</p>' +
       '<details><summary class="wp-note">선정 기록 보기</summary><ul class="wp-ev">' + A.log.map(function (t) { return '<li>' + E(t) + '</li>'; }).join('') + '</ul></details>' +
       extraNotes(ch, A, o, 'ohaeng') + '<p class="wp-note">' + E(d.disclaimer) + '</p></section>';
   }
@@ -135,11 +176,11 @@
   function apt(M, ch, opt) {
     var A = get(M, ch); if (!A) return ''; var o = opts(opt), E = o.E, d = D(), L = list(A);
     var info = aptInfo(M, ch, A) || { links: [] };
-    var cards = L.length ? '<div class="wp-list">' + L.map(function (w, i) { return item(A, w, i, o, 'apt'); }).join('') + '</div>' : noneBody(A, E);
+    var cards = L.length ? '<div class="wp-list">' + L.map(function (w, i) { return item(A, w, i, o, 'apt', M, ch); }).join('') + '</div>' : noneBody(A, E);
     var lk = info.links.length ? '<p class="wp-s"><span class="wp-lb">적성과 연결</span>이 주무기가 근거 앞자리에 들어간 특기·적성: ' + info.links.map(function (t) { return '<b>' + E(t.name) + '</b>(' + E(t.levelK) + ')'; }).join(' · ') + '</p>' : '';
     var diff = A.weapons.length && info.first && !info.firstLinked ? '<p class="wp-note">' + E(d.aptDiff.replace('{apt}', info.first.name).replace('{basis}', info.firstBasis.join(' · '))) + '</p>' : '';
     return '<section class="card wp" id="weapon-apt" data-wp="' + E(sigOf(A)) + '"><div class="card-h"><h2>나의 주무기</h2><span class="note">특기·적성의 바탕이 되는 힘</span></div><p class="wp-head">' + E(headOf(A)) + '</p>' +
-      cards + lk + diff + (L.length ? '' : extraNotes(ch, A, o, 'apt')) + '<p class="wp-note">' + E(d.aptNotJob) + ' ' + o.L('wonguk', '원국 탭에서 형성 근거 보기 ›') + '</p></section>';
+      cards + (L.length ? '<p class="wp-sec">능력의 발현 방식</p>' + L.map(function (w) { return secB(A, w, o); }).join('') : '') + lk + diff + (L.length ? '' : extraNotes(ch, A, o, 'apt')) + '<p class="wp-note">' + E(d.aptNotJob) + ' ' + o.L('wonguk', '원국 탭에서 형성 근거 보기 ›') + '</p></section>';
   }
 
   // ── 운세 흐름 탭: 주무기 발현 타이밍 ──

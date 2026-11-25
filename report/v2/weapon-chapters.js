@@ -176,17 +176,23 @@
       return sec('나의 핵심 주무기', esc(d.none.self), A.hiddenPow.length ? '<p>' + esc('세력과 뿌리는 넉넉한데 천간에 드러나지 않은 힘(' + A.hiddenPow.map(function (e) { return EL_K[e]; }).join('·') + ')은 그 기운이 천간에 오는 운에서 겉으로 올라오기 쉬워요.') + '</p>' : '', wd.disclaimer);
     }
     var ws = pickWeapons(B, use); if (!ws.length) return null; var w = ws[0], g = w.group;
-    var lead = esc(J.은('주무기') + ' ') + '<b>' + esc(wTitle(w)) + '</b>' + esc('이에요. ' + wd.el[w.el].strengths.join('·') + ' 쪽이 대표 강점이에요.');
+    var lead = esc(J.은('주무기') + ' ') + '<b>' + esc(wTitle(w)) + '</b>' + esc('이에요' + (w.typeK ? '(' + w.typeK + ')' : '') + '. ' + wd.el[w.el].strengths.join('·') + ' 쪽이 대표 강점이에요.');
     var body = '';
     if (use.power || use.rootExp || use.overlap) body += '<h4>' + esc('주무기의 형성 근거') + '</h4>' + formationPlain(B, w, use);   // 2판: 실제 글자·자리를 쉬운 문장으로
-    if (use.tenGod) body += '<h4>' + esc('강점이 발현되는 방식') + '</h4><p>' + esc(EL_K[w.el] + ' 기운이 ' + w.groupName + '(' + wd.group[g].way + ')으로 드러나요. ' + wd.elGroup[w.el][g] + '이 이 명식의 쓰는 방식이에요.' + (w.tgs.length ? ' 천간에 드러난 ' + J.은(w.tgs.join('·')) + ' ' + w.tgs.map(function (t) { return wd.tg[t]; }).join(', ') + '으로 읽혀요.' : '')) + '</p>';
+    if (use.tenGod) body += '<h4>' + esc('강점이 발현되는 방식') + '</h4><p>' + esc(EL_K[w.el] + ' 기운이 ' + w.groupName + '(' + wd.group[g].way + ')으로 드러나요. ' + wd.elGroup[w.el][g] + '이 이 명식의 쓰는 방식이에요.' + (w.type && wd.typeNote ? ' ' + wd.typeNote[w.type] : '') + (w.tgs.length ? ' 천간에 드러난 ' + J.은(w.tgs.join('·')) + ' ' + w.tgs.map(function (t) { return wd.tg[t]; }).join(', ') + '으로 읽혀요.' : '')) + '</p>';
     if (ws[1]) { var v = ws[1]; body += '<h4>' + esc('보조 주무기와의 결합') + '</h4><p>' + esc('보조 주무기는 ' + wTitle(v) + '(' + v.groupName + ')이에요. ' + wd.group[g].short + '에 ' + J.이(wd.group[v.group].short) + ' 붙어, ' + wd.elGroup[v.el][v.group] + '이 주무기를 옆에서 받쳐 줘요.') + '</p>'; }
+    // 3판: 능력의 발현 조합(짝 십성) — 같은 십성이라도 짝에 따라 드러나는 형태가 다르다
+    var ps = w.partners || [], GNV = ['비겁', '식상', '재성', '관성', '인성'], pk = function (a, b) { return Math.min(a, b) + '-' + Math.max(a, b); };
+    if (use.tenGod) {
+      var pl = ps.map(function (p) { var P = wd.pair[pk(g, p.group)]; if (!P) return ''; var bad = p.tone === 'bad' && P.tension; return '<li><b>' + esc(w.groupName + ' + ' + GNV[p.group] + ' — ' + P.name) + '</b> ' + esc((bad ? P.tension : P.desc) + (bad ? '' : ' 주로 ' + wd.forms[g][p.group] + ' 쪽으로 드러나기 쉬워요.')) + '</li>'; }).filter(Boolean);
+      body += '<h4>' + esc('능력의 발현 조합') + '</h4>' + (pl.length ? '<ul class="dp-ul">' + pl.join('') + '</ul>' : '<p>' + esc(wd.noPartner) + '</p>');
+    }
     body += '<h4>' + esc('과잉 작용 시 주의점') + '</h4><p>' + esc(wd.el[w.el].overLine + ' ' + d.self.distort[g]) + (/기신|구신/.test(w.role || '') ? esc(' 이 명식에선 주무기가 균형상 이미 많은 쪽(' + w.role + ')이라 더 주의가 필요해요.') : '') + '</p>';
     body += '<h4>' + esc('장기적인 발현 환경') + '</h4><p>' + esc(fitLine(B, w) + ' ' + d.self.grow[g]) + '</p>';   // 강약과 주무기의 관계 + 십성별 키우는 환경
     body += timingBlock(B, 'self', use, w);
     var hk = A.provisional && A.hourKeep, pv = hk ? (hk.keep >= hk.of ? wd.statusNote.provisional : wd.statusNote.provisionalSome.replace('{k}', hk.keep)) + ' ' : '';   // 시간 모름: 종합풀이에만 한 번
     var mi = pv + (A.yong ? (A.yong.isWeapon ? wd.yongRel.same : /기신|구신/.test(w.role || '') ? wd.yongRel.gisin : wd.yongRel.other) + ' ' : '') + fill(d.selfFoot.conf, { c: wd.confidence[w.confidence].replace('판정 근거 ', '') });
-    return sec('나의 핵심 주무기', lead, body, mi);
+    return sec(A.label === '잠정 주무기' ? '나의 핵심 주무기 · 잠정' : '나의 핵심 주무기', lead, body, mi);
   }
   function wealthBlock(B, use) {
     if (!B.sure) return null; var ws = pickWeapons(B, use); if (!ws.length) return null;
@@ -201,7 +207,8 @@
     var relX = g === 2 ? rm[zk + 'Body'] : jl ? fill(rm[jl], { pct: jf.pct }) : '';
     var pats = ((B.ch.patterns && B.ch.patterns.list) || []).filter(function (p) { return W2.pattern[p.name] && p.status !== '불성립'; }).map(function (p) { return W2.pattern[p.name]; });
     if (relX || pats.length) body += '<p>' + esc([relX].concat(pats.slice(0, 1)).filter(Boolean).join(' ')) + '</p>';
-    body += '<h4>' + esc('수익 창출 방식') + '</h4><p>' + esc(d.wealth.mode[g] + '이 이 주무기와 결이 맞아요.') + '</p>';
+    var wps = (w.partners || []).filter(function (p) { return p.tone !== 'bad'; }), pkw = function (a, b) { return Math.min(a, b) + '-' + Math.max(a, b); }, mlist = wps.map(function (p) { var P = wd.pair[pkw(g, p.group)]; return P ? P.name + ': ' + P.money : ''; }).filter(Boolean);
+    body += '<h4>' + esc('수익 창출 방식') + '</h4><p>' + esc(d.wealth.mode[g] + '이 이 주무기와 결이 맞아요.' + (mlist.length ? ' 능력 조합으로 보면 — ' + mlist.join(' / ') : '')) + '</p>';
     body += '<h4>' + esc('사업·직장·투자에서의 강점') + '</h4><p>' + esc(d.wealth.edge[g] + (ws[1] ? ' 보조 주무기 ' + EL_K[ws[1].el] + '(' + ws[1].groupName + ')' + (bat(ws[1].groupName) ? '은' : '는') + ' ' + d.wealth.mode[ws[1].group].split(' — ')[0] + '를 곁가지로 열어 줘요.' : '')) + '</p><ul class="dp-ul">' + W2.arena[g].map(function (t, i) { return '<li><b>' + esc(W2.arenaK[i]) + '</b> — ' + esc(t) + '</li>'; }).join('') + '</ul>';
     body += timingBlock(B, 'wealth', use, w);
     body += '<h4>' + esc('재물활동에서 주의할 점') + '</h4><p>' + esc(d.wealth.caution[g] + ' ' + fill(W2.overTail, { o: wd.el[w.el].over.replace(' · ', '·') })) + '</p>';
@@ -235,6 +242,8 @@
       if (good) ax.push(bad ? fill(C2.env, { good: good, bad: bad }) : fill(C2.envNoBad, { good: good }));
       if (ax.length) body += '<h4>' + esc('기존 직업 분석과 맞춰 보기') + '</h4><ul class="dp-ul">' + ax.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
     }
+    var cps = (w.partners || []).filter(function (p) { return p.tone !== 'bad'; }), pkc = function (a, b) { return Math.min(a, b) + '-' + Math.max(a, b); };
+    if (cps.length && use.tenGod) body += '<h4>' + esc('능력 조합으로 본 일하는 방식') + '</h4><ul class="dp-ul">' + cps.map(function (p) { var P = wd.pair[pkc(g, p.group)]; return P ? '<li><b>' + esc(P.name) + '</b> — ' + esc(P.work) + '</li>' : ''; }).join('') + '</ul>';   // 3판: 같은 십성이라도 짝에 따라 일하는 형태가 다름
     body += '<h4>' + esc('조직과 협업에서') + '</h4><p>' + esc(d.career.lead[g]) + '</p>';
     body += timingBlock(B, 'career', use, w);
     body += '<h4>' + esc('경력 발전 방향') + '</h4><p>' + esc(d.career.move[g] + ' ' + d.career.over[g]) + '</p>';
@@ -269,6 +278,8 @@
     if (!B.sure) return null; var ws = pickWeapons(B, use); if (!ws.length) return null;
     var w = ws[0], g = w.group, d = DD(), A = B.A, dEl = B.M.stemEl(B.ch.pillars.day.s);
     var body = '<h4>' + esc('주무기 강화 루틴') + '</h4><ul class="dp-ul">' + d.remedy.grow[g].map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
+    var rp = (w.partners || []).filter(function (p) { return p.tone !== 'bad' && p.group !== g; })[0];
+    if (rp && use.tenGod) body += '<p>' + esc(fill(d.remedy.partnerGrow, { p: GN[rp.group], r: d.remedy.grow[rp.group][0] })) + '</p>';   // 3판: 짝 능력을 함께 키우는 루틴
     if (ws[1]) body += '<h4>' + esc('보조 주무기 활용') + '</h4><p>' + esc('주무기가 막힐 땐 보조 주무기 ' + EL_K[ws[1].el] + '(' + ws[1].groupName + ') 쪽 루틴 — “' + d.remedy.grow[ws[1].group][0] + '” — 으로 우회하세요.') + '</p>';
     body += '<h4>' + esc('과잉 성향 조절') + '</h4><p>' + esc(d.remedy.calm[g] + '을(를) 하나 정해 두세요.' + (/기신|구신/.test(w.role || '') ? ' 주무기가 이 명식에서 이미 많은 힘(' + w.role + ')이라 조절 규칙이 특히 중요해요.' : '')) + '</p>';
     if (A.yong && use.tenGod) { var yg = (A.yong.el - dEl + 5) % 5; if (yg !== g) body += '<h4>' + esc('부족한 기능 보완') + '</h4><p>' + esc(d.remedy.lack[yg] + ' (균형에 필요한 기운: ' + EL_K[A.yong.el] + ' · ' + GN[yg] + ')') + '</p>'; }
@@ -354,7 +365,7 @@
   function loadDeps() {
     if (W() && WD()) return Promise.resolve();
     var DOC = root.document; if (!DOC) return Promise.resolve();
-    return ['/weapon-data.js?v=20261126-hr', '/weapon.js?v=20261126-hr'].reduce(function (p, src) { return p.then(function () { return new Promise(function (ok) { var s = DOC.createElement('script'); s.src = src; s.async = false; s.onload = ok; s.onerror = ok; DOC.head.appendChild(s); }); }); }, Promise.resolve());
+    return ['/weapon-data.js?v=20261126-v3', '/weapon.js?v=20261126-v3'].reduce(function (p, src) { return p.then(function () { return new Promise(function (ok) { var s = DOC.createElement('script'); s.src = src; s.async = false; s.onload = ok; s.onerror = ok; DOC.head.appendChild(s); }); }); }, Promise.resolve());
   }
   function ready() {
     if (readyP) return readyP;

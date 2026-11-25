@@ -7,7 +7,7 @@
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const root = path.join(__dirname, '..', '..');
 const c = { console }; c.window = c; vm.createContext(c);
-['engine.js', 'feature-flags.js', 'luck-grade.js', 'weapon-data.js', 'weapon.js'].forEach(f => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), c, { filename: f }));
+['engine.js', 'feature-flags.js', 'luck-grade.js', 'ten-god-roles.js', 'weapon-data.js', 'weapon.js'].forEach(f => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), c, { filename: f }));
 const M = c.Manse, W = c.MantraWeapon, EL = ['목', '화', '토', '금', '수'];
 const dev = [...Array(300)].map((_, i) => ({ year: 1950 + (i * 7) % 55, month: 1 + (i * 5) % 12, day: 1 + (i * 11) % 28, hour: (i * 3) % 24, minute: 0, gender: i % 2 ? 'M' : 'F', calendar: 'solar' }));
 const inc = (o, k, n = 1) => o[k] = (o[k] || 0) + n, pctOf = (n, d) => Math.round(n / d * 1000) / 10;
@@ -27,14 +27,18 @@ base.forEach(A => A.weapons.forEach(w => inc(out.yongIsWeapon.weaponRole, w.role
 // 민감도(판정이 달라지는 명식 수) — judge 를 다른 기준으로 다시 부른다(시주 있는 명식 기준)
 const sig = j => W.sig(j), first = j => j.weapons[0] ? j.weapons[0].el : -1;
 const baseJ = charts.map(ch => W.judge(M, ch));
-const VARIANTS = {
+const VARIANTS = {   // 2판(2026-11-26): 보탬 조건 5개(득령·병존/간여지동·세력 1위·깊은 뿌리·격국·상신) 기준
   'forceMin 15%': { forceMin: 15 }, 'forceMin 25%': { forceMin: 25 },
   '온전함 먼저 안 봄': { intactFirst: false },
-  '보탬에서 병존·간여지동 뺌': { plusKeys: ['season', 'top', 'deepRoot'] },
-  '병존·간여지동 두 배': { plusKeys: ['season', 'overlap', 'overlap', 'top', 'deepRoot'] },
-  '보탬에서 득령 뺌': { plusKeys: ['overlap', 'top', 'deepRoot'] },
-  '보탬에서 세력 1위 뺌': { plusKeys: ['season', 'overlap', 'deepRoot'] },
-  '보탬에서 깊은 뿌리 뺌': { plusKeys: ['season', 'overlap', 'top'] },
+  '보탬에서 병존·간여지동 뺌': { plusKeys: ['season', 'top', 'deepRoot', 'structure', 'act'] },
+  '병존·간여지동 두 배': { plusKeys: ['season', 'overlap', 'overlap', 'top', 'deepRoot', 'structure', 'act'] },
+  '보탬에서 득령 뺌': { plusKeys: ['overlap', 'top', 'deepRoot', 'structure', 'act'] },
+  '보탬에서 세력 1위 뺌': { plusKeys: ['season', 'overlap', 'deepRoot', 'structure', 'act'] },
+  '보탬에서 깊은 뿌리 뺌': { plusKeys: ['season', 'overlap', 'top', 'structure', 'act'] },
+  '보탬에서 격국·상신 뺌': { plusKeys: ['season', 'overlap', 'top', 'deepRoot', 'act'] },
+  '보탬에서 실제 작용 뺌(= 2판)': { plusKeys: ['season', 'overlap', 'top', 'deepRoot', 'structure'] },
+  '십신형 경로 끔': { structMin: null },
+  '1판과 같게(구조·실제 작용·십신형 경로 모두 끔)': { plusKeys: ['season', 'overlap', 'top', 'deepRoot'], structMin: null },
   '보탬 조건 없이 세력 %만': { plusKeys: [] },
 };
 out.sensitivity = Object.entries(VARIANTS).map(([name, o]) => {

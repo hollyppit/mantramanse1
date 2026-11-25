@@ -13,6 +13,10 @@
 | `summary.json` · `summary-head-engine.json` | 집계·예외 사례 묶음 |
 | `stats.json` | 분포·민감도·병존 영향·운별 교차표 |
 | `PAID_CONTENT_INTEGRATION_REPORT.md` | 유료 상세풀이(종합·재물·커리어·인연·개운) 주무기 연결 보고서 (2026-11-26) |
+| `V3_ABILITY_REPORT.md` | 판정 3판(생극제화·확정 규칙·발현 조합·A/B/C·조합형 운) 보고서와 집중 검사 |
+| `v3-focus.json` · `v3-vs-v1.json` · `v3-vs-v2.json` | 3판 집중 검사·판별 비교 결과 |
+| `V2_JUDGMENT_REPORT.md` | 판정 2판(격국·상신·십신형·유형·잠정/미확정) 보고서와 1판 비교 |
+| `v2-compare.json` | 1판↔2판 300명식 비교 결과 |
 | `paid-content-300.json` | 유료 블록 300명식 검증 결과 |
 
 코드: `weapon.js`(판정) · `weapon-data.js`(문안) · `weapon-view.js`(화면) · `index.html` `wpBlock()` · 스위치 `feature-flags.js` `weapon`(2026-11-26 사용자 승인으로 기본 켬·배포)
