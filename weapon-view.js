@@ -13,7 +13,7 @@
   var esc0 = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var W = function () { return G.MantraWeapon; }, D = function () { return G.MantraWeaponData; };
   var EC = ['var(--wood,#2FA866)', 'var(--fire,#E5533D)', 'var(--earth,#C99A3B)', 'var(--metal,#8E9AAF)', 'var(--water,#3B6FD8)'];
-  var CSS = '.wp{display:grid;gap:10px}.wp-rel{border-radius:6px;padding:0 5px;font-size:.7rem}.wp-rel.r-boost{background:var(--wi,#555);color:#fff}.wp-rel.r-fill{border:1px solid var(--wc,#888)}.wp-rel.r-shift{background:#f3e3c3;color:#7a5600}.wp-cross{border-top:1px dashed var(--line);padding-top:8px;margin-top:4px}.wp-tri{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;margin:6px 0}.wp-tc{flex:1 1 150px;border:1px solid var(--line);border-radius:10px;padding:6px 8px;display:flex;flex-direction:column;gap:2px;font-size:.82rem}.wp-tc.m{border-color:var(--wc,#888);background:color-mix(in srgb,var(--wc,#888) 10%,var(--surface,#fff))}.wp-arr{align-self:center;color:var(--ink-3)}.wp-fl{border-radius:6px;padding:0 5px;font-size:.7rem;font-weight:700;border:1px solid var(--line)}.wp-fl.review{border-color:#c0392b;color:#c0392b}.wp-fl.check{border-color:#c9a227;color:#8a6d0f}.wp-fl.note{color:var(--ink-3)}.wp-u{border-radius:6px;padding:1px 4px;font-size:.68rem;border:1px solid var(--line);color:var(--ink-2)}.wp-u.u-good,.wp-u.u-good2{border-color:#2f7bd6;color:#1d5aa6}.wp-u.u-adj{border-color:#c9a227;color:#8a6d0f}.wp-u.u-bad{border-color:#b04a8a;color:#8a2f68}.wp-mix{font-size:.86rem;font-weight:600;color:var(--ink);margin:2px 0 4px!important}.wp-act{font-size:.84rem;margin-top:4px!important;color:var(--ink)}.wp-core{font-size:.9rem;line-height:1.65;margin:2px 0 6px!important;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,var(--wc,#888) 10%,var(--surface,#fff))}.wp-core b{color:var(--ink)}.wp-cb{border-top:1px solid var(--line);padding:6px 0 2px}.wp-ct{font-size:.78rem!important;font-weight:700;color:var(--ink-3);margin:0 0 2px!important}.wp-cn{display:inline-block;min-width:1.4em;color:var(--wi,var(--ink-2))}.wp-kind{border-radius:6px;padding:1px 6px;font-size:.78rem;background:var(--surface-2);color:var(--ink)}.wp-kind.k-boost{background:var(--wi,#555);color:#fff}.wp-kind.k-assist{border:1px solid var(--wc,#888);background:transparent}.wp-kind.k-limit{text-decoration:underline dotted}.wp-plan{font-size:.84rem;margin-top:4px!important;color:var(--ink)}.wp-det .wp-ev li{margin:1px 0}.wp p{margin:0;line-height:1.65}.wp-head{font-weight:800;font-size:1rem;line-height:1.55}' +
+  var CSS = '.wp{display:grid;gap:10px}.wp-ch .wp-mw{font-size:10px;fill:var(--ink-2)}.wp-ch .wp-fw{font-size:9px;fill:#fff;font-weight:700}.wp-bdr{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 6px!important}.wp-bd{border-radius:999px;padding:1px 8px;font-size:.74rem;border:1px solid var(--line);background:var(--surface-2)}.wp-bd.k-boost{background:var(--wi,#555);color:#fff;border-color:transparent}.wp-bd.u-good,.wp-bd.u-good2{border-color:#2f7bd6;color:#1d5aa6}.wp-bd.u-adj{border-color:#c9a227;color:#8a6d0f}.wp-bd.u-bad{border-color:#b04a8a;color:#8a2f68}.wp-bd.f-good{border-color:#2DB36B;color:#1d7a47}.wp-bd.f-care{border-color:#E8622C;color:#b2461a}.wp-bd.c{border-color:var(--wc,#888)}.wp-dlx{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:6px 0;font-size:.82rem}.wp-dlx dt{font-weight:700;color:var(--ink-3);white-space:nowrap}.wp-dlx dd{margin:0}.wp-tg{display:inline-block;border-radius:6px;padding:0 6px;margin:0 3px 3px 0;font-size:.74rem;border:1px solid var(--line)}.wp-tg.p{border-color:#2DB36B;color:#1d7a47}.wp-tg.m{border-color:#E8622C;color:#b2461a}.wp-tg.c{border-color:var(--wc,#888)}.wp-more{margin-top:6px}.wp-more>summary{cursor:pointer;padding:4px 0}.wp-rel{border-radius:6px;padding:0 5px;font-size:.7rem}.wp-rel.r-boost{background:var(--wi,#555);color:#fff}.wp-rel.r-fill{border:1px solid var(--wc,#888)}.wp-rel.r-shift{background:#f3e3c3;color:#7a5600}.wp-cross{border-top:1px dashed var(--line);padding-top:8px;margin-top:4px}.wp-tri{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;margin:6px 0}.wp-tc{flex:1 1 150px;border:1px solid var(--line);border-radius:10px;padding:6px 8px;display:flex;flex-direction:column;gap:2px;font-size:.82rem}.wp-tc.m{border-color:var(--wc,#888);background:color-mix(in srgb,var(--wc,#888) 10%,var(--surface,#fff))}.wp-arr{align-self:center;color:var(--ink-3)}.wp-fl{border-radius:6px;padding:0 5px;font-size:.7rem;font-weight:700;border:1px solid var(--line)}.wp-fl.review{border-color:#c0392b;color:#c0392b}.wp-fl.check{border-color:#c9a227;color:#8a6d0f}.wp-fl.note{color:var(--ink-3)}.wp-u{border-radius:6px;padding:1px 4px;font-size:.68rem;border:1px solid var(--line);color:var(--ink-2)}.wp-u.u-good,.wp-u.u-good2{border-color:#2f7bd6;color:#1d5aa6}.wp-u.u-adj{border-color:#c9a227;color:#8a6d0f}.wp-u.u-bad{border-color:#b04a8a;color:#8a2f68}.wp-mix{font-size:.86rem;font-weight:600;color:var(--ink);margin:2px 0 4px!important}.wp-act{font-size:.84rem;margin-top:4px!important;color:var(--ink)}.wp-core{font-size:.9rem;line-height:1.65;margin:2px 0 6px!important;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,var(--wc,#888) 10%,var(--surface,#fff))}.wp-core b{color:var(--ink)}.wp-cb{border-top:1px solid var(--line);padding:6px 0 2px}.wp-ct{font-size:.78rem!important;font-weight:700;color:var(--ink-3);margin:0 0 2px!important}.wp-cn{display:inline-block;min-width:1.4em;color:var(--wi,var(--ink-2))}.wp-kind{border-radius:6px;padding:1px 6px;font-size:.78rem;background:var(--surface-2);color:var(--ink)}.wp-kind.k-boost{background:var(--wi,#555);color:#fff}.wp-kind.k-assist{border:1px solid var(--wc,#888);background:transparent}.wp-kind.k-limit{text-decoration:underline dotted}.wp-plan{font-size:.84rem;margin-top:4px!important;color:var(--ink)}.wp-det .wp-ev li{margin:1px 0}.wp p{margin:0;line-height:1.65}.wp-head{font-weight:800;font-size:1rem;line-height:1.55}' +
     '.wp-e0{--wc:var(--wood,#2FA866);--wi:var(--wood-ink,#17744B)}.wp-e1{--wc:var(--fire,#E5533D);--wi:var(--fire-ink,#B1321F)}.wp-e2{--wc:var(--earth,#C99A3B);--wi:var(--earth-ink,#8A6418)}.wp-e3{--wc:var(--metal,#8E9AAF);--wi:var(--metal-ink,#56627A)}.wp-e4{--wc:var(--water,#3B6FD8);--wi:var(--water-ink,#234A9A)}' +
     '.wp-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}' +
     '.wp-it{border:1px solid var(--line);border-left:4px solid var(--wc);border-radius:12px;padding:11px 13px;background:var(--surface);display:grid;gap:6px}' +
@@ -221,18 +221,28 @@
 
   // ── 운세 흐름 탭: 주무기 발현 타이밍 ──
   // 활성도 실선 그래프(단계 이름만, 숫자 눈금 없음) + 유리도 보조 띠(엔진 등급 색). 점 색 = 그 시기 천간의 오행(주요 오행 색상 태그)
-  // 2026-11-26 단순화: 시기마다 막대 하나 — 높을수록 주무기가 강하게 켜짐(5단계 높이), 막대 색 = 그 시기 천간 오행, 제약·조정은 회색 낮은 막대.
-  //  눈금·흐름 띠는 뺐다(흐름 등급은 바로 위 기존 그래프에 이미 있음). 단계 이름은 칸과 풀이에서 본다
+  // 2026-11-26: 흐름이 보이는 꺾은선(사용자 요청으로 막대 → 선). 눈금은 세 줄(강하게 발현·보조·강화·제약·조정)만, 흐름 띠 없음.
+  //  점 색 = 그 시기 천간 오행, 흔들림은 점선 테두리, 지금 시기는 큰 점
   function chart(rows, labels, nowIdx) {
     var n = rows.length; if (!n) return '';
-    var CW = 40, H = 92, base = 70, unit = 12, wd = n * CW, bars = '', xl = '';
+    var CW = 44, LM = 52, H = 136, top = 10, step = 15, yOf = function (y) { return top + (4 - y) * step; }, yX = 92, yM = 110, yF = 124;
+    var MW = ['추진', '표현', '전략', '관리', '연구'], FC = { good: '#2DB36B', ok: '#B5BDCB', care: '#E8622C' };
+    var wd = LM + n * CW, pts = [], dots = '', xl = '', mw = '', fw = '';
     rows.forEach(function (r, i) {
-      var x = i * CW + CW / 2, a = r && r.best; if (!a) return;
-      var h = (a.y + 1) * unit, col = a.y === 0 ? 'var(--ink-3,#999)' : EC[Math.floor((r.s == null ? 0 : r.s) / 2)];
-      bars += '<rect x="' + (x - 11) + '" y="' + (base - h) + '" width="22" height="' + h + '" rx="4" fill="' + col + '" opacity="' + (a.y === 0 ? 0.35 : a.level === 'shaky' ? 0.55 : 0.9) + '"' + (i === nowIdx ? ' stroke="var(--ink)" stroke-width="2"' : ' stroke="rgba(0,0,0,.18)" stroke-width="1"') + '><title>' + esc0(labels[i] + ' ' + r.gz + ' · 주무기 ' + a.levelK) + '</title></rect>';
-      xl += '<text x="' + x + '" y="' + (H - 6) + '" text-anchor="middle"' + (i === nowIdx ? ' style="font-weight:700;fill:var(--ink)"' : '') + '>' + esc0(labels[i]) + '</text>';
+      var x = LM + i * CW + CW / 2, a = r && r.best; if (!a) return;
+      var y = yOf(a.y); pts.push(x + ',' + y);
+      var col = a.y === 0 ? 'var(--ink-3,#999)' : EC[Math.floor((r.s == null ? 0 : r.s) / 2)];
+      dots += '<circle cx="' + x + '" cy="' + y + '" r="' + (i === nowIdx ? 6 : 4.5) + '" fill="' + (a.level === 'shaky' ? 'var(--surface,#fff)' : col) + '" stroke="' + (i === nowIdx ? 'var(--ink)' : col) + '" stroke-width="2"' + (a.level === 'shaky' ? ' stroke-dasharray="2 2"' : '') + '><title>' + esc0(labels[i] + ' ' + r.gz + ' · 주무기 ' + a.levelK) + '</title></circle>';
+      xl += '<text x="' + x + '" y="' + yX + '" text-anchor="middle"' + (i === nowIdx ? ' style="font-weight:700;fill:var(--ink)"' : '') + '>' + esc0(labels[i]) + '</text>';
+      var g = a.use ? a.use.group : null, dim = a.y <= 1;   // 잠재·제약 시기는 방식 글자를 흐리게
+      if (g != null) mw += '<text x="' + x + '" y="' + yM + '" text-anchor="middle" class="wp-mw" style="' + (dim ? 'opacity:.45' : 'font-weight:600') + '"><title>' + esc0(labels[i] + ' 주무기를 쓰는 결: ' + MW[g] + '(운 천간 ' + a.use.tg + ')') + '</title>' + MW[g] + '</text>';
+      var f = r.favor; if (f) fw += '<rect x="' + (x - 15) + '" y="' + (yF - 9) + '" width="30" height="13" rx="6" fill="' + (FC[f.k] || FC.ok) + '" opacity=".9"><title>' + esc0((f.metric || '흐름') + ' ' + f.n) + '</title></rect><text x="' + x + '" y="' + (yF + 1) + '" text-anchor="middle" class="wp-fw">' + esc0(f.n) + '</text>';
     });
-    return '<div class="wp-ch"><svg viewBox="0 0 ' + wd + ' ' + H + '" style="min-width:' + Math.round(wd * 0.82) + 'px;max-width:' + Math.round(wd * 1.4) + 'px" role="img" aria-label="주무기 발현도 막대 그래프"><line x1="0" x2="' + wd + '" y1="' + base + '" y2="' + base + '" stroke="var(--line)"/>' + bars + xl + '</svg></div>';
+    var area = pts.length > 1 ? '<polygon points="' + pts[0].split(',')[0] + ',' + yOf(0) + ' ' + pts.join(' ') + ' ' + pts[pts.length - 1].split(',')[0] + ',' + yOf(0) + '" fill="var(--wc,#888)" opacity=".08"/>' : '';
+    var grid = [[4, '강하게 발현'], [2, '보조·강화'], [0, '제약·조정']].map(function (g) { var y = yOf(g[0]); return '<line x1="' + LM + '" x2="' + wd + '" y1="' + y + '" y2="' + y + '" stroke="var(--line)" stroke-width="1"' + (g[0] === 2 ? ' stroke-dasharray="3 3"' : '') + '/><text class="lv" x="' + (LM - 4) + '" y="' + (y + 3) + '" text-anchor="end">' + g[1] + '</text>'; }).join('');
+    return '<div class="wp-ch"><svg viewBox="0 0 ' + wd + ' ' + H + '" style="min-width:' + Math.round(wd * 0.82) + 'px;max-width:' + Math.round(wd * 1.3) + 'px" role="img" aria-label="주무기 발현도 흐름 그래프">' + grid + area +
+      '<polyline points="' + pts.join(' ') + '" fill="none" stroke="var(--ink-2)" stroke-width="2"/>' + dots + xl +
+      '<text class="lv" x="' + (LM - 4) + '" y="' + yM + '" text-anchor="end">방식</text>' + mw + '<text class="lv" x="' + (LM - 4) + '" y="' + (yF + 1) + '" text-anchor="end">흐름</text>' + fw + '</svg></div>';
   }
   // 4판(2026-11-26) 상세 카드: ① 핵심 해석 ② 작용 유형 ③ 작용 근거 ④ 활용 방향 ⑤ 발현 지원 ⑥ 제약 ⑦ 운의 유불리
   //  판정은 MantraWeapon.luck 그대로(별도 판정 없음). 지원·제약은 근거가 있을 때만 그린다.
@@ -295,8 +305,25 @@
       li(['천간 ' + st.ch + ' — ' + EL_K[st.el] + ' · ' + st.tg + ' · ' + roleTxt(st), '지지 ' + br.ch + ' — 정기 ' + br.main + '(' + EL_K[br.mainEl] + ') · ' + br.tg + ' · ' + roleTxt(br)]) +
       '<p class="wp-act">' + E(r.mText ? r.mText + ' ' : '') + E((C.act[a.kind] || C.act.keep)[fk] || '') + '</p>';
     // 상담자용: 명리 용어 그대로 ②~⑧ (2026-11-26 쉬운 풀이는 사용자 요청으로 되돌림). 첫 문장 아래 8판 '타고난 주무기 ↔ 이 시기 핵심 역량'
-    return '<div class="wp-det wp-e' + w.el + '" id="' + id + '" data-wpr="' + row + '"><h4>' + E(title + ' ' + r.gz) + ' — 주무기 ' + E(a.levelK) + ' · 활용 ' + E(U.n) + ' · ' + E((f && f.metric) || '흐름') + ' ' + E(f ? f.n : '—') + '</h4>' +
-      '<p class="wp-core"><b>' + E(head) + '</b> ' + E(feat) + ' <b>' + E(CU.head[U.k]) + '</b></p>' +
+    // 2026-11-26 압축: 배지 한 줄 → 핵심 두 문장 → 근거 태그 네 줄(발현·활용·시기 역량·쓰는 법) → '자세히'에 기존 ②~⑧
+    var tags = function (arr, cls) { return arr.filter(Boolean).map(function (t) { return '<span class="wp-tg ' + (cls || '') + '">' + E(t) + '</span>'; }).join(''); };
+    var cut = function (t) { return String(t).split(' — ')[0]; };
+    var plusT = (a.supports || []).map(function (x) { return x.k === 'stem' ? '천간 투출' : x.k === 'root' ? '지지 통근(' + (a.rootDepth || '') + ')' : x.k === 'gen' ? '생조 ' + EL_K[(w.el + 4) % 5] : x.k === 'out' ? '설기 ' + EL_K[(w.el + 1) % 5] : x.k === 'partner' ? '짝 ' + ((a.partner && a.partner.name) || '') : x.k === 'struct' ? '격국 역할' : cut(x.x); });
+    var minusT = (a.limits || []).map(function (x) { return x.k === 'ctrl' ? '극 ' + (st.ch || '') : x.k === 'over' ? '과잉' : x.k === 'badpair' ? '부담 짝 ' + ((a.partner && a.partner.name) || '') : cut(x.x); });
+    var ufT = [U.role || '', (U.why || []).some(function (x) { return x.k === 'release'; }) ? '설기 열림' : '', (U.why || []).some(function (x) { return x.k === 'jehwa'; }) ? '제화' : '', (U.why || []).some(function (x) { return x.k === 'overheat'; }) ? '과열' : '', (U.why || []).some(function (x) { return x.k === 'badpair'; }) ? '부담 조합' : ''];
+    var cp = r.core && r.core.pick, CK = { natalRoot: '원국 정기 통근', natalRootS: '원국 통근', natalStem: '원국 천간 동기', selfRoot: '운 내 통근', pure: '간여지동형', hap: '합국', link: '생 연결', stemBlock: '합거·충(−)', branchClash: '지지 충(−)' };
+    var coreT = cp ? [EL_K[cp.el] + '(' + cp.groupName + ') ' + cp.pts + '점 · ' + cp.relK].concat(cp.why.map(function (x) { return CK[x.k] || ''; })) : ['뚜렷하지 않음 — 타고난 주무기 중심'];
+    var adjS = adjust !== C.adjustNone ? adjust.replace(/^조절할 기능: /, '') : '';
+    var rowsH = '<dl class="wp-dlx">' +
+      '<dt>발현</dt><dd>' + tags(plusT, 'p') + tags(minusT, 'm') + (!plusT.length && !minusT.length ? '<span class="wp-note">주무기에 직접 닿는 작용 없음</span>' : '') + '</dd>' +
+      '<dt>활용</dt><dd>' + tags(ufT, 'u') + '</dd>' +
+      '<dt>시기 역량</dt><dd>' + tags(coreT, cp ? 'c' : '') + '</dd>' +
+      '<dt>쓰는 법</dt><dd>' + E(grow) + (adjS ? '<br><span class="wp-note">조절: ' + E(adjS) + '</span>' : '') + '</dd></dl>';
+    var badge = function (t, cls) { return '<span class="wp-bd ' + cls + '">' + E(t) + '</span>'; };
+    return '<div class="wp-det wp-e' + w.el + '" id="' + id + '" data-wpr="' + row + '"><h4>' + E(title + ' ' + r.gz) + '</h4>' +
+      '<p class="wp-bdr">' + badge('발현 ' + a.levelK, 'k-' + a.kind) + badge('활용 ' + U.n, 'u-' + U.k) + badge(((f && f.metric) || '흐름') + ' ' + (f ? f.n : '—'), 'f-' + fk) + (cp ? badge('시기 역량 ' + EL_K[cp.el] + '·' + cp.relK, 'c') : '') + '</p>' +
+      '<p class="wp-core"><b>' + E(head) + '</b> ' + E(C.mix[hiK][ufK]) + '</p>' + rowsH +
+      '<details class="wp-more"><summary class="wp-note">자세히 (발현 강도·활용 유리도·작용 근거·시기 역량·흐름 등급)</summary>' +
       coreBlock(r, L, E, tW, ch, G.Manse || null, false) +
       sec('②', '발현 강도', kindB) +
       sec('③', '활용 유리도', ufB) +
@@ -304,7 +331,7 @@
       sec('⑤', '활용 전략', '<p class="wp-mix">' + E(C.mix[hiK][ufK]) + '</p>' + li(use) + '<p class="wp-plan">' + E(plan) + '</p>') +
       (sups.length ? sec('⑥', '발현 지원 요인', li(sups)) : '') +
       (lims.length ? sec('⑦', '제약 요인', li(lims)) : '') +
-      sec(lims.length ? '⑧' : sups.length ? '⑦' : '⑥', '운의 흐름 등급', fav) + '</div>';
+      sec(lims.length ? '⑧' : sups.length ? '⑦' : '⑥', '운의 흐름 등급', fav) + '</details></div>';
   }
   // 8판: 타고난 주무기 ↔ 이 시기 핵심 역량(weapon.js periodCore 결과만 읽음)
   function coreBlock(r, L, E, tW, ch, M, short) {
@@ -349,19 +376,20 @@
     var du = ch.daeun.list, curDi = -1; du.forEach(function (x, i) { if (x.startMs <= now) curDi = i; });
     var curWi = -1; tl.wolun.forEach(function (r, i) { if (r && r.startMs <= now) curWi = i; }); if (wolY !== curY) curWi = -1;
     var names = L.slice(0, 2).map(function (w) { return EL_H[w.el] + ' ' + D().el[w.el].title; }).join(' · ');
-    var legend = '<p class="wp-note">막대가 높을수록 주무기가 강하게 켜지는 시기예요. 칸을 누르면 시기별 풀이가 열려요.</p>';
+    var legend = '<p class="wp-note">선 = 주무기가 발현되는 정도 · 방식 = 그 시기 주무기를 쓰는 결 · 흐름 = 운 흐름 등급. 칸을 누르면 풀이가 열려요.</p>';
     var dLab = du.map(function (x) { return x.startAge + '세'; }), sLab = tl.seun.map(function (r) { return String(r.year); }), wLab = tl.wolun.map(function (r) { return r.month + '월'; });
     var block = function (row, rows, labs, subs, nowIdx, secT) {
       return '<p class="wp-sec">' + E(secT) + '</p>' + chart(rows, labs, nowIdx) + '<div class="wp-row">' + rows.map(function (r, i) { return cell(r, labs[i], subs[i], i === nowIdx, 'wpd-' + row + '-' + i, row); }).join('') + '</div>' +
         rows.map(function (r, i) { return r ? detail('wpd-' + row + '-' + i, row, r, labs[i], E, L, ch) : ''; }).join('');
     };
     // 그래프 카드 아래에 붙는 한 단위(대운·세운·월운) — 같은 판정, 같은 칸·상세 카드
-    var short = '<p class="wp-note">막대가 높을수록 주무기가 강하게 켜지는 시기예요(흐름 등급은 위 그래프 그대로). 칸을 누르면 시기별 풀이가 열려요.</p>' + mNote;
+    var short = '<p class="wp-note">선 = 주무기가 발현되는 정도 · 방식 = 그 시기 주무기를 쓰는 결 · 흐름 = 운 흐름 등급(위 그래프와 같음). 칸을 누르면 풀이가 열려요.</p>' + mNote;
     var PART = { daeun: ['d', tl.daeun, dLab, du.map(function (x) { return x.startYear + '~'; }), curDi, '대운별'], seun: ['s', tl.seun, sLab, tl.seun.map(function (r) { return r.age ? r.age + '세' : ''; }), tl.seun.findIndex(function (r) { return r.year === curY; }), curY + '~' + (curY + 9) + '년'], wolun: ['w', tl.wolun, wLab, tl.wolun.map(function (r) { return r.termName; }), curWi, wolY + '년 달별'] };
     if (PART[part]) { var p = PART[part]; return '<div class="wp wp-part wp-e' + L[0].el + '" id="weapon-luck-' + part + '" data-wp="' + E(sigOf(A)) + '" style="margin:10px 0 14px;padding:10px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)"><h3 style="margin:0;font-size:.95rem">주무기 발현도 · ' + E(p[5]) + ' <span class="wp-note" style="font-weight:400">' + E(names) + '</span></h3>' + short + block(p[0], p[1], p[2], p[3], p[4], '').replace('<p class="wp-sec"></p>', '') + '</div>'; }
     // 8판: 지금 대운·올해의 시기별 핵심 역량(타고난 주무기와 함께)
     var curS = tl.seun.filter(function (r) { return r && r.year === curY; })[0] || null, KK = d.core || {};
-    var coreNow = KK.title ? '<p class="wp-sec">' + E(KK.title) + '</p><p class="wp-note">' + E(KK.sumLead) + '</p>' + (tl.daeun[curDi] ? '<p class="wp-s"><b>지금 대운 ' + E(tl.daeun[curDi].gz) + '</b></p>' + coreBlock(tl.daeun[curDi], L, E, '이 대운', ch, M, true) : '') + (curS ? '<p class="wp-s"><b>올해 ' + E(curS.year + '년 ' + curS.gz) + '</b></p>' + coreBlock(curS, L, E, '이 해', ch, M, true) : '') : '';
+    var coreLine = function (when, r) { var c = r.core && r.core.pick, Lw = L[0]; if (!c) return '<li><span class="when">' + E(when) + '</span> — 시기 역량 뚜렷하지 않음 · 타고난 주무기 중심</li>'; var rel = (KK.rel || {})[c.relRaw] || ''; return '<li><span class="when">' + E(when) + '</span> — 시기 역량 <b>' + E(EL_K[c.el] + '(' + c.groupName + ')') + '</b> ' + c.pts + '점 · <b>' + E(c.relK) + '</b><br>' + E(fixJ5(rel.replace(/\{X\}/g, EL_K[c.el] + '(' + c.groupName + ')').replace(/\{xf\}/g, ((d.card && d.card.fn) || [])[c.group] || '')).split('. ')[0] + '.') + '</li>'; };
+    var coreNow = KK.title ? '<p class="wp-sec">' + E(KK.title) + '</p><p class="wp-note">' + E(KK.sumLead) + '</p>' + '<ul class="wp-dl">' + (tl.daeun[curDi] ? coreLine('지금 대운 ' + tl.daeun[curDi].gz, tl.daeun[curDi]) : '') + (curS ? coreLine('올해 ' + curS.year + '년 ' + curS.gz, curS) : '') + '</ul>' : '';
     var cur = tl.daeun[curDi] || null, picks = tl.seun.filter(function (r) { return r && r.best && /strong|on|shaky/.test(r.best.level); }).slice(0, 3);
     var line = function (when, r) { return '<li><span class="when">' + E(when) + '</span> — 주무기 <b>' + E(r.best.levelK) + '</b> · ' + E(r.favor && r.favor.metric || '흐름') + ' ' + E(r.favor ? r.favor.n : '—') + '<br>' + E(r.mText || (d.card && r.best.kind ? (d.card.act[r.best.kind] || {})[r.favor ? r.favor.k : 'ok'] : d.combo[r.read])) + '</li>'; };
     var lines = (cur ? [line('지금 대운 ' + cur.gz, cur)] : []).concat(picks.map(function (r) { return line(r.year + '년 ' + r.gz, r); }));
