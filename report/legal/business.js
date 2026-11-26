@@ -25,7 +25,7 @@
   function footerHtml() {
     return '<footer class="mt-legal" role="contentinfo"><nav class="mt-legal-links" aria-label="약관과 정책">' +
       '<a href="' + B.links.my + '">내 구매 내역</a><a href="' + B.links.products + '">상품 안내</a><a href="' + B.links.terms + '">이용약관</a><a href="' + B.links.privacy + '"><b>개인정보처리방침</b></a><a href="' + B.links.refund + '">환불정책</a></nav>' +
-      '<p>' + esc(B.name) + ' · 대표 ' + esc(B.ceo) + ' · 사업자등록번호 ' + esc(B.bizNo) + ' <a href="' + B.bizCheck + '" target="_blank" rel="noopener">사업자정보 확인</a></p>' +
+      '<p>' + esc(B.name) + ' · 대표 ' + esc(B.ceo) + ' · 사업자등록번호 ' + esc(B.bizNo) + ' <a href="' + B.bizCheck + '" target="_blank" rel="noopener">사업자정보 확인</a> <a class="mt-legal-ask" href="/report/#/me?inq=open">문의하기</a></p>' +
       '<p>통신판매업 신고 ' + esc(B.mailOrderNo) + ' · ' + esc(B.address) + '</p>' +
       '<p>고객 문의 <a href="tel:' + B.phone.replace(/-/g, '') + '">' + esc(B.phone) + '</a> · <a href="mailto:' + B.email + '">' + esc(B.email) + '</a></p></footer>';   // '참고용 콘텐츠' 안내는 화면마다 이미 있어 푸터에서는 반복하지 않는다
   }
@@ -33,7 +33,7 @@
     if (document.getElementById('mt-legal-css')) return;
     var s = document.createElement('style'); s.id = 'mt-legal-css';
     s.textContent = '.mt-legal{max-width:960px;margin:32px auto 0;padding:20px 16px calc(28px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(128,128,128,.25);font-size:12px;line-height:1.7;color:#8a8577;text-align:center}' +
-      '.mt-legal p{margin:2px 0}.mt-legal a{color:inherit;text-decoration:underline;text-underline-offset:2px}.mt-legal-links{display:flex;gap:0 2px;justify-content:center;flex-wrap:wrap;margin-bottom:4px;font-size:13px}.mt-legal-links a{text-decoration:none;display:inline-flex;align-items:center;min-height:40px;padding:0 7px}.mt-legal-note{margin-top:8px!important;opacity:.8}';
+      '.mt-legal p{margin:2px 0}.mt-legal a{color:inherit;text-decoration:underline;text-underline-offset:2px}.mt-legal-links{display:flex;gap:0 2px;justify-content:center;flex-wrap:wrap;margin-bottom:4px;font-size:13px}.mt-legal-links a{text-decoration:none;display:inline-flex;align-items:center;min-height:40px;padding:0 7px}.mt-legal-note{margin-top:8px!important;opacity:.8}.mt-legal a.mt-legal-ask{display:inline-flex;align-items:center;min-height:32px;margin-left:6px;padding:0 12px;border:1px solid currentColor;border-radius:999px;text-decoration:none;font-weight:700}';
     document.head.appendChild(s);
   }
   function mountFooter(target) {

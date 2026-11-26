@@ -1,4 +1,6 @@
-// POST /api/account/inquiry — 마이페이지 1:1 문의(로그인 회원만, 헤더 x-member-token). 2026-11-13
+// POST /api/account/inquiry — 마이페이지 1:1 문의(회원은 헤더 x-member-token). 2026-11-13
+//   비회원(2026-11-26): 토큰 없이 { action:'send', email, agree:true, category, subject, body } → 저장하지 않고 운영자 메일로만 보낸다(회신 주소 = 입력한 이메일).
+//   입력한 주소로는 아무것도 보내지 않는다(남의 주소를 넣어 스팸에 쓰는 것 방지). 같은 접속 주소 하루 3건 · 비회원 전체 하루 30건.
 //   { action: 'send', category, subject, body, orderId? } → 저장(support_inquiries) + 관리자 알림 메일(회신 주소 = 회원 이메일) + 회원 접수 확인 메일
 //   { action: 'list' } → 내 문의 목록(최근 20건, 문의 본문·관리자 답변 포함). 새 답변(isNew)은 이때 읽음 처리
 //   { action: 'unread' } → 아직 안 본 답변 수(타임라인·마이페이지 '새 답변' 표시)
@@ -6,12 +8,39 @@
 // 저장이 실패해도(테이블이 아직 없을 때 등) 메일이 갔으면 접수로 본다. 저장·메일이 둘 다 안 되면 실패를 돌려준다.
 import { json } from '../../_lib.js';
 import { memberOf, supabaseReady, sbRest } from '../../_commerce.js';
-import { mailInquiry, inquiryReady, INQ_CAT } from '../../_mail.js';
+import { mailInquiry, mailReady, inquiryReady, INQ_CAT } from '../../_mail.js';
 
+const GUEST_LIMIT = 3, GUEST_TOTAL = 30;
 const DAY_LIMIT = 5;   // 회원당 24시간 안에 보낼 수 있는 문의 수(스팸 방지)
 const clean = (s, max) => String(s == null ? '' : s).replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').trim().slice(0, max);
 
+const sha = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))].slice(0, 16).map(x => x.toString(16).padStart(2, '0')).join('');
+
+async function guestSend(request, env, b) {
+  if (b.website) return json({ ok: true, guest: true });   // 사람에게 안 보이는 칸을 채우면 자동 프로그램: 보내지 않고 성공처럼 답한다
+  const email = clean(b.email, 120);
+  if (!/^[^\s@,;<>"]+@[^\s@,;<>"]+\.[^\s@,;<>"]+$/.test(email) || /@users\.mantrafortune\.com$/i.test(email)) return json({ error: 'email-required' }, 400);   // 회신 받을 메일은 필수
+  if (b.agree !== true) return json({ error: 'agree-required' }, 400);
+  const category = INQ_CAT[b.category] ? b.category : 'etc';
+  const subject = clean(b.subject, 80).replace(/\n/g, ' '), body = clean(b.body, 2000);
+  if (!subject) return json({ error: 'subject-required' }, 400);
+  if (body.length < 5) return json({ error: 'body-too-short' }, 400);
+  if (!mailReady(env) || !env.GLOSSARY_KV) return json({ error: 'not-received' }, 503);   // 횟수를 셀 곳이 없으면 열지 않는다
+  const day = new Date().toISOString().slice(0, 10);
+  const ipKey = 'inquiry:guest:' + day + ':' + await sha('inq:' + (request.headers.get('cf-connecting-ip') || 'unknown')), allKey = 'inquiry:guest:' + day + ':all';
+  const mine = +(await env.GLOSSARY_KV.get(ipKey)) || 0, all = +(await env.GLOSSARY_KV.get(allKey)) || 0;
+  if (mine >= GUEST_LIMIT || all >= GUEST_TOTAL) return json({ error: 'too-many', limit: GUEST_LIMIT }, 429);
+  await env.GLOSSARY_KV.put(ipKey, String(mine + 1), { expirationTtl: 86400 });
+  await env.GLOSSARY_KV.put(allKey, String(all + 1), { expirationTtl: 86400 });
+  const mailed = await mailInquiry(env, { guest: true, category, subject, body, email });
+  return mailed ? json({ ok: true, guest: true, email }) : json({ error: 'not-received' }, 503);
+}
+
 export async function onRequestPost({ request, env }) {
+  if (!request.headers.get('x-member-token')) {
+    let g; try { g = await request.clone().json(); } catch { g = null; }
+    if (g && g.action === 'send') return guestSend(request, env, g);
+  }
   if (!supabaseReady(env)) return json({ error: 'not-configured' }, 503);
   const member = await memberOf(request, env); if (!member) return json({ error: 'login-required' }, 401);
   let b; try { b = await request.json(); } catch { b = null; }

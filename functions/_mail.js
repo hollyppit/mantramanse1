@@ -135,15 +135,17 @@ export const INQ_CAT = { payment: '결제', refund: '환불', content: '풀이·
 const pre = s => esc(s).replace(/\r?\n/g, '<br>');
 const okMail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e || '') && !/@users\.mantrafortune\.com$/i.test(e);
 export function inquiryAdminMail(q) {
-  const rows = [['문의 번호', q.id ? '#' + esc(q.id) : '(저장 실패 · 메일로만 접수)'], ['분류', esc(INQ_CAT[q.category] || q.category)], ['제목', esc(q.subject)], ['회원 이메일', esc(q.email)], ['로그인', esc(q.provider || '-')]];
+  const rows = [['문의 번호', q.id ? '#' + esc(q.id) : q.guest ? '(비회원 · 메일로만 접수)' : '(저장 실패 · 메일로만 접수)'], ['분류', esc(INQ_CAT[q.category] || q.category)], ['제목', esc(q.subject)], [q.guest ? '답장 받을 이메일' : '회원 이메일', esc(q.email)], ['로그인', q.guest ? '비회원(본인 확인 안 됨)' : esc(q.provider || '-')]];
   if (q.order_id) rows.push(['주문번호', esc(q.order_id)]);
   rows.push(['내용', pre(q.body)]);
-  const note = okMail(q.email)
-    ? '<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#9b3b2a"><b>답변 방법</b><br>관리자 화면 <b>결제·상품 → 1:1 문의</b>에서 답변을 쓰면 회원에게 메일로 가고 마이페이지 문의 내역에도 남습니다. 이 메일에 바로 답장해도 회원(' + esc(q.email) + ')에게 가지만, 그 내용은 마이페이지에 보이지 않습니다.</p>'
+  const note = q.guest
+    ? '<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#9b3b2a"><b>답변 방법</b><br>이 메일에 <b>답장</b>하면 적어 준 주소(' + esc(q.email) + ')로 갑니다. 비회원 문의는 관리자 화면에 남지 않습니다. 주소는 본인 확인이 안 된 값이니 결제 정보 같은 내용은 본인 확인 뒤 안내하세요.</p>'
+    : okMail(q.email)
+    ?'<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#9b3b2a"><b>답변 방법</b><br>관리자 화면 <b>결제·상품 → 1:1 문의</b>에서 답변을 쓰면 회원에게 메일로 가고 마이페이지 문의 내역에도 남습니다. 이 메일에 바로 답장해도 회원(' + esc(q.email) + ')에게 가지만, 그 내용은 마이페이지에 보이지 않습니다.</p>'
     : '<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#9b3b2a"><b>답변 방법</b><br>이 회원은 답장 받을 이메일이 확인되지 않았습니다. 회원 이메일 칸을 확인해 직접 연락해 주세요.</p>';
   const html = layout('새 1:1 문의', rows, note).replace(`${SITE}/report/my/" style="display:inline-block`, `${SITE}/report/admin/" style="display:inline-block`).replace('내 구매 내역 보기', '관리자 화면 열기');
   const text = `새 1:1 문의${q.id ? ' #' + q.id : ''}\n분류: ${INQ_CAT[q.category] || q.category}\n제목: ${q.subject}\n회원 이메일: ${q.email}${q.order_id ? '\n주문번호: ' + q.order_id : ''}\n\n${q.body}\n\n답변은 관리자 화면 결제·상품 → 1:1 문의에서 쓰면 회원 메일과 마이페이지 문의 내역에 함께 남습니다.\n${SITE}/report/admin/`;
-  return { subject: `[1:1 문의${q.id ? ' #' + q.id : ''}] ${INQ_CAT[q.category] || ''} · ${q.subject}`, html, text };
+  return { subject: `[1:1 문의${q.id ? ' #' + q.id : q.guest ? ' 비회원' : ''}] ${INQ_CAT[q.category] || ''} · ${q.subject}`, html, text };
 }
 export function inquiryUserMail(q) {
   const rows = [['문의 번호', q.id ? '#' + esc(q.id) : '-'], ['분류', esc(INQ_CAT[q.category] || q.category)], ['제목', esc(q.subject)], ['내용', pre(q.body)]];
@@ -165,10 +167,11 @@ export async function mailInquiryAnswer(env, q) {
 export const inquiryReady = env => alertReady(env);
 // 반환: 관리자 메일이 한 통이라도 갔는지. 회원 확인 메일은 실패해도 접수에 영향 없음
 export async function mailInquiry(env, q) {
-  if (!inquiryReady(env)) return false;
+  if (!(q.guest ? mailReady(env) : inquiryReady(env))) return false;
   const mail = inquiryAdminMail(q), reply = okMail(q.email) ? q.email : undefined; let any = false;
-  for (const to of adminAlertTo(env)) any = (await send(env, to, mail, 'inquiry-admin', reply)) || any;
-  if (reply) await send(env, reply, inquiryUserMail(q), 'inquiry-user');
+  const admins = adminAlertTo(env);
+  for (const to of admins.length ? admins : [BIZ.email]) any = (await send(env, to, mail, 'inquiry-admin', reply)) || any;   // ADMIN_ALERT_EMAIL 이 없으면 사업자 메일
+  if (reply && !q.guest) await send(env, reply, inquiryUserMail(q), 'inquiry-user');   // 비회원이 적은 주소로는 보내지 않는다
   return any;
 }
 

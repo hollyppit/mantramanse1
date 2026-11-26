@@ -233,6 +233,7 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 #hub .me-form input, #hub .me-form select, #hub .me-form textarea{ width: 100%; box-sizing: border-box; min-height: 46px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(8,10,17,.7); color: var(--ink); font: inherit; font-size: 16px; }
 #hub .me-form textarea{ resize: vertical; line-height: 1.6; } #hub .me-form :focus-visible{ outline: 2px solid var(--gold); outline-offset: 1px; }
 #hub .me-form[hidden]{ display: none; }
+#hub .me-form label.me-agree{ grid-template-columns: auto 1fr; align-items: start; gap: 10px; } #hub .me-form label.me-agree input{ width: 22px; height: 22px; min-height: 0; padding: 0; margin: 2px 0 0; } #hub .me-form label.me-agree > span{ font-size: .8rem; line-height: 1.6; } #hub .me-form label.me-agree a{ color: var(--gold-l); }
 #hub .me-count{ justify-self: end; font-size: .75rem; color: var(--ink-3); }
 #hub .me-msg{ margin: 0; font-size: .85rem; color: #e3a593; min-height: 1em; }
 #hub .me-sent{ margin: 12px 0 0; padding: 10px 14px; border: 1px solid var(--gold); border-radius: 12px; color: var(--gold-l); font-size: .88rem; }

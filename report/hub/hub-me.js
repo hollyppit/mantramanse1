@@ -142,12 +142,58 @@
     var list = ['kakao', 'google'].concat(d && d.configured && d.configured.naver ? ['naver'] : []), last = lastLogin();
     return '<div class="me-login">' + list.map(function (p) { return '<button type="button" class="me-lb ' + p + '" data-login="' + p + '">' + LN[p] + '로 로그인' + (last === p ? '<small>이 기기에서 지난번에 쓴 방법</small>' : '') + '</button>'; }).join('') + '</div>';
   }
+  // 비회원 1:1 문의(2026-11-26): 로그인 없이 남기고, 회신 받을 메일은 필수. 서버는 운영자 메일로만 보낸다(functions/api/account/inquiry.js)
+  function guestInquiryHtml() {
+    var opts = Object.keys(CAT).map(function (k) { return '<option value="' + k + '">' + CAT[k] + '</option>'; }).join('');
+    return '<section class="me-card" id="meInq"><h2>1:1 문의</h2>' +
+      '<p class="me-muted">로그인하지 않아도 문의할 수 있어요. 답변은 적어 주신 메일로 보내 드립니다(영업일 기준 1~2일).</p>' +
+      '<div class="me-acts"><button type="button" class="btn sm" data-me="inq-open" aria-expanded="false" aria-controls="meInqForm">문의하기</button></div>' +
+      '<form class="me-form" id="meInqForm" data-guest hidden novalidate>' +
+      '<label><span>회신 받을 메일 <small>(필수)</small></span><input name="email" type="email" maxlength="120" required autocomplete="email" inputmode="email" placeholder="name@example.com"></label>' +
+      '<label><span>분류</span><select name="category">' + opts + '</select></label>' +
+      '<label><span>제목</span><input name="subject" maxlength="80" autocomplete="off" placeholder="예) 결제했는데 주제가 열리지 않아요"></label>' +
+      '<label><span>내용</span><textarea name="body" rows="6" maxlength="2000" placeholder="상황을 자세히 적어 주시면 빠르게 도와드릴 수 있어요. 생년월일 같은 출생정보는 적지 않아도 됩니다."></textarea><small class="me-count">0 / 2000</small></label>' +
+      '<input name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;min-height:0;padding:0;border:0">' +
+      '<label class="me-agree"><input name="agree" type="checkbox"><span>답변을 위해 메일 주소와 문의 내용을 수집하고 3년간 보관하는 데 동의합니다. <a href="/report/legal/privacy.html">개인정보처리방침</a></span></label>' +
+      '<div class="me-acts"><button type="submit" class="btn sm">보내기</button><button type="button" class="btn ghost sm" data-me="inq-close">취소</button></div><p class="me-msg" role="status" aria-live="polite"></p></form>' +
+      '</section>';
+  }
+  function guestSubmit(form) {
+    var f = form.elements, msg = form.querySelector('.me-msg'), btn = form.querySelector('[type=submit]');
+    var email = f.email.value.trim(), subject = f.subject.value.trim(), body = f.body.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = '회신 받을 메일 주소를 정확히 적어 주세요.'; f.email.focus(); return; }
+    if (!subject) { msg.textContent = '제목을 적어 주세요.'; f.subject.focus(); return; }
+    if (body.length < 5) { msg.textContent = '내용을 5자 이상 적어 주세요.'; f.body.focus(); return; }
+    if (!f.agree.checked) { msg.textContent = '수집·보관 동의에 체크해 주세요.'; f.agree.focus(); return; }
+    btn.disabled = true; msg.textContent = '보내는 중입니다…';
+    var cat = f.category.value;
+    post('/api/account/inquiry', '', { action: 'send', email: email, agree: true, category: cat, subject: subject, body: body, website: f.website.value }).then(function (x) {
+      btn.disabled = false;
+      if (x.ok && x.j.ok) {
+        form.reset(); form.hidden = true; msg.textContent = ''; var ob = $('[data-me="inq-open"]'); if (ob) ob.setAttribute('aria-expanded', 'false');
+        var sec = $('#meInq'); if (sec) { var p = sec.querySelector('.me-sent') || sec.appendChild(root.document.createElement('p')); p.className = 'me-sent'; p.textContent = '문의를 접수했습니다. 답변은 ' + email + ' 로 보내 드립니다.'; }
+        H.toast('문의를 보냈습니다.', 3500); H.track('inquiry_send', { category: cat }); return;
+      }
+      msg.textContent = x.status === 429 ? '오늘은 문의를 더 보낼 수 없습니다. 급한 일은 아래 고객 문의 전화·메일로 연락해 주세요.' : x.j.error === 'email-required' ? '회신 받을 메일 주소를 확인해 주세요.' : '보내지 못했습니다. 아래 고객 문의 메일로 보내 주세요.';
+    }).catch(function () { btn.disabled = false; msg.textContent = '연결이 끊겼습니다. 잠시 후 다시 시도해 주세요.'; });
+  }
+  function openInquiry() {
+    var sec = $('#meInq'), fm = $('#meInqForm'), ob = $('[data-me="inq-open"]'); if (!sec || !fm) return false;
+    if (fm.hidden && ob) ob.click();
+    sec.style.scrollMarginTop = '64px';   // 위에 붙어 있는 머리줄에 제목이 가리지 않게
+    sec.scrollIntoView({ block: 'start', behavior: 'instant' });
+    // 첫 화면 그림·허브가 뒤늦게 자리를 잡으면 다른 곳에 멈춘다 → 잠시 뒤 어긋났으면 다시 맞춘다(사용자가 직접 움직였으면 그만둔다)
+    var moved = false, stop = function () { moved = true; };
+    ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(function (t) { root.addEventListener(t, stop, { once: true, passive: true }); });
+    [400, 1300, 2000, 3200].forEach(function (ms) { setTimeout(function () { if (!moved && sec.isConnected && Math.abs(sec.getBoundingClientRect().top - 64) > 90) sec.scrollIntoView({ block: 'start', behavior: 'instant' }); }, ms); });
+    return true;
+  }
   function guestHtml(d, off) {
-    return head('로그인한 회원만 볼 수 있는 화면입니다.') +
+    return head('구매 내역은 로그인하면 볼 수 있어요. 1:1 문의는 로그인 없이 남길 수 있습니다.') +
       '<section class="me-card me-guest"><h2>로그인하고 마이페이지 열기</h2>' +
       '<ul class="me-why"><li>구매한 주제를 <b>어느 기기에서든</b> 다시 열기</li><li>결제 기록·영수증·환불을 <b>한 곳에서</b> 확인</li><li>계정에 저장한 사주를 <b>출생정보 입력 없이</b> 바로 읽기</li></ul>' +
       (off ? '<p class="me-muted">지금은 로그인을 준비하고 있습니다. 잠시 후 다시 열어 주세요.</p>' : loginButtons(d) + '<p class="me-note">구매한 적이 있다면 그때 쓴 로그인 방법을 골라 주세요. 로그인하지 않아도 운명의 타임라인과 무료 콘텐츠는 그대로 볼 수 있어요.</p>') +
-      '</section>' + deviceHtml(false);
+      '</section>' + guestInquiryHtml() + deviceHtml(false);
   }
   // 회원 탈퇴(마이페이지에서 바로): 접어 두고, '탈퇴'를 직접 입력해야 진행. 서버 POST /api/account/withdraw(처리 내용 functions/_account.js) — /report/my/ 와 같은 API
   function withdrawHtml(orders) {
@@ -266,7 +312,7 @@
     A.info().then(function (d) {
       return A.session().then(function (sess) {
         if (!H.alive(ctx)) return;
-        if (!sess || sess.off) { paint(guestHtml(d, !!(sess && sess.off) || !A.ready(d))); H.track('mypage_view', { logged: 0 }); return; }
+        if (!sess || sess.off) { paint(guestHtml(d, !!(sess && sess.off) || !A.ready(d))); H.track('mypage_view', { logged: 0 }); if (q.inq) setTimeout(openInquiry, 300); return; }
         return Promise.all([
           post('/api/commerce/mine', sess.access_token, {}),
           post('/api/account/logins', sess.access_token, {}).catch(function () { return null; }),
@@ -278,13 +324,15 @@
           inquiryList($('#meInqList'), sess.access_token);
           if (H.MeConsent) H.MeConsent.mount(sess.access_token, ctx);
           if (q.inq === 'list') setTimeout(function () { var s = $('#meInq'); if (s) s.scrollIntoView({ block: 'start', behavior: H.reduce ? 'auto' : 'smooth' }); }, 500);
-          if (q.inq && q.inq !== 'list') { var io = $('[data-me="inq-open"]'); if (io) { io.click(); $('#meInq').scrollIntoView({ block: 'start' }); } }
+          if (q.inq && q.inq !== 'list') setTimeout(openInquiry, 300);
           H.track('mypage_view', { logged: 1 });
         });
       });
     }).catch(function () { if (H.alive(ctx)) paint(head('') + '<p class="me-muted">마이페이지를 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 다시 열어 주세요.</p><div class="me-acts"><button type="button" class="btn ghost sm" data-me="retry">다시 시도</button></div>' + deviceHtml(false)); });
 
     var onClick = function (e) {
+      // 이미 마이페이지에 있을 때 아래 사업자 정보의 '문의하기'를 누르면 주소가 같아 화면이 안 바뀐다 → 여기서 열어 준다
+      if (e.target.closest && e.target.closest('.mt-legal-ask') && openInquiry()) { e.preventDefault(); return; }
       var scr = $('#screen'); if (!scr || !scr.contains(e.target)) return;
       var b = e.target.closest('[data-login],[data-me],[data-open]'); if (!b) return;
       if (b.hasAttribute('data-login')) { A.login(b.getAttribute('data-login')); return; }
@@ -299,10 +347,10 @@
       if (a === 'logout') { b.disabled = true; A.logout().then(function () { H.toast('로그아웃했습니다.'); H.render(); }); return; }
       if (a === 'retry') H.render();
       if (a === 'withdraw') { withdraw(b); return; }
-      if (a === 'inq-open' || a === 'inq-close') { var fm = $('#meInqForm'), ob = $('[data-me="inq-open"]'); if (!fm) return; fm.hidden = a === 'inq-close' ? true : !fm.hidden; if (ob) ob.setAttribute('aria-expanded', String(!fm.hidden)); if (!fm.hidden) fm.elements.subject.focus(); }
+      if (a === 'inq-open' || a === 'inq-close') { var fm = $('#meInqForm'), ob = $('[data-me="inq-open"]'); if (!fm) return; fm.hidden = a === 'inq-close' ? true : !fm.hidden; if (ob) ob.setAttribute('aria-expanded', String(!fm.hidden)); if (!fm.hidden) (fm.elements.email || fm.elements.subject).focus(); }
     };
     root.document.addEventListener('click', onClick);
-    var onSubmit = function (e) { if (e.target && e.target.id === 'meInqForm') { e.preventDefault(); inquirySubmit(e.target, el.__token, el.__email); } };
+    var onSubmit = function (e) { if (e.target && e.target.id === 'meInqForm') { e.preventDefault(); if (e.target.hasAttribute('data-guest')) guestSubmit(e.target); else inquirySubmit(e.target, el.__token, el.__email); } };
     var onInput = function (e) { if (e.target && e.target.id === 'meWdIn') { var wb = $('[data-me="withdraw"]'); if (wb) wb.disabled = e.target.value.trim() !== '탈퇴'; return; } if (e.target && e.target.name === 'body' && e.target.closest('#meInqForm')) { var c = e.target.parentNode.querySelector('.me-count'); if (c) c.textContent = e.target.value.length + ' / 2000'; } };
     root.document.addEventListener('submit', onSubmit); root.document.addEventListener('input', onInput);
     // 안내자를 바꾸면(guide-control.js) 이름 표시를 고친다
