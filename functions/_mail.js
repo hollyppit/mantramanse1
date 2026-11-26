@@ -66,6 +66,23 @@ async function send(env, to, mail, tag, replyTo) {
     return r.ok;
   } catch (e) { console.log('[mail]', tag, 'error', String(e && e.message || e).slice(0, 80)); return false; }
 }
+// ── 만세력 PDF 첨부 메일(관리자가 보내는 것만, functions/api/mail-pdf.js) 2026-11-26
+export const PDF_B64_MAX = 20 * 1024 * 1024;   // base64 글자 수(원본 약 15MB). Resend 한도(40MB)보다 낮게
+export async function mailPdf(env, to, filename, content) {
+  const line = '요청하신 만세력 PDF를 첨부해 보내 드립니다.';
+  const sign = `${BIZ.name} · ${BIZ.phone} · ${BIZ.email}`;
+  const html = `<!doctype html><html lang="ko"><body style="font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:#1c1b18;font-size:14px;line-height:1.7"><p>${esc(line)}</p><p style="color:#8a8577;font-size:12px">${esc(sign)}</p></body></html>`;
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST', signal: AbortSignal.timeout(45000),
+      headers: { authorization: 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
+      body: JSON.stringify({ from: env.MAIL_FROM || '만트라 사주 무빙툰 <noreply@mantrafortune.com>', to: [to], reply_to: BIZ.email, subject: `[${BIZ.name}] 만세력 PDF`, html, text: `${line}\n\n${sign}`, attachments: [{ filename, content }], tags: [{ name: 'kind', value: 'saju-pdf' }] }),
+    });
+    if (!r.ok) console.log('[mail] saju-pdf failed', r.status);
+    return r.ok;
+  } catch (e) { console.log('[mail] saju-pdf error', String(e && e.message || e).slice(0, 80)); return false; }
+}
+
 // 주문 하나에 대한 메일. order 는 결제 완료(또는 취소) 뒤의 값(paid_at·method·canceled_at 포함)
 export async function mailPurchase(env, order) {
   if (!mailReady(env)) return false;

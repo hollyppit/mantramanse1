@@ -83,6 +83,9 @@ button { font: inherit; color: inherit; }
 .xpp-items input { margin-top: 1px; }
 .xpp-f .btn[disabled] { opacity: .45; cursor: not-allowed; box-shadow: none; }
 .xpp-f { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid var(--line); padding-top: 10px; font-size: 0.88rem; }
+.xpp-m { display: flex; flex-wrap: wrap; gap: 8px; }
+.xpp-m input { flex: 1 1 200px; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: inherit; font: inherit; font-size: 16px; }
+.xpp-m .btn[disabled] { opacity: .45; cursor: not-allowed; }
 
 /* 공유용 사주 카드 */
 .xc { width: 1080px; box-sizing: border-box; padding: 64px; background: linear-gradient(160deg, #fff 55%, #eef2ff); color: var(--ink); font-size: 28px; display: grid; gap: 28px; }
@@ -11282,7 +11285,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
           return `<div class="xpp-g${op ? ' open' : ''}"><div class="xpp-gh"><label><input type="checkbox" data-xpg="${g.tab}"${full ? ' checked' : ''}${c && !full ? ' data-mixed="1"' : ''}><b>${esc(g.label)}</b></label><span class="xpp-n">${c}/${g.secs.length}</span><button type="button" class="xpp-t" data-xpt="${g.tab}" aria-expanded="${op}" aria-label="${esc(g.label)} 섹션 ${op ? '접기' : '펼치기'}">${op ? '접기' : '펼치기'}</button></div>
             ${op ? `<div class="xpp-items">${g.secs.map(secRow).join('')}</div>` : ''}</div>`;
         }).join('')}</div>
-        <div class="xpp-f"><span>${n ? `<b>${n}</b>개 섹션 선택` : '섹션을 하나 이상 고르세요'}</span><button type="button" class="btn primary" data-xpp="go"${n ? '' : ' disabled'}>PDF 만들기</button></div>`;
+        <div class="xpp-f"><span>${n ? `<b>${n}</b>개 섹션 선택` : '섹션을 하나 이상 고르세요'}</span><button type="button" class="btn primary" data-xpp="go"${n ? '' : ' disabled'}>PDF 만들기</button></div>
+        ${adminPw ? `<div class="xpp-m"><input type="email" data-xpm placeholder="받는 메일 주소" aria-label="받는 메일 주소" autocomplete="off" value="${esc(XP.mailTo || '')}"><button type="button" class="btn" data-xpp="mail"${n ? '' : ' disabled'}>메일로 보내기</button></div>` : ''}`;
       sh.querySelectorAll('input[data-mixed]').forEach(i => { i.indeterminate = true; });
     };
     const keepScroll = fn => { const l = sh.querySelector('.xpp-list'), t = l ? l.scrollTop : 0; fn(); paint(); const l2 = sh.querySelector('.xpp-list'); if (l2) l2.scrollTop = t; };
@@ -11298,6 +11302,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         } else if (i.dataset.xpg) { const g = groups.find(x => x.tab === i.dataset.xpg); g.secs.forEach(s => setSec(s, i.checked)); }
       });
     });
+    sh.addEventListener('input', ev => { if (ev.target.hasAttribute('data-xpm')) XP.mailTo = ev.target.value.trim(); });
     sh.addEventListener('click', ev => {
       const st = ev.target.closest('[data-xpst]');
       if (st) { keepScroll(() => { const k = st.dataset.xpst; if (openS.has(k)) openS.delete(k); else openS.add(k); }); return; }
@@ -11309,8 +11314,13 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (a === 'all') return keepScroll(() => { all.forEach(k => setSec(secOf[k], true)); });
       if (a === 'none') return keepScroll(() => { pick.clear(); off.clear(); });
       if (a === 'cur') return keepScroll(() => { pick.clear(); off.clear(); curG.secs.forEach(s => setSec(s, true)); openG.add(curG.tab); });
-      if (a === 'go') {
+      if (a === 'go' || a === 'mail') {
         if (!pick.size) return;
+        const mailTo = a === 'mail' ? (XP.mailTo || '') : '';
+        if (a === 'mail') {
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mailTo)) { alert('받는 메일 주소를 확인해 주세요.'); return; }
+          if (!confirm(mailTo + ' 주소로 만세력 PDF를 보낼까요?')) return;
+        }
         XP.pick = { pick: new Set(pick), off: new Set(off) };
         const used = groups.map(g => ({ g, secs: g.secs.filter(s => pick.has(s.key)) })).filter(x => x.secs.length);
         const multi = used.length > 1, cards = [];
@@ -11324,7 +11334,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         const label = !multi ? labels[0] : labels.length <= 3 ? labels.join(' · ') : `${labels.slice(0, 2).join(' · ')} 외 ${labels.length - 2}개 탭`;
         close();
         const pb = document.querySelector('[data-export="pdf"]');
-        xpExport('pdf', pb || b, { cards, label, file: multi ? '섹션모음' : labels[0] });
+        xpExport('pdf', pb || b, { cards, label, file: multi ? '섹션모음' : labels[0], mailTo });
       }
     });
     bg.addEventListener('click', ev => { if (ev.target === bg) close(); });
@@ -11347,8 +11357,15 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const base = `만세력_${pick ? pick.file : label}_${who}`.replace(/[\\/:*?"<>|\s]+/g, '_');
       if (kind === 'pdf') {
         const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
-        pages.forEach((pc, i) => { if (i) pdf.addPage('a4', 'portrait'); pdf.addImage(pc.toDataURL('image/jpeg', XP_MOBILE ? 0.85 : 0.92), 'JPEG', 0, 0, 210, 297); });
-        if (XP_MOBILE) xpSheet([new File([pdf.output('blob')], base + '.pdf', { type: 'application/pdf' })], 'pdf');
+        const mailTo = pick && pick.mailTo;
+        pages.forEach((pc, i) => { if (i) pdf.addPage('a4', 'portrait'); pdf.addImage(pc.toDataURL('image/jpeg', mailTo ? 0.8 : XP_MOBILE ? 0.85 : 0.92), 'JPEG', 0, 0, 210, 297); });
+        if (mailTo) {
+          btn.textContent = '보내는 중…';
+          const content = pdf.output('datauristring').split('base64,')[1];
+          if (content.length > 20 * 1024 * 1024) throw new Error('PDF가 너무 큽니다. 섹션을 나눠 보내 주세요.');   // functions/_mail.js PDF_B64_MAX 와 같다
+          await api('/api/mail-pdf', { method: 'POST', body: JSON.stringify({ to: mailTo, filename: base + '.pdf', content }) });
+          alert(mailTo + ' 주소로 보냈습니다.');
+        } else if (XP_MOBILE) xpSheet([new File([pdf.output('blob')], base + '.pdf', { type: 'application/pdf' })], 'pdf');
         else pdf.save(base + '.pdf');
       } else if (XP_MOBILE) {
         const files = [];
