@@ -99,7 +99,22 @@
 
   // ── 읽기 화면
   function chapters() { return S.data ? S.data.reading.chapters : []; }
+  // 옛 글귀 서찰: 원문 한 줄 바로 아래에 그 줄의 고전체 해석
+  function verseBox(x) {
+    var label = String(x.text).split(':')[0];
+    return '<div class="ny-p tojeong ny-verse"><span class="ny-vlabel">' + esc(label) + '</span>' + x.verses.map(function (v) {
+      return '<div class="ny-vpair"><p class="ny-vh" lang="ko-Hant">' + esc(v.h).replace(/\n/g, '<br>') + '</p>' + (v.k ? '<p class="ny-vk">' + esc(v.k) + '</p>' : '') + '</div>';
+    }).join('') + '</div>';
+  }
+  // 좋은 점·조심할 점: 문장마다 한 줄
+  function listBox(x) {
+    var items = String(x.text).split(/(?<=[.!?])\s+/).filter(Boolean);
+    return items.length < 2 ? null : '<div class="ny-p ny-list ' + x.role + '"><ul>' + items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>';
+  }
   function p(x) {
+    if (x.merged) return '';
+    if (x.verses && x.verses.length) return verseBox(x);
+    if (x.role === 'good' || x.role === 'caution') { var l = listBox(x); if (l) return l; }
     var cls = 'ny-p ' + x.role + (x.plain ? ' plain' : '');   // plain: 토정 칸이지만 옛 글귀가 아닌 풀이
     return '<p class="' + cls + '">' + esc(x.text) + '</p>';
   }

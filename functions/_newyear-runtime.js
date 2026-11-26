@@ -9,6 +9,7 @@ import '../report/newyear/quality.js';
 import '../report/newyear/texts/tojeong-kyu1077.js';
 import '../report/newyear/texts/tojeong-nl-supplement.js';
 import '../report/newyear/texts/tojeong-month-deep.js';   // 월별 심화 해설(손 해설 3괘)
+import '../report/newyear/texts/tojeong-verse.js';   // 괘사 원문 줄별 해석(고전체)
 import '../report/newyear/texts/tojeong-modern-1.js';
 import '../report/newyear/texts/tojeong-modern-2.js';
 import '../report/newyear/texts/tojeong-modern-3.js';

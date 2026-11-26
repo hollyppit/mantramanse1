@@ -119,6 +119,16 @@ a { color: var(--gold-l); }
 .ny-p.tojeong::before { content: ""; position: absolute; left: 11px; top: 14px; bottom: 14px; width: 1px; background: rgba(168, 57, 42, .6); }
 .ny-p.tojeong.plain { color: var(--ink); background: none; box-shadow: none; padding: 0; margin: 0 0 12px; text-shadow: 0 1px 6px rgba(11, 12, 14, .8); }
 .ny-p.tojeong.plain::before { content: none; }
+/* 원문 바로 아래 해석 */
+.ny-verse .ny-vlabel { display: block; font-size: .74rem; letter-spacing: .12em; color: #7A2A1E; margin-bottom: 8px; }
+.ny-vpair + .ny-vpair { margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(110, 36, 27, .35); }
+.ny-vh { margin: 0; font-size: 1.08rem; font-weight: 700; letter-spacing: .06em; line-height: 1.8; color: #1E160F; word-break: keep-all; }
+.ny-vk { margin: 4px 0 0; font-size: .95rem; line-height: 1.75; color: #4A3A28; word-break: keep-all; }
+/* 좋은 점·조심할 점: 한 문장씩 */
+.ny-list ul { list-style: none; margin: 4px 0 0; padding: 0; } .ny-list li { position: relative; padding-left: 16px; margin-top: 6px; }
+.ny-list li::before { content: ""; position: absolute; left: 1px; top: .75em; width: 5px; height: 5px; background: var(--gold-d); transform: rotate(45deg); }
+.ny-p.good.ny-list::before, .ny-p.caution.ny-list::before { display: block; font-family: var(--f-serif); }
+.ny-p.basis { white-space: pre-line; }
 .ny-p.scene::before { content: "장면 "; color: var(--earth); font-size: .8rem; font-weight: 700; font-family: var(--f-serif); }
 .ny-p.advice { background: rgba(143, 184, 162, .08); border-left: 1px solid var(--good); padding: 12px 14px; }
 .ny-p.advice::before { content: "이렇게 해 보세요 "; color: var(--good); font-size: .8rem; font-weight: 700; display: block; margin-bottom: 4px; font-family: var(--f-serif); }

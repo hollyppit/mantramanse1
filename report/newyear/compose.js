@@ -107,12 +107,23 @@
 
     // ── 1. 여는 장 ─────────────────────────
     var gx = src ? src.guaxiang.join(' ') : sup ? sup.front.slice(0, 2).join(' ') : '';
+    // 원문 한 줄마다 바로 아래에 고전체 해석(verses: {h 원문, k 해석}). 해석은 현대어 풀이와 같은 공개 조건(modOk)에서만 보인다
+    var VERSE = (deps && deps.TojeongVerse) || root.TojeongVerse || { LINES: {}, SUPP: {} };
+    function verseLines() {
+      if (src) return src.guaci.slice(0, 3).map(function (p, i) {
+        var same = i === 0 && p.join('') === src.guaxiang.join(''), line = (VERSE.LINES[g] || [])[i];
+        return { h: p.join(' '), k: modOk ? (same ? mod.theme : line) || '' : '' };
+      });
+      if (!sup) return [];
+      var out = []; for (var i = 0; i * 2 < sup.front.length; i++) out.push({ h: sup.front.slice(i * 2, i * 2 + 2).join(' '), k: modOk ? (VERSE.SUPP[g] || [])[i] || (i === 0 ? mod.theme : '') || '' : '' });
+      return out;
+    }
     var open = {
       id: 'open', title: PACK.productTitle,
       paras: [
         { role: 'hook', text: PACK.intro[0] },
         { role: 'basis', text: '토정비결로 계산한 올해의 괘는 ' + g + '괘예요. 나이 ' + tj.steps.upper.age + '세와 올해 수, 태어난 달·날의 올해 수를 더해 나온 번호예요.' },
-        { role: 'tojeong', text: '괘의 첫 글귀: ' + gx + (modOk && mod.theme ? ' — ' + mod.theme : '') },
+        { role: 'tojeong', text: '괘의 첫 글귀: ' + gx + (modOk && mod.theme ? ' — ' + mod.theme : ''), verses: gx ? [{ h: gx, k: modOk && mod.theme ? mod.theme : '' }] : null },
         { role: 'situation', text: PACK.symbol.line },
         { role: 'note', text: PACK.intro[1] },
       ].concat(tj.notes.map(function (n) { return { role: 'note', text: n }; })),
@@ -134,8 +145,8 @@
     var changeBlock = pick(BLOCKS, 'change', ctx);
     var samjaeBlock = ctx.when.samjae ? pick(BLOCKS, 'samjae', ctx) : null;
     var tjTotal = [];
-    if (src) tjTotal.push({ role: 'tojeong', text: '토정비결 원문: ' + src.guaci.slice(0, 3).map(function (p) { return p.join(' '); }).join(' / ') });
-    if (sup && !src) tjTotal.push({ role: 'tojeong', text: '토정비결 원문(보충본): ' + sup.front.join(' ') });
+    if (src) tjTotal.push({ role: 'tojeong', text: '토정비결 원문: ' + src.guaci.slice(0, 3).map(function (p) { return p.join(' '); }).join(' / '), verses: verseLines() });
+    if (sup && !src) tjTotal.push({ role: 'tojeong', text: '토정비결 원문(보충본): ' + sup.front.join(' '), verses: verseLines() });
     // 개요는 첫 문장만 — 나머지는 아래 좋은 점·조심할 점과 내용이 겹친다
     if (modOk && mod.overview && mod.overview[0]) tjTotal.push({ role: 'tojeong', plain: true, text: mod.overview[0] });   // plain = 풀이(존댓말): 옛 글귀 서찰이 아니라 본문 모양
     var tjTone = modOk ? mod.tone : null;
@@ -148,7 +159,7 @@
         { id: 'tojeong', title: '토정비결이 말하는 올해', paras: dedupe(tjTotal.concat(modOk && mod.good && mod.good.length ? [{ role: 'good', text: mod.good.join(' ') }] : []).concat(modOk && mod.caution && mod.caution.length ? [{ role: 'caution', text: mod.caution.join(' ') }] : [])) },
       ].concat(deep ? [halves()] : []).concat([
         { id: 'compare', title: '두 풀이가 만나는 지점', compare: cmp, paras: dedupe(bridge ? paras(null, bridge) : [{ role: 'note', text: '토정비결 괘의 길흉 풀이를 검수하는 중이라, 두 풀이의 방향 비교는 검수 뒤에 보여 드려요.' }]) },
-        { id: 'opportunity', title: '기회와 위기', paras: dedupe(relBlock ? paras('올해 들어오는 글자와 타고난 사주의 관계: ' + sj.year.relations.map(function (r) { return r.with.map(function (w) { return PILLAR_PLAIN[w] || w; }).join('·') + '과 ' + (REL_PLAIN[r.type] || r.type) + '(' + r.type + ')'; }).join(', ') + '.', relBlock) : []).concat(samjaeBlock ? dedupe(paras('띠로 보는 삼재: ' + sj.year.samjae.group + ' — 올해는 ' + sj.year.samjae.stage + '예요.', samjaeBlock)) : []) },
+        { id: 'opportunity', title: '기회와 위기', paras: dedupe(relBlock ? paras('올해 들어오는 글자와 타고난 사주의 관계\n· ' + sj.year.relations.map(function (r) { return r.with.map(function (w) { return PILLAR_PLAIN[w] || w; }).join('·') + '과 ' + (REL_PLAIN[r.type] || r.type) + '(' + r.type + ')'; }).join('\n· '), relBlock) : []).concat(samjaeBlock ? dedupe(paras('띠로 보는 삼재: ' + sj.year.samjae.group + ' — 올해는 ' + sj.year.samjae.stage + '예요.', samjaeBlock)) : []) },
         { id: 'change', title: '작년과 달라지는 점', paras: dedupe(paras(basisChange, changeBlock)) },
       ]),
     };
@@ -193,8 +204,8 @@
       var tjm = src ? src.months[lm.lunarMonth] : null, mm = modOk && mod.months ? mod.months[lm.lunarMonth] : null;
       var c = LINK.compare(mm ? mm.tone : null, sm.direction);
       var ps = [];
-      if (tjm) ps.push({ role: 'tojeong', text: '토정비결 ' + lm.lunarMonth + '월: ' + tjm.map(function (p) { return p.join(' '); }).join(' / ') });
-      if (mm) ps.push({ role: 'tojeong', text: mm.gist });
+      if (tjm) ps.push({ role: 'tojeong', text: '토정비결 ' + lm.lunarMonth + '월: ' + tjm.map(function (p) { return p.join(' '); }).join(' / '), verses: [{ h: tjm.map(function (p) { return p.join(' '); }).join('\n'), k: mm ? mm.gist : '' }] });
+      if (mm) ps.push({ role: 'tojeong', text: mm.gist, merged: !!tjm });   // merged: 위 서찰에 함께 보였다
       ps.push({ role: 'basis', text: '사주로 보면 이 무렵(' + sm.solarStart + '~' + sm.solarEnd + ')은 ' + sm.gz + '월, 흐름은 ' + ieyo(sm.band) + '.' });
       if (mb) ps = ps.concat([{ role: 'situation', text: mb.situation }, { role: 'scene', text: mb.scene }, { role: 'advice', text: mb.advice }]);
       if (season && (season.line || season.hook)) ps.push({ role: 'scene', text: season.line || season.hook });
@@ -209,8 +220,8 @@
       var tjm = src ? src.months[lm.lunarMonth] : null, mm = mod.months ? mod.months[lm.lunarMonth] : null;
       var c = LINK.compare(mm ? mm.tone : null, sm.direction);
       var ps = [];
-      if (tjm) ps.push({ role: 'tojeong', text: '토정비결 ' + lm.lunarMonth + '월 원문: ' + tjm.map(function (p) { return p.join(' '); }).join(' / ') });
-      ps.push({ role: 'symbol', text: dmn.symbolLead && mm && mm.gist ? dmn.symbolLead + ' ' + mm.gist : dmn.symbol });   // 조합 해설은 지금 현대어(관리자 수정 반영)
+      if (tjm) ps.push({ role: 'tojeong', text: '토정비결 ' + lm.lunarMonth + '월 원문: ' + tjm.map(function (p) { return p.join(' '); }).join(' / '), verses: [{ h: tjm.map(function (p) { return p.join(' '); }).join('\n'), k: mm && mm.gist ? mm.gist : '' }] });
+      ps.push({ role: 'symbol', merged: !!(tjm && mm && mm.gist && !dmn.symbolLead && dmn.symbol === mm.gist), text: dmn.symbolLead && mm && mm.gist ? dmn.symbolLead + ' ' + mm.gist : dmn.symbol });   // 조합 해설은 지금 현대어(관리자 수정 반영)
       if (dmn.life) ps.push({ role: 'life', text: dmn.life });
       [['money', '돈'], ['work', '일'], ['people', '사람'], ['home', '집'], ['body', '몸'], ['move', '이동'], ['dir', '방향']].forEach(function (d) { if (dmn[d[0]]) ps.push({ role: 'domain', label: d[1], text: d[1] + ' — ' + dmn[d[0]] }); });
       if (dmn.do) ps.push({ role: 'do', text: '해 볼 것: ' + dmn.do });
