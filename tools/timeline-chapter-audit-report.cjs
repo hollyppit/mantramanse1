@@ -191,8 +191,8 @@ const ex = (title, pick, fmt) => { const list = rows.filter(pick); W(`### ${titl
 ex('장 사이 반복 문장 상위', r => r.repeat >= 0.1, r => `${pct(r.repeat)} — ${r.repeatEx.slice(0, 2).map(s => '“' + s + '”').join(' / ')}`);
 ex('그래프와 본문 연도 어긋남', r => r.graphBad > 0, r => `${pct(r.graphBad)} — ${r.graphEx.slice(0, 2).join(' / ')}`);
 ex('단정 표현', r => r.ban > 0, r => `${pct(r.ban)} — ${Object.entries(r.banEx).map(([k, v]) => `“${k}” ${v}명`).join(', ')}`);
-ex('20세 미만 어른 장면', r => r.youngBad >= 0.2, r => `${pct(r.youngBad)} (${r.youngN}명 중) — ${Object.entries(r.youngEx).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, v]) => `${k} ${v}`).join(', ')}`);
-ex('65세 이상 어색한 장면', r => r.seniorBad >= 0.05, r => `${pct(r.seniorBad)} (${r.seniorN}명 중) — ${Object.entries(r.seniorEx).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, v]) => `${k} ${v}`).join(', ')}`);
+ex('20세 미만 어른 장면', r => r.youngBad >= 0.2, r => `${pct(r.youngBad)} (${r.youngN}명 중) — ${Object.entries(r.youngEx).sort((a, b) => (b[1].n || b[1]) - (a[1].n || a[1])).slice(0, 4).map(([k, v]) => `${k} ${v && v.n != null ? v.n + '명 · “' + v.ex + '”' : v}`).join(', ')}`);
+ex('65세 이상 어색한 장면', r => r.seniorBad >= 0.05, r => `${pct(r.seniorBad)} (${r.seniorN}명 중) — ${Object.entries(r.seniorEx).sort((a, b) => (b[1].n || b[1]) - (a[1].n || a[1])).slice(0, 4).map(([k, v]) => `${k} ${v && v.n != null ? v.n + '명 · “' + v.ex + '”' : v}`).join(', ')}`);
 ex('이미 지난 나이를 앞날로 말함', r => r.ageBad > 0, r => `${pct(r.ageBad)} — ${r.ageEx.slice(0, 1).join('')}`);
 ex('조립 오류', r => r.errors > 0, r => `${r.errors}건 — ${r.errEx}`);
 

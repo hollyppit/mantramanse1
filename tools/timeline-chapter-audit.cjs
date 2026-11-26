@@ -61,6 +61,9 @@ const sents = t => String(t || '').split(/(?<=[.!?。])\s+/).map(s => s.trim()).
 const norm = s => s.replace(/[\s.,!?·—'"‘’“”()\[\]:~…-]/g, '');
 const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
 const pct = v => (100 * v).toFixed(0) + '%';
+const BROKEN = [['undefined', /undefined|\bnull\b|NaN/], ['[object', /\[object/], ['빈 괄호', /\(\s*\)/], ['중괄호', /\{\{|\}\}|\{[a-zA-Z_]+\}/], ['조사 자리표시자', /[가-힣A-Za-z)](?:은\(는\)|이\(가\)|을\(를\)|와\(과\)|으로\(로\)|이\(라\)|이라\(는\))/], ['쉼표 겹침', /[,，]\s*[,，]/], ['음수 나이·0년', /-\d+세|-\d+년|\b0년 /], ['같은 말 연달아', /([가-힣]{3,}) \1 /]];
+const BR = {}, DMP = {}, DUMP = process.env.DUMP || '';
+const CONTRA = require('./timeline-contra.cjs'), CT = {};   // 층 간 모순 후보(장 × 축)
 let seed = 20261115; const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
 
 (async () => {
@@ -173,6 +176,14 @@ let seed = 20261115; const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4
       // 층별 첫 걸림(층 이름: 예문) — 어느 층을 고쳐야 하는지 보이게
       // 부정·면책 문장("~을 뜻하지 않습니다", "무조건 나쁘게 보지 않습니다")은 뺀다. only: 이 조건도 맞는 문장만
       const firstHit = (re, only) => { for (const p of parts) { if (/^(head|end|why|basis|chart|panel)$/.test(p.suf)) continue; const s = sents(p.text).find(x => re.test(x) && !NEGATED.test(x) && (!only || only.test(x))); if (s) return { layer: layerName(p), word: s.match(re)[0], s: s.slice(0, 90) }; } return null; };
+      // 깨진 문안 검사(2026-11-26): 값이 비어 그대로 노출됐거나 조사·문장부호가 어긋난 곳 + 원문 덤프(DUMP=1)
+      { const bodyOnly = parts.filter(p => !/^(head|end)$/.test(p.suf)).map(p => p.text).join(' ');
+        for (const [k, re] of BROKEN) { const m = re.exec(bodyOnly); if (m) { const e = (BR[id + ' · ' + k] = BR[id + ' · ' + k] || { n: 0, ex: '' }); e.n++; if (!e.ex) e.ex = bodyOnly.slice(Math.max(0, m.index - 30), m.index + 50); } }
+        if (bodyOnly.length < 80) { const e = (BR[id + ' · 거의 빈 장'] = BR[id + ' · 거의 빈 장'] || { n: 0, ex: String(bodyOnly.length) }); e.n++; }
+        if (DUMP && pi < 6) (DMP[id] = DMP[id] || []).push({ age, g: b.gender, text: parts.filter(p => !/^(head|end|chart|panel|why|basis)$/.test(p.suf)).map(p => '[' + layerName(p) + '] ' + p.text).join('\n') }); }
+      // 층 간 모순 후보(2026-11-26): 그래프·표·근거·시기표를 뺀 글 층끼리 비교
+      { const by = {}; parts.forEach(p => { if (/^(head|end|why|basis|chart|panel|periods)$/.test(p.suf)) return; const k = layerName(p); by[k] = (by[k] ? by[k] + ' ' : '') + p.text; });
+        for (const h of CONTRA.find(by)) { const key = id.replace('timeline_', '') + ' · ' + h.axis; const e = CT[key] = CT[key] || { n: 0, pairs: {}, ex: [] }; e.n++; const lp = h.a.layer + '(' + h.a.side + ') ↔ ' + h.b.layer + '(' + h.b.side + ')'; e.pairs[lp] = (e.pairs[lp] || 0) + 1; if (e.ex.length < 3) e.ex.push([h.a.layer + ': ' + h.a.s.slice(-110), h.b.layer + ': ' + h.b.s.slice(-110)]); } }
       const tally = (box, h) => { const k = h.layer + ' · ' + h.word; const e = box[k] = box[k] || { n: 0, ex: h.s }; e.n++; };
       const bh = firstHit(BAN_LUCK); if (bh) { a.ban++; tally(a.banEx, bh); }
       if (IK.BANNED_RE.test(proseText) || ST.PROHIBITED_RE.test(proseText)) a.svcBan++;
@@ -327,6 +338,7 @@ let seed = 20261115; const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4
 
   const result = { generated: STAMP, N, now: new Date(NOW).toISOString(), catalogVersion: CATALOG.version, loadFail, rows, hiddenRows, overlapPairs: overlapPairs.slice(0, 30), sameQuestion: SAME_Q, engineMap, modMap, chapterEngine, deepBy, topicDeep: { measured: tdOk, perChapter: Object.fromEntries(Object.entries(tdRes).map(([id, r]) => [id.replace('timeline_', ''), { rendered: r.ok / r.n, avgChars: Math.round(avg(r.chars)) }])) }, factSpread: Object.fromEntries(Object.entries(factSpread || {}).map(([f, a]) => [f, { avgChapters: +avg(a).toFixed(1), max: Math.max(...a) }])), topicSum };
   fs.mkdirSync(path.join(root, 'report/admin/data'), { recursive: true });
+  if (process.env.AUDIT_OUT) { fs.writeFileSync(process.env.AUDIT_OUT + "-contra.json", JSON.stringify({ N, found: CT }, null, 1)); fs.writeFileSync(process.env.AUDIT_OUT + "-broken.json", JSON.stringify(BR, null, 1)); if (DUMP) fs.writeFileSync(process.env.AUDIT_OUT + "-dump.json", JSON.stringify(DMP, null, 1)); }
   fs.writeFileSync(path.join(root, 'docs/timeline-chapter-audit.json'), JSON.stringify(result, null, 1));
   fs.writeFileSync(path.join(root, 'report/admin/data/timeline-chapter-audit.json'), JSON.stringify(result));
   console.log(`완료: ${N}명 × ${ORDER.length}장 (+비공개 ${hiddenRows.length}장 재료) · ${((Date.now() - t0) / 1000).toFixed(0)}초 · 로드 실패 ${loadFail.length}`);
