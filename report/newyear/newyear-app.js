@@ -100,7 +100,7 @@
   // ── 읽기 화면
   function chapters() { return S.data ? S.data.reading.chapters : []; }
   function p(x) {
-    var cls = 'ny-p ' + x.role;
+    var cls = 'ny-p ' + x.role + (x.plain ? ' plain' : '');   // plain: 토정 칸이지만 옛 글귀가 아닌 풀이
     return '<p class="' + cls + '">' + esc(x.text) + '</p>';
   }
   function paras(list) { return (list || []).map(p).join(''); }

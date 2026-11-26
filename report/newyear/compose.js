@@ -137,7 +137,7 @@
     if (src) tjTotal.push({ role: 'tojeong', text: '토정비결 원문: ' + src.guaci.slice(0, 3).map(function (p) { return p.join(' '); }).join(' / ') });
     if (sup && !src) tjTotal.push({ role: 'tojeong', text: '토정비결 원문(보충본): ' + sup.front.join(' ') });
     // 개요는 첫 문장만 — 나머지는 아래 좋은 점·조심할 점과 내용이 겹친다
-    if (modOk && mod.overview && mod.overview[0]) tjTotal.push({ role: 'tojeong', text: mod.overview[0] });
+    if (modOk && mod.overview && mod.overview[0]) tjTotal.push({ role: 'tojeong', plain: true, text: mod.overview[0] });   // plain = 풀이(존댓말): 옛 글귀 서찰이 아니라 본문 모양
     var tjTone = modOk ? mod.tone : null;
     var cmp = LINK.compare(tjTone, sj.year.direction);
     var bridge = cmp.kind !== 'unknown' ? pick(BLOCKS, 'bridge', withCtx({ compare: cmp.kind }), 'bridge-year') : null;
@@ -158,7 +158,7 @@
       for (k = 1; k <= 12; k++) tl.push({ m: k, tone: mod.months[k] ? mod.months[k].tone : null, theme: deep.months[k] ? deep.months[k].theme : '' });
       var turns = [];
       for (k = 1; k < 12; k++) { var a = TONE_SIDE[tl[k - 1].tone], b = TONE_SIDE[tl[k].tone]; if (a && b && a !== b) turns.push((k + 1) + '월(' + (b === 'up' ? '밝아짐' : '조심으로 바뀜') + ')'); }
-      var ps = [{ role: 'tojeong', text: deep.year.core }, { role: 'h1', text: deep.year.h1 }, { role: 'h2', text: deep.year.h2 }];
+      var ps = [{ role: 'tojeong', plain: true, text: deep.year.core }, { role: 'h1', text: deep.year.h1 }, { role: 'h2', text: deep.year.h2 }];
       ps.push({ role: 'basis', text: turns.length ? '원문 월별 글귀의 결이 바뀌는 달(음력): ' + turns.join(' · ') + '.' : '원문 월별 글귀의 결이 한 해 내내 크게 바뀌지 않아요.' });
       return { id: 'halves', title: '한 해의 흐름 — 상반기와 하반기', timeline: tl, paras: dedupe(ps) };
     }
