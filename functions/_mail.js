@@ -66,7 +66,7 @@ async function send(env, to, mail, tag, replyTo) {
     return r.ok;
   } catch (e) { console.log('[mail]', tag, 'error', String(e && e.message || e).slice(0, 80)); return false; }
 }
-// ── 만세력 PDF 첨부 메일(관리자가 보내는 것만, functions/api/mail-pdf.js) 2026-11-26
+// ── 만세력 PDF 첨부 메일(사이트에 입장한 본인만, functions/api/mail-pdf.js) 2026-11-26
 export const PDF_B64_MAX = 20 * 1024 * 1024;   // base64 글자 수(원본 약 15MB). Resend 한도(40MB)보다 낮게
 export async function mailPdf(env, to, filename, content) {
   const line = '요청하신 만세력 PDF를 첨부해 보내 드립니다.';

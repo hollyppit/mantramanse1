@@ -11259,14 +11259,6 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     } finally { S.tab = keep; render(); window.scrollTo(sx, sy); }
     return groups;
   }
-  // 메일 보내기는 관리자 전용: 로그인하지 않아도 단추는 보이고, 누르면 이유와 로그인 길을 알려 준다(2026-11-26)
-  function xpGoLogin() { XP.afterLogin = S.tab; if (!isAdminHash()) location.hash = 'admin'; else render(); setTimeout(() => { window.scrollTo(0, 0); const i = document.getElementById('admin-pw'); if (i) i.focus(); }, 60); }
-  function xpMailNotice() {
-    const bg = document.createElement('div'); bg.className = 'sheet-bg';
-    bg.innerHTML = '<div class="sheet" role="dialog" aria-modal="true" aria-label="메일로 보내기"><h3>메일로 보내기</h3><p>메일 보내기는 <b>관리자 로그인</b> 후에 쓸 수 있어요. 로그인 없이도 <b>PDF</b> 단추로 파일을 저장해 직접 보낼 수 있어요.</p><div style="display:flex;flex-wrap:wrap;gap:8px"><button type="button" class="btn primary" data-m="login">관리자 로그인</button><button type="button" class="btn" data-m="close">닫기</button></div></div>';
-    bg.addEventListener('click', ev => { const b = ev.target.closest('[data-m]'); if (!b && ev.target !== bg) return; ev.stopPropagation(); bg.remove(); if (b && b.dataset.m === 'login') xpGoLogin(); });
-    document.body.appendChild(bg);
-  }
   function xpPicker(btn) {
     if (XP.busy) return;
     XP.busy = true; const old = btn.textContent; btn.textContent = '목록 만드는 중…'; btn.disabled = true;
@@ -11313,7 +11305,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
             ${op ? `<div class="xpp-items">${g.secs.map(secRow).join('')}</div>` : ''}</div>`;
         }).join('')}</div>
         <div class="xpp-f"><span>${n ? `<b>${n}</b>개 섹션 선택` : '섹션을 하나 이상 고르세요'}</span><button type="button" class="btn primary" data-xpp="go"${n ? '' : ' disabled'}>PDF 만들기</button></div>
-        ${adminPw ? `<div class="xpp-m"><input type="email" data-xpm placeholder="받는 메일 주소" aria-label="받는 메일 주소" autocomplete="off" value="${esc(XP.mailTo || '')}"><button type="button" class="btn" data-xpp="mail"${n ? '' : ' disabled'}>메일로 보내기</button></div>` : '<p class="xpp-d">메일로 보내기는 관리자 로그인 후에 쓸 수 있어요. <button type="button" class="btn sm" data-xpp="login">관리자 로그인</button></p>'}`;
+        <div class="xpp-m"><input type="email" data-xpm placeholder="받는 메일 주소" aria-label="받는 메일 주소" autocomplete="off" value="${esc(XP.mailTo || '')}"><button type="button" class="btn" data-xpp="mail"${n ? '' : ' disabled'}>메일로 보내기</button></div>`;
       sh.querySelectorAll('input[data-mixed]').forEach(i => { i.indeterminate = true; });
     };
     const keepScroll = fn => { const l = sh.querySelector('.xpp-list'), t = l ? l.scrollTop : 0; fn(); paint(); const l2 = sh.querySelector('.xpp-list'); if (l2) l2.scrollTop = t; };
@@ -11338,7 +11330,6 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const b = ev.target.closest('[data-xpp]'); if (!b) return;
       const a = b.dataset.xpp;
       if (a === 'close') return close();
-      if (a === 'login') { close(); return xpGoLogin(); }
       if (a === 'all') return keepScroll(() => { all.forEach(k => setSec(secOf[k], true)); });
       if (a === 'none') return keepScroll(() => { pick.clear(); off.clear(); });
       if (a === 'cur') return keepScroll(() => { pick.clear(); off.clear(); curG.secs.forEach(s => setSec(s, true)); openG.add(curG.tab); });
@@ -11373,7 +11364,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   async function xpExport(kind, btn, pick) {
     if (XP.busy) return;
-    if (kind === 'mail') { if (!adminPw) return xpMailNotice(); XP.focusMail = true; return xpPicker(btn); }
+    if (kind === 'mail') { XP.focusMail = true; return xpPicker(btn); }
     if (kind === 'pdf' && !pick) return xpPicker(btn);
     XP.busy = true;
     const btns = document.querySelectorAll('[data-export]'), old = btn.textContent;
@@ -12424,7 +12415,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   async function adminLogin(pw) {
     if (!pw) { S.adminMsg = '비밀번호를 입력하세요'; render(); return; }
     adminPw = pw;
-    try { await api('/api/admin', { method: 'POST', body: '{}' }); try { sessionStorage.setItem(ADMIN_KEY, pw); } catch (e) { } S.adminMsg = null; S.tab = XP.afterLogin || 'gl'; XP.afterLogin = null; render(); }
+    try { await api('/api/admin', { method: 'POST', body: '{}' }); try { sessionStorage.setItem(ADMIN_KEY, pw); } catch (e) { } S.adminMsg = null; S.tab = 'gl'; render(); }
     catch (e) { adminPw = null; S.adminMsg = e.message; render(); }
   }
   function adminLogout(msg) { adminPw = null; try { sessionStorage.removeItem(ADMIN_KEY); } catch (e) { } S.adminMsg = msg || null; render(); }

@@ -1,11 +1,13 @@
-// 만세력 PDF 를 원하는 주소로 메일 발송(관리자 전용). 2026-11-26
-// POST /api/mail-pdf  (Authorization: Bearer ADMIN_PASSWORD)  { to, filename, content: PDF base64 }
+// 만세력 PDF 를 원하는 주소로 메일 발송(개인용). 2026-11-26
+// 보낼 수 있는 사람: 사이트 입장 비밀번호로 들어온 브라우저(쿠키) 또는 관리자. /api 는 잠금 밖이라 여기서 꼭 확인한다(누구나 보내면 스팸에 쓰인다).
+// POST /api/mail-pdf  { to, filename, content: PDF base64 }
 // 필요: Secret RESEND_API_KEY · ADMIN_PASSWORD (선택 MAIL_FROM). 받는 주소·사주 정보는 로그에 남기지 않는다.
 import { json, isAdmin } from '../_lib.js';
 import { mailReady, mailPdf, PDF_B64_MAX } from '../_mail.js';
+import { gatePassed } from '../_site-gate.js';
 
 export async function onRequestPost({ request, env }) {
-  if (!isAdmin(request, env)) return json({ error: '관리자 로그인이 필요합니다' }, 401);
+  if (!isAdmin(request, env) && !await gatePassed(request, env)) return json({ error: '사이트 입장 비밀번호 확인이 필요합니다. 주소 끝에 /__gate 를 붙여 다시 들어온 뒤 보내 주세요' }, 401);
   if (!mailReady(env)) return json({ error: 'RESEND_API_KEY 가 설정되지 않았습니다' }, 503);
   const tooBig = () => json({ error: 'PDF 가 너무 큽니다. 섹션을 나눠 보내 주세요' }, 413);
   if (+request.headers.get('content-length') > PDF_B64_MAX + 4096) return tooBig();

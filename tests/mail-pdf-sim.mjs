@@ -1,18 +1,26 @@
 // 만세력 PDF 메일 발송 API 검사(네트워크 없음): node tests/mail-pdf-sim.mjs
 import assert from 'node:assert';
 import { onRequestPost } from '../functions/api/mail-pdf.js';
+import { tokenFor } from '../functions/_site-gate.js';
 
 const env = { ADMIN_PASSWORD: 'pw-test', RESEND_API_KEY: 're_test' };
 const pdf = Buffer.from('%PDF-1.4 test').toString('base64');
 let sent = [], status = 200;
 globalThis.fetch = async (url, opt) => { sent.push({ url, body: JSON.parse(opt.body) }); return new Response('{}', { status }); };
-const call = async (body, { auth = 'pw-test', e = env } = {}) => {
-  const r = await onRequestPost({ env: e, request: new Request('https://x/api/mail-pdf', { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + auth }, body: typeof body === 'string' ? body : JSON.stringify(body) }) });
+const call = async (body, { auth = 'pw-test', e = env, cookie = '' } = {}) => {
+  const r = await onRequestPost({ env: e, request: new Request('https://x/api/mail-pdf', { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + auth, cookie }, body: typeof body === 'string' ? body : JSON.stringify(body) }) });
   return r.status;
 };
 const good = { to: 'a@example.com', filename: '만세력_원국/홍.pdf', content: pdf };
 
 assert.strictEqual(await call(good, { auth: 'wrong' }), 401);
+const gated = { ...env, SITE_GATE_PASSWORD: 'door' }, ticket = 'mantra_gate=' + await tokenFor('door');
+assert.strictEqual(await call(good, { auth: '', e: gated }), 401, '입장 쿠키가 없으면 거절');
+assert.strictEqual(await call(good, { auth: '', e: gated, cookie: 'mantra_gate=abc' }), 401, '틀린 쿠키는 거절');
+assert.strictEqual(await call(good, { auth: '', cookie: ticket }), 401, '잠금이 꺼진 사이트에서는 쿠키만으로 안 된다');
+assert.strictEqual(sent.length, 0);
+assert.strictEqual(await call(good, { auth: '', e: gated, cookie: ticket }), 200, '입장 쿠키만으로 발송');
+sent = [];
 assert.strictEqual(await call(good, { e: { ADMIN_PASSWORD: 'pw-test' } }), 503);
 assert.strictEqual(await call('{'), 400);
 for (const to of ['', 'abc', 'a@b.com,c@d.com', 'a@b.com\nbcc@x.com']) assert.strictEqual(await call({ ...good, to }), 400, to);

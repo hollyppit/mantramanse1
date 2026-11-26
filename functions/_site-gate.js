@@ -41,6 +41,12 @@ export function publicPath(pathname) {
   return true;   // 확장자가 있는 정적 파일(engine.js·feature-flags.js·이미지 등)은 무빙툰이 함께 쓴다
 }
 
+// 사이트 비밀번호로 들어온 브라우저인지(입장 쿠키 확인). 잠금이 꺼져 있으면 false — 열린 사이트에서는 쿠키가 증명이 되지 않는다.
+export async function gatePassed(request, env) {
+  const pw = env && typeof env.SITE_GATE_PASSWORD === 'string' ? env.SITE_GATE_PASSWORD : '';
+  return !!pw && same(getCookie(request, COOKIE), await tokenFor(pw));
+}
+
 // 잠금 대상이 아니면 null, 막아야 하면 Response 를 돌려준다.
 export async function siteGate(request, env) {
   const pw = env && typeof env.SITE_GATE_PASSWORD === 'string' ? env.SITE_GATE_PASSWORD : '';
