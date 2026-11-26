@@ -145,7 +145,7 @@
       g.map(function (x) { return '<div class="dp-part"><div class="dp-ph1"><b>' + esc(x.name) + '</b><small>' + esc(x.sub) + '</small></div>' + bar(x.text, x.v, { text: Math.round(x.v) + '', color: x.color }) + '<p>' + esc(x.plain) + '</p></div>'; }).join('') + '</div>')));
     // 7) 장단점 + 일간 성향
     out.push(scene(sec('', cap('이 그릇의 장점과 조심할 점') + '<div class="dp-pc"><div class="dp-pro"><h4>장점</h4><ul>' + P.pros.map(li).join('') + '</ul></div><div class="dp-con"><h4>조심할 점</h4><ul>' + P.cons.map(li).join('') + '</ul></div></div><p class="dp-note">그릇을 잘 쓰는 법: ' + esc(P.tip) + '</p>')));
-    out.push(scene(sec('', cap('돈을 다루는 나의 성향 · 일간 ' + st + '(' + el + EL_HJ[el] + ')') + '<p class="lead">' + esc('일간 ' + st + '은(는) ' + SH[0] + '입니다. ' + SH[1]) + '</p>')));
+    out.push(scene(sec('', cap('돈을 다루는 나의 성향 · 일간 ' + st + '(' + el + EL_HJ[el] + ')') + '<p class="lead">' + esc('일간 ' + st + (/[무기계]/.test(st) ? '는 ' : '은 ') + SH[0] + '입니다. ' + SH[1]) + '</p>')));
     // 8) 돈 버는 방식 그래프
     out.push(scene(sec('', cap('나에게 유리한 돈 버는 방식') + '<p class="dp-lead2">같은 돈도 버는 모양이 다릅니다. 사주의 십성·일간 힘·창고·충·재물 인연을 겹쳐 6가지 방식의 <b>어울림</b>을 점수로 옮겼습니다. 수익을 맞히는 점수가 아니라 "내 구조에 편한 방식"의 상대적 순위입니다.</p><div class="dp-bars">' +
       ms.map(function (m, i) { return bar((i === 0 ? '★ ' : '') + m.name, m.v, { text: m.v + '점 · ' + band(m.v), color: m.v >= 70 ? '#5FBF9A' : m.v >= 50 ? '#D5B97F' : '#FF9A3C' }); }).join('') + '</div>')));

@@ -94,7 +94,7 @@ function climateKey(c){if(!c||!Number.isFinite(c.temp)||!Number.isFinite(c.hum))
  if(t==='열')return h==='조'?'열조':'열';if(t==='한')return h==='습'?'한습':'한';return h==='습'?'습':h==='조'?'조':'평';}
 function pairKey(a,b){var i=PILLAR_ORDER.indexOf(a),j=PILLAR_ORDER.indexOf(b);return i<=j?a+'-'+b:b+'-'+a;}
 function relPlace(type,members){var stem=/^천간/.test(type),parts=members.slice().sort(function(a,b){return PILLAR_ORDER.indexOf(a)-PILLAR_ORDER.indexOf(b);});
- return parts.map(function(m){return PILLAR_NAME[m]+(stem?'간':'지');}).join('와 ');}
+ var nm=parts.map(function(m){return PILLAR_NAME[m]+(stem?'간':'지');});if(nm.length<2)return nm.join('');var last=nm[nm.length-1],head=nm.slice(0,-1).join('·');return head+josa(head,'과','와')+' '+last;}
 // 대운·세운의 지지가 내 일지·월지와 맺는 관계 중 가장 눈에 띄는 하나. 일지를 먼저 본다.
 function luckRel(rels,P){var best=null;(rels||[]).forEach(function(r){if(r&&r.kind==='branch'&&SEUN_TYPE_KEY[r.type]&&Array.isArray(r.members)){var place=r.members.indexOf('day')>=0?'day':r.members.indexOf('month')>=0?'month':null;if(place&&P[place]){var sc=(place==='day'?10:0)+(REL_TYPE_SCORE[r.type]||0);if(!best||sc>best.sc)best={place:place,type:r.type,sc:sc};}}});return best;}
 // 사주 하나에서 쓸 수 있는 요소를 모은다. 값이 없으면 그 요소는 만들지 않는다.

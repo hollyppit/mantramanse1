@@ -177,8 +177,11 @@
     if (!list || !list.length) return '';
     var want = lens === 'wealth' ? [2, 1] : lens === 'career' ? [3, 1] : lens === 'love' ? (ch.gender === 'F' ? [3, 4] : [2, 4]) : null;
     var scored = list.map(function (x) { var pu = pullOf(M, ch, x), s = x.ev.fitScore + (want ? (pu.top === want[0] ? 30 : pu.top === want[1] ? 14 : 0) : 0); return { y: x.year, gz: M.gzNameK(x), s: s, fit: x.ev.fitScore, clash: (x.ev.triggers || []).some(function (t) { return /충/.test(t); }) }; });
-    var best = scored.slice().sort(function (a, b) { return b.s - a.s; })[0], worst = scored.slice().sort(function (a, b) { return a.fit - b.fit; })[0];
-    var sh = want ? shared(M, ch, now, lens, 'year') : null; if (sh) { var b5 = sh.filter(function (r) { return r.y < Y + 5; })[0]; if (b5) best = { y: b5.y, gz: b5.gz }; }
+    var best = scored.slice().sort(function (a, b) { return b.s - a.s; })[0];
+    var sh = want ? shared(M, ch, now, lens, 'year') : null;
+    // 2026-11-26: "무거운 해" 후보에서 이 주제 그래프 상위(10해 중 1~4위)인 해는 뺀다 — 같은 해를 "힘이 실리는 해"와 "조심할 해"로 동시에 말하지 않게
+    var worstPool = sh ? scored.filter(function (x) { var i = -1; sh.forEach(function (r, k) { if (r.y === x.y && i < 0) i = k; }); return i < 0 || i >= 4; }) : scored;
+    var worst = worstPool.slice().sort(function (a, b) { return a.fit - b.fit; })[0]; if (sh) { var b5 = sh.filter(function (r) { return r.y < Y + 5; })[0]; if (b5) best = { y: b5.y, gz: b5.gz }; }
     var out = '앞으로 5년 중 ' + LENS_WORD[lens] + ' 쪽으로 힘이 가장 실리는 해는 ' + best.y + '년(' + best.gz + ')이에요.';
     if (worst && worst.y !== best.y && worst.fit < -12) out += ' ' + worst.y + '년(' + worst.gz + ')은 흐름이 무거운 해라' + (worst.clash ? ' 부딪히는 글자까지 겹쳐' : '') + ' 큰 결정을 피하는 편이 좋아요.';
     return out;
@@ -284,7 +287,8 @@
         else out.push(mv2.length ? yearList('앞으로 10년 중 이직·자리 이동이 움직이기 쉬운 해는 ', mv2) : '앞으로 10년 안에는 일터를 크게 흔드는 해가 뚜렷하지 않아요. 떠밀려 옮길 일이 적은 만큼, 옮길지는 스스로 정한 기준으로 판단하세요.');
         var heavyMv = mv2.filter(function (x) { return x.fit <= -12; }).map(function (x) { return x.y + '년'; });
         if (heavyMv.length) out.push('다만 ' + heavyMv.join('·') + '은 전체 흐름이 무거운 해라, 움직일 일이 생겨도 조건을 확인한 뒤 천천히 정하세요.');
-        var ind = vrows.filter(function (x) { return x.indep &&!mv2.some(function (m) { return m.y === x.y; }); }).sort(function (a, b) { return b.fit - a.fit; }).slice(0, 2).sort(function (a, b) { return a.y - b.y; });
+        var shCar = shared(M, ch, now, 'career', 'year'), lowCar = function (y) { if (!shCar) return false; for (var q = 0; q < shCar.length; q++) if (shCar[q].y === y) return q >= 7; return false; };   // 커리어 그래프 하위(8~10위) 해는 "시험해 보기 좋은 해"에서 뺀다(2026-11-26)
+        var ind = vrows.filter(function (x) { return x.indep && !lowCar(x.y) &&!mv2.some(function (m) { return m.y === x.y; }); }).sort(function (a, b) { return b.fit - a.fit; }).slice(0, 2).sort(function (a, b) { return a.y - b.y; });
         if (ind.length) out.push((spec.senior ? '새 활동을 시험해 보기 좋은 해는 ' : '독립이나 내 일을 시험해 보기 좋은 해는 ') + ind.map(function (x) { return x.y + '년'; }).join('·') + (spec.senior ? '이에요. 큰돈 없이 작게 먼저 해 보세요.' : '이에요. 회사를 다니며 작게 먼저 해 보세요.'));
         var vw = vrows.slice().sort(function (a, b) { return a.fit - b.fit; })[0]; if (vw && vw.fit < -15) out.push(josa(vw.y + '년', '은/는') + (spec.senior ? ' 흐름이 가장 무거운 해라, 이 해에는 일을 늘리거나 목돈을 넣는 결정을 피하세요.' : ' 흐름이 가장 무거운 해라, 이 해의 이직이나 퇴사는 다음 자리를 확정한 뒤에만 하세요.'));
       } catch (e) { }

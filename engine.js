@@ -1935,6 +1935,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (yongPct < 5) notes.push(`용신 ${elJ(yong, '이', '가')} 원국에 거의 없어(${yongPct.toFixed(0)}%) 평소에는 힘이 약하고, 운에서 들어올 때 제 역할을 합니다.`);
     else if (ys.length && !yr.length) notes.push(`용신 ${elJ(yong, '이', '가')} ${ys.map(k => POS_K[k] + '간').join('·')}에 드러나 있지만 지지에 뿌리가 없어 쉽게 흔들립니다. 운에서 뿌리(지지)가 들어오는 때가 가장 좋습니다.`);
     else if (ys.length && yr.length) notes.push(`용신 ${elJ(yong, '이', '가')} 천간(${ys.map(k => POS_K[k] + '간').join('·')})에 드러나고 지지(${yr.map(k => POS_K[k] + '지').join('·')})에 뿌리도 있어 실제로 쓸 수 있는 힘이 있습니다.`);
+    else if (!yr.length) notes.push(`용신 ${elJ(yong, '이', '가')} 천간·지지 어디에도 또렷이 자리 잡지 못해(${yongPct.toFixed(0)}%) 평소에는 겉으로 드러나지 않습니다. 운에서 들어올 때 제 역할을 합니다.`);
     else notes.push(`용신 ${elJ(yong, '이', '가')} 지지(${yr.map(k => POS_K[k] + '지').join('·')}) 속에만 있어 겉으로 드러나지 않습니다. 운에서 천간으로 드러날 때 쓰임이 커집니다.`);
     for (const r of ch.relations) {
       if (r.type === '충' && r.members.some(k => ch.pillars[k] && BR_EL[ch.pillars[k].b] === yong)) notes.push(`용신의 자리(${r.members.map(k => POS_K[k] + '지').join('·')})가 충(${r.name})을 받아 뿌리가 흔들릴 수 있습니다.`);

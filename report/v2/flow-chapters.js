@@ -65,10 +65,10 @@
   function curWith(C, g) { return C.flows.filter(function (r) { return r.cur && brings(C, r.x, g); })[0] || null; }
   function whenLine(C, g, what, label) {
     // 같은 기운의 시기가 여러 장에 나와도 문장이 같아지지 않게, 문장마다 이 장의 주제(what)를 넣는다
-    var c = curWith(C, g), n = nextWith(C, g), L = label || C.gl(g), w = String(what).replace(/[이가]$/, '');
+    var c = curWith(C, g), n = nextWith(C, g), L = label || C.gl(g), w = String(what).replace(/[이가]$/, '').replace(/ 쪽 [^ ]+$/, '');   // '돈·성과 쪽 결과' → '돈·성과' (뒤에 ' 쪽을'을 또 붙이므로 '쪽 … 쪽' 겹침 방지)
     if (c) return '지금 대운(' + span(c.x) + ')이 바로 ' + J.을(L) + ' 실어 오는 때라, ' + what + ' 몸으로 느끼기 쉬운 시기예요.' + (n ? ' ' + w + ' 쪽에 이 기운이 다시 들어오는 때는 ' + J.예요(span(n.x) + '(' + age(n.x) + ')') + '.' : '');
     if (n) return w + ' 쪽이 한결 수월해지는 다음 시기는 ' + J.이(L) + ' 운에서 들어오는 ' + J.예요(span(n.x) + '(' + age(n.x) + ', ' + C.M.gzName(n.x) + ' 대운)') + '.';
-    return J.은(w + ' 쪽을 받쳐 줄 ' + L) + ' 앞으로 80세 전까지 대운에서 크게 들어오는 때가 드물어서, ' + w + ' 쪽은 운을 기다리기보다 생활 습관과 곁의 사람으로 채우는 편이 현실적이에요.';
+    return J.은(w + ' 쪽을 받쳐 줄 ' + L) + ' 앞으로 이어질 대운에서 크게 들어오는 때가 드물어서, ' + w + ' 쪽은 운을 기다리기보다 생활 습관과 곁의 사람으로 채우는 편이 현실적이에요.';
   }
   // 화면의 존댓말 변환(polite-text.js)이 '모입니다'를 '모예요'로 바꾸는 일이 있어, 동사 '-이다'형은 미리 해요체로 넘긴다
   var VERB_YO = { 모입니다: '모여요', 트입니다: '트여요', 움직입니다: '움직여요', 쓰입니다: '쓰여요', 보입니다: '보여요' };
@@ -124,7 +124,7 @@
     var items = nf.items.map(function (x) { return x.plain; }).slice(0, 3);
     var luckRows = ahead(C).filter(function (r) { return r.f; });
     var goodN = luckRows.filter(function (r) { return GOOD_V[r.f.verdict]; }), badN = luckRows.filter(function (r) { return BAD_V[r.f.verdict]; });
-    var lifeLine = luckRows.length ? '지금부터 80세 전까지 ' + luckRows.length + '개의 대운을 오행 흐름으로 보면, 기운이 잘 이어지거나 막힌 곳이 풀리는 시기가 ' + goodN.length + '번, 힘이 빠지거나 고이기 쉬운 시기가 ' + badN.length + '번이에요.' + (goodN.length ? ' 흐름이 잘 이어지는 시기는 ' + goodN.map(function (r) { return span(r.x) + '(' + age(r.x) + ')'; }).join(', ') + '이에요.' : '') : '';
+    var lifeLine = luckRows.length ? '지금부터 앞으로 이어질 ' + luckRows.length + '개의 대운을 오행 흐름으로 보면, 기운이 잘 이어지거나 막힌 곳이 풀리는 시기가 ' + goodN.length + '번, 힘이 빠지거나 고이기 쉬운 시기가 ' + badN.length + '번이에요.' + (goodN.length ? ' 흐름이 잘 이어지는 시기는 ' + goodN.map(function (r) { return span(r.x) + '(' + age(r.x) + ')'; }).join(', ') + '이에요.' : '') : '';
     var goodChips = nf.chips.filter(function (c) { return c.good && c.plain; }), badChips = nf.chips.filter(function (c) { return !c.good && c.plain; });
     var brk = nf.items.filter(function (x) { return x.kind === 'break'; })[0], lowG = brk ? null : low;
     var missingG = [0, 1, 2, 3, 4].filter(function (g) { return C.G[g] < 5 && g !== 0; })[0];
