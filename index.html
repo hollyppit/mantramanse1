@@ -83,6 +83,11 @@ button { font: inherit; color: inherit; }
 .xpp-items input { margin-top: 1px; }
 .xpp-f .btn[disabled] { opacity: .45; cursor: not-allowed; box-shadow: none; }
 .xpp-f { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid var(--line); padding-top: 10px; font-size: 0.88rem; }
+/* PDF: 가로 스크롤 줄은 잘리므로 줄을 바꾼다(2026-11-26) */
+/* 제목 칸(dt) 없이 설명만 있는 목록이 첫 좁은 칸에 눌리지 않게(궁합 판단 기준 한계) */
+.acc dl > dd:only-child { grid-column: 1 / -1; }
+.xs, .xs * { transition: none !important; animation: none !important; }
+.xs .wp-row { grid-auto-flow: row; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); overflow: visible; }
 .xpp-m { display: flex; flex-wrap: wrap; gap: 8px; }
 .xpp-m input { flex: 1 1 200px; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: inherit; font: inherit; font-size: 16px; }
 .xpp-m .btn[disabled] { opacity: .45; cursor: not-allowed; }
@@ -11037,15 +11042,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         ['fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'opacity', 'fill-opacity', 'font-size', 'font-weight', 'font-family', 'text-anchor'].forEach(k => { el.style.setProperty(k, cs.getPropertyValue(k)); });
       });
     });
-    // html2canvas는 inset 그림자를 칠해 버리므로 같은 굵기의 테두리로 바꾼다
-    stage.querySelectorAll('*').forEach(el => {
-      const bs = getComputedStyle(el).boxShadow;
-      if (!bs || bs === 'none' || !bs.includes('inset')) return;
-      const m = bs.match(/^(rgba?\([^)]+\))\s+0px 0px 0px (\d+(?:\.\d+)?)px inset$/);
-      el.style.boxShadow = 'none';
-      if (m && m[1] !== 'rgba(0, 0, 0, 0)') { el.style.border = m[2] + 'px solid ' + m[1]; }
-    });
     stage.querySelectorAll('.tip').forEach(e => e.remove());
+    // 화면에서만 쓰는 단추(‹ ›·닫기·'… ›' 이동·더 보기)와 아직 못 불러온 토정비결 안내 줄은 뺀다(2026-11-26). 글이 긴 단추(타일)는 내용이므로 남긴다
+    stage.querySelectorAll('button:not(.term)').forEach(b => { const t = b.textContent.replace(/s+/g, ' ').trim(); if (t.length <= 24 && /^(‹|오늘 닫기|자세히 보기|전체 분야 보기|60일주 전체 보기)$|›$/.test(t)) b.remove(); });
+    stage.querySelectorAll('.tj-leg').forEach(p => { if (/불러오는 중|불러오지 못했/.test(p.textContent)) p.remove(); });
     // 2026-11-21: html2canvas 는 <details> 의 접힘을 모른다 — 접힌 상자의 숨은 내용을 높이 0 자리에 겹쳐 그리고 summary 앞에 번호(1. 2.)를 붙인다.
     // 2026-11-21 사용자 요청: PDF는 내담자가 읽을 문서 — 접는 상자를 골라서 펼친다(안쪽부터 처리해야 겹친 상자도 맞게 풀린다).
     //  · XP_DROP(전문가용·계산 근거·용어 설명·입력 칸·긴 목록): 화면에서 펼쳐 두었어도 PDF에서는 뺀다
@@ -11069,6 +11069,15 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       mk.textContent = ol ? ([...li.parentElement.children].filter(x => x.tagName === 'LI').indexOf(li) + (+li.parentElement.getAttribute('start') || 1)) + '.' : '•';
       mk.style.cssText = 'position:absolute;right:100%;top:0;padding-right:.45em;white-space:nowrap';
       li.style.listStyle = 'none'; li.style.position = 'relative'; li.prepend(mk);
+    });
+    // 접는 상자를 div 로 바꾼 뒤에 해야 새로 생긴 상자(심리 솔루션 '지금' 카드 등)도 파란 덩어리가 되지 않는다(2026-11-26)
+    // html2canvas는 inset 그림자를 칠해 버리므로 같은 굵기의 테두리로 바꾼다
+    stage.querySelectorAll('*').forEach(el => {
+      const bs = getComputedStyle(el).boxShadow;
+      if (!bs || bs === 'none' || !bs.includes('inset')) return;
+      const m = bs.match(/^(rgba?\([^)]+\))\s+0px 0px 0px (\d+(?:\.\d+)?)px inset$/);
+      el.style.boxShadow = 'none';
+      if (m && m[1] !== 'rgba(0, 0, 0, 0)') { el.style.border = m[2] + 'px solid ' + m[1]; }
     });
     return stage;
   }
@@ -11209,6 +11218,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return ok.map(u => ({ title: u.title, def: !!u.def, det: !!u.det }));
   }
   const XP_PANE = { hobby: '활동·취미', work: '직업·일' };
+  // 접는 상자를 빼면 제목만 남는 카드(궁합 판단 기준 등)는 접는 상자를 펼친 것으로 본다 — 체크했는데 빈 카드가 나오지 않게(2026-11-26)
+  function xpOpenIfEmpty(c) {
+    const rest = c.cloneNode(true); rest.querySelectorAll('details:not([open]), .card-h, h2, button').forEach(e => e.remove());
+    if (rest.textContent.replace(/\s+/g, '').length >= 20) return;
+    c.querySelectorAll('details').forEach(d => { const sm = d.querySelector(':scope > summary'); if (!XP_DROP.test(sm ? sm.textContent : '')) { d.open = true; d.setAttribute('open', ''); } });
+  }
   function xpCollectTab(k) {
     S.tab = k;
     let cards = k === 'luck' ? xpLuckCards() : null;
@@ -11228,6 +11243,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const title = t || (c.classList.contains('al-bar') ? '눈여겨볼 신호' : (c.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 24) || '안내');
       const pane = c.dataset.xpPane || '', sk = (pane ? pane + ' ' : '') + title;
       seen[sk] = (seen[sk] || 0) + 1;
+      xpOpenIfEmpty(c);
       let subs = []; try { subs = xpSubs(c); } catch (e) { subs = []; }
       out.push({ key: `${k}|${sk}|${seen[sk]}`, title, pane, subs, nodes: [c] });
     });
@@ -11246,13 +11262,16 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function xpPicker(btn) {
     if (XP.busy) return;
     XP.busy = true; const old = btn.textContent; btn.textContent = '목록 만드는 중…'; btn.disabled = true;
-    setTimeout(() => {
+    // 운세 흐름의 토정비결 보조선은 서버에서 받아 온다: 받기 전에 복제하면 '불러오는 중' 상태로 찍히므로 최대 6초 기다린다
+    try { if (S.ch) tjEnsure(M.yearPillarAt(NOW).sajuYear); } catch (e) { }
+    const t0 = Date.now(), whenReady = fn => (TJM.st === 'busy' && Date.now() - t0 < 6000) ? setTimeout(() => whenReady(fn), 150) : fn();
+    setTimeout(() => whenReady(() => {
       let groups = [];
       try { groups = xpCollectAll(); } catch (e) { groups = []; }
       finally { XP.busy = false; document.querySelectorAll('[data-export]').forEach(b => { b.disabled = false; }); const nb = document.querySelector('[data-export="pdf"]'); if (nb) nb.textContent = old; }
       if (!groups.length) { alert('내보낼 섹션이 없습니다. 사주를 먼저 입력하세요.'); return; }
       xpPickSheet(groups);
-    }, 30);
+    }), 30);
   }
   function xpPickSheet(groups) {
     const all = groups.flatMap(g => g.secs.map(s => s.key)), secOf = {};
