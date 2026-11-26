@@ -35,7 +35,7 @@
 
   /* ── 종류 선택 ───────────────────────────────────────────── */
   H.route('tarot', function () {
-    var h = '<section class="hero" style="text-align:left;padding-bottom:6px"><p class="kick">FREE TAROT</p><h1 class="h1">마음속 질문 하나를<br>떠올려보세요.</h1><p class="sub">AI가 아닌, 준비된 카드 해석으로 바로 읽어드려요. 생년월일은 필요 없습니다.</p></section><div class="tsp" role="group" aria-label="카드 배열"><p class="sub" style="margin:0 0 6px">카드 배열</p><div class="chips">' + Object.keys(SP).map(function (k) { return '<button type="button" class="chipbtn" data-sp="' + k + '" aria-pressed="' + (curSpread() === k) + '">' + esc(SP[k][0]) + ' <small>' + SP[k][1].length + '장</small></button>'; }).join('') + '</div><p class="note" id="spnote">' + spNote(curSpread()) + '</p></div><div class="tmodes">';
+    var h = '<section class="hero" style="text-align:left;padding-bottom:6px"><p class="kick">TAROT CARD · 무료 이벤트 중</p><h1 class="h1">마음속 질문 하나를<br>떠올려보세요.</h1><p class="sub">AI가 아닌, 준비된 카드 해석으로 바로 읽어드려요. 생년월일은 필요 없습니다.</p></section><div class="tsp" role="group" aria-label="카드 배열"><p class="sub" style="margin:0 0 6px">카드 배열</p><div class="chips">' + Object.keys(SP).map(function (k) { return '<button type="button" class="chipbtn" data-sp="' + k + '" aria-pressed="' + (curSpread() === k) + '">' + esc(SP[k][0]) + ' <small>' + SP[k][1].length + '장</small></button>'; }).join('') + '</div><p class="note" id="spnote">' + spNote(curSpread()) + '</p></div><div class="tmodes">';
     Object.keys(Tarot.modes).forEach(function (k) { h += '<button type="button" class="tm" data-m="' + k + '"><span class="ic" aria-hidden="true">' + ICON[k] + '</span><span><b>' + esc(Tarot.modes[k].name) + '</b><small>' + SUB[k] + '</small></span><span class="ar" aria-hidden="true">›</span></button>'; });
     var el = H.view(h + '</div>');
     el.onclick = function (e) {
@@ -120,16 +120,10 @@
     h += sec('조심할 것', '<p>' + esc(r.caution) + '</p>', 'warn');
     h += sec('오늘 해볼 것', '<ul class="dl">' + r.actions.map(function (a) { return '<li>' + esc(a) + '</li>'; }).join('') + '</ul>');
     h += sec('오늘의 한마디', '<p>“' + esc(r.closing) + '”</p>', 'one');
-    h += '<div class="bridge' + rv + '"' + d(1.8 + (n + 1) * 0.7) + ' id="rend"><p class="q">카드는 지금의 질문에 답했습니다.<br>그렇다면 당신이 타고난<br>운의 흐름은 어떨까요?</p><p class="sub">생년월일을 통해 당신의 사주팔자와<br>현재 운의 흐름을 확인해보세요.</p>' +
-      '<div class="stack"><button type="button" class="btn" id="toSaju">내 운명 이야기 시작하기</button><button type="button" class="btn ghost sm" id="toToday">오늘의 사주 보기</button></div></div>' +
-      '<div class="others"><p class="sub">다른 분야도 뽑아 볼까요?</p><div class="chips">' + Object.keys(Tarot.modes).filter(function (k) { return k !== st.m; }).map(function (k) { return '<button type="button" class="chipbtn" data-m="' + k + '">' + esc(LABEL[k]) + '</button>'; }).join('') + '</div></div>' +
-      '<p class="dis' + rv + '"' + d(1.8 + (n + 2) * 0.7) + '><button type="button" class="linkbtn" id="again">같은 종류로 다시 뽑기</button> · <button type="button" class="linkbtn" id="menu">다른 타로 보기</button></p>' +
-      '<p class="dis">타로는 지금의 마음과 흐름을 비추는 거울입니다. 결과는 정해진 미래가 아니라 선택에 따라 달라질 수 있는 가능성으로 읽어 주세요.</p>';
+    h += '<p class="dis">타로는 지금의 마음과 흐름을 비추는 거울입니다. 결과는 정해진 미래가 아니라 선택에 따라 달라질 수 있는 가능성으로 읽어 주세요.</p>' +
+      '<div class="stack"' + (' id="rend"') + '><button type="button" class="btn ghost sm" id="menu">다른 주제 카드 보기</button></div>';
     var el = H.view(h);
     if (animate && !H.reduce) { var rc = H.$('#rc', el); setTimeout(function () { rc.classList.add('flip'); }, 250); }
-    H.$('#toSaju', el).onclick = function () { H.track('tarot_to_saju_click', { mode: st.m, to: 'story' }); H.track('tarot_cta_click', { mode: st.m, to: 'story' }); H.go(next.story); };
-    H.$('#toToday', el).onclick = function () { H.track('tarot_to_saju_click', { mode: st.m, to: 'today' }); H.track('tarot_cta_click', { mode: st.m, to: 'today' }); H.go(next.today); };
-    H.$('#again', el).onclick = function () { H.track('tarot_redraw', { mode: st.m }); H.ss(KEY, fresh(st.m, st.spread)); H.go('#/tarot/play?m=' + st.m + '&sp=' + spreadFor(st.m, st.spread)); };
     H.$('#menu', el).onclick = function () { H.ss(KEY, null); H.go('#/tarot'); };
     H.$$('.chipbtn', el).forEach(function (b) { b.onclick = function () { H.track('tarot_category_select', { mode: b.dataset.m, from: 'result' }); var sp2 = spreadFor(b.dataset.m, st.spread); H.ss(KEY, fresh(b.dataset.m, sp2)); H.go('#/tarot/play?m=' + b.dataset.m + '&sp=' + sp2); }; });
     var end = H.$('#rend', el); if (end && root.IntersectionObserver) { var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { H.track('tarot_result_complete', { mode: st.m, card: card.id }, true); io.disconnect(); } }); io.observe(end); }
@@ -163,16 +157,10 @@
       h += sec(esc(r.label) + ' · ' + esc(r.card.nameKo) + (r.rev ? ' (역방향)' : ''), '<p class="note">' + esc(r.frame) + '을 비추는 카드</p>' + body);
     });
     h += sec('종합 한마디', '<p>“' + esc(rs.advice) + '”</p>', 'one');
-    h += '<div class="bridge' + rv + '"' + d(1.6 + (n + 1) * 0.6) + ' id="rend"><p class="q">카드는 지금의 질문에 답했습니다.<br>그렇다면 당신이 타고난<br>운의 흐름은 어떨까요?</p><p class="sub">생년월일을 통해 당신의 사주팔자와<br>현재 운의 흐름을 확인해보세요.</p>' +
-      '<div class="stack"><button type="button" class="btn" id="toSaju">내 운명 이야기 시작하기</button><button type="button" class="btn ghost sm" id="toToday">오늘의 사주 보기</button></div></div>' +
-      '<div class="others"><p class="sub">다른 배열로도 뽑아 볼까요?</p><div class="chips">' + Object.keys(SP).filter(function (k) { return k !== st.spread; }).map(function (k) { return '<button type="button" class="chipbtn" data-sp2="' + k + '">' + esc(SP[k][0]) + '</button>'; }).join('') + '</div></div>' +
-      '<p class="dis' + rv + '"' + d(1.8 + (n + 2) * 0.6) + '><button type="button" class="linkbtn" id="again">같은 배열로 다시 뽑기</button> · <button type="button" class="linkbtn" id="menu">다른 타로 보기</button></p>' +
-      '<p class="dis">타로는 지금의 마음과 흐름을 비추는 거울입니다. 결과는 정해진 미래가 아니라 선택에 따라 달라질 수 있는 가능성으로 읽어 주세요.</p>';
+    h += '<p class="dis">타로는 지금의 마음과 흐름을 비추는 거울입니다. 결과는 정해진 미래가 아니라 선택에 따라 달라질 수 있는 가능성으로 읽어 주세요.</p>' +
+      '<div class="stack"' + (' id="rend"') + '><button type="button" class="btn ghost sm" id="menu">다른 주제 카드 보기</button></div>';
     var el = H.view(h);
     if (animate && !H.reduce) rs.rows.forEach(function (r, i) { var rc = H.$('#rc' + i, el); setTimeout(function () { rc.classList.add('flip'); }, 250 + i * 450); });
-    H.$('#toSaju', el).onclick = function () { H.track('tarot_to_saju_click', { mode: st.m, to: 'story', spread: st.spread }); H.go(next.story); };
-    H.$('#toToday', el).onclick = function () { H.track('tarot_to_saju_click', { mode: st.m, to: 'today', spread: st.spread }); H.go(next.today); };
-    H.$('#again', el).onclick = function () { H.track('tarot_redraw', { mode: st.m, spread: st.spread }); H.ss(KEY, fresh(st.m, st.spread)); H.go('#/tarot/play?m=' + st.m + '&sp=' + st.spread); };
     H.$('#menu', el).onclick = function () { H.ss(KEY, null); H.go('#/tarot'); };
     [].forEach.call(el.querySelectorAll('[data-sp2]'), function (b) { b.onclick = function () { H.ss(SPREAD_KEY, b.dataset.sp2); H.track('tarot_spread_select', { spread: b.dataset.sp2, from: 'result' }); H.ss(KEY, fresh(st.m, b.dataset.sp2)); H.go('#/tarot/play?m=' + st.m + '&sp=' + spreadFor(st.m, b.dataset.sp2)); }; });
     var end = H.$('#rend', el); if (end && root.IntersectionObserver) { var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { H.track('tarot_result_complete', { mode: st.m, spread: st.spread, cards: rs.rows.map(function (r) { return r.card.id; }).join(',') }, true); io.disconnect(); } }); io.observe(end); }
@@ -190,15 +178,10 @@
       '<p class="rhead' + rv + '"' + d(1.4) + '>' + esc(r.headline) + '</p>';
     r.sections.forEach(function (s, i) { h += '<div class="rsec' + rv + '"' + d(2.2 + i * 0.9) + '><h4>' + esc(s[0]) + '</h4><p>' + esc(s[1]) + '</p></div>'; });
     h += '<div class="rsec one' + rv + '"' + d(5.0) + '><h4>한 줄 조언</h4><p>' + esc(r.oneLine) + '</p></div>' +
-      '<div class="bridge' + rv + '"' + d(5.9) + '><p class="q">카드는 지금의 질문에 답했습니다.<br>그렇다면 당신이 타고난<br>운의 흐름은 어떨까요?</p><p class="sub">생년월일을 통해 당신의 사주팔자와<br>현재 운의 흐름을 확인해보세요.</p>' +
-      '<div class="stack"><button type="button" class="btn" id="toSaju">내 운명 이야기 시작하기</button><button type="button" class="btn ghost sm" id="toToday">오늘의 사주 보기</button></div></div>' +
-      '<p class="dis' + rv + '"' + d(6.2) + '><button type="button" class="linkbtn" id="again">같은 종류로 다시 뽑기</button> · <button type="button" class="linkbtn" id="menu">다른 타로 보기</button></p>' +
-      '<p class="dis">타로는 지금의 마음과 흐름을 비추는 거울입니다. 결과는 정해진 미래가 아니라 선택에 따라 달라질 수 있는 가능성으로 읽어 주세요.</p>';
+      '<p class="dis">타로는 지금의 마음과 흐름을 비추는 거울입니다. 결과는 정해진 미래가 아니라 선택에 따라 달라질 수 있는 가능성으로 읽어 주세요.</p>' +
+      '<div class="stack"' + (' id="rend"') + '><button type="button" class="btn ghost sm" id="menu">다른 주제 카드 보기</button></div>';
     var el = H.view(h);
     if (animate && !H.reduce) { var rc = H.$('#rc', el); setTimeout(function () { rc.classList.add('flip'); }, 250); }
-    H.$('#toSaju', el).onclick = function () { H.track('tarot_to_saju_click', { mode: st.m, to: 'story' }); H.go(next.story); };
-    H.$('#toToday', el).onclick = function () { H.track('tarot_to_saju_click', { mode: st.m, to: 'today' }); H.go(next.today); };
-    H.$('#again', el).onclick = function () { H.track('tarot_redraw', { mode: st.m }); H.ss(KEY, fresh(st.m, st.spread)); H.go('#/tarot/play?m=' + st.m + '&sp=' + spreadFor(st.m, st.spread)); };
     H.$('#menu', el).onclick = function () { H.ss(KEY, null); H.go('#/tarot'); };
     H.track('tarot_result_view', { mode: st.m, rev: c.rev ? 1 : 0, card: card.id });
   }

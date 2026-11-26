@@ -538,7 +538,7 @@
       return today +
         '<div class="tq-fcs">' +
         card('#/today', 'calendar', 'CALENDAR · 무료', '일진 캘린더', '월운 그래프와 날짜별 일진, 내 일정에 맞는 날 고르기', '캘린더 열기') +
-        card('#/tarot', 'tarot', 'FREE TAROT · 무료', '무료 타로', '마음속 질문 하나, 카드 한 장으로 가볍게 확인합니다', '카드 뽑기') +
+        card('#/tarot', 'tarot', 'TAROT CARD · 무료 이벤트 중', '타로 카드', '마음속 질문 하나, 카드 한 장으로 가볍게 확인합니다', '카드 뽑기') +
         card('#/awaken?replay=1&to=timeline', 'ilju_replay', 'ILJU · 무료', '일주 각성 영상 다시 보기', esc(ju) + '일주 · 타고난 기질과 강점을 영상으로 다시 만납니다', '영상 보기') +
         // 신년운세(별도 연도 상품, /report/newyear/) 입구. 보이기·문구는 관리자 › 신년운세 › 공개 범위에서 정하고 /api/newyear/entry 로 받는다(nyEntryHtml).
         // 누르면 지금 사주를 넘겨 바로 풀이가 열린다(아래 [data-ny-go] 처리).
@@ -562,8 +562,8 @@
     var TNm = function (id, h) { return root.ReportV2 && root.ReportV2.TermNotes && (id === 'birth' || id === 'flow' || id === 'now') ? root.ReportV2.TermNotes.mark(h) : h; };
     var build = function (id) { return TNm(id, builders[id]()); };
     // 2026-11-24 홈 구성: 사람들이 먼저 궁금한 '지금'을 위로, 전문 표(태어난 순간)는 아래로. 켜고 끄기는 관리자 설정을 따른다
-    var SEC_ORDER = ['glance', 'now', 'free', 'flow', 'themes', 'birth', 'mine'], SEC_NAME = { now: ['지금 나의 운', '올해 · 이번 달 — 지금 내게 오는 흐름'], free: ['오늘 무료로 보기', '오늘의 일진 · 무료 타로 · 일진 캘린더'], flow: ['인생의 큰 물줄기', '10년마다 바뀌는 계절(대운)과 그 안의 해'], themes: ['더 깊이 읽을 주제', '돈 · 일 · 인연… 궁금한 분야를 골라 펼쳐 보세요'], birth: ['태어난 순간의 명부', '원국표 · 오행 · 십성 — 명리를 아는 분을 위한 기록'] };
-    if (SIMPLE) { SEC_ORDER = ['free', 'glance', 'now', 'flow', 'themes', 'birth', 'mine']; SEC_NAME.free = ['오늘 무료로 보기', '오늘의 일진 · 일진 캘린더 · 무료 타로 — 누구나 바로']; SEC_NAME.now = ['지금 나의 운', '올해와 이번 달 — 핵심 먼저, 자세한 건 펼쳐서']; SEC_NAME.flow = ['인생의 큰 물줄기', '10년마다 바뀌는 계절(대운) · 막대를 누르면 그 10년이 열려요']; }
+    var SEC_ORDER = ['glance', 'now', 'free', 'flow', 'themes', 'birth', 'mine'], SEC_NAME = { now: ['지금 나의 운', '올해 · 이번 달 — 지금 내게 오는 흐름'], free: ['오늘 무료로 보기', '오늘의 일진 · 타로 카드 · 일진 캘린더'], flow: ['인생의 큰 물줄기', '10년마다 바뀌는 계절(대운)과 그 안의 해'], themes: ['더 깊이 읽을 주제', '돈 · 일 · 인연… 궁금한 분야를 골라 펼쳐 보세요'], birth: ['태어난 순간의 명부', '원국표 · 오행 · 십성 — 명리를 아는 분을 위한 기록'] };
+    if (SIMPLE) { SEC_ORDER = ['free', 'glance', 'now', 'flow', 'themes', 'birth', 'mine']; SEC_NAME.free = ['오늘 무료로 보기', '오늘의 일진 · 일진 캘린더 · 타로 카드 — 누구나 바로']; SEC_NAME.now = ['지금 나의 운', '올해와 이번 달 — 핵심 먼저, 자세한 건 펼쳐서']; SEC_NAME.flow = ['인생의 큰 물줄기', '10년마다 바뀌는 계절(대운) · 막대를 누르면 그 10년이 열려요']; }
     secs = secs.map(function (x) { var nm2 = SEC_NAME[x.id]; return nm2 ? Object.assign({}, x, { title: nm2[0], sub: nm2[1] }) : x; }).sort(function (a, b) { var ia = SEC_ORDER.indexOf(a.id), ib = SEC_ORDER.indexOf(b.id); return (ia < 0 ? 50 : ia) - (ib < 0 ? 50 : ib); });
     var builders = { glance: glanceHtml, free: freeHtml, birth: birthHtml, flow: flowHtml, now: nowHtml, themes: themesHtml, mine: mineHtml };
     var heroBg = asset('archive'), pos = Q.assetFocus(cfg, 'archive', mobile);

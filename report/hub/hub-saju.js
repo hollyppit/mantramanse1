@@ -247,8 +247,7 @@
           '<section class="dsec"><h3>분야별로 자세히 보기</h3><p class="dsub">궁금한 분야를 눌러 펼쳐 보세요.</p>' + detail + '</section>' +
           '<section class="actcard" id="d-action"><h3>이날의 행동 처방</h3><h5>하면 좋은 것</h5><div class="chips tg">' + tags(d.todayActions) + '</div><h5>미루면 좋은 것</h5><div class="chips tg avoid">' + tags(d.avoidActions) + '</div><div class="one"><small>이날의 한 문장</small><p>“' + esc(d.closingMessage) + '”</p></div></section>' +
           '<section class="dsec">' + why + '</section>' +
-          '<p class="dis">점수는 선택한 날의 일진이 내 사주에 필요한 기운인지를 따진 값입니다. 사건을 확정하지 않는 참고용 흐름이며, 컨디션은 의학적 진단이 아닌 생활 리듬의 참고입니다.</p>' +
-          '<section class="nextc"><p class="q">' + esc(d.next.q) + '</p><a class="btn" href="' + esc(d.next.to) + '" data-track="today_cta_click" data-p="' + esc(d.next.track) + '">' + esc(d.next.btn) + '</a><a class="btn ghost sm" href="#/my" data-track="fortune_content_click" data-p="from_today_my">MY 운명으로</a></section>'), { keepScroll: cal.draws++ > 0 });
+          '<p class="dis">점수는 선택한 날의 일진이 내 사주에 필요한 기운인지를 따진 값입니다. 사건을 확정하지 않는 참고용 흐름이며, 컨디션은 의학적 진단이 아닌 생활 리듬의 참고입니다.</p>' ), { keepScroll: cal.draws++ > 0 });
         cal.bind(el);
         if (root.MantraSignalColors) { try { root.MantraSignalColors.paint(el); } catch (e) { } }   // 좋은 신호·주의할 신호 글자 색
         if (cal.pickScroll) { cal.pickScroll = false; var mb = $('#mc-lv-month', el); if (mb && mb.scrollIntoView) setTimeout(function () { mb.scrollIntoView({ block: 'start', behavior: H.reduce ? 'auto' : 'smooth' }); }, 60); }
