@@ -97,6 +97,9 @@
     if (use.activation) bits.push('주무기 발현도 ' + a.levelK);
     var U = a.useFav; if (use.activation && U) bits.push('활용 유리도 ' + U.n);   // 5판: 강해진 주무기를 쓰는 게 명식 전체에 득인가(발현도·흐름 등급과 따로)
     if (use.favor && r.favor) bits.push('흐름 ' + r.favor.n);
+    // 8판: 시기별 핵심 역량(운이 원국과 실제로 맞물려 켜는 힘) — 타고난 주무기와의 관계(강화·보완·전환)
+    var cp = use.activation && r.core && r.core.pick, cpk = cp ? cp.rel : (use.activation && r.core ? 'none' : '');
+    if (cp) bits.push('시기 역량 ' + EL_K[cp.el] + '(' + cp.groupName + ')·' + cp.relK);
     var cls = /strong|on|shaky/.test(a.level) ? 'on' : /sup|quiet/.test(a.level) ? 'prep' : 'guard';   // 활성도 단계에 맞는 문장(조용한 때를 '좋은 때'로 읽지 않게)
     // 2판(2026-11-26): 주제 × 작용 유형(강화·지원·발산·조정·조용함) + 주제 × 들어오는 십성 — 같은 해라도 주제마다, 해마다 다른 풀이
     var typ = !a.types.length ? 'quiet' : (a.types.indexOf('adjust') >= 0 && cls !== 'on') ? 'adjust' : a.types[0];
@@ -108,10 +111,12 @@
     var rk = (a.roles.stem || '—') + '|' + (a.roles.branch || '—');   // 지원(용신 역할)은 앞 줄과 같으면 생략
     var sup = use.tenGod && (a.roles.stem || a.roles.branch) && !(B.seenLens && B.seenLens['r' + rk]) ? ' ' + fill(P.sup, { s: a.roles.stem || '—', b: a.roles.branch || '—' }) : ''; B.lastRole = rk; if (B.seenLens) B.seenLens['r' + rk] = 1;
     var cc = a.constraints.filter(function (c) { return !(B.seenLens && B.seenLens['c' + c]) && !(topic === 'self' && /이미 많은 쪽/.test(c)); })[0];   // 같은 제약은 블록 안에서 처음 한 번만
+    var cfn = cp ? (WD().card && WD().card.fn ? WD().card.fn[cp.group] : cp.groupName) : '', cls2 = cpk && d.coreLens ? fill(d.coreLens[topic][cpk] || '', { f: cfn }) : '';
+    if (cls2 && B.seenLens) { if (B.seenLens['k' + cls2]) cls2 = ''; else B.seenLens['k' + cls2] = 1; }   // 같은 블록 안에서는 바뀔 때만
     var ufc = U && use.activation && d.ufLens ? (/good/.test(U.k) ? 'good' : U.k === 'mid' ? 'mid' : 'bad') : '', ufs = ufc ? d.ufLens[topic][ufc] : '';
     if (ufs && B.seenLens) { if (B.seenLens['f' + ufs]) ufs = ''; else B.seenLens['f' + ufs] = 1; }   // 활용 유리도 문장은 바뀔 때만
     var con = cc ? ' ' + fill(P.con, { c: cc }) : ''; if (cc) { B.hasCon = true; if (B.seenLens) B.seenLens['c' + cc] = 1; }
-    return '<li><b>' + esc(label + ' ' + r.gz) + '</b>' + (bits.length ? ' <span class="dp-mi">' + esc(bits.join(' · ')) + '</span>' : '') + '<br>' + esc((lens + (ufs ? ' ' + ufs : '') + dir + sup + con).trim()) + '</li>';
+    return '<li><b>' + esc(label + ' ' + r.gz) + '</b>' + (bits.length ? ' <span class="dp-mi">' + esc(bits.join(' · ')) + '</span>' : '') + '<br>' + esc((lens + (cls2 ? ' ' + cls2 : '') + (ufs ? ' ' + ufs : '') + dir + sup + con).trim()) + '</li>';
   }
   function timingBlock(B, topic, use, w) {
     var tl = B.tl, d = DD(); if (!tl || !w) return '';
