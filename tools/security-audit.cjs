@@ -73,7 +73,7 @@ function run() {
   const migs = ls('supabase/migrations').filter(x => /^2026111[5-9]|^202611[2-3]/.test(x) && x.endsWith('.sql')).sort();
   for (const m of migs) {
     const sql = rd('supabase/migrations/' + m).replace(/--[^\n]*/g, '');
-    const tables = [...sql.matchAll(/create table if not exists public\.(\w+)/g)].map(x => x[1]);
+    const tables = [...sql.matchAll(/create (?:unlogged )?table if not exists public\.(\w+)/g)].map(x => x[1]);
     for (const t of tables) {
       add('D DB', m + ' · ' + t + ' RLS', new RegExp('alter table public\\.' + t + '\\s+enable row level security').test(sql), '');
       add('D DB', m + ' · ' + t + ' 권한 회수', new RegExp('revoke all on [^;]*public\\.' + t + '\\b[^;]*from anon, authenticated').test(sql), '');

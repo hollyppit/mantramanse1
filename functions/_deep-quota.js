@@ -5,6 +5,7 @@
 //   · 사람·IP 횟수는 풀이를 실제로 받았을 때만 줄어든다(실패하면 차감하지 않는다).
 //   · 하루는 한국 시간 자정에 바뀐다.
 // 설정은 기존 주역 AI 설정 키(iching:ai)에 함께 둔다(관리자 주역 탭의 "AI 깊이 읽기" 상자).
+import { rateReserve, rateAdd } from './_rate.js';
 const K_CFG = 'iching:ai';
 export const DEFAULT_DEEP = { enabled: false, tarotEnabled: false, dailyLimit: 200, perIpLimit: 6, perDevice: 2, maxOutputTokens: 1400 };
 const num = (v, lo, hi, d) => (Number.isFinite(+v) ? Math.max(lo, Math.min(hi, Math.round(+v))) : d);
@@ -35,8 +36,17 @@ export async function remaining(kv, cfg, ctx) {
   return { left: Math.max(0, cfg.perDevice - mine), limit: cfg.perDevice };
 }
 // 호출 전: 한도 확인 + 사이트 전체 시도 1 증가. 반환 slot 은 성공 뒤 commit 에 넘긴다.
+// 2026-11-26 보안 3차: ctx.env 가 있으면 DB 에서 세 횟수(전체·기기·IP)를 한꺼번에 올리며 판정한다(동시에 여러 번 눌러도 한도를 못 넘음).
+//   기기·IP 는 실패하면 release 로 되돌린다(실패하면 차감 안 함 — 예전 규칙 그대로). 화면 표시용 KV 숫자는 예전처럼 적는다. DB 에 닿지 못하면 예전 KV 방식.
 export async function reserve(kv, cfg, ctx) {
   const w = await who(ctx), k = keys(w, kstDay());
+  if (ctx && ctx.env) {
+    const hit = await rateReserve(ctx.env, [k.all, k.dev, k.ip], [cfg.dailyLimit, cfg.perDevice, cfg.perIpLimit], 172800);
+    if (hit === 1) return { ok: false, error: 'daily-limit', status: 429 };
+    if (hit === 2) return { ok: false, error: 'device-limit', status: 429 };
+    if (hit === 3) return { ok: false, error: 'ip-limit', status: 429 };
+    if (hit === 0) { try { const all = +(await rd(kv, k.all, 0)) || 0; await kv.put(k.all, JSON.stringify(all + 1), TTL); } catch { } return { ok: true, k, db: ctx.env }; }
+  }
   const all = +(await rd(kv, k.all, 0)) || 0, mine = +(await rd(kv, k.dev, 0)) || 0, ipN = +(await rd(kv, k.ip, 0)) || 0;
   if (all >= cfg.dailyLimit) return { ok: false, error: 'daily-limit', status: 429 };
   if (mine >= cfg.perDevice) return { ok: false, error: 'device-limit', status: 429 };
@@ -44,7 +54,11 @@ export async function reserve(kv, cfg, ctx) {
   await kv.put(k.all, JSON.stringify(all + 1), TTL);
   return { ok: true, k };
 }
-// 풀이를 실제로 내준 뒤: 사람·IP 횟수 1 증가. 남은 횟수를 돌려준다.
+// 풀이를 못 내줬을 때(DB 로 센 경우만): 기기·IP 횟수를 되돌린다. 전체 시도 수는 비용 차단용이라 되돌리지 않는다.
+export async function release(slot) {
+  if (slot && slot.db) { await rateAdd(slot.db, slot.k.dev, -1, 172800); await rateAdd(slot.db, slot.k.ip, -1, 172800); }
+}
+// 풀이를 실제로 내준 뒤: 사람·IP 횟수 1 증가(DB 로 셌으면 화면 표시용 KV 만). 남은 횟수를 돌려준다.
 export async function commit(kv, cfg, slot) {
   const mine = (+(await rd(kv, slot.k.dev, 0)) || 0) + 1, ipN = (+(await rd(kv, slot.k.ip, 0)) || 0) + 1;
   await kv.put(slot.k.dev, JSON.stringify(mine), TTL); await kv.put(slot.k.ip, JSON.stringify(ipN), TTL);

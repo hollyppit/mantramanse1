@@ -8,7 +8,7 @@ import { generate as realGenerate } from './api/movingtoon-reading.js';
 import { loadSettings } from './_interpretation-store.js';
 
 // 횟수 제한은 타로 깊이 읽기와 같이 쓰는 _deep-quota.js(기기당 하루 N회 · 한국 시간 자정 · 받은 풀이만 차감)를 따른다.
-import { loadDeepConfig, saveDeepConfig, providerOf, reserve, commit, usedToday } from './_deep-quota.js';
+import { loadDeepConfig, saveDeepConfig, providerOf, reserve, commit, release, usedToday } from './_deep-quota.js';
 
 export async function loadAiConfig(kv) { return loadDeepConfig(kv); }
 export async function aiPublicState(kv, env) { const c = await loadAiConfig(kv); return { enabled: !!c.enabled && !!providerOf(env) }; }
@@ -26,18 +26,18 @@ export async function detail(kv, env, body, ctx = {}) {
   if (!provider) return { ok: false, error: 'ai-unavailable', status: 503 };
   if (!body || body.consent !== true) return { ok: false, error: 'consent-required', status: 400 };
   const base = await interpret(kv, body); if (!base.ok) return base; // 개방 전·잘못된 입력·미게시 문구는 여기서 걸러진다
-  const slot = await reserve(kv, cfg, { ip: ctx.ip, device: ctx.device || body.device }); if (!slot.ok) return slot;
+  const slot = await reserve(kv, cfg, { ip: ctx.ip, device: ctx.device || body.device, env }); if (!slot.ok) return slot;
   const input = A.buildInput(base.result), payload = JSON.stringify(input);
   // 비용 상한: 사이트의 기존 AI 설정(maxRequestCost·단가)을 그대로 따른다. 단가를 모르는데 상한이 있으면 호출하지 않는다.
   let settings = {}; try { settings = await loadSettings(kv); } catch { settings = {}; }
   const est = settings.inputPricePerMillion != null && settings.outputPricePerMillion != null ? ((new TextEncoder().encode(payload + A.SYSTEM).length * 2 + 512) * settings.inputPricePerMillion + cfg.maxOutputTokens * settings.outputPricePerMillion) / 1e6 : null;
-  if (settings.maxRequestCost != null && (est == null || est * 2 > settings.maxRequestCost)) return { ok: false, error: 'cost-limit', status: 429 };
+  if (settings.maxRequestCost != null && (est == null || est * 2 > settings.maxRequestCost)) { await release(slot); return { ok: false, error: 'cost-limit', status: 429 }; }
   let note = '', lastErrors = [];
   for (let attempt = 0; attempt < 2; attempt++) {
-    let out; try { out = await gen(env, provider, payload, A.SYSTEM + note, { ...settings, maxOutputTokens: cfg.maxOutputTokens, telemetryPurpose: 'iching-detail', disableThinking: true }); } catch (e) { return { ok: false, error: 'ai-failed', status: 502 }; }
+    let out; try { out = await gen(env, provider, payload, A.SYSTEM + note, { ...settings, maxOutputTokens: cfg.maxOutputTokens, telemetryPurpose: 'iching-detail', disableThinking: true }); } catch (e) { await release(slot); return { ok: false, error: 'ai-failed', status: 502 }; }
     const d = A.parse(out && out.text), v = d ? A.validate(d, input, base.result) : { ok: false, errors: ['JSON 파싱 실패'] };
     if (v.ok) return { ok: true, detail: A.clean(d), attempts: attempt + 1, quota: await commit(kv, cfg, slot) };
     lastErrors = v.errors; note = '\n[재작성 요청] 직전 출력이 다음 규칙을 어겼습니다. 같은 JSON 형식으로 다시 쓰되 이 문제를 모두 고치십시오: ' + lastErrors.slice(0, 6).join(' / ');
   }
-  return { ok: false, error: 'ai-invalid', status: 502 };
+  await release(slot); return { ok: false, error: 'ai-invalid', status: 502 };
 }

@@ -10,6 +10,7 @@ import { json, isAdmin } from './_lib.js';
 import { memberOf, sbRest, supabaseReady } from './_commerce.js';
 import { readConsents, requiredOk } from './_consent.js';
 import { cleanPublicBase, publicUrl } from './_media.js';
+import { rateReserve } from './_rate.js';
 
 export { json, isAdmin, sbRest, supabaseReady, memberOf };
 export const CATS = { wealth: '재물', love: '연애', work: '직장', people: '인간관계', daily: '일상' };
@@ -57,8 +58,10 @@ export const cleanTags = (tags, body) => {
 
 // 하루 횟수 제한(KV). 넘으면 true
 export async function overLimit(env, key, max) {
-  const kv = env.GLOSSARY_KV; if (!kv) return false;
   const k = 'cm:rate:' + key + ':' + new Date().toISOString().slice(0, 10);
+  // 2026-11-26 보안 3차: DB 에서 한 번에 센다(동시에 보낸 글·인증 시도도 정확히 셈). DB 에 닿지 못하면 아래 예전 KV 방식
+  const hit = await rateReserve(env, [k], [max], 90000); if (hit === 0) return false; if (hit === 1) return true;
+  const kv = env.GLOSSARY_KV; if (!kv) return false;
   try { const n = +(await kv.get(k)) || 0; if (n >= max) return true; await kv.put(k, String(n + 1), { expirationTtl: 90000 }); } catch { }
   return false;
 }

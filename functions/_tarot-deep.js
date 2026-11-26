@@ -7,7 +7,7 @@ import '../report/iching/quality.js';
 import '../report/v2/tarot-deep-ai.js';
 import { generate as realGenerate } from './api/movingtoon-reading.js';
 import { loadSettings } from './_interpretation-store.js';
-import { loadDeepConfig, providerOf, reserve, commit } from './_deep-quota.js';
+import { loadDeepConfig, providerOf, reserve, commit, release } from './_deep-quota.js';
 
 const MODES = ['today', 'love', 'money', 'work'];
 const SPREAD_N = { one: 1, three: 3, four: 4 };
@@ -37,13 +37,13 @@ export async function tarotDetail(kv, env, body, ctx = {}) {
   let settings = {}; try { settings = await loadSettings(kv); } catch { settings = {}; }
   const est = settings.inputPricePerMillion != null && settings.outputPricePerMillion != null ? ((new TextEncoder().encode(payload + A.SYSTEM).length * 2 + 512) * settings.inputPricePerMillion + cfg.maxOutputTokens * settings.outputPricePerMillion) / 1e6 : null;
   if (settings.maxRequestCost != null && (est == null || est * 2 > settings.maxRequestCost)) return { ok: false, error: 'cost-limit', status: 429 };
-  const slot = await reserve(kv, cfg, { ip: ctx.ip, device: ctx.device || body.device }); if (!slot.ok) return slot;
+  const slot = await reserve(kv, cfg, { ip: ctx.ip, device: ctx.device || body.device, env }); if (!slot.ok) return slot;
   let note = '';
   for (let attempt = 0; attempt < 2; attempt++) {
-    let out; try { out = await gen(env, provider, payload, A.SYSTEM + note, { ...settings, maxOutputTokens: cfg.maxOutputTokens, telemetryPurpose: 'tarot-deep', disableThinking: true }); } catch (e) { return { ok: false, error: 'ai-failed', status: 502 }; }
+    let out; try { out = await gen(env, provider, payload, A.SYSTEM + note, { ...settings, maxOutputTokens: cfg.maxOutputTokens, telemetryPurpose: 'tarot-deep', disableThinking: true }); } catch (e) { await release(slot); return { ok: false, error: 'ai-failed', status: 502 }; }
     const d = A.parse(out && out.text), v = d ? A.validate(d, input, c.deck) : { ok: false, errors: ['JSON 파싱 실패'] };
     if (v.ok) return { ok: true, detail: A.clean(d), attempts: attempt + 1, quota: await commit(kv, cfg, slot) };
     note = '\n[재작성 요청] 직전 출력이 다음 규칙을 어겼습니다. 같은 JSON 형식으로 다시 쓰되 이 문제를 모두 고치십시오: ' + v.errors.slice(0, 6).join(' / ');
   }
-  return { ok: false, error: 'ai-invalid', status: 502 };
+  await release(slot); return { ok: false, error: 'ai-invalid', status: 502 };
 }

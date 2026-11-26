@@ -14,6 +14,7 @@
 import { json, isAdmin } from './_lib.js';
 import { memberOf, sbRest, supabaseReady } from './_commerce.js';
 import { looksStaff, staffOf } from './_staff.js';
+import { rateAdd } from './_rate.js';
 
 export const STAGES = ['dev', 'beta', 'public'];
 export const STAGE_LABEL = { dev: '개발 중', beta: '비공개 베타', public: '정식 공개' };
@@ -115,7 +116,9 @@ export async function authThrottle(request, env) {
   if (n >= AUTH_FAIL_MAX) return new Response(JSON.stringify({ error: '인증 실패가 너무 많습니다. 1시간 뒤에 다시 시도해 주세요', need: 'auth-throttle' }), { status: 429, headers: { ...HDR, 'content-type': 'application/json; charset=utf-8', 'retry-after': '3600' } });
   // 2026-11-26: 예약 작업 열쇠(RAG_SCHEDULER_SECRET, agentic-rag·reading-blocks)도 맞는 열쇠로 본다 — 미들웨어가 이제 모든 /api/* 에 이 검사를 건다
   const good = isAdmin(request, env) || (env.RAG_SCHEDULER_SECRET && isAdmin(request, { ADMIN_PASSWORD: env.RAG_SCHEDULER_SECRET })) || (looksStaff(request) && await staffOf(request, env));
-  if (!good) { try { await env.GLOSSARY_KV.put(k, String(n + 1), { expirationTtl: 3700 }); } catch { } }
+  // 2026-11-26 보안 3차: 틀린 횟수는 DB 에서 한 번에 센다 — KV 만 쓰면 한꺼번에 보낸 수백 번이 1번으로 세져 제한이 안 걸렸다.
+  //   판정은 빠른 KV 숫자로 하고(맞는 열쇠 요청마다 DB 를 부르지 않게), DB 가 센 정확한 숫자를 KV 에 적는다. DB 에 닿지 못하면 예전처럼 KV 만.
+  if (!good) { const db = await rateAdd(env, k, 1, 3700); try { await env.GLOSSARY_KV.put(k, String(db != null ? Math.max(db, n + 1) : n + 1), { expirationTtl: 3700 }); } catch { } }
   return null;
 }
 
