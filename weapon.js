@@ -16,7 +16,7 @@
    · 사용: MantraWeapon.analyze(M, ch) · MantraWeapon.luck(M, ch, pillar, kind) · MantraWeapon.timeline(M, ch, { fromY, years, wolY }) */
 (function (G) {
   'use strict';
-  var VERSION = 'weapon-20261126-9';   // 7판 보완: 묶인 후보도 구조적 중요도가 2점 이상 높으면 1순위 가능   // 7판: 탭 사이 일관성(기반 역량·보조 역량·오행·강약 판정과의 관계·모순 재검토 표시), 선정 불변   // 6판(선정): 지지 중심 경로·월령 장악·사령·지지 병존, 구조적 중요도 순위(투출 가점 없음), 생으로 이어지는 보조 역량   // 5판: 발현 강도(강한 주무기 재강화 그대로 반영)와 활용 유리도(용신 역할·강약·관련 십성 작용) 분리   // 4판(운): 발현 단계 이름 통일·오행 축/십성 축/합충 한 번·유형별 분기·작용 유형 4종   // 3판: 생극제화(십성 상호작용 성립) 근거·오행+십신 둘 다 있어야 확정·발현 조합(짝 십성)·운의 조합형   // 판정 2판: 격국·상신 구조 조건, 십신형 경로, 파격 제약, 유형(오행형·십신형·복합형), 표시 이름(주무기·잠정·미확정)
+  var VERSION = 'weapon-20261126-10';   // 8판: 시기별 핵심 역량(운이 원국과 실제로 작용해 켜는 오행·십성)과 타고난 주무기의 관계(강화·보완·전환)   // 7판 보완: 묶인 후보도 구조적 중요도가 2점 이상 높으면 1순위 가능   // 7판: 탭 사이 일관성(기반 역량·보조 역량·오행·강약 판정과의 관계·모순 재검토 표시), 선정 불변   // 6판(선정): 지지 중심 경로·월령 장악·사령·지지 병존, 구조적 중요도 순위(투출 가점 없음), 생으로 이어지는 보조 역량   // 5판: 발현 강도(강한 주무기 재강화 그대로 반영)와 활용 유리도(용신 역할·강약·관련 십성 작용) 분리   // 4판(운): 발현 단계 이름 통일·오행 축/십성 축/합충 한 번·유형별 분기·작용 유형 4종   // 3판: 생극제화(십성 상호작용 성립) 근거·오행+십신 둘 다 있어야 확정·발현 조합(짝 십성)·운의 조합형   // 판정 2판: 격국·상신 구조 조건, 십신형 경로, 파격 제약, 유형(오행형·십신형·복합형), 표시 이름(주무기·잠정·미확정)
   var EL_K = ['목', '화', '토', '금', '수'], EL_H = ['木', '火', '土', '金', '水'];
   var GN = ['비겁', '식상', '재성', '관성', '인성'];
   var POS = ['year', 'month', 'day', 'hour'], POSK = { year: '년', month: '월', day: '일', hour: '시', luck: '운' };
@@ -530,12 +530,53 @@
     return f === 'good' ? 'combo-other' : 'combo-rest';
   }
 
+  // ── 8판(2026-11-26) 시기별 핵심 역량: 타고난 주무기(원국, 운에 따라 바뀌지 않음)와 따로, 대운·세운이 실제로 켜는 오행·십성 ──
+  //  (기준: 3점 이상. 동점이면 둘째를 '함께 켜지는 역량'으로)
+  //  후보: 운 천간 오행 · 운 지지 정기 오행 · 운이 끼어 완성한 삼합/방합 오행
+  //  들어왔다는 것만으로 고르지 않는다 — 원국과의 실제 작용 점수(2점 이상만 후보):
+  //    원국 지지 뿌리(정기 +2 / 여기·중기 +1) · 원국 천간에 같은 기운 +1 · 운 안의 뿌리(천간이 운 지지에 통근) +1 · 운 천간·지지 같은 기운 +1
+  //    지지 삼합·방합 완성 +2 · 세력 있는 원국 십성과 생으로 이어짐 +1 · 운 천간이 원국과 합으로 묶임(합화 불성립)·충 −1 · 운 지지가 원국과 충 −1
+  //  주무기와의 관계: 같은 오행 = 강화 · 낳음/이어 받음/다스림 = 보완 · 주무기를 누름 = 전환. 점수 산식·용신·주무기 선정은 그대로 읽기만
+  var _trc = typeof WeakMap === 'function' ? new WeakMap() : null;
+  function trOf(M, ch) { var t = _trc && _trc.get(ch); if (t !== undefined && _trc) return t; try { t = G.MantraTenGodRoles && G.MantraTenGodRoles.analyze ? G.MantraTenGodRoles.analyze(M, ch) : null; } catch (e) { t = null; } if (_trc) _trc.set(ch, t); return t; }
+  var GEN_NAME = [['', '비겁생식상', '', '', ''], ['', '', '식상생재', '', ''], ['', '', '', '재생관', ''], ['', '', '', '', '관인상생'], ['인성생비겁', '', '', '', '']];
+  var CORE_MIN = 3;   // 3점 이상만 시기별 핵심 역량(2점 이하 = 단순 유입에 가까움 → 타고난 주무기 중심)
+  var CORE_REL = { same: 'boost', gen: 'fill', out: 'fill', ctrled: 'fill', ctrl: 'shift' }, CORE_REL_K = { boost: '강화', fill: '보완', shift: '전환' };
+  function periodCore(M, ch, p, wMain) {
+    var P = ch.pillars, ds = P.day.s, dEl = M.stemEl(ds), se = M.stemEl(p.s), bMain = M.mainHidden(p.b), be = M.stemEl(bMain);
+    var rr = []; try { rr = M.luckRelations(ch, p).rels || []; } catch (e) { rr = []; }
+    var TR = trOf(M, ch), grp = TR && TR.groups || [], roles = ch.unified && ch.unified.roles || {};
+    var monthEl = M.stemEl(M.mainHidden(P.month.b));
+    var cands = [{ el: se, src: 'stem' }];
+    if (be !== se) cands.push({ el: be, src: 'branch' });
+    rr.filter(function (r) { return r.kind === 'branch' && /삼합|방합/.test(r.type) && r.el != null && r.members.indexOf('luck') >= 0; }).forEach(function (r) { if (!cands.some(function (c) { return c.el === r.el; })) cands.push({ el: r.el, src: 'hap', hap: r.name }); else cands.forEach(function (c) { if (c.el === r.el) c.hap = r.name; }); });
+    var scored = cands.map(function (c) {
+      var e = c.el, pts = 0, why = [], g = mod(e - dEl, 5);
+      var rootDeep = [], rootAny = [];
+      POS.forEach(function (k) { var q = P[k]; if (!q) return; var H = M.HIDDEN[q.b], Lb = M.hiddenLabels(q.b); H.forEach(function (h, i) { if (M.stemEl(h[0]) === e) (Lb[i] === '정기' ? rootDeep : rootAny).push(POSK[k] + '지 ' + M.BR[q.b]); }); });
+      if (rootDeep.length) { pts += 2; why.push({ k: 'natalRoot', v: 2, at: rootDeep }); } else if (rootAny.length) { pts += 1; why.push({ k: 'natalRootS', v: 1, at: rootAny }); }
+      var nStem = POS.filter(function (k) { return P[k] && M.stemEl(P[k].s) === e; }); if (nStem.length) { pts += 1; why.push({ k: 'natalStem', v: 1, at: nStem.map(function (k) { return POSK[k] + '간 ' + M.STEM[P[k].s]; }) }); }
+      if (c.src === 'stem' && M.HIDDEN[p.b].some(function (h) { return M.stemEl(h[0]) === e; })) { pts += 1; why.push({ k: 'selfRoot', v: 1 }); }
+      if (se === be && e === se) { pts += 1; why.push({ k: 'pure', v: 1 }); }
+      if (c.hap) { pts += 2; why.push({ k: 'hap', v: 2, name: c.hap }); }
+      var links = []; grp.forEach(function (x) { if (x.g === g || !/보통|강함|과다/.test(x.force || '')) return; var nm = GEN_NAME[g][x.g] || GEN_NAME[x.g][g]; if (nm) links.push(nm); });
+      if (links.length) { pts += 1; why.push({ k: 'link', v: 1, names: links.slice(0, 2) }); }
+      if (c.src === 'stem') { var bad = rr.filter(function (r) { return r.kind === 'stem' && r.members.indexOf('luck') >= 0 && (r.type === '천간충' || (r.type === '천간합' && !((monthEl === r.el || mod(monthEl + 1, 5) === r.el) && r.el === e))); }); if (bad.length) { pts -= 1; why.push({ k: 'stemBlock', v: -1, names: bad.map(function (r) { return r.name; }) }); } }
+      if (c.src === 'branch') { var bc = rr.filter(function (r) { return r.kind === 'branch' && r.type === '충' && r.members.indexOf('luck') >= 0; }); if (bc.length) { pts -= 1; why.push({ k: 'branchClash', v: -1, names: bc.map(function (r) { return r.name; }) }); } }
+      return { el: e, elK: EL_K[e], group: g, groupName: GN[g], src: c.src, hap: c.hap || null, pts: pts, why: why, role: String(roles[e] || '').replace(/^조건부 /, ''), tg: c.src === 'stem' ? M.tenGod(ds, p.s) : c.src === 'branch' ? M.tenGod(ds, bMain) : '' };
+    }).sort(function (a, b) { return (b.pts - a.pts) || ((a.src === 'stem' ? 0 : 1) - (b.src === 'stem' ? 0 : 1)); });
+    var top = scored[0], ok = top && top.pts >= CORE_MIN && top.why.some(function (x) { return /natalRoot|natalRootS|hap|selfRoot|natalStem/.test(x.k); });
+    var res = { pick: ok ? top : null, also: ok && scored[1] && scored[1].pts === top.pts ? scored[1] : null, cands: scored, min: CORE_MIN };
+    if (ok && wMain) [res.pick, res.also].forEach(function (x) { if (!x) return; var rl = REL_OF(x.el, wMain.el); x.relRaw = rl; x.rel = CORE_REL[rl]; x.relK = CORE_REL_K[x.rel]; });
+    return res;
+  }
   function luck(M, ch, p, kind) {
     var A = analyze(M, ch); if (!A.ok || !p) return null;
     var list = A.weapons.length ? A.weapons : A.complex; if (!list.length) return { kind: kind, gz: M.gzName(p), none: true, favor: favor(M, p) };
     var acts = list.slice(0, CFG.maxWeapons).map(function (w) { return luckOne(M, ch, w, p); });
     var best = acts.slice().sort(function (a, b) { return a.ord - b.ord; })[0], fv = favor(M, p);
-    return { kind: kind, gz: M.gzName(p), s: p.s, b: p.b, acts: acts, best: best, favor: fv, read: readPair(best, fv) };
+    var core = null; try { core = periodCore(M, ch, p, list[0]); } catch (e) { core = null; }
+    return { kind: kind, gz: M.gzName(p), s: p.s, b: p.b, acts: acts, best: best, favor: fv, read: readPair(best, fv), core: core };
   }
 
   function timeline(M, ch, opt) {
@@ -552,7 +593,7 @@
     };
   }
 
-  var api = { VERSION: VERSION, CFG: CFG, ACT: ACT, KIND_K: KIND_K, crossCheck: crossCheck, TYPE_K: TYPE_K, PLUS_K: PLUS_K, analyze: analyze, luck: luck, timeline: timeline, favor: favor, readPair: readPair, judge: judge, sig: sig, _elementFacts: elementFacts };
+  var api = { VERSION: VERSION, CFG: CFG, ACT: ACT, KIND_K: KIND_K, crossCheck: crossCheck, periodCore: periodCore, TYPE_K: TYPE_K, PLUS_K: PLUS_K, analyze: analyze, luck: luck, timeline: timeline, favor: favor, readPair: readPair, judge: judge, sig: sig, _elementFacts: elementFacts };
   G.MantraWeapon = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -1,0 +1,73 @@
+{
+ "n": 600,
+ "periods": 11560,
+ "pick": 10346,
+ "none": 1214,
+ "also": 1383,
+ "rel": {
+  "전환": 1771,
+  "보완": 5658,
+  "강화": 2917
+ },
+ "src": {
+  "branch": 2271,
+  "stem": 7691,
+  "hap": 384
+ },
+ "pts": {
+  "3": 3417,
+  "4": 3949,
+  "5": 1870,
+  "6": 942,
+  "7": 131,
+  "8": 37
+ },
+ "sameAsWeapon": 2917,
+ "examples": [
+  {
+   "chart": "1950-1-1 0시 F",
+   "weapon": "수(관성)",
+   "daeun": "庚辰",
+   "core": "토(식상) 4점 전환",
+   "why": [
+    "natalRoot+2",
+    "natalStem+1",
+    "link+1"
+   ]
+  },
+  {
+   "chart": "1957-6-12 3시 M",
+   "weapon": "화(식상)",
+   "daeun": "壬寅",
+   "core": "목(비겁) 4점 보완",
+   "why": [
+    "natalRoot+2",
+    "natalStem+1",
+    "link+1"
+   ]
+  },
+  {
+   "chart": "1964-11-23 6시 F",
+   "weapon": "수(관성)",
+   "daeun": "辛未",
+   "core": "목(인성) 6점 보완",
+   "why": [
+    "natalRoot+2",
+    "natalStem+1",
+    "hap+2",
+    "link+1"
+   ]
+  },
+  {
+   "chart": "1971-4-6 9시 M",
+   "weapon": "수(식상)",
+   "daeun": "戊子",
+   "core": "수(식상) 4점 강화",
+   "why": [
+    "natalRoot+2",
+    "natalStem+1",
+    "link+1"
+   ]
+  }
+ ]
+}

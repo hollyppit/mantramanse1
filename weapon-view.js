@@ -13,7 +13,7 @@
   var esc0 = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var W = function () { return G.MantraWeapon; }, D = function () { return G.MantraWeaponData; };
   var EC = ['var(--wood,#2FA866)', 'var(--fire,#E5533D)', 'var(--earth,#C99A3B)', 'var(--metal,#8E9AAF)', 'var(--water,#3B6FD8)'];
-  var CSS = '.wp{display:grid;gap:10px}.wp-more{margin-top:6px}.wp-more>summary{cursor:pointer;padding:4px 0}.wp-cross{border-top:1px dashed var(--line);padding-top:8px;margin-top:4px}.wp-tri{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;margin:6px 0}.wp-tc{flex:1 1 150px;border:1px solid var(--line);border-radius:10px;padding:6px 8px;display:flex;flex-direction:column;gap:2px;font-size:.82rem}.wp-tc.m{border-color:var(--wc,#888);background:color-mix(in srgb,var(--wc,#888) 10%,var(--surface,#fff))}.wp-arr{align-self:center;color:var(--ink-3)}.wp-fl{border-radius:6px;padding:0 5px;font-size:.7rem;font-weight:700;border:1px solid var(--line)}.wp-fl.review{border-color:#c0392b;color:#c0392b}.wp-fl.check{border-color:#c9a227;color:#8a6d0f}.wp-fl.note{color:var(--ink-3)}.wp-u{border-radius:6px;padding:1px 4px;font-size:.68rem;border:1px solid var(--line);color:var(--ink-2)}.wp-u.u-good,.wp-u.u-good2{border-color:#2f7bd6;color:#1d5aa6}.wp-u.u-adj{border-color:#c9a227;color:#8a6d0f}.wp-u.u-bad{border-color:#b04a8a;color:#8a2f68}.wp-mix{font-size:.86rem;font-weight:600;color:var(--ink);margin:2px 0 4px!important}.wp-act{font-size:.84rem;margin-top:4px!important;color:var(--ink)}.wp-core{font-size:.9rem;line-height:1.65;margin:2px 0 6px!important;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,var(--wc,#888) 10%,var(--surface,#fff))}.wp-core b{color:var(--ink)}.wp-cb{border-top:1px solid var(--line);padding:6px 0 2px}.wp-ct{font-size:.78rem!important;font-weight:700;color:var(--ink-3);margin:0 0 2px!important}.wp-cn{display:inline-block;min-width:1.4em;color:var(--wi,var(--ink-2))}.wp-kind{border-radius:6px;padding:1px 6px;font-size:.78rem;background:var(--surface-2);color:var(--ink)}.wp-kind.k-boost{background:var(--wi,#555);color:#fff}.wp-kind.k-assist{border:1px solid var(--wc,#888);background:transparent}.wp-kind.k-limit{text-decoration:underline dotted}.wp-plan{font-size:.84rem;margin-top:4px!important;color:var(--ink)}.wp-det .wp-ev li{margin:1px 0}.wp p{margin:0;line-height:1.65}.wp-head{font-weight:800;font-size:1rem;line-height:1.55}' +
+  var CSS = '.wp{display:grid;gap:10px}.wp-rel{border-radius:6px;padding:0 5px;font-size:.7rem}.wp-rel.r-boost{background:var(--wi,#555);color:#fff}.wp-rel.r-fill{border:1px solid var(--wc,#888)}.wp-rel.r-shift{background:#f3e3c3;color:#7a5600}.wp-cross{border-top:1px dashed var(--line);padding-top:8px;margin-top:4px}.wp-tri{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;margin:6px 0}.wp-tc{flex:1 1 150px;border:1px solid var(--line);border-radius:10px;padding:6px 8px;display:flex;flex-direction:column;gap:2px;font-size:.82rem}.wp-tc.m{border-color:var(--wc,#888);background:color-mix(in srgb,var(--wc,#888) 10%,var(--surface,#fff))}.wp-arr{align-self:center;color:var(--ink-3)}.wp-fl{border-radius:6px;padding:0 5px;font-size:.7rem;font-weight:700;border:1px solid var(--line)}.wp-fl.review{border-color:#c0392b;color:#c0392b}.wp-fl.check{border-color:#c9a227;color:#8a6d0f}.wp-fl.note{color:var(--ink-3)}.wp-u{border-radius:6px;padding:1px 4px;font-size:.68rem;border:1px solid var(--line);color:var(--ink-2)}.wp-u.u-good,.wp-u.u-good2{border-color:#2f7bd6;color:#1d5aa6}.wp-u.u-adj{border-color:#c9a227;color:#8a6d0f}.wp-u.u-bad{border-color:#b04a8a;color:#8a2f68}.wp-mix{font-size:.86rem;font-weight:600;color:var(--ink);margin:2px 0 4px!important}.wp-act{font-size:.84rem;margin-top:4px!important;color:var(--ink)}.wp-core{font-size:.9rem;line-height:1.65;margin:2px 0 6px!important;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,var(--wc,#888) 10%,var(--surface,#fff))}.wp-core b{color:var(--ink)}.wp-cb{border-top:1px solid var(--line);padding:6px 0 2px}.wp-ct{font-size:.78rem!important;font-weight:700;color:var(--ink-3);margin:0 0 2px!important}.wp-cn{display:inline-block;min-width:1.4em;color:var(--wi,var(--ink-2))}.wp-kind{border-radius:6px;padding:1px 6px;font-size:.78rem;background:var(--surface-2);color:var(--ink)}.wp-kind.k-boost{background:var(--wi,#555);color:#fff}.wp-kind.k-assist{border:1px solid var(--wc,#888);background:transparent}.wp-kind.k-limit{text-decoration:underline dotted}.wp-plan{font-size:.84rem;margin-top:4px!important;color:var(--ink)}.wp-det .wp-ev li{margin:1px 0}.wp p{margin:0;line-height:1.65}.wp-head{font-weight:800;font-size:1rem;line-height:1.55}' +
     '.wp-e0{--wc:var(--wood,#2FA866);--wi:var(--wood-ink,#17744B)}.wp-e1{--wc:var(--fire,#E5533D);--wi:var(--fire-ink,#B1321F)}.wp-e2{--wc:var(--earth,#C99A3B);--wi:var(--earth-ink,#8A6418)}.wp-e3{--wc:var(--metal,#8E9AAF);--wi:var(--metal-ink,#56627A)}.wp-e4{--wc:var(--water,#3B6FD8);--wi:var(--water-ink,#234A9A)}' +
     '.wp-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}' +
     '.wp-it{border:1px solid var(--line);border-left:4px solid var(--wc);border-radius:12px;padding:11px 13px;background:var(--surface);display:grid;gap:6px}' +
@@ -239,7 +239,6 @@
   var jo = function (w, a, b) { var c = String(w || '').charCodeAt(String(w || '').length - 1); var has = c >= 0xAC00 && c <= 0xD7A3 ? (c - 0xAC00) % 28 !== 0 : /[0-9LMNRlmnr]$/.test(w); return w + (has ? a : b); };
   var fillJ = function (t, m) { return String(t).replace(/\{(\w)\}(이\(가\)|을\(를\)|과\(와\))?/g, function (_, k, j) { var v = m[k] == null ? '' : m[k]; if (!j) return v; return j === '이(가)' ? jo(v, '이', '가') : j === '을(를)' ? jo(v, '을', '를') : jo(v, '과', '와'); }); };
   var GNV = ['비겁', '식상', '재성', '관성', '인성'];
-  var fillP = function (t, m) { return String(t || '').replace(/\{(\w)\}/g, function (_, k) { return m[k] == null ? '' : m[k]; }); }, J5 = function (t) { return fixJ5(t); };
   function relWord(we, e) { var d = (e - we + 5) % 5; return ['same', 'out', 'ctrled', 'ctrl', 'gen'][d]; }
   function detail(id, row, r, title, E, L, ch) {
     var d = D(), C = d.card, a = r.best; if (!a) return '';
@@ -295,34 +294,34 @@
     var fav = '<p class="wp-s"><span class="wp-f ' + (f ? f.k : '') + '">' + E((f && f.metric) || '흐름') + ' ' + E(f ? f.n : '—') + '</span> 기존 운세 흐름 등급 그대로예요(발현 강도·활용 유리도와 합치지 않아요).</p>' +
       li(['천간 ' + st.ch + ' — ' + EL_K[st.el] + ' · ' + st.tg + ' · ' + roleTxt(st), '지지 ' + br.ch + ' — 정기 ' + br.main + '(' + EL_K[br.mainEl] + ') · ' + br.tg + ' · ' + roleTxt(br)]) +
       '<p class="wp-act">' + E(r.mText ? r.mText + ' ' : '') + E((C.act[a.kind] || C.act.keep)[fk] || '') + '</p>';
-    // 2026-11-26 쉬운 풀이: 왜 이렇게 봤는지(쉬운 말 3줄) → 이렇게 써요 → 흐름 한 줄, 명리 용어로 된 근거는 '자세히'로 접는다
-    var CP = d.plain || {}, gEl = (w.el + 4) % 5, oEl = (w.el + 1) % 5, pos = [], neg = [], lk = function (k) { return (a.limits || []).some(function (x) { return x.k === k; }); };
-    if (a.stemSame) pos.push(fillP(CP.stem, { c: st.ch, e: EL_K[st.el] }));
-    if (a.rootDepth) pos.push(fillP(a.rootDepth === '정기' ? CP.rootDeep : CP.root, { c: br.ch }));
-    if ((a.supports || []).some(function (x) { return x.k === 'guk' || x.k === 'hwa'; })) pos.push(fillP(CP.gather, { e: EL_K[w.el] }));
-    if (a.gen) pos.push(fillP(CP.gen, { e: EL_K[gEl] }));
-    if (a.partner && a.partner.tone !== 'bad') pos.push(fillP(CP.partner, { n: (P && P.name) || a.partner.name || GNV[a.partner.group] }));
-    if (a.out) pos.push(fillP(CP.out, { e: EL_K[oEl] }));
-    if (a.hitStem && !(a.axis && a.axis.jehwa)) neg.push(fillP(CP.hit, { c: st.ch, e: EL_K[st.el] }));
-    if (lk('bound') || lk('clash') || lk('roothit')) neg.push(CP.tied);
-    if (lk('badpair')) neg.push(fillP(CP.badpair, { n: (badP && badP.name) || (a.partner && a.partner.name) || '' }));
-    if (lk('over')) neg.push(CP.over);
-    // 쉬운 말 '키울 능력·조절할 점'(십성 이름 없이)
-    var growE = ufK !== 'bad' ? '키울 능력: ' + sW + (P ? ' + ' + P.name : '') : '키울 능력: ' + (U.yongGroup != null ? C.fn[U.yongGroup] : sW) + ' 쪽 — 사주 균형을 잡아 주는 힘이라 주무기보다 이쪽을 키울 때 득이에요';
-    var adjE = adjust === C.adjustNone ? '' : '조절할 점: ' + String(adjust.replace(/^조절할 기능: /, '')).replace(/^(비겁|식상|재성|관성|인성) 기능이 과해지면/, '이 능력을 과하게 쓰면');
-    var why = (a.kind === 'limit' ? neg.concat(pos) : a.level === 'shaky' ? pos.slice(0, 2).concat(neg) : pos.concat(neg)).slice(0, 3);
-    if (!why.length) why.push(CP.none);
-    var ufWhy = U.role ? fillP(CP.role[U.role] || '', { e: EL_K[w.el] }) + (U.why.some(function (x) { return x.k === 'release'; }) ? ' ' + CP.release : U.why.some(function (x) { return x.k === 'overheat'; }) ? ' ' + CP.overheat : '') : '';
-    var easy = '<div class="wp-cb"><p class="wp-ct">' + E(CP.whyT) + '</p>' + li(why.map(J5)) + (ufWhy ? '<p class="wp-s">' + E(J5(ufWhy)) + '</p>' : '') + '</div>' +
-      '<div class="wp-cb"><p class="wp-ct">' + E(CP.useT) + '</p><p class="wp-mix">' + E(C.mix[hiK][ufK]) + '</p>' + li([growE].concat(adjE ? [adjE] : []).concat(['어울리는 일: ' + C.fields[a.use.group]])) + '</div>' +
-      '<div class="wp-cb"><p class="wp-s"><span class="wp-f ' + (f ? f.k : '') + '">' + E((f && f.metric) || '흐름') + ' ' + E(f ? f.n : '—') + '</span> ' + E(r.mText ? r.mText + ' ' : '') + E((C.act[a.kind] || C.act.keep)[fk] || '') + '</p></div>';
-    var more = '<details class="wp-more"><summary class="wp-note">' + E(CP.moreT) + '</summary>' +
-      sec('·', '발현 강도', kindB) + sec('·', '활용 유리도', ufB) + sec('·', '작용 근거', li(ev)) +
-      sec('·', '활용 전략 자세히', li(use) + '<p class="wp-plan">' + E(plan) + '</p>') +
-      (sups.length ? sec('·', '발현 지원 요인', li(sups)) : '') + (lims.length ? sec('·', '제약 요인', li(lims)) : '') +
-      sec('·', '운의 흐름 등급', fav) + '</details>';
-    return '<div class="wp-det wp-e' + w.el + '" id="' + id + '" data-wpr="' + row + '"><h4>' + E(title + ' ' + r.gz) + ' — 주무기 ' + E(a.levelK) + ' · 활용 ' + E(U.n) + '</h4>' +
-      '<p class="wp-core"><b>' + E(head) + '</b> ' + E(CU.head[U.k]) + '</p>' + easy + more + '</div>';
+    // 상담자용: 명리 용어 그대로 ②~⑧ (2026-11-26 쉬운 풀이는 사용자 요청으로 되돌림). 첫 문장 아래 8판 '타고난 주무기 ↔ 이 시기 핵심 역량'
+    return '<div class="wp-det wp-e' + w.el + '" id="' + id + '" data-wpr="' + row + '"><h4>' + E(title + ' ' + r.gz) + ' — 주무기 ' + E(a.levelK) + ' · 활용 ' + E(U.n) + ' · ' + E((f && f.metric) || '흐름') + ' ' + E(f ? f.n : '—') + '</h4>' +
+      '<p class="wp-core"><b>' + E(head) + '</b> ' + E(feat) + ' <b>' + E(CU.head[U.k]) + '</b></p>' +
+      coreBlock(r, L, E, tW, ch, G.Manse || null, false) +
+      sec('②', '발현 강도', kindB) +
+      sec('③', '활용 유리도', ufB) +
+      sec('④', '작용 근거', li(ev)) +
+      sec('⑤', '활용 전략', '<p class="wp-mix">' + E(C.mix[hiK][ufK]) + '</p>' + li(use) + '<p class="wp-plan">' + E(plan) + '</p>') +
+      (sups.length ? sec('⑥', '발현 지원 요인', li(sups)) : '') +
+      (lims.length ? sec('⑦', '제약 요인', li(lims)) : '') +
+      sec(lims.length ? '⑧' : sups.length ? '⑦' : '⑥', '운의 흐름 등급', fav) + '</div>';
+  }
+  // 8판: 타고난 주무기 ↔ 이 시기 핵심 역량(weapon.js periodCore 결과만 읽음)
+  function coreBlock(r, L, E, tW, ch, M, short) {
+    var d = D(), K = d.core, C = d.card, c = r && r.core; if (!K || !c || !L || !L.length) return '';
+    var w = L[0], dEl = M.stemEl(ch.pillars.day.s), GNs = ['비겁', '식상', '재성', '관성', '인성'], FN = (C && C.fn) || GNs;
+    var nm = function (x) { return EL_K[x.el] + '(' + EL_H[x.el] + ', ' + GNs[x.group] + ')'; }, wn = EL_K[w.el] + '(' + EL_H[w.el] + ') ' + d.el[w.el].title;
+    var pk2 = c.pick, chips = '<div class="wp-tri"><div class="wp-tc"><span class="wp-lb">' + E(K.natal) + '</span><b>' + E(wn) + '</b><span class="wp-note">' + E(K.natalNote) + '</span></div><span class="wp-arr">↔</span>' +
+      '<div class="wp-tc m"><span class="wp-lb">' + E(K.period) + (pk2 ? ' · <b class="wp-rel r-' + pk2.rel + '">' + E(pk2.relK) + '</b>' : '') + '</span><b>' + E(pk2 ? nm(pk2) : '뚜렷하지 않음') + '</b>' + (pk2 ? '<span class="wp-note">' + E(FN[pk2.group]) + '</span>' : '') + '</div></div>';
+    if (!pk2) return '<div class="wp-cb wp-core2">' + (short ? '' : '<p class="wp-ct">' + E(K.title) + '</p>') + chips + '<p class="wp-s">' + E(K.none) + '</p></div>';
+    var fx = function (t, m) { return fixJ5(String(t || '').replace(/\{(\w+)\}/g, function (_, k) { return m[k] == null ? '' : m[k]; })); };
+    var relT = fx(K.rel[pk2.relRaw], { X: nm(pk2), xf: FN[pk2.group] });
+    var whyL = pk2.why.slice().sort(function (a, b) { return b.v - a.v; }).map(function (x) { return fx(K.why[x.k], { at: (x.at || []).join('·'), name: x.name || '', names: (x.names || []).join('·') }); });
+    var roleT = pk2.role ? fx(K.role[pk2.role], { X: nm(pk2) }) : '';
+    var plan = C && C.plan ? C.plan[w.group][pk2.group] : '';
+    return '<div class="wp-cb wp-core2">' + (short ? '' : '<p class="wp-ct">' + E(K.title) + '</p>') + chips + '<p class="wp-s"><b>' + E(relT) + '</b></p>' +
+      '<p class="wp-note">' + E(fx(K.scoreNote, { p: pk2.pts })) + '</p><ul class="wp-ev">' + whyL.map(function (t) { return '<li>' + E(t) + '</li>'; }).join('') + (roleT ? '<li>' + E(roleT) + '</li>' : '') + (c.also ? '<li>' + E(fx(K.also, { X: nm(c.also) })) + '</li>' : '') + '</ul>' +
+      (plan ? '<p class="wp-mix">' + E(K.planT) + ' — ' + E(plan) + '</p>' : '') + '</div>';
   }
   function cell(r, top, sub, isNow, id, row) {
     if (!r) return '';
@@ -350,21 +349,24 @@
     var du = ch.daeun.list, curDi = -1; du.forEach(function (x, i) { if (x.startMs <= now) curDi = i; });
     var curWi = -1; tl.wolun.forEach(function (r, i) { if (r && r.startMs <= now) curWi = i; }); if (wolY !== curY) curWi = -1;
     var names = L.slice(0, 2).map(function (w) { return EL_H[w.el] + ' ' + D().el[w.el].title; }).join(' · ');
-    var legend = '<p class="wp-note">막대가 높을수록 주무기가 강하게 켜지는 시기예요. 칸을 누르면 쉬운 풀이가 열려요.</p>';
+    var legend = '<p class="wp-note">막대가 높을수록 주무기가 강하게 켜지는 시기예요. 칸을 누르면 시기별 풀이가 열려요.</p>';
     var dLab = du.map(function (x) { return x.startAge + '세'; }), sLab = tl.seun.map(function (r) { return String(r.year); }), wLab = tl.wolun.map(function (r) { return r.month + '월'; });
     var block = function (row, rows, labs, subs, nowIdx, secT) {
       return '<p class="wp-sec">' + E(secT) + '</p>' + chart(rows, labs, nowIdx) + '<div class="wp-row">' + rows.map(function (r, i) { return cell(r, labs[i], subs[i], i === nowIdx, 'wpd-' + row + '-' + i, row); }).join('') + '</div>' +
         rows.map(function (r, i) { return r ? detail('wpd-' + row + '-' + i, row, r, labs[i], E, L, ch) : ''; }).join('');
     };
     // 그래프 카드 아래에 붙는 한 단위(대운·세운·월운) — 같은 판정, 같은 칸·상세 카드
-    var short = '<p class="wp-note">막대가 높을수록 주무기가 강하게 켜지는 시기예요(흐름 등급은 위 그래프 그대로). 칸을 누르면 쉬운 풀이가 열려요.</p>' + mNote;
+    var short = '<p class="wp-note">막대가 높을수록 주무기가 강하게 켜지는 시기예요(흐름 등급은 위 그래프 그대로). 칸을 누르면 시기별 풀이가 열려요.</p>' + mNote;
     var PART = { daeun: ['d', tl.daeun, dLab, du.map(function (x) { return x.startYear + '~'; }), curDi, '대운별'], seun: ['s', tl.seun, sLab, tl.seun.map(function (r) { return r.age ? r.age + '세' : ''; }), tl.seun.findIndex(function (r) { return r.year === curY; }), curY + '~' + (curY + 9) + '년'], wolun: ['w', tl.wolun, wLab, tl.wolun.map(function (r) { return r.termName; }), curWi, wolY + '년 달별'] };
     if (PART[part]) { var p = PART[part]; return '<div class="wp wp-part wp-e' + L[0].el + '" id="weapon-luck-' + part + '" data-wp="' + E(sigOf(A)) + '" style="margin:10px 0 14px;padding:10px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)"><h3 style="margin:0;font-size:.95rem">주무기 발현도 · ' + E(p[5]) + ' <span class="wp-note" style="font-weight:400">' + E(names) + '</span></h3>' + short + block(p[0], p[1], p[2], p[3], p[4], '').replace('<p class="wp-sec"></p>', '') + '</div>'; }
+    // 8판: 지금 대운·올해의 시기별 핵심 역량(타고난 주무기와 함께)
+    var curS = tl.seun.filter(function (r) { return r && r.year === curY; })[0] || null, KK = d.core || {};
+    var coreNow = KK.title ? '<p class="wp-sec">' + E(KK.title) + '</p><p class="wp-note">' + E(KK.sumLead) + '</p>' + (tl.daeun[curDi] ? '<p class="wp-s"><b>지금 대운 ' + E(tl.daeun[curDi].gz) + '</b></p>' + coreBlock(tl.daeun[curDi], L, E, '이 대운', ch, M, true) : '') + (curS ? '<p class="wp-s"><b>올해 ' + E(curS.year + '년 ' + curS.gz) + '</b></p>' + coreBlock(curS, L, E, '이 해', ch, M, true) : '') : '';
     var cur = tl.daeun[curDi] || null, picks = tl.seun.filter(function (r) { return r && r.best && /strong|on|shaky/.test(r.best.level); }).slice(0, 3);
     var line = function (when, r) { return '<li><span class="when">' + E(when) + '</span> — 주무기 <b>' + E(r.best.levelK) + '</b> · ' + E(r.favor && r.favor.metric || '흐름') + ' ' + E(r.favor ? r.favor.n : '—') + '<br>' + E(r.mText || (d.card && r.best.kind ? (d.card.act[r.best.kind] || {})[r.favor ? r.favor.k : 'ok'] : d.combo[r.read])) + '</li>'; };
     var lines = (cur ? [line('지금 대운 ' + cur.gz, cur)] : []).concat(picks.map(function (r) { return line(r.year + '년 ' + r.gz, r); }));
     if (part === 'summary') return '<section class="card wp" id="weapon-luck" data-wp="' + E(sigOf(A)) + '"><div class="card-h"><h2>주무기 발현 타이밍</h2><span class="note">' + E(names) + '</span></div>' +
-      '<p class="wp-note">' + E(d.twoAxes) + (A.status === 'undetermined' ? ' 태어난 시간을 몰라 세 기둥 기준 후보로 봤어요.' : A.status === 'complex' ? ' 복합형이라 후보 중 가장 잘 켜지는 쪽을 보여 줘요.' : '') + ' 대운·세운·월운 그래프 카드마다 맨 아래에 그 단위의 주무기 줄이 있어요.</p>' + legend +
+      '<p class="wp-note">' + E(d.twoAxes) + (A.status === 'undetermined' ? ' 태어난 시간을 몰라 세 기둥 기준 후보로 봤어요.' : A.status === 'complex' ? ' 복합형이라 후보 중 가장 잘 켜지는 쪽을 보여 줘요.' : '') + ' 대운·세운·월운 그래프 카드마다 맨 아래에 그 단위의 주무기 줄이 있어요.</p>' + legend + coreNow +
       (lines.length ? '<p class="wp-sec">가까운 시기 읽기</p><ul class="wp-dl">' + lines.join('') + '</ul>' : '') +
       '<p class="wp-note">' + E(d.disclaimer) + ' 특정 날짜의 성패를 예측하지 않아요.</p></section>';
     return '<section class="card wp" id="weapon-luck" data-wp="' + E(sigOf(A)) + '"><div class="card-h"><h2>주무기 발현 타이밍</h2><span class="note">' + E(names) + '</span></div>' +
