@@ -257,8 +257,8 @@
   var out='<figure class="reading-overview reading-timing-rank" data-reading-chart data-chart-kind="timing-rank"><figcaption>'+esc(TOPIC_LABEL[topic])+' 흐름 한눈에 보기</figcaption>'+legendHtml();
   // 2026-11-24: 맨 위 단위 눈금자(10년 ▸ 1년 ▸ 1달 ▸ 하루), 층마다 단위 머리띠·색·막대 모양을 다르게
   var layers=['daeun'].concat(withMonths&&annual&&annual.length?['seun']:[]).concat(withMonths&&monthly&&monthly.length?['wolun']:[]);out+=unitRuler(layers);
-  // 2026-11-28 전성기 장: 바람(이 그래프 점수)과 칼날(주무기 발현도)로 고른 순서가 오면 그 순서로(풀이 본문과 같은 순위)
-  var tp=order&&order.length?order.map(function(y){return dw.filter(function(x){return x.ord===y;})[0];}).filter(Boolean):topOf(dw,3);out+='<section class="rt-unit u-daeun">'+unitHead('daeun')+bars(dw,TOPIC_LABEL[topic]+' 대운 흐름 그래프')+(tp.length?'<p class="rt-sub">'+(order&&order.length?'바람(막대 점수)과 주무기 칼날로 고른 전성기 순위':'앞으로 힘이 실리는 10년 순위')+'</p>'+rankList(tp):'')+'</section>';
+  // 2026-11-28 전성기 장: 바람(이 그래프 점수)과 기량(주무기 발현도)로 고른 순서가 오면 그 순서로(풀이 본문과 같은 순위)
+  var tp=order&&order.length?order.map(function(y){return dw.filter(function(x){return x.ord===y;})[0];}).filter(Boolean):topOf(dw,3);out+='<section class="rt-unit u-daeun">'+unitHead('daeun')+bars(dw,TOPIC_LABEL[topic]+' 대운 흐름 그래프')+(tp.length?'<p class="rt-sub">'+(order&&order.length?'바람(막대 점수)과 주무기 기량으로 고른 전성기 순위':'앞으로 힘이 실리는 10년 순위')+'</p>'+rankList(tp):'')+'</section>';
   if(withMonths&&annual&&annual.length){
    var yr=annual.filter(function(y){return Number.isFinite(y.year);}).map(function(y){var n=rf&&Number.isFinite(rf.y[y.year])?rf.y[y.year]:luckScore(y,topic,gender);return {n:n,gz:y.ganzhi,cur:!!y.isNow,past:false,ord:y.year,label:gzHtml(y.ganzhi)+'<span class="rt-age">'+y.year+'</span>'+kwHtml(y)+(y.isNow?'<em class="rt-now">올해</em>':''),title:y.year+'년 ('+esc(y.ganzhi||'')+')'+(y.isNow?' · 올해':''),reason:luckReason(y,topic,'해')};});
    if(yr.length)out+='<section class="rt-unit u-seun">'+unitHead('seun')+'<p class="rt-sub">앞으로 10년, 해마다</p>'+bars(yr,TOPIC_LABEL[topic]+' 세운 흐름 그래프')+'<p class="rt-sub">힘이 실리는 해 순위</p>'+rankList(topOf(yr,3))+'</section>';}

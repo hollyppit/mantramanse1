@@ -223,9 +223,9 @@
   // 활성도 실선 그래프(단계 이름만, 숫자 눈금 없음) + 유리도 보조 띠(엔진 등급 색). 점 색 = 그 시기 천간의 오행(주요 오행 색상 태그)
   // 2026-11-26: 흐름이 보이는 꺾은선(사용자 요청으로 막대 → 선). 눈금은 세 줄(강하게 발현·보조·강화·제약·조정)만, 흐름 띠 없음.
   //  점 색 = 그 시기 천간 오행, 흔들림은 점선 테두리, 지금 시기는 큰 점
-  // 2026-11-27 바람·칼날 구간: 흐름 등급 = 바람(순풍·보통·역풍), 발현 강도 = 칼날. 두 값은 그대로 두고 조합 이름만(유료 상세풀이 '바람과 칼날'과 같은 규칙)
-  function quad(a, fk) { var shp = /strong|on|shaky/.test(a.level); return shp ? (fk === 'good' ? ['전성기', '순풍 + 칼날 예리 — 바람과 칼날이 함께', 'peak'] : fk === 'care' ? ['돌파기', '역풍 + 칼날 예리 — 환경은 거칠지만 주무기는 먹힘, 실력이 크게 남는 구간', 'push'] : ['발휘기', '보통 바람 + 칼날 예리 — 환경보다 주무기가 먼저 섬', 'show']) : (fk === 'good' ? ['순항기', '순풍 + 칼날 쉼 — 환경은 받쳐 주나 주무기는 쉼, 날을 가는 구간', 'cruise'] : ['정비기', (fk === 'care' ? '역풍' : '보통 바람') + ' + 칼날 쉼 — 쉬며 정비하는 구간', 'tune']); }
-  // 2026-11-28 전성기 순위: 지금·앞으로(80세 미만 시작) 대운 중 갈래 순서 전성기(칼날 섬+순풍) → 발휘기(칼날 섬+보통) → 순항기(칼날 쉼+순풍), 같은 갈래는 바람 점수 → 칼날 세기 → 이른 대운. 2개가 안 되면 보통 바람에서 채움. 점수 합산 없음
+  // 2026-11-27 바람·기량 구간: 흐름 등급 = 바람(순풍·보통·역풍), 발현 강도 = 기량. 두 값은 그대로 두고 조합 이름만(유료 상세풀이 '바람과 기량'과 같은 규칙)
+  function quad(a, fk) { var shp = /strong|on|shaky/.test(a.level); return shp ? (fk === 'good' ? ['전성기', '순풍 + 기량 높음 — 바람과 기량이 함께', 'peak'] : fk === 'care' ? ['돌파기', '역풍 + 기량 높음 — 환경은 거칠지만 주무기는 먹힘, 실력이 크게 남는 구간', 'push'] : ['발휘기', '보통 바람 + 기량 높음 — 환경보다 주무기가 먼저 섬', 'show']) : (fk === 'good' ? ['순항기', '순풍 + 기량 쉼 — 환경은 받쳐 주나 주무기는 쉼, 기량을 다지는 구간', 'cruise'] : ['정비기', (fk === 'care' ? '역풍' : '보통 바람') + ' + 기량 쉼 — 쉬며 정비하는 구간', 'tune']); }
+  // 2026-11-28 전성기 순위: 지금·앞으로(80세 미만 시작) 대운 중 갈래 순서 전성기(기량 오름+순풍) → 발휘기(기량 오름+보통) → 순항기(기량 쉼+순풍), 같은 갈래는 바람 점수 → 기량 세기 → 이른 대운. 2개가 안 되면 보통 바람에서 채움. 점수 합산 없음
   function peakRank(rows, du, now) {
     var QO = { peak: 0, show: 1, cruise: 2, push: 3, tune: 4 }, PW = { strong: 3, on: 2, shaky: 1 };
     var c = rows.map(function (r, i) { if (!r || !r.best || !r.favor || !du[i]) return null; var end = du[i + 1] ? du[i + 1].startMs : Infinity; if (end <= now || du[i].startAge >= 80) return null; var q = quad(r.best, r.favor.k); return { i: i, q: QO[q[2]], name: q[0], v: Number.isFinite(r.favor.v) ? r.favor.v : 0, pw: PW[r.best.level] || 0, k: r.favor.k }; }).filter(Boolean)
@@ -250,11 +250,11 @@
       if (g != null) mw += '<text x="' + x + '" y="' + yM + '" text-anchor="middle" class="wp-mw" style="' + (dim ? 'opacity:.45' : 'font-weight:600') + '"><title>' + esc0(labels[i] + ' 주무기를 쓰는 결: ' + MW[g] + '(운 천간 ' + a.use.tg + ')') + '</title>' + MW[g] + '</text>';
       var f = r.favor; if (f) { bg += '<rect x="' + (x - CW / 2) + '" y="' + (top - 6) + '" width="' + CW + '" height="' + (yOf(0) - top + 12) + '" fill="' + (BG[f.k] || BG.ok) + '"/>';
         fw += '<rect x="' + (x - 15) + '" y="' + (yF - 9) + '" width="30" height="13" rx="6" fill="' + (FC[f.k] || FC.ok) + '" opacity=".9"><title>' + esc0('바람 ' + (WN[f.k] || f.n) + ' — ' + (f.metric || '흐름') + ' ' + f.n) + '</title></rect><text x="' + x + '" y="' + (yF + 1) + '" text-anchor="middle" class="wp-fw">' + esc0(WN[f.k] || f.n) + '</text>';
-        var qn = r.q2 ? r.q2.q : quad(a, f.k), qt = r.q2 ? ' (유료 상세풀이와 같은 계산: 인생 흐름 ' + r.q2.n + '점 ' + r.q2.tierN + ' · 1순위 주무기 ' + r.q2.levelK + ')' : ''; qw += '<text x="' + x + '" y="' + yQ + '" text-anchor="middle" class="wp-qw q-' + qn[2] + '"><title>' + esc0(labels[i] + ' ' + qn[0] + ': ' + qn[1] + qt) + '</title>' + qn[0].slice(0, 2) + '</text>'; }
+        var qn = r.q2 ? r.q2.q : quad(a, f.k), qt = r.q2 ? ' (인생 흐름 ' + r.q2.n + '점 ' + r.q2.tierN + ' · 1순위 주무기 ' + r.q2.levelK + ')' : ''; qw += '<text x="' + x + '" y="' + yQ + '" text-anchor="middle" class="wp-qw q-' + qn[2] + '"><title>' + esc0(labels[i] + ' ' + qn[0] + ': ' + qn[1] + qt) + '</title>' + qn[0].slice(0, 2) + '</text>'; }
     });
     var area = pts.length > 1 ? '<polygon points="' + pts[0].split(',')[0] + ',' + yOf(0) + ' ' + pts.join(' ') + ' ' + pts[pts.length - 1].split(',')[0] + ',' + yOf(0) + '" fill="var(--wc,#888)" opacity=".08"/>' : '';
-    var grid = [[4, '칼날 예리'], [2, '보조·강화'], [0, '눌림·조정']].map(function (g) { var y = yOf(g[0]); return '<line x1="' + LM + '" x2="' + wd + '" y1="' + y + '" y2="' + y + '" stroke="var(--line)" stroke-width="1"' + (g[0] === 2 ? ' stroke-dasharray="3 3"' : '') + '/><text class="lv" x="' + (LM - 4) + '" y="' + (y + 3) + '" text-anchor="end">' + g[1] + '</text>'; }).join('');
-    return '<div class="wp-ch"><svg viewBox="0 0 ' + wd + ' ' + H + '" style="min-width:' + Math.round(wd * 0.82) + 'px;max-width:' + Math.round(wd * 1.3) + 'px" role="img" aria-label="바람(운 흐름) 속 주무기 칼날 그래프">' + bg + grid + dvd + area +
+    var grid = [[4, '기량 높음'], [2, '보조·강화'], [0, '눌림·조정']].map(function (g) { var y = yOf(g[0]); return '<line x1="' + LM + '" x2="' + wd + '" y1="' + y + '" y2="' + y + '" stroke="var(--line)" stroke-width="1"' + (g[0] === 2 ? ' stroke-dasharray="3 3"' : '') + '/><text class="lv" x="' + (LM - 4) + '" y="' + (y + 3) + '" text-anchor="end">' + g[1] + '</text>'; }).join('');
+    return '<div class="wp-ch"><svg viewBox="0 0 ' + wd + ' ' + H + '" style="min-width:' + Math.round(wd * 0.82) + 'px;max-width:' + Math.round(wd * 1.3) + 'px" role="img" aria-label="바람(운 흐름) 속 주무기 기량 그래프">' + bg + grid + dvd + area +
       '<polyline points="' + pts.join(' ') + '" fill="none" stroke="var(--ink-2)" stroke-width="2"/>' + dots + xl +
       '<text class="lv" x="' + (LM - 4) + '" y="' + yM + '" text-anchor="end">방식</text>' + mw + '<text class="lv" x="' + (LM - 4) + '" y="' + (yF + 1) + '" text-anchor="end">바람</text>' + fw + '<text class="lv" x="' + (LM - 4) + '" y="' + yQ + '" text-anchor="end">구간</text>' + qw + '</svg></div>';
   }
@@ -315,7 +315,7 @@
     var lims = (a.limits || []).map(function (x) { return x.x; });   // 과잉 기능 설명은 ⑤ '조절할 기능'에 한 번만
     // 운의 흐름 등급 — 기존 흐름 등급 그대로 + 글자별 역할(이분화하지 않음)
     var f = r.favor, fk = f ? f.k : 'ok', roleTxt = function (x) { return x.role ? x.role + '(' + (C.roleWord[x.role] || '') + ')' : '역할 표시 없음'; };
-    var fav = '<p class="wp-s"><span class="wp-f ' + (f ? f.k : '') + '">' + E((d.windLong || {})[fk] || '바람') + '</span> ' + E(((f && f.metric) || '흐름') + ' ' + (f ? f.n : '—')) + ' — 기존 운세 흐름 등급을 바람으로만 읽어요(칼날·활용 유리도와 합치지 않아요).</p>' +
+    var fav = '<p class="wp-s"><span class="wp-f ' + (f ? f.k : '') + '">' + E((d.windLong || {})[fk] || '바람') + '</span> ' + E(((f && f.metric) || '흐름') + ' ' + (f ? f.n : '—')) + ' — 기존 운세 흐름 등급을 바람으로만 읽어요(기량·활용 유리도와 합치지 않아요).</p>' +
       li(['천간 ' + st.ch + ' — ' + EL_K[st.el] + ' · ' + st.tg + ' · ' + roleTxt(st), '지지 ' + br.ch + ' — 정기 ' + br.main + '(' + EL_K[br.mainEl] + ') · ' + br.tg + ' · ' + roleTxt(br)]) +
       '<p class="wp-act">' + E(r.mText ? r.mText + ' ' : '') + E((C.act[a.kind] || C.act.keep)[fk] || '') + '</p>';
     // 상담자용: 명리 용어 그대로 ②~⑧ (2026-11-26 쉬운 풀이는 사용자 요청으로 되돌림). 첫 문장 아래 8판 '타고난 주무기 ↔ 이 시기 핵심 역량'
@@ -329,20 +329,20 @@
     var coreT = cp ? [EL_K[cp.el] + '(' + cp.groupName + ') ' + cp.pts + '점 · ' + cp.relK].concat(cp.why.map(function (x) { return CK[x.k] || ''; })) : ['뚜렷하지 않음 — 타고난 주무기 중심'];
     var adjS = adjust !== C.adjustNone ? adjust.replace(/^조절할 기능: /, '') : '';
     var rowsH = '<dl class="wp-dlx">' +
-      '<dt>칼날</dt><dd>' + tags(plusT, 'p') + tags(minusT, 'm') + (!plusT.length && !minusT.length ? '<span class="wp-note">주무기에 직접 닿는 작용 없음</span>' : '') + '</dd>' +
+      '<dt>기량</dt><dd>' + tags(plusT, 'p') + tags(minusT, 'm') + (!plusT.length && !minusT.length ? '<span class="wp-note">주무기에 직접 닿는 작용 없음</span>' : '') + '</dd>' +
       '<dt>활용</dt><dd>' + tags(ufT, 'u') + '</dd>' +
       '<dt>시기 역량</dt><dd>' + tags(coreT, cp ? 'c' : '') + '</dd>' +
       '<dt>쓰는 법</dt><dd>' + E(grow) + (adjS ? '<br><span class="wp-note">조절: ' + E(adjS) + '</span>' : '') + '</dd></dl>';
     var badge = function (t, cls) { return '<span class="wp-bd ' + cls + '">' + E(t) + '</span>'; };
-    // 2026-11-27 구간 성격: 흐름 등급 = 바람(환경), 발현 강도 = 칼날(주무기가 먹히는 정도). 두 값은 그대로 두고 조합 이름만(유료 상세풀이 '바람과 칼날'과 같은 규칙)
+    // 2026-11-27 구간 성격: 흐름 등급 = 바람(환경), 발현 강도 = 기량(주무기가 먹히는 정도). 두 값은 그대로 두고 조합 이름만(유료 상세풀이 '바람과 기량'과 같은 규칙)
     var shp = r.q2 ? r.q2.sharp : /strong|on|shaky/.test(a.level), QN = r.q2 ? r.q2.q.slice() : quad(a, fk);
-    if (r.q2) QN[1] += ' · 유료 상세풀이와 같은 계산(인생 흐름 ' + r.q2.n + '점 ' + r.q2.tierN + ' · 1순위 주무기 ' + r.q2.levelK + ')';
+    if (r.q2) QN[1] += ' (인생 흐름 ' + r.q2.n + '점 ' + r.q2.tierN + ' · 1순위 주무기 ' + r.q2.levelK + ')';
     if (shp && (U.k === 'adj' || U.k === 'bad')) QN[1] += ' · 활용 ' + U.n + (((U.n.charCodeAt(U.n.length - 1) - 0xAC00) % 28) ? '이라' : '라') + ' 과용 주의';
     rowsH = rowsH.replace('<dl class="wp-dlx">', '<dl class="wp-dlx"><dt>구간</dt><dd><b>' + E(QN[0]) + '</b> <span class="wp-note">' + E(QN[1]) + '</span></dd>');
     return '<div class="wp-det wp-e' + w.el + '" id="' + id + '" data-wpr="' + row + '"><h4>' + E(title + ' ' + r.gz) + '</h4>' +
-      '<p class="wp-bdr">' + badge('바람 ' + ((d.wind || {})[fk] || '—') + (f ? '(' + ((f.metric) || '흐름') + ' ' + f.n + ')' : ''), 'f-' + fk) + badge('칼날 ' + a.levelK, 'k-' + a.kind) + badge('활용 ' + U.n, 'u-' + U.k) + (cp ? badge('시기 역량 ' + EL_K[cp.el] + '·' + cp.relK, 'c') : '') + badge(QN[0], 'q') + '</p>' +
+      '<p class="wp-bdr">' + badge('바람 ' + ((d.wind || {})[fk] || '—') + (f ? '(' + ((f.metric) || '흐름') + ' ' + f.n + ')' : ''), 'f-' + fk) + badge('기량 ' + a.levelK, 'k-' + a.kind) + badge('활용 ' + U.n, 'u-' + U.k) + (cp ? badge('시기 역량 ' + EL_K[cp.el] + '·' + cp.relK, 'c') : '') + badge(QN[0], 'q') + '</p>' +
       '<p class="wp-core"><b>' + E(head) + '</b> ' + E(C.mix[hiK][ufK]) + '</p>' + rowsH +
-      '<details class="wp-more"><summary class="wp-note">자세히 (칼날=발현 강도·활용 유리도·작용 근거·시기 역량·바람=흐름 등급)</summary>' +
+      '<details class="wp-more"><summary class="wp-note">자세히 (기량=발현 강도·활용 유리도·작용 근거·시기 역량·바람=흐름 등급)</summary>' +
       coreBlock(r, L, E, tW, ch, G.Manse || null, false) +
       sec('②', '발현 강도', kindB) +
       sec('③', '활용 유리도', ufB) +
@@ -397,13 +397,13 @@
     var du = ch.daeun.list, curDi = -1; du.forEach(function (x, i) { if (x.startMs <= now) curDi = i; });
     var curWi = -1; tl.wolun.forEach(function (r, i) { if (r && r.startMs <= now) curWi = i; }); if (wolY !== curY) curWi = -1;
     var names = L.slice(0, 2).map(function (w) { return EL_H[w.el] + ' ' + D().el[w.el].title; }).join(' · ');
-    var legend = '<p class="wp-note">바탕·바람 = 운 흐름(초록 순풍 · 회색 보통 · 주황 역풍) · 선 = 그 바람 속 주무기 칼날(얼마나 예리해지고 먹히는지) · 방식 = 칼날을 쓰는 결 · 구간 = 바람×칼날(전성·발휘·돌파·순항·정비). 칸을 누르면 풀이가 열려요.</p>';
+    var legend = '<p class="wp-note">바탕·바람 = 운 흐름(초록 순풍 · 회색 보통 · 주황 역풍) · 선 = 그 바람 속 주무기 기량(얼마나 살아나고 잘 통하는지) · 방식 = 기량을 쓰는 결 · 구간 = 바람×기량(전성·발휘·돌파·순항·정비). 칸을 누르면 풀이가 열려요.</p>';
     var dLab = du.map(function (x) { return x.startAge + '세'; }), sLab = tl.seun.map(function (r) { return String(r.year); }), wLab = tl.wolun.map(function (r) { return r.month + '월'; });
-    // 대운 그래프: 전성기 1~3위(바람 = 이 탭 흐름 등급, 칼날 = 1순위 주무기 발현도)
-    // 2026-11-28 유료 상세풀이 '내 인생의 전성기는 언제?'와 같은 계산: 같은 사주 데이터(SajuData) + 같은 고르기(PeakReading) + 같은 칼날 표(MantraWeapon.daeunBlades). 바람 = 인생 흐름 점수
+    // 대운 그래프: 전성기 1~3위(바람 = 이 탭 흐름 등급, 기량 = 1순위 주무기 발현도)
+    // 2026-11-28 유료 상세풀이 '내 인생의 전성기는 언제?'와 같은 계산: 같은 사주 데이터(SajuData) + 같은 고르기(PeakReading) + 같은 기량 표(MantraWeapon.daeunBlades). 바람 = 인생 흐름 점수
     var pk = [], RV = G.ReportV2, same = false;
     if (RV && RV.SajuData && RV.PeakReading && Wm.daeunBlades) { try { var sdP = RV.SajuData.build(ch, { now: now }), bl = Wm.daeunBlades(M, ch);
-      // 2026-11-28 대운 구간 줄·카드도 같은 계산: 바람 = 인생 흐름 점수(65↑ 좋음·45↑ 무난), 칼날 = 1순위 주무기 발현도
+      // 2026-11-28 대운 구간 줄·카드도 같은 계산: 바람 = 인생 흐름 점수(65↑ 좋음·45↑ 무난), 기량 = 1순위 주무기 발현도
       if (bl && RV.PeakReading.lifeScore) tl.daeun.forEach(function (r) { if (!r) return; var p = (sdP.daewoon || []).filter(function (x) { return x.startYear === r.startYear; })[0], b = bl[r.startYear]; if (!p || !b) return; var n = RV.PeakReading.lifeScore(p), k = n >= 65 ? 'good' : n >= 45 ? 'ok' : 'care', q = quad({ level: b.level }, k); r.q2 = { q: q, n: n, k: k, tierN: { good: '좋음', ok: '무난', care: '조심' }[k], levelK: b.levelK, sharp: b.sharp };
         // 바람 칩·바탕·선도 같은 계산(그래프 지표를 따로 고른 때는 그 지표가 바람이라 그대로 둔다): 선 = 1순위 주무기(acts[0]), 바람 = 인생 흐름 점수 등급
         if (!mApplied && r.acts && r.acts[0]) { r.best = r.acts[0]; r.favor = { k: k, n: r.q2.tierN, v: n, metric: '인생 흐름 ' + n + '점' }; if (Wm.readPair) r.read = Wm.readPair(r.best, r.favor); r.q2.all = true; } });
@@ -413,22 +413,22 @@
       if (dt) { same = true; pk = dt.map(function (o) { var i = du.findIndex(function (x) { return x.startYear === o.y; }); return i < 0 ? null : { i: i, q: o.q, name: o.kind, n: o.n, tier: o.tier, levelK: o.levelK }; }).filter(Boolean); } } catch (e) { pk = []; same = false; } }
     if (!same) pk = peakRank(tl.daeun, du, now);
     var pkMarks = {}; pk.forEach(function (x, n) { pkMarks[x.i] = { rank: n + 1, q: x.q, name: x.name }; });
-    var pkLine = pk.length ? '<p class="wp-note wp-pkl"><b>전성기 순위</b> ' + (same ? '(유료 상세풀이 전성기 장과 같은 계산 · 바람 = 인생 흐름 점수 · 칼날 = 1순위 주무기 ' + EL_H[L[0].el] + ' 발현도' + (tl.daeun.some(function (r) { return r && r.q2 && r.q2.all; }) ? ' · 이 대운 그래프의 바람·선·구간도 같은 계산이라 맨 위 운세 그래프의 흐름 등급과 다를 수 있어요' : (L.length > 1 ? ', 위 선은 두 무기 중 더 켜지는 쪽' : '') + ' · 아래 구간 줄도 같은 계산') + ') ' : '(바람 = 운 흐름 등급 · 칼날 = 주무기 발현도) ') + pk.map(function (x, n) { var dx = du[x.i]; return '<span class="wp-pkn">' + (n + 1) + '</span> ' + E(dx.startAge + '세 ' + M.gzName(dx) + '(' + dx.startYear + '~) ' + (same ? '바람 ' + x.n + '점 ' + x.tier + ' · 칼날 ' + x.levelK + ' → ' : '') + x.name); }).join(' · ') + '</p>' : '';
+    var pkLine = pk.length ? '<p class="wp-note wp-pkl"><b>전성기 순위</b> ' + pk.map(function (x, n) { var dx = du[x.i]; return '<span class="wp-pkn">' + (n + 1) + '</span> ' + E(dx.startAge + '세 ' + M.gzName(dx) + '(' + dx.startYear + '~) ' + (same ? '바람 ' + x.n + '점 ' + x.tier + ' · 기량 ' + x.levelK + ' → ' : '') + x.name); }).join(' · ') + '</p>' : '';
     var block = function (row, rows, labs, subs, nowIdx, secT) {
       return '<p class="wp-sec">' + E(secT) + '</p>' + chart(rows, labs, nowIdx, row === 'd' ? pkMarks : null) + (row === 'd' ? pkLine : '') + '<div class="wp-row">' + rows.map(function (r, i) { return cell(r, labs[i], subs[i], i === nowIdx, 'wpd-' + row + '-' + i, row); }).join('') + '</div>' +
         rows.map(function (r, i) { return r ? detail('wpd-' + row + '-' + i, row, r, labs[i], E, L, ch) : ''; }).join('');
     };
     // 그래프 카드 아래에 붙는 한 단위(대운·세운·월운) — 같은 판정, 같은 칸·상세 카드
-    var short = '<p class="wp-note">바탕·바람 = 운 흐름(초록 순풍 · 회색 보통 · 주황 역풍, 위 그래프 등급과 같음) · 선 = 그 바람 속 주무기 칼날 · 방식 = 칼날을 쓰는 결 · 구간 = 바람×칼날(전성·발휘·돌파·순항·정비). 칸을 누르면 풀이가 열려요.</p>' + mNote;
+    var short = '<p class="wp-note">바탕·바람 = 운 흐름(초록 순풍 · 회색 보통 · 주황 역풍, 위 그래프 등급과 같음) · 선 = 그 바람 속 주무기 기량 · 방식 = 기량을 쓰는 결 · 구간 = 바람×기량(전성·발휘·돌파·순항·정비). 칸을 누르면 풀이가 열려요.</p>' + mNote;
     var PART = { daeun: ['d', tl.daeun, dLab, du.map(function (x) { return x.startYear + '~'; }), curDi, '대운별'], seun: ['s', tl.seun, sLab, tl.seun.map(function (r) { return r.age ? r.age + '세' : ''; }), tl.seun.findIndex(function (r) { return r.year === curY; }), opt.seunTitle || (sFrom + '~' + (sFrom + sYears - 1) + '년')], wolun: ['w', tl.wolun, wLab, tl.wolun.map(function (r) { return r.termName; }), curWi, wolY + '년 달별'] };
     var pickRow = part === 'seun' ? '<div class="wp-dpk"><span class="wp-note">대운 고르기</span><button type="button" class="wp-dp' + (opt.seunDaeun == null ? ' on' : '') + '" data-pick="seun:' + curY + '">지난 10년 + 앞 10년</button>' + du.map(function (x, i) { return '<button type="button" class="wp-dp' + (opt.seunDaeun === i ? ' on' : '') + (i === curDi ? ' wp-dnow' : '') + '" data-pick="daeun:' + i + '">' + E(x.startAge + '세 ' + M.gzName(x)) + '</button>'; }).join('') + '</div>' : '';
-    if (PART[part]) { var p = PART[part]; return '<div class="wp wp-part wp-e' + L[0].el + '" id="weapon-luck-' + part + '" data-wp="' + E(sigOf(A)) + '" style="margin:10px 0 14px;padding:10px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)"><h3 style="margin:0;font-size:.95rem">주무기 발현도 · ' + E(p[5]) + ' <span class="wp-note" style="font-weight:400">' + E(names) + '</span></h3>' + (PART[part] && PART[part][1].some(function (r) { return r && r.q2 && r.q2.all; }) ? short.replace('위 그래프 등급과 같음', '인생 흐름 점수 — 유료 상세풀이·전성기 순위와 같은 계산').replace('선 = 그 바람 속 주무기 칼날', '선 = 그 바람 속 1순위 주무기 칼날') : short) + pickRow + block(p[0], p[1], p[2], p[3], p[4], '').replace('<p class="wp-sec"></p>', '') + '</div>'; }
+    if (PART[part]) { var p = PART[part]; return '<div class="wp wp-part wp-e' + L[0].el + '" id="weapon-luck-' + part + '" data-wp="' + E(sigOf(A)) + '" style="margin:10px 0 14px;padding:10px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)"><h3 style="margin:0;font-size:.95rem">주무기 발현도 · ' + E(p[5]) + ' <span class="wp-note" style="font-weight:400">' + E(names) + '</span></h3>' + (PART[part] && PART[part][1].some(function (r) { return r && r.q2 && r.q2.all; }) ? short.replace(', 위 그래프 등급과 같음', '').replace('선 = 그 바람 속 주무기 기량', '선 = 그 바람 속 1순위 주무기 기량') : short) + pickRow + block(p[0], p[1], p[2], p[3], p[4], '').replace('<p class="wp-sec"></p>', '') + '</div>'; }
     // 8판: 지금 대운·올해의 시기별 핵심 역량(타고난 주무기와 함께)
     var curS = tl.seun.filter(function (r) { return r && r.year === curY; })[0] || null, KK = d.core || {};
     var coreLine = function (when, r) { var c = r.core && r.core.pick, Lw = L[0]; if (!c) return '<li><span class="when">' + E(when) + '</span> — 시기 역량 뚜렷하지 않음 · 타고난 주무기 중심</li>'; var rel = (KK.rel || {})[c.relRaw] || ''; return '<li><span class="when">' + E(when) + '</span> — 시기 역량 <b>' + E(EL_K[c.el] + '(' + c.groupName + ')') + '</b> ' + c.pts + '점 · <b>' + E(c.relK) + '</b><br>' + E(fixJ5(rel.replace(/\{X\}/g, EL_K[c.el] + '(' + c.groupName + ')').replace(/\{xf\}/g, ((d.card && d.card.fn) || [])[c.group] || '')).split('. ')[0] + '.') + '</li>'; };
     var coreNow = KK.title ? '<p class="wp-sec">' + E(KK.title) + '</p><p class="wp-note">' + E(KK.sumLead) + '</p>' + '<ul class="wp-dl">' + (tl.daeun[curDi] ? coreLine('지금 대운 ' + tl.daeun[curDi].gz, tl.daeun[curDi]) : '') + (curS ? coreLine('올해 ' + curS.year + '년 ' + curS.gz, curS) : '') + '</ul>' : '';
     var cur = tl.daeun[curDi] || null, picks = tl.seun.filter(function (r) { return r && r.best && /strong|on|shaky/.test(r.best.level); }).slice(0, 3);
-    var line = function (when, r) { var fk2 = r.favor ? r.favor.k : 'ok'; return '<li><span class="when">' + E(when) + '</span> — 바람 <b>' + E((d.wind || {})[fk2] || '—') + '</b> · 칼날 <b>' + E(r.best.levelK) + '</b> → ' + E(quad(r.best, fk2)[0]) + '<br>' + E(r.mText || (d.card && r.best.kind ? (d.card.act[r.best.kind] || {})[r.favor ? r.favor.k : 'ok'] : d.combo[r.read])) + '</li>'; };
+    var line = function (when, r) { var fk2 = r.favor ? r.favor.k : 'ok'; return '<li><span class="when">' + E(when) + '</span> — 바람 <b>' + E((d.wind || {})[fk2] || '—') + '</b> · 기량 <b>' + E(r.best.levelK) + '</b> → ' + E(quad(r.best, fk2)[0]) + '<br>' + E(r.mText || (d.card && r.best.kind ? (d.card.act[r.best.kind] || {})[r.favor ? r.favor.k : 'ok'] : d.combo[r.read])) + '</li>'; };
     var lines = (cur ? [line('지금 대운 ' + cur.gz, cur)] : []).concat(picks.map(function (r) { return line(r.year + '년 ' + r.gz, r); }));
     if (part === 'summary') return '<section class="card wp" id="weapon-luck" data-wp="' + E(sigOf(A)) + '"><div class="card-h"><h2>주무기 발현 타이밍</h2><span class="note">' + E(names) + '</span></div>' +
       '<p class="wp-note">' + E(d.twoAxes) + (A.status === 'undetermined' ? ' 태어난 시간을 몰라 세 기둥 기준 후보로 봤어요.' : A.status === 'complex' ? ' 복합형이라 후보 중 가장 잘 켜지는 쪽을 보여 줘요.' : '') + ' 대운·세운·월운 그래프 카드마다 맨 아래에 그 단위의 주무기 줄이 있어요.</p>' + legend + coreNow +

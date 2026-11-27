@@ -40,7 +40,7 @@
     timeline_wealth_14: { on: true, topic: 'wealth', view: 'graph', scope: 'seun', use: u({ first: 1, second: 1, activation: 1, favor: 1, seun: 1 }) },
     timeline_career_14: { on: true, topic: 'career', view: 'graph', scope: 'seun', use: u({ first: 1, second: 1, activation: 1, favor: 1, seun: 1 }) },
     timeline_love_14: { on: true, topic: 'love', view: 'graph', scope: 'seun', use: u({ first: 1, second: 1, activation: 1, favor: 1, seun: 1 }) },
-    // 바람·칼날·결과 블록(view:'axes', 2026-11-27) — 흐름 점수로 고른 시기(전성기 대운·TOP 3 해·달)는 그대로 두고, 같은 시기의 주무기 발현도(칼날)·활용 유리도(결과)를 겹쳐 다섯 갈래로 읽는다
+    // 바람·기량·결과 블록(view:'axes', 2026-11-27) — 흐름 점수로 고른 시기(전성기 대운·TOP 3 해·달)는 그대로 두고, 같은 시기의 주무기 발현도(기량)·활용 유리도(결과)를 겹쳐 다섯 갈래로 읽는다
     timeline_self_peak: { on: true, topic: 'self', view: 'axes', scope: 'peak', use: u({ first: 1, activation: 1, favor: 1, daeun: 1 }) },
     timeline_wealth_06: { on: true, topic: 'wealth', view: 'axes', scope: 'year', use: u({ first: 1, activation: 1, favor: 1, seun: 1 }) },
     timeline_wealth_10: { on: true, topic: 'wealth', view: 'axes', scope: 'month', use: u({ first: 1, activation: 1, favor: 1, wolun: 1 }) },
@@ -76,7 +76,7 @@
     Object.keys(RF.SPEC).forEach(function (id) { var sp = RF.SPEC[id]; if (sp && sp.parts) sp.parts = sp.parts.filter(function (p) { return !(p.custom && /^wp:/.test(p.custom)); }); });
     Object.keys(cfg.rows).forEach(function (id) {
       var r = cfg.rows[id]; if (!r.on) return;
-      var sp = RF.SPEC[id] || (RF.SPEC[id] = { title: r.view === 'axes' ? '바람과 칼날 · ' + TOPIC_K[r.topic] : '나의 주무기 · ' + TOPIC_K[r.topic], parts: [] });
+      var sp = RF.SPEC[id] || (RF.SPEC[id] = { title: r.view === 'axes' ? '바람과 기량 · ' + TOPIC_K[r.topic] : '나의 주무기 · ' + TOPIC_K[r.topic], parts: [] });
       sp.parts = sp.parts.concat([{ custom: 'wp:' + id }]);
     });
     return true;
@@ -94,11 +94,11 @@
     return { A: A, tl: tl, now: now, nowY: nowY, sure: sure, M: H.M, ch: H.ch, who: H.name || (H.sd && H.sd.name) || '' };
   }
   function prim(r) { if (r && r.acts && r.acts[0]) { r.best = r.acts[0]; if (W().readPair) r.read = W().readPair(r.best, r.favor); } return r; }
-  // 전성기 순위용(2026-11-28): 대운 시작 연도 → 1순위 주무기 칼날. 스위치가 꺼졌거나 주무기 미확정이면 null(전성기 장은 바람 점수만으로 고른다)
+  // 전성기 순위용(2026-11-28): 대운 시작 연도 → 1순위 주무기 기량. 스위치가 꺼졌거나 주무기 미확정이면 null(전성기 장은 바람 점수만으로 고른다)
   function daeunBlades(M, ch, now) {
     if (!API.on || !M || !ch || !W() || !W().daeunBlades) return null; return W().daeunBlades(M, ch);   // 규칙은 /weapon.js daeunBlades 하나(만세력 전성기 표시와 공용)
   }
-  // ── 바람·칼날·결과(2026-11-27) — 운 흐름 = 바람, 주무기 발현도 = 칼날, 활용 유리도 = 결과. 세 값은 따로 두고 갈래 이름만 붙인다(점수 합산 없음) ──
+  // ── 바람·기량·결과(2026-11-27) — 운 흐름 = 바람, 주무기 발현도 = 기량, 활용 유리도 = 결과. 세 값은 따로 두고 갈래 이름만 붙인다(점수 합산 없음) ──
   function bladeOf(a) { return !a ? null : /strong|on|shaky/.test(a.level) ? 'sharp' : a.level === 'sup' ? 'mid' : a.level === 'quiet' ? 'dull' : 'blocked'; }
   function axesOf(a, windK) {
     var b = bladeOf(a); if (!b || !windK) return null; var k = b === 'sharp' ? (windK === 'good' ? 'peak' : windK === 'care' ? 'push' : 'show') : (windK === 'good' ? 'cruise' : 'tune');
@@ -115,7 +115,7 @@
     if (use.activation) bits.push('주무기 발현도 ' + a.levelK);
     var U = a.useFav; if (use.activation && U) bits.push('활용 유리도 ' + U.n);   // 5판: 강해진 주무기를 쓰는 게 명식 전체에 득인가(발현도·흐름 등급과 따로)
     if (use.favor && r.favor) bits.push('흐름 ' + r.favor.n);
-    var qx = use.activation && use.favor && r.favor && d.axes ? axesOf(a, r.favor.k) : null; if (qx) bits.push('→ ' + d.axes.name[qx.k]);   // 바람(흐름)·칼날(발현도)로 본 갈래
+    var qx = use.activation && use.favor && r.favor && d.axes ? axesOf(a, r.favor.k) : null; if (qx) bits.push('→ ' + d.axes.name[qx.k]);   // 바람(흐름)·기량(발현도)로 본 갈래
     // 8판: 시기별 핵심 역량(운이 원국과 실제로 맞물려 켜는 힘) — 타고난 주무기와의 관계(강화·보완·전환)
     var cp = use.activation && r.core && r.core.pick, cpk = cp ? cp.rel : (use.activation && r.core ? 'none' : '');
     if (cp) bits.push('시기 역량 ' + EL_K[cp.el] + '(' + cp.groupName + ')·' + cp.relK);
@@ -365,10 +365,10 @@
     if (over.length && !allOver) lines.push(fill(T.over, { list: lim(over) }));
     if (cruise.length && T.cruise) lines.push(fill(T.cruise, { list: lim(cruise) }));
     if (low.length) lines.push(fill(T.low, { list: lim(low) }));
-    var leg = '선 = 칼날, 주무기 발현도(' + EL_K[w.el] + ' · ' + WD().el[w.el].title + ')' + (use.favor ? ' · 아래 띠 = 바람, ' + favName + '(초록 좋음·회색 무난·주황 조심)' : '') + ' · 점 색 = 그 시기에 들어오는 기운의 색 · 선과 띠는 따로 매긴 값이라 더하지 않아요';
+    var leg = '선 = 기량, 주무기 발현도(' + EL_K[w.el] + ' · ' + WD().el[w.el].title + ')' + (use.favor ? ' · 아래 띠 = 바람, ' + favName + '(초록 좋음·회색 무난·주황 조심)' : '') + ' · 점 색 = 그 시기에 들어오는 기운의 색 · 선과 띠는 따로 매긴 값이라 더하지 않아요';
     return sec(fill(g.cap[scope], { t: TOPIC_K[topic] }), esc(fill(T.lead[scope] || T.lead.seun, { s: strong })), svgChart(G, use) + '<p class="dp-mi dp-key">' + esc(leg) + '</p><ul class="dp-ul">' + lines.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>', '');
   }
-  // ── 바람·칼날·결과 블록(view:'axes') — 이 장 위의 흐름 순위(바람)를 그대로 받아, 같은 시기의 칼날·결과를 겹친다 ──
+  // ── 바람·기량·결과 블록(view:'axes') — 이 장 위의 흐름 순위(바람)를 그대로 받아, 같은 시기의 기량·결과를 겹친다 ──
   function monthLuck(B, y, m) { var list = (B.M.wolun(B.ch, y - 1) || []).concat(B.M.wolun(B.ch, y) || []), x = list.filter(function (o) { var k = new Date(o.startMs + 9 * 3600e3); return k.getUTCFullYear() === y && k.getUTCMonth() + 1 === m; })[0]; return x ? prim(W().luck(B.M, B.ch, x, 'wolun')) : null; }
   function axesRows(B, H, topic, scope) {
     var T = R.ReadingText, LGm = root.MantraLuckGrade, out = [];
@@ -400,7 +400,7 @@
       var q = axesOf(o.a, o.wind); if (!q) return '';
       var tip = seen[q.k] ? '' : tt[q.k]; seen[q.k] = 1;   // 같은 갈래가 다시 오면 이름만(같은 문장 반복 안 함)
       var nr = q.resN + (bat(q.resN) ? '이라' : '라'), res = q.res && !seen['r' + q.res] ? fill(q.res === 'heavy' ? X.resHeavy : X.resLight, { nr: nr }) : ''; if (q.res) seen['r' + q.res] = 1;   // 결과 문장도 같은 종류는 처음 한 번만
-      var bits = ['바람 ' + X.wind[q.wind] + '(' + o.windN + ')', '칼날 ' + X.blade[q.blade] + '(' + o.a.levelK + ')'].concat(o.a.useFav ? ['결과 ' + o.a.useFav.n] : []);
+      var bits = ['바람 ' + X.wind[q.wind] + '(' + o.windN + ')', '기량 ' + X.blade[q.blade] + '(' + o.a.levelK + ')'].concat(o.a.useFav ? ['결과 ' + o.a.useFav.n] : []);
       return '<li><b>' + esc(o.label + ' ' + o.gz) + ' → ' + esc(X.name[q.k]) + '</b> <span class="dp-mi">' + esc(bits.join(' · ')) + '</span><br>' + esc((X.mean[q.k] + '. ' + tip + (res ? ' ' + res : '')).trim()) + '</li>';
     }).filter(Boolean);
     if (!li.length) return null;

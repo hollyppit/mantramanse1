@@ -80,7 +80,7 @@ T('build 경로', () => {
   assert.ok(Object.keys(stat.buildShown).length === Object.keys(rows).length, '다섯 장 모두 붙음: ' + JSON.stringify(stat.buildShown));
 });
 stat.axes = { shown: {}, kinds: {} };
-T('11 바람·칼날·결과', () => {
+T('11 바람·기량·결과', () => {
   const NAMES = ['전성기', '발휘기', '돌파기', '순항기', '정비기'];
   // 갈래 규칙(표 그대로)
   const Q = (lv, wk) => WC.axesOf({ level: lv, useFav: null }, wk).k;
@@ -89,17 +89,17 @@ T('11 바람·칼날·결과', () => {
   dev.slice(0, 60).forEach(inp => {
     const ch = M.compute(inp), sd = R.SajuData.build(ch, { now }), A = W.analyze(M, ch), sure = A.weapons.length && A.status !== 'undetermined' && A.status !== 'complex';
     AXES_IDS.forEach(id => {
-      const o = FEAT.build(wf({ id, editorialContractId: id }, { M, ch, sd, now, name: '', assets: {}, videos: {} })), s = txt(o ? (o.lead || '') + (o.rest || '') : ''), has = /바람과 칼날로 다시 본/.test(s);
+      const o = FEAT.build(wf({ id, editorialContractId: id }, { M, ch, sd, now, name: '', assets: {}, videos: {} })), s = txt(o ? (o.lead || '') + (o.rest || '') : ''), has = /바람과 기량으로 다시 본/.test(s);
       if (!sure) { assert.ok(!has, id + ' 무기 미확정인데 블록'); return; }
       if (!has) return; stat.axes.shown[id] = (stat.axes.shown[id] || 0) + 1;
       assert.ok(!/undefined|NaN|\[object|null/.test(s), id + ' 빈 값'); assert.ok(!/반드시|무조건|보장|성공 확률/.test(s), id + ' 금지어');
-      const seg = s.slice(s.indexOf('바람과 칼날로 다시 본')), names = (seg.match(/→ (전성기|발휘기|돌파기|순항기|정비기)/g) || []).map(x => x.slice(2)); assert.ok(names.length >= 1, id + ' 갈래 이름'); names.forEach(n => { assert.ok(NAMES.includes(n)); stat.axes.kinds[n] = (stat.axes.kinds[n] || 0) + 1; });
+      const seg = s.slice(s.indexOf('바람과 기량으로 다시 본')), names = (seg.match(/→ (전성기|발휘기|돌파기|순항기|정비기)/g) || []).map(x => x.slice(2)); assert.ok(names.length >= 1, id + ' 갈래 이름'); names.forEach(n => { assert.ok(NAMES.includes(n)); stat.axes.kinds[n] = (stat.axes.kinds[n] || 0) + 1; });
       if (id === 'timeline_self_peak') { const pk = R.PeakReading.build(sd, '', { M, ch, now }); assert.equal(names.length, pk.readingVisualData.peakPicks.length, '전성기 고른 대운 수 = 갈래 수'); (seg.match(/인생 흐름 (\d+)점 (좋음|무난|조심)/g) || []).forEach(x => { const m = x.match(/(\d+)점 (\S+)/); assert.equal(R.ReadingText.tierOf(+m[1]).n, m[2], '바람 = 전성기 점수 등급'); }); }
       else { const kind = rows[id].topic === 'self' ? 'career' : rows[id].topic, top = FEAT.rank(M, ch, now, kind, rows[id].scope === 'month' ? 'month' : 'year').slice(0, 3); top.forEach(x => assert.ok(seg.includes(x.v + '점'), id + ' 순위 점수 그대로 ' + x.v)); }
     });
   });
   AXES_IDS.forEach(id => assert.ok(stat.axes.shown[id] > 0, id + ' 한 번도 안 붙음'));
-  // 전성기 순위 칼날 반영(2026-11-28): 갈래 순서(전성기 → 발휘기 → 순항기 → 나머지)가 지켜지고, 1위 = 그래프 아래 순위 1위, 스위치 끔이면 예전(바람 점수만)과 같음
+  // 전성기 순위 기량 반영(2026-11-28): 갈래 순서(전성기 → 발휘기 → 순항기 → 나머지)가 지켜지고, 1위 = 그래프 아래 순위 1위, 스위치 끔이면 예전(바람 점수만)과 같음
   const QO = { '전성기': 0, '발휘기': 1, '순항기': 2, '돌파기': 3, '정비기': 4 }; stat.peakRank = { blade: 0, topChanged: 0 };
   dev.slice(0, 80).forEach(inp => {
     const ch = M.compute(inp), sd = R.SajuData.build(ch, { now }), b = R.PeakReading.build(sd, '', { M, ch, now }), vd = b.readingVisualData; if (vd.peakRule !== 'blade' || !vd.peakPicks.length) return; stat.peakRank.blade++;
@@ -110,7 +110,7 @@ T('11 바람·칼날·결과', () => {
     const o = R.PeakReading.build(sd, ''); if (o.readingVisualData.peakSelected !== vd.peakSelected) stat.peakRank.topChanged++;
     WC.on = false; const off = R.PeakReading.build(sd, '', { M, ch, now }); WC.on = true; assert.equal(off.readingVisualData.peakRule, 'wind', '스위치 끔이면 바람만'); assert.deepEqual(off.readingVisualData.peakPicks, o.readingVisualData.peakPicks, '스위치 끔 = 예전 순위');
   });
-  assert.ok(stat.peakRank.blade > 40, '칼날 반영 표본');
+  assert.ok(stat.peakRank.blade > 40, '기량 반영 표본');
   // 만세력 전성기 표시(2026-11-28): reading-text.js 없이 lifeScore + MantraWeapon.daeunBlades 로 고른 결과 = 유료 전성기 장
   dev.slice(0, 80).forEach(inp => {
     const ch = M.compute(inp), sd = R.SajuData.build(ch, { now }); sd.daewoon.forEach(p => assert.equal(R.PeakReading.lifeScore(p), R.ReadingText.timingScore(p, 'life'), '인생 흐름 점수 같음'));
@@ -148,8 +148,8 @@ T('문안 금지 표현', () => { const walk = o => typeof o === 'string' ? asse
     assert.ok(api.cleanRows({ timeline_self_25: { topic: 'self', use: { hack: true } } }).error, '없는 항목 거부');
     assert.ok(api.cleanRows({ timeline_wealth_14: { topic: 'wealth', view: 'graph', scope: 'year' } }).error, '없는 그래프 범위 거부');
     assert.ok(api.cleanRows({ timeline_wealth_14: { topic: 'wealth', view: 'chart' } }).error, '없는 형태 거부');
-    assert.ok(api.cleanRows({ timeline_wealth_06: { topic: 'wealth', view: 'axes', scope: 'seun' } }).error, '없는 바람·칼날 범위 거부');
-    const ax = api.cleanRows({ timeline_self_peak: { topic: 'self', view: 'axes', scope: 'peak', use: { activation: true } } }); assert.ok(ax.rows && ax.rows.timeline_self_peak.view === 'axes' && ax.rows.timeline_self_peak.scope === 'peak', '바람·칼날 줄 저장');
+    assert.ok(api.cleanRows({ timeline_wealth_06: { topic: 'wealth', view: 'axes', scope: 'seun' } }).error, '없는 바람·기량 범위 거부');
+    const ax = api.cleanRows({ timeline_self_peak: { topic: 'self', view: 'axes', scope: 'peak', use: { activation: true } } }); assert.ok(ax.rows && ax.rows.timeline_self_peak.view === 'axes' && ax.rows.timeline_self_peak.scope === 'peak', '바람·기량 줄 저장');
     const gr = api.cleanRows({ timeline_wealth_14: { topic: 'wealth', view: 'graph', scope: 'seun', use: { activation: true } } }); assert.ok(gr.rows && gr.rows.timeline_wealth_14.view === 'graph' && gr.rows.timeline_wealth_14.scope === 'seun', '그래프 줄 저장');
     const store = {}, env = { ADMIN_PASSWORD: 'pw-test', GLOSSARY_KV: { get: async (k) => store[k] ? JSON.parse(store[k]) : null, put: async (k, v) => { store[k] = v; } } };
     const req = (m, body, auth) => new Request('https://x/api/weapon-links', { method: m, headers: { 'content-type': 'application/json', ...(auth ? { authorization: 'Bearer pw-test' } : {}) }, body: body ? JSON.stringify(body) : undefined });
