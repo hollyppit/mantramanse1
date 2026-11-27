@@ -1,6 +1,6 @@
 // 주무기 상세풀이 질문(장)별 연결 설정(2026-11-26, report/v2/weapon-chapters.js)
 // GET /api/weapon-links — { version, rows: { 장ID: { on, topic, use{…} } } } (공개, 60초 캐시). 저장값이 없으면 rows 없이 version 0 → 화면은 코드 기본값을 쓴다
-// 줄 하나: { on, topic, use{…}, view?: 'block'|'graph', scope?: 'daeun'|'seun'|'wolun'(graph 일 때) } — graph 는 발현 그래프(2026-11-26)
+// 줄 하나: { on, topic, use{…}, view?: 'block'|'graph'|'axes', scope?: 'daeun'|'seun'|'wolun'(graph 일 때) · 'peak'|'year'|'month'(axes 일 때) } — graph 는 발현 그래프(2026-11-26), axes 는 바람·칼날·결과 블록(2026-11-27)
 // PUT /api/weapon-links — { rows: {…} } 통째로 저장 (관리자). 장 ID·질문·상품·결제는 건드리지 않고 이 KV 키(weapon:links) 하나만 쓴다
 // 건강·사고수(health_*, self_35, self_h*)·전생(creative_*, self_36) 장은 고를 수 없다(주무기를 건강·전생 근거로 쓰지 않기)
 // 공개 여부 전체는 /api/luck-flags weaponChapters 스위치가 정한다
@@ -24,10 +24,11 @@ export function cleanRows(rows) {
     if (r.on !== undefined && typeof r.on !== 'boolean') return { error: 'on 은 true/false 여야 합니다: ' + id };
     const use = {}; for (const k of USE_KEYS) { const v = r.use && r.use[k]; if (v !== undefined && typeof v !== 'boolean') return { error: '사용 여부는 true/false 여야 합니다: ' + id + '.' + k }; use[k] = v === true; }
     if (r.use) for (const k of Object.keys(r.use)) if (!USE_KEYS.includes(k)) return { error: '알 수 없는 항목입니다: ' + id + '.' + k };
-    if (r.view !== undefined && r.view !== 'block' && r.view !== 'graph') return { error: '형태는 block(풀이) 또는 graph(발현 그래프)여야 합니다: ' + id };
+    if (r.view !== undefined && r.view !== 'block' && r.view !== 'graph' && r.view !== 'axes') return { error: '형태는 block(풀이)·graph(발현 그래프)·axes(바람과 칼날) 중 하나여야 합니다: ' + id };
+    if (r.view === 'axes' && !['peak', 'year', 'month'].includes(r.scope)) return { error: '바람과 칼날 범위는 peak·year·month 중 하나여야 합니다: ' + id };
     if (r.view === 'graph' && !['daeun', 'seun', 'wolun'].includes(r.scope)) return { error: '그래프 범위는 daeun·seun·wolun 중 하나여야 합니다: ' + id };
     out[id] = { on: r.on !== false, topic: r.topic, use };
-    if (r.view === 'graph') { out[id].view = 'graph'; out[id].scope = r.scope; }
+    if (r.view === 'graph' || r.view === 'axes') { out[id].view = r.view; out[id].scope = r.scope; }
   }
   return { rows: out };
 }

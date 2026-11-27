@@ -7,7 +7,7 @@ const fs = require('fs'), path = require('path'), vm = require('vm'), assert = r
 const root = path.join(__dirname, '..');
 vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8'), { filename: 'engine.js' }); globalThis.window = globalThis;
 ['luck-grade', 'ten-god-roles', 'gyeok-structure', 'wealth-career-data', 'wealth-career-data-2', 'wealth-career-data-3', 'wealth-career-jobs', 'wealth-career', 'element-strategy', 'aptitude-data', 'aptitude'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, f + '.js'), 'utf8'), { filename: f }));
-['ilju-data', 'saju-data', 'deep', 'deep-life', 'deep-time', 'deep-wealth', 'deep-love', 'reading-feature-data-1', 'reading-feature-data-2', 'reading-feature', 'reading-text', 'aptitude-chapters-data', 'aptitude-chapters'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8'), { filename: f }));
+['ilju-data', 'saju-data', 'deep', 'deep-life', 'deep-time', 'deep-wealth', 'deep-love', 'reading-feature-data-1', 'reading-feature-data-2', 'reading-feature', 'reading-text', 'reading-peak', 'aptitude-chapters-data', 'aptitude-chapters'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8'), { filename: f }));
 const M = globalThis.Manse, R = globalThis.ReportV2, FEAT = R.ReadingFeature, now = Date.UTC(2026, 10, 26);
 const wf = (c, H) => { Object.defineProperty(c, 'readingFeature', { value: H, writable: true, configurable: true, enumerable: false }); return c; };
 const dev = [...Array(300)].map((_, i) => ({ year: 1950 + (i * 7) % 55, month: 1 + (i * 5) % 12, day: 1 + (i * 11) % 28, hour: (i * 3) % 24, minute: 0, gender: i % 2 ? 'M' : 'F', calendar: 'solar' }));
@@ -30,8 +30,8 @@ T('SPEC 에 wp 조각 연결', () => { Object.keys(WC.DEFAULT_ROWS).forEach(id =
 // ── 본 검사 ──
 WC.on = true;
 const stat = { status: {}, topicShown: { self: 0, wealth: 0, career: 0, love: 0, remedy: 0 }, dupSentences: 0, dupExamples: [], buildShown: {}, avgChars: { self: 0, wealth: 0, career: 0, love: 0, remedy: 0 }, nohour: { selfNote: 0, others: 0 } };
-const rows = WC.DEFAULT_ROWS, TOPIC_ID = {}; Object.keys(rows).forEach(id => { if (rows[id].view !== 'graph') TOPIC_ID[rows[id].topic] = id; });
-const GRAPH_IDS = Object.keys(rows).filter(id => rows[id].view === 'graph');
+const rows = WC.DEFAULT_ROWS, TOPIC_ID = {}; Object.keys(rows).forEach(id => { if (!rows[id].view) TOPIC_ID[rows[id].topic] = id; });
+const GRAPH_IDS = Object.keys(rows).filter(id => rows[id].view === 'graph'), AXES_IDS = Object.keys(rows).filter(id => rows[id].view === 'axes');
 const HEAD = { self: '나의 핵심 주무기', wealth: '경제활동의 주무기', career: '직업적 주무기', love: '관계에서의 주무기', remedy: '주무기로 운을 쓰는 법' };
 const results = [];
 function runOne(inp, i, tag) {
@@ -79,6 +79,27 @@ T('build 경로', () => {
   });
   assert.ok(Object.keys(stat.buildShown).length === Object.keys(rows).length, '다섯 장 모두 붙음: ' + JSON.stringify(stat.buildShown));
 });
+stat.axes = { shown: {}, kinds: {} };
+T('11 바람·칼날·결과', () => {
+  const NAMES = ['전성기', '발휘기', '돌파기', '순항기', '정비기'];
+  // 갈래 규칙(표 그대로)
+  const Q = (lv, wk) => WC.axesOf({ level: lv, useFav: null }, wk).k;
+  assert.equal(Q('strong', 'good'), 'peak'); assert.equal(Q('on', 'ok'), 'show'); assert.equal(Q('shaky', 'care'), 'push'); assert.equal(Q('quiet', 'good'), 'cruise'); assert.equal(Q('sup', 'care'), 'tune'); assert.equal(Q('hit', 'good'), 'cruise'); assert.equal(Q('trim', 'ok'), 'tune');
+  assert.equal(WC.axesOf({ level: 'on', useFav: { k: 'bad', n: '부담' } }, 'good').res, 'heavy', '날 섬 + 부담 = 대가 주의'); assert.equal(WC.axesOf({ level: 'quiet', useFav: { k: 'good', n: '유리' } }, 'ok').res, 'light');
+  dev.slice(0, 60).forEach(inp => {
+    const ch = M.compute(inp), sd = R.SajuData.build(ch, { now }), A = W.analyze(M, ch), sure = A.weapons.length && A.status !== 'undetermined' && A.status !== 'complex';
+    AXES_IDS.forEach(id => {
+      const o = FEAT.build(wf({ id, editorialContractId: id }, { M, ch, sd, now, name: '', assets: {}, videos: {} })), s = txt(o ? (o.lead || '') + (o.rest || '') : ''), has = /바람과 칼날로 다시 본/.test(s);
+      if (!sure) { assert.ok(!has, id + ' 무기 미확정인데 블록'); return; }
+      if (!has) return; stat.axes.shown[id] = (stat.axes.shown[id] || 0) + 1;
+      assert.ok(!/undefined|NaN|\[object|null/.test(s), id + ' 빈 값'); assert.ok(!/반드시|무조건|보장|성공 확률/.test(s), id + ' 금지어');
+      const seg = s.slice(s.indexOf('바람과 칼날로 다시 본')), names = (seg.match(/→ (전성기|발휘기|돌파기|순항기|정비기)/g) || []).map(x => x.slice(2)); assert.ok(names.length >= 1, id + ' 갈래 이름'); names.forEach(n => { assert.ok(NAMES.includes(n)); stat.axes.kinds[n] = (stat.axes.kinds[n] || 0) + 1; });
+      if (id === 'timeline_self_peak') { const pk = R.PeakReading.build(sd, ''); assert.equal(names.length, pk.readingVisualData.peakPicks.length, '전성기 고른 대운 수 = 갈래 수'); (seg.match(/인생 흐름 (\d+)점 (좋음|무난|조심)/g) || []).forEach(x => { const m = x.match(/(\d+)점 (\S+)/); assert.equal(R.ReadingText.tierOf(+m[1]).n, m[2], '바람 = 전성기 점수 등급'); }); }
+      else { const kind = rows[id].topic === 'self' ? 'career' : rows[id].topic, top = FEAT.rank(M, ch, now, kind, rows[id].scope === 'month' ? 'month' : 'year').slice(0, 3); top.forEach(x => assert.ok(seg.includes(x.v + '점'), id + ' 순위 점수 그대로 ' + x.v)); }
+    });
+  });
+  AXES_IDS.forEach(id => assert.ok(stat.axes.shown[id] > 0, id + ' 한 번도 안 붙음'));
+});
 T('10 질문별 끄기·데이터 항목 끄기', () => {
   const inp = dev.find(x => { const A = W.analyze(M, M.compute(x)); return A.weapons.length === 2 && A.status === 'dual'; }), ch = M.compute(inp), sd = () => R.SajuData.build(ch, { now });
   const r2 = JSON.parse(JSON.stringify(rows)); r2.timeline_wealth_02.on = false; r2.timeline_self_25.use.second = false; r2.timeline_self_25.use.daeun = false; r2.timeline_self_25.use.seun = false;
@@ -104,6 +125,8 @@ T('문안 금지 표현', () => { const walk = o => typeof o === 'string' ? asse
     assert.ok(api.cleanRows({ timeline_self_25: { topic: 'self', use: { hack: true } } }).error, '없는 항목 거부');
     assert.ok(api.cleanRows({ timeline_wealth_14: { topic: 'wealth', view: 'graph', scope: 'year' } }).error, '없는 그래프 범위 거부');
     assert.ok(api.cleanRows({ timeline_wealth_14: { topic: 'wealth', view: 'chart' } }).error, '없는 형태 거부');
+    assert.ok(api.cleanRows({ timeline_wealth_06: { topic: 'wealth', view: 'axes', scope: 'seun' } }).error, '없는 바람·칼날 범위 거부');
+    const ax = api.cleanRows({ timeline_self_peak: { topic: 'self', view: 'axes', scope: 'peak', use: { activation: true } } }); assert.ok(ax.rows && ax.rows.timeline_self_peak.view === 'axes' && ax.rows.timeline_self_peak.scope === 'peak', '바람·칼날 줄 저장');
     const gr = api.cleanRows({ timeline_wealth_14: { topic: 'wealth', view: 'graph', scope: 'seun', use: { activation: true } } }); assert.ok(gr.rows && gr.rows.timeline_wealth_14.view === 'graph' && gr.rows.timeline_wealth_14.scope === 'seun', '그래프 줄 저장');
     const store = {}, env = { ADMIN_PASSWORD: 'pw-test', GLOSSARY_KV: { get: async (k) => store[k] ? JSON.parse(store[k]) : null, put: async (k, v) => { store[k] = v; } } };
     const req = (m, body, auth) => new Request('https://x/api/weapon-links', { method: m, headers: { 'content-type': 'application/json', ...(auth ? { authorization: 'Bearer pw-test' } : {}) }, body: body ? JSON.stringify(body) : undefined });

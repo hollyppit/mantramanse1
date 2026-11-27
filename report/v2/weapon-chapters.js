@@ -17,9 +17,10 @@
 (function (root) {
   'use strict';
   var R = root.ReportV2 = root.ReportV2 || {};
-  var VERSION = 'weapon-chapters-20261126-1';
+  var VERSION = 'weapon-chapters-20261127-axes';
   var TOPICS = ['self', 'wealth', 'career', 'love', 'remedy'], TOPIC_K = { self: '종합풀이', wealth: '재물운', career: '커리어운', love: '인연운', remedy: '개운법' };
   var SCOPES = ['daeun', 'seun', 'wolun'], SCOPE_K = { daeun: '대운', seun: '세운', wolun: '월운' };
+  var AX_SCOPES = ['peak', 'year', 'month'], AX_K = { peak: '전성기 대운', year: 'TOP 3 해', month: 'TOP 3 달' };
   var USE_KEYS = ['first', 'second', 'power', 'overlap', 'rootExp', 'tenGod', 'daeun', 'seun', 'wolun', 'activation', 'favor'];
   var USE_K = { first: '1순위 주무기', second: '2순위 주무기', power: '오행 세력', overlap: '병존·간여지동 근거', rootExp: '통근·투간 근거', tenGod: '십성 작용', daeun: '대운', seun: '세운', wolun: '월운', activation: '주무기 발현도·활용 유리도', favor: '흐름 등급' };
   var BLOCKED = /^timeline_(health|creative)_|^timeline_self_(3[56]|h\d+)$/;   // 건강·사고수(health_*, self_35, 건강 상세 self_h1~6)·전생(creative_*, self_36) 장
@@ -39,6 +40,11 @@
     timeline_wealth_14: { on: true, topic: 'wealth', view: 'graph', scope: 'seun', use: u({ first: 1, second: 1, activation: 1, favor: 1, seun: 1 }) },
     timeline_career_14: { on: true, topic: 'career', view: 'graph', scope: 'seun', use: u({ first: 1, second: 1, activation: 1, favor: 1, seun: 1 }) },
     timeline_love_14: { on: true, topic: 'love', view: 'graph', scope: 'seun', use: u({ first: 1, second: 1, activation: 1, favor: 1, seun: 1 }) },
+    // 바람·칼날·결과 블록(view:'axes', 2026-11-27) — 흐름 점수로 고른 시기(전성기 대운·TOP 3 해·달)는 그대로 두고, 같은 시기의 주무기 발현도(칼날)·활용 유리도(결과)를 겹쳐 다섯 갈래로 읽는다
+    timeline_self_peak: { on: true, topic: 'self', view: 'axes', scope: 'peak', use: u({ first: 1, activation: 1, favor: 1, daeun: 1 }) },
+    timeline_wealth_06: { on: true, topic: 'wealth', view: 'axes', scope: 'year', use: u({ first: 1, activation: 1, favor: 1, seun: 1 }) },
+    timeline_wealth_10: { on: true, topic: 'wealth', view: 'axes', scope: 'month', use: u({ first: 1, activation: 1, favor: 1, wolun: 1 }) },
+    timeline_career_08: { on: true, topic: 'career', view: 'axes', scope: 'year', use: u({ first: 1, activation: 1, favor: 1, seun: 1 }) },
   };
   var BANNED = /반드시|무조건|성공합니다|성공할 거예요|성공 확률|대박|보장|틀림없|천재|돈을 법니다|수익이 납니다|결혼합니다|결혼하게 됩니다|건강해집니다|병이|진단|월 \d+만/;
   var WD = function () { return root.MantraWeaponData; }, W = function () { return root.MantraWeapon; };
@@ -57,6 +63,7 @@
       var r = d.rows[id]; if (!/^timeline_[a-z]+_[\w]+$/.test(id) || BLOCKED.test(id) || !r || TOPICS.indexOf(r.topic) < 0) return;
       rows[id] = { on: r.on !== false, topic: r.topic, use: u(r.use) };
       if (r.view === 'graph') { rows[id].view = 'graph'; rows[id].scope = SCOPES.indexOf(r.scope) >= 0 ? r.scope : 'seun'; }
+      if (r.view === 'axes') { rows[id].view = 'axes'; rows[id].scope = AX_SCOPES.indexOf(r.scope) >= 0 ? r.scope : 'year'; }
     });
     return { version: Number.isInteger(d.version) ? d.version : 0, rows: rows };
   }
@@ -69,7 +76,7 @@
     Object.keys(RF.SPEC).forEach(function (id) { var sp = RF.SPEC[id]; if (sp && sp.parts) sp.parts = sp.parts.filter(function (p) { return !(p.custom && /^wp:/.test(p.custom)); }); });
     Object.keys(cfg.rows).forEach(function (id) {
       var r = cfg.rows[id]; if (!r.on) return;
-      var sp = RF.SPEC[id] || (RF.SPEC[id] = { title: '나의 주무기 · ' + TOPIC_K[r.topic], parts: [] });
+      var sp = RF.SPEC[id] || (RF.SPEC[id] = { title: r.view === 'axes' ? '바람과 칼날 · ' + TOPIC_K[r.topic] : '나의 주무기 · ' + TOPIC_K[r.topic], parts: [] });
       sp.parts = sp.parts.concat([{ custom: 'wp:' + id }]);
     });
     return true;
@@ -87,6 +94,13 @@
     return { A: A, tl: tl, now: now, nowY: nowY, sure: sure, M: H.M, ch: H.ch, who: H.name || (H.sd && H.sd.name) || '' };
   }
   function prim(r) { if (r && r.acts && r.acts[0]) { r.best = r.acts[0]; if (W().readPair) r.read = W().readPair(r.best, r.favor); } return r; }
+  // ── 바람·칼날·결과(2026-11-27) — 운 흐름 = 바람, 주무기 발현도 = 칼날, 활용 유리도 = 결과. 세 값은 따로 두고 갈래 이름만 붙인다(점수 합산 없음) ──
+  function bladeOf(a) { return !a ? null : /strong|on|shaky/.test(a.level) ? 'sharp' : a.level === 'sup' ? 'mid' : a.level === 'quiet' ? 'dull' : 'blocked'; }
+  function axesOf(a, windK) {
+    var b = bladeOf(a); if (!b || !windK) return null; var k = b === 'sharp' ? (windK === 'good' ? 'peak' : windK === 'care' ? 'push' : 'show') : (windK === 'good' ? 'cruise' : 'tune');
+    var U = a.useFav, res = U ? (b === 'sharp' && (U.k === 'adj' || U.k === 'bad') ? 'heavy' : b !== 'sharp' && /good/.test(U.k) ? 'light' : '') : '';
+    return { k: k, blade: b, wind: windK, res: res, resN: U ? U.n : '' };
+  }
   function pickWeapons(B, use) { var w = B.A.weapons.slice(); var out = []; if (use.first && w[0]) out.push(w[0]); if (use.second && w[1]) out.push(w[1]); return out; }
   function wTitle(w) { return EL_K[w.el] + '(' + EL_H[w.el] + ') — ' + WD().el[w.el].title; }
   function curIdx(list, now) { var c = -1; (list || []).forEach(function (r, i) { if (r && r.startMs <= now) c = i; }); return c; }
@@ -97,6 +111,7 @@
     if (use.activation) bits.push('주무기 발현도 ' + a.levelK);
     var U = a.useFav; if (use.activation && U) bits.push('활용 유리도 ' + U.n);   // 5판: 강해진 주무기를 쓰는 게 명식 전체에 득인가(발현도·흐름 등급과 따로)
     if (use.favor && r.favor) bits.push('흐름 ' + r.favor.n);
+    var qx = use.activation && use.favor && r.favor && d.axes ? axesOf(a, r.favor.k) : null; if (qx) bits.push('→ ' + d.axes.name[qx.k]);   // 바람(흐름)·칼날(발현도)로 본 갈래
     // 8판: 시기별 핵심 역량(운이 원국과 실제로 맞물려 켜는 힘) — 타고난 주무기와의 관계(강화·보완·전환)
     var cp = use.activation && r.core && r.core.pick, cpk = cp ? cp.rel : (use.activation && r.core ? 'none' : '');
     if (cp) bits.push('시기 역량 ' + EL_K[cp.el] + '(' + cp.groupName + ')·' + cp.relK);
@@ -333,16 +348,60 @@
     var from = scope === 'daeun' || scope === 'seun' ? Math.max(0, G.nowIdx) : 0;   // 요약은 지금부터 앞쪽만(그래프는 평생 전체·세운은 지난 10년까지)
     var pick = function (f) { return G.rows.map(function (r, i) { return i >= from && f(r) ? G.when[i] : null; }).filter(Boolean); };
     var isOn = function (r) { return r && r.best && /strong|on|shaky/.test(r.best.level); };
-    var onL = pick(isOn), both = use.favor ? pick(function (r) { return isOn(r) && r.favor && r.favor.k === 'good'; }) : [], over = use.favor ? pick(function (r) { return isOn(r) && r.favor && r.favor.k === 'care'; }) : [], low = pick(function (r) { return r && r.best && /hit|trim/.test(r.best.level); });
+    var onL = pick(isOn), cruise = use.favor ? pick(function (r) { return r && r.best && !isOn(r) && r.favor && r.favor.k === 'good'; }) : [], both = use.favor ? pick(function (r) { return isOn(r) && r.favor && r.favor.k === 'good'; }) : [], over = use.favor ? pick(function (r) { return isOn(r) && r.favor && r.favor.k === 'care'; }) : [], low = pick(function (r) { return r && r.best && /hit|trim/.test(r.best.level); });
     var lim = function (a) { return a.slice(0, 4).join(', ') + (a.length > 4 ? ' 외 ' + (a.length - 4) + '구간' : ''); };
     var T = g[topic] || g.self, lines = [];
     var allOver = onL.length && over.length === onL.length && !both.length;   // 켜지는 구간이 모두 조심이면 같은 목록을 두 번 말하지 않는다
     lines.push(allOver ? fill(T.allOver, { list: lim(onL) }) : onL.length ? fill(T.on, { list: lim(onL), s: strong }) : fill(T.none, { s: strong }));
     if (both.length) lines.push(fill(T.both, { list: lim(both) }));
     if (over.length && !allOver) lines.push(fill(T.over, { list: lim(over) }));
+    if (cruise.length && T.cruise) lines.push(fill(T.cruise, { list: lim(cruise) }));
     if (low.length) lines.push(fill(T.low, { list: lim(low) }));
-    var leg = '선 = 주무기 발현도(' + EL_K[w.el] + ' · ' + WD().el[w.el].title + ')' + (use.favor ? ' · 아래 띠 = ' + favName + '(초록 좋음·회색 무난·주황 조심)' : '') + ' · 점 색 = 그 시기에 들어오는 기운의 색 · 선과 띠는 따로 매긴 값이라 더하지 않아요';
+    var leg = '선 = 칼날, 주무기 발현도(' + EL_K[w.el] + ' · ' + WD().el[w.el].title + ')' + (use.favor ? ' · 아래 띠 = 바람, ' + favName + '(초록 좋음·회색 무난·주황 조심)' : '') + ' · 점 색 = 그 시기에 들어오는 기운의 색 · 선과 띠는 따로 매긴 값이라 더하지 않아요';
     return sec(fill(g.cap[scope], { t: TOPIC_K[topic] }), esc(fill(T.lead[scope] || T.lead.seun, { s: strong })), svgChart(G, use) + '<p class="dp-mi dp-key">' + esc(leg) + '</p><ul class="dp-ul">' + lines.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>', '');
+  }
+  // ── 바람·칼날·결과 블록(view:'axes') — 이 장 위의 흐름 순위(바람)를 그대로 받아, 같은 시기의 칼날·결과를 겹친다 ──
+  function monthLuck(B, y, m) { var list = (B.M.wolun(B.ch, y - 1) || []).concat(B.M.wolun(B.ch, y) || []), x = list.filter(function (o) { var k = new Date(o.startMs + 9 * 3600e3); return k.getUTCFullYear() === y && k.getUTCMonth() + 1 === m; })[0]; return x ? prim(W().luck(B.M, B.ch, x, 'wolun')) : null; }
+  function axesRows(B, H, topic, scope) {
+    var T = R.ReadingText, LGm = root.MantraLuckGrade, out = [];
+    if (scope === 'peak') {
+      var PR = R.PeakReading, sd = H.sd || {}; if (!PR || !T || !T.timingScore || !B.tl) return null; var pk = null; try { pk = PR.build(sd, B.who); } catch (e) { pk = null; }
+      var ys = pk && pk.readingVisualData && pk.readingVisualData.peakPicks || []; if (!ys.length) return null;
+      var one = function (p) { var r = B.tl.daeun.filter(function (q) { return q && q.startYear === p.startYear; })[0]; if (!r || !r.best) return null; var n = T.timingScore(p, 'life'), t = T.tierOf(n);
+        return ({ label: p.startYear + '~' + p.endYear + '년(' + Math.floor(p.startAge) + '~' + (Math.floor(p.startAge) + 10) + '세)', gz: (p.ganzhi || r.gz) + ' 대운', wind: t.k, windN: '인생 흐름 ' + n + '점 ' + t.n, a: r.best, short: p.startYear + '~' + p.endYear + '년', t: p.startYear }); };
+      ys.forEach(function (y) { var p = (sd.daewoon || []).filter(function (q) { return q.startYear === y; })[0], o = p && one(p); if (o) out.push(o); });
+      out.rest = (sd.daewoon || []).filter(function (p) { return ys.indexOf(p.startYear) < 0 && p.endYear >= (sd.nowYear || B.nowY) && p.startAge < 80; }).map(one).filter(Boolean);
+      return out;
+    }
+    var kind = topic === 'self' ? 'career' : topic, RF = R.ReadingFeature; if (!RF || !RF.rank) return null;
+    var top = RF.rank(B.M, B.ch, B.now, kind, scope === 'month' ? 'month' : 'year'); if (!top || top.length < 3) return null;
+    var KN = { wealth: '재물 지수', love: '인연 지수', career: '일 흐름 지수' }[kind];
+    var mk = function (x) {
+      var r = scope === 'month' ? monthLuck(B, x.y, x.m) : (B.tl.seun.filter(function (q) { return q && q.year === x.y; })[0] || null); if (!r || !r.best) return null;
+      var g = kind === 'career' ? (T && T.tierOf ? T.tierOf(x.v) : null) : (LGm && LGm.metric ? LGm.metric(kind, x.v) : null); if (!g) return null;
+      return { label: scope === 'month' ? x.y + '년 ' + x.m + '월' : x.y + '년', gz: x.gz, wind: g.k, windN: KN + ' ' + x.v + '점 ' + g.n, a: r.best, short: scope === 'month' ? x.y + '년 ' + x.m + '월' : x.y + '년', t: x.y * 100 + (x.m || 0) };
+    };
+    top.slice(0, 3).forEach(function (x) { var o = mk(x); if (o) out.push(o); }); out.rest = top.slice(3).map(mk).filter(Boolean);
+    return out;
+  }
+  function axesBlock(B, H, topic, scope, use) {
+    if (!B.sure || !B.tl || !use.activation) return null; var w = pickWeapons(B, use)[0]; if (!w) return null;
+    var X = DD().axes, rows = axesRows(B, H, topic, scope); if (!X || !rows || !rows.length) return null;
+    var tt = X.tip[topic] || X.tip.self, strong = WD().el[w.el].strengths.slice(0, 2).join('·'), seen = {};
+    var li = rows.map(function (o, i) {
+      var q = axesOf(o.a, o.wind); if (!q) return '';
+      var tip = seen[q.k] ? '' : tt[q.k]; seen[q.k] = 1;   // 같은 갈래가 다시 오면 이름만(같은 문장 반복 안 함)
+      var nr = q.resN + (bat(q.resN) ? '이라' : '라'), res = q.res && !seen['r' + q.res] ? fill(q.res === 'heavy' ? X.resHeavy : X.resLight, { nr: nr }) : ''; if (q.res) seen['r' + q.res] = 1;   // 결과 문장도 같은 종류는 처음 한 번만
+      var bits = ['바람 ' + X.wind[q.wind] + '(' + o.windN + ')', '칼날 ' + X.blade[q.blade] + '(' + o.a.levelK + ')'].concat(o.a.useFav ? ['결과 ' + o.a.useFav.n] : []);
+      return '<li><b>' + esc(o.label + ' ' + o.gz) + ' → ' + esc(X.name[q.k]) + '</b> <span class="dp-mi">' + esc(bits.join(' · ')) + '</span><br>' + esc((X.mean[q.k] + '. ' + tip + (res ? ' ' + res : '')).trim()) + '</li>';
+    }).filter(Boolean);
+    if (!li.length) return null;
+    var rest = (rows.rest || []).map(function (o) { var q = axesOf(o.a, o.wind); return q && (q.k === 'push' || q.k === 'show') ? { o: o, q: q } : null; }).filter(Boolean).sort(function (x, y) { return (x.q.k === 'push' ? 0 : 1) - (y.q.k === 'push' ? 0 : 1); }).slice(0, 3).sort(function (x, y) { return x.o.t - y.o.t; });
+    var restL = rest.length ? '<li><b>' + esc(X.outside[scope]) + '</b> <span class="dp-mi">' + esc(rest.map(function (z) { return z.o.short + '(' + X.name[z.q.k] + ' · ' + z.o.windN.replace(/^.* (d+점 S+)$/, '$1') + ')'; }).join(', ')) + '</span><br>' + esc(rest.some(function (z) { return z.q.k === 'push'; }) ? X.outsidePush : X.outsideShow) + '</li>' : '';
+    if (restL) li.push(restL);
+    // 설명 문단은 전성기 장에서만 길게, TOP 3 장은 한 줄(여러 장에 같은 설명이 반복되지 않게)
+    var lead = scope === 'peak' ? fill(X.lead, { s: strong }) + (rows.some(function (o) { return o.a.useFav; }) ? X.leadRes : '') : fill(X.leadShort[scope], { s: strong, t: X.leadT[topic] || X.leadT.self });
+    return sec(X.cap[scope], esc(X.keep[scope]) + '<br>' + esc(lead), '<ul class="dp-ul">' + li.join('') + '</ul>' + (scope === 'peak' ? '<p class="dp-mi">' + esc(X.foot) + '</p>' : ''), '');
   }
   var BUILD = { self: selfBlock, wealth: wealthBlock, career: careerBlock, love: loveBlock, remedy: remedyBlock };
 
@@ -355,13 +414,13 @@
     if (!API.on) return null;
     var cid = String(part.custom).slice(3), row = cfg.rows[cid] || cfg.rows[id]; if (!row || !row.on || BLOCKED.test(cid)) return null;
     var B = base(H); if (!B) return null;
-    var html = null; try { html = row.view === 'graph' ? graphBlock(B, row.topic, row.scope, row.use) : BUILD[row.topic](B, row.use); } catch (e) { html = null; }
+    var html = null; try { html = row.view === 'graph' ? graphBlock(B, row.topic, row.scope, row.use) : row.view === 'axes' ? axesBlock(B, H, row.topic, row.scope, row.use) : BUILD[row.topic](B, row.use); } catch (e) { html = null; }
     if (html && BANNED.test(html.replace(/<[^>]+>/g, ' '))) return null;
     return plainWp(html);
   }
   // 관리자 미리보기·검사용: 장 ID 없이 주제·설정으로 바로 그린다
   // 관리자 미리보기: 설정 줄 하나(형태·범위 포함)로 그린다
-  function previewRow(H, row) { var B = base(H); if (!B || !row) return null; var c = sanitize({ rows: { timeline_x_preview: row } }), r = c && c.rows.timeline_x_preview; if (!r) return null; return r.view === 'graph' ? graphBlock(B, r.topic, r.scope, r.use) : BUILD[r.topic](B, r.use); }
+  function previewRow(H, row) { var B = base(H); if (!B || !row) return null; var c = sanitize({ rows: { timeline_x_preview: row } }), r = c && c.rows.timeline_x_preview; if (!r) return null; return r.view === 'graph' ? graphBlock(B, r.topic, r.scope, r.use) : r.view === 'axes' ? axesBlock(B, H, r.topic, r.scope, r.use) : BUILD[r.topic](B, r.use); }
   function preview(H, topic, use) { var B = base(H); if (!B || !BUILD[topic]) return null; return BUILD[topic](B, u(use || DEFAULT_ROWS[Object.keys(DEFAULT_ROWS).filter(function (k) { return DEFAULT_ROWS[k].topic === topic && DEFAULT_ROWS[k].view !== 'graph'; })[0]].use)); }
 
   // ── 공개 스위치·설정 불러오기(aptitude-chapters.js 와 같은 방식) ──
@@ -394,7 +453,7 @@
   if (R.ReadingFeature) inject();
 
   var API = { VERSION: VERSION, on: false, TOPICS: TOPICS, TOPIC_K: TOPIC_K, USE_KEYS: USE_KEYS, USE_K: USE_K, DEFAULT_ROWS: DEFAULT_ROWS, BLOCKED: BLOCKED, BANNED: BANNED,
-    has: has, render: render, preview: preview, previewRow: previewRow, SCOPES: SCOPES, setConfig: setConfig, rows: rowsOf, inject: inject, sanitize: sanitize, ready: ready, readyWithin: readyWithin, localFlag: localFlag };
+    has: has, render: render, axesOf: axesOf, bladeOf: bladeOf, AX_SCOPES: AX_SCOPES, AX_K: AX_K, preview: preview, previewRow: previewRow, SCOPES: SCOPES, setConfig: setConfig, rows: rowsOf, inject: inject, sanitize: sanitize, ready: ready, readyWithin: readyWithin, localFlag: localFlag };
   R.WeaponChapters = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
 })(typeof window !== 'undefined' ? window : globalThis);

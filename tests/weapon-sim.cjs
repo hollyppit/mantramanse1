@@ -110,7 +110,7 @@ dev.forEach((inp, i) => T('nohour#' + i, () => {
 }));
 // 그래프 지표(2026-11-26): 지표를 고르면 띠·풀이가 그 지표로, 건강·사고수는 전체 흐름 + 안내
 T('그래프 지표 연동', () => { const ch = M.compute(dev[1]); const o = { now: Date.UTC(2026, 10, 26), curY: CUR_Y, wolY: CUR_Y, part: 'seun' };
-  const w = V.luck(M, ch, { ...o, metric: 'wealth', metricName: '재물', favorOf: () => ({ k: 'good', n: '좋음' }) }); assert.ok(w.includes('재물 좋음') && /돈/.test(w) && w.includes('재물 흐름도 받쳐 줘요'), '재물 지표 띠·풀이');
+  const w = V.luck(M, ch, { ...o, metric: 'wealth', metricName: '재물', favorOf: () => ({ k: 'good', n: '좋음' }) }); assert.ok(w.includes('재물 좋음') && /돈/.test(w) && w.includes('재물 쪽 바람은 순풍이에요') && w.includes('순풍'), '재물 지표 띠·풀이');
   const h = V.luck(M, ch, { ...o, metric: 'health', metricName: '건강', favorOf: () => ({ k: 'good', n: '좋음' }) }); assert.ok(!h.includes('건강 좋음') && h.includes('건강과 잇지 않아요'), '건강 지표는 전체 흐름 + 안내');
   const f0 = V.luck(M, ch, o); assert.ok(f0.includes('흐름 등급') && !f0.includes('재물'), '전체 흐름 기본'); });
 // 문안 파일 금지 표현
