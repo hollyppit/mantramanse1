@@ -593,7 +593,13 @@
     };
   }
 
-  var api = { VERSION: VERSION, CFG: CFG, ACT: ACT, KIND_K: KIND_K, crossCheck: crossCheck, periodCore: periodCore, TYPE_K: TYPE_K, PLUS_K: PLUS_K, analyze: analyze, luck: luck, timeline: timeline, favor: favor, readPair: readPair, judge: judge, sig: sig, _elementFacts: elementFacts };
+  // 2026-11-28 전성기 순위용 대운 칼날 표: 시작 연도 → 1순위 주무기(acts[0]) 발현도. 주무기 없음·미확정·복합형이면 null. 유료 전성기 장과 만세력 전성기 표시가 같은 표를 쓴다
+  function daeunBlades(M, ch) {
+    var A; try { A = analyze(M, ch); } catch (e) { return null; } if (!A || !A.ok || !A.weapons.length || A.status === 'undetermined' || A.status === 'complex') return null;
+    var out = {}; (ch.daeun && ch.daeun.list || []).forEach(function (x) { var r = luck(M, ch, x, 'daeun'), a = r && r.acts && r.acts[0]; if (a && Number.isFinite(x.startYear)) out[x.startYear] = { level: a.level, levelK: a.levelK, sharp: /strong|on|shaky/.test(a.level), power: { strong: 3, on: 2, shaky: 1 }[a.level] || 0 }; });
+    return Object.keys(out).length ? out : null;
+  }
+  var api = { VERSION: VERSION, daeunBlades: daeunBlades, CFG: CFG, ACT: ACT, KIND_K: KIND_K, crossCheck: crossCheck, periodCore: periodCore, TYPE_K: TYPE_K, PLUS_K: PLUS_K, analyze: analyze, luck: luck, timeline: timeline, favor: favor, readPair: readPair, judge: judge, sig: sig, _elementFacts: elementFacts };
   G.MantraWeapon = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -111,6 +111,13 @@ T('11 바람·칼날·결과', () => {
     WC.on = false; const off = R.PeakReading.build(sd, '', { M, ch, now }); WC.on = true; assert.equal(off.readingVisualData.peakRule, 'wind', '스위치 끔이면 바람만'); assert.deepEqual(off.readingVisualData.peakPicks, o.readingVisualData.peakPicks, '스위치 끔 = 예전 순위');
   });
   assert.ok(stat.peakRank.blade > 40, '칼날 반영 표본');
+  // 만세력 전성기 표시(2026-11-28): reading-text.js 없이 lifeScore + MantraWeapon.daeunBlades 로 고른 결과 = 유료 전성기 장
+  dev.slice(0, 80).forEach(inp => {
+    const ch = M.compute(inp), sd = R.SajuData.build(ch, { now }); sd.daewoon.forEach(p => assert.equal(R.PeakReading.lifeScore(p), R.ReadingText.timingScore(p, 'life'), '인생 흐름 점수 같음'));
+    const paid = R.PeakReading.build(sd, '', { M, ch, now }).readingVisualData, T0 = R.ReadingText; R.ReadingText = undefined;
+    let manse; try { manse = R.PeakReading.build(R.SajuData.build(ch, { now }), '', { blades: W.daeunBlades(M, ch) }).readingVisualData; } finally { R.ReadingText = T0; }
+    assert.deepEqual([manse.peakRule, manse.peakOrder, manse.peakPicks, manse.peakDetail], [paid.peakRule, paid.peakOrder, paid.peakPicks, paid.peakDetail], '만세력 전성기 = 유료 전성기 장');
+  });
 });
 T('10 질문별 끄기·데이터 항목 끄기', () => {
   const inp = dev.find(x => { const A = W.analyze(M, M.compute(x)); return A.weapons.length === 2 && A.status === 'dual'; }), ch = M.compute(inp), sd = () => R.SajuData.build(ch, { now });

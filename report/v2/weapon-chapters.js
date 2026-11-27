@@ -96,9 +96,7 @@
   function prim(r) { if (r && r.acts && r.acts[0]) { r.best = r.acts[0]; if (W().readPair) r.read = W().readPair(r.best, r.favor); } return r; }
   // 전성기 순위용(2026-11-28): 대운 시작 연도 → 1순위 주무기 칼날. 스위치가 꺼졌거나 주무기 미확정이면 null(전성기 장은 바람 점수만으로 고른다)
   function daeunBlades(M, ch, now) {
-    if (!API.on || !M || !ch) return null; var B = base({ M: M, ch: ch, now: now }); if (!B || !B.sure || !B.tl) return null;
-    var out = {}; B.tl.daeun.forEach(function (r) { if (r && r.best && Number.isFinite(r.startYear)) out[r.startYear] = { level: r.best.level, levelK: r.best.levelK, sharp: /strong|on|shaky/.test(r.best.level), power: { strong: 3, on: 2, shaky: 1 }[r.best.level] || 0 }; });
-    return Object.keys(out).length ? out : null;
+    if (!API.on || !M || !ch || !W() || !W().daeunBlades) return null; return W().daeunBlades(M, ch);   // 규칙은 /weapon.js daeunBlades 하나(만세력 전성기 표시와 공용)
   }
   // ── 바람·칼날·결과(2026-11-27) — 운 흐름 = 바람, 주무기 발현도 = 칼날, 활용 유리도 = 결과. 세 값은 따로 두고 갈래 이름만 붙인다(점수 합산 없음) ──
   function bladeOf(a) { return !a ? null : /strong|on|shaky/.test(a.level) ? 'sharp' : a.level === 'sup' ? 'mid' : a.level === 'quiet' ? 'dull' : 'blocked'; }
@@ -443,7 +441,7 @@
   function loadDeps() {
     if (W() && WD()) return Promise.resolve();
     var DOC = root.document; if (!DOC) return Promise.resolve();
-    return ['/weapon-data.js?v=20261126-v3', '/weapon.js?v=20261126-v3'].reduce(function (p, src) { return p.then(function () { return new Promise(function (ok) { var s = DOC.createElement('script'); s.src = src; s.async = false; s.onload = ok; s.onerror = ok; DOC.head.appendChild(s); }); }); }, Promise.resolve());
+    return ['/weapon-data.js?v=20261128-pk', '/weapon.js?v=20261128-pk'].reduce(function (p, src) { return p.then(function () { return new Promise(function (ok) { var s = DOC.createElement('script'); s.src = src; s.async = false; s.onload = ok; s.onerror = ok; DOC.head.appendChild(s); }); }); }, Promise.resolve());
   }
   function ready() {
     if (readyP) return readyP;
