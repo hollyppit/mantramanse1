@@ -7743,6 +7743,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // ───────────── 환경 변화 타임라인 ─────────────
   // 연도(앞뒤 2년) 또는 선택한 해의 12개월을 환경 5영역의 부각 정도(강조·보통·약함)로 나란히 보여 준다. 길흉이나 점수가 아니다.
   const TL_SHORT = { work: '직업', wealth: '재물', rel: '인연', move: '이동', learn: '학습' };
+  const TL_COLOR = { work: '#3B5BDB', wealth: '#F08C00', rel: '#E64980', move: '#12B886', learn: '#495057' };
   function envTimeline(kind) {
     const LI = window.MantraLuckInterpret, ch = S.ch; if (!LI || window.MANTRA_FLAGS.timeline === false) return '';
     let rows = [], selI = -1, label = kind === 'seun' ? '해' : '달';
@@ -7759,14 +7760,27 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       }
     } catch (e) { return ''; }
     if (!rows.length) return '';
-    const cell = a => '<td class="tl-c tl-' + (a.level === '강조' ? 'hi' : a.level === '보통' ? 'mid' : 'lo') + '" title="' + esc(a.name + ' · ' + a.level) + '">' + (a.level === '강조' ? '●' : a.level === '보통' ? '◐' : '·') + '</td>';
+    // 2026-11-28 사용자 요청: 표(●◐·) 대신 분야별 곡선을 겹친 그래프. 가로 = 달(또는 해), 세로 = 부각 정도(luck-interpret areas[].value 0~1).
+    //   점선 두 줄 = 보통(0.30)·강조(0.55) 경계(luck-interpret lvlOf 와 같은 값). 칸을 누르면 아래에 그 달의 변화 설명(예전과 같은 data-pick).
     let detail = '';
     if (selI >= 0) {
       const c = LI.compare(selI ? rows[selI - 1].r : null, rows[selI].r, rows[selI + 1] ? rows[selI + 1].r : null, label);
       detail = '<div class="tl-d"><b>' + esc(rows[selI].name) + ' ' + esc(M.gzNameK(rows[selI].x)) + '</b><ul class="ib-ul">' + c.lines.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul></div>';
     }
-    return '<div class="tl"><div class="ib-k">환경 변화 타임라인 <span class="muted">· ● 강조 ◐ 보통 · 약함 — 주제가 부각되는 정도이며 좋고 나쁨이 아닙니다</span></div><div class="tbl-wrap"><table class="tl-t"><thead><tr><th></th>' + LI.AREA_KEYS.map(k => '<th>' + TL_SHORT[k] + '</th>').join('') + '</tr></thead><tbody>' +
-      rows.map((q, i) => '<tr class="' + (i === selI ? 'sel' : '') + '" data-pick="' + q.pick + '" role="button" tabindex="0"><td class="tl-n">' + esc(q.name) + ' <span class="muted">' + esc(M.gzNameK(q.x)) + '</span></td>' + q.r.areas.map(cell).join('') + '</tr>').join('') + '</tbody></table></div>' + detail + '</div>';
+    const keys = LI.AREA_KEYS, n = rows.length, W = 640, H = 200, L = 30, R = 10, T = 12, B = 40, cw = (W - L - R) / n;
+    const xOf = i => L + cw * (i + .5), yOf = v => T + (H - T - B) * (1 - Math.max(0, Math.min(1, v)));
+    const curve = pts => { if (pts.length < 2) return ''; let d = 'M' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1); for (let i = 0; i < pts.length - 1; i++) { const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2; const c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6, c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6; d += ' C' + [c1x, Math.max(T, Math.min(H - B, c1y)), c2x, Math.max(T, Math.min(H - B, c2y)), p2[0], p2[1]].map(v => v.toFixed(1)).join(' '); } return d; };
+    let svg = '<svg class="tl-g" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc('분야별 환경 변화 곡선 · ' + rows.map(q => q.name).join(' ')) + '">';
+    if (selI >= 0) svg += '<rect x="' + (L + cw * selI).toFixed(1) + '" y="' + T + '" width="' + cw.toFixed(1) + '" height="' + (H - T - B) + '" class="tl-gsel"/>';
+    [[.55, '강조'], [.3, '보통']].forEach(([v, t]) => { svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + yOf(v).toFixed(1) + '" y2="' + yOf(v).toFixed(1) + '" class="tl-gref"/><text x="' + (L - 4) + '" y="' + (yOf(v) + 3).toFixed(1) + '" class="tl-gax" text-anchor="end">' + t + '</text>'; });
+    keys.forEach(k => {
+      const pts = rows.map((q, i) => { const a = q.r.areas.find(z => z.key === k); return [xOf(i), yOf(a ? a.value : 0), a]; });
+      svg += '<g class="tl-gl" data-area="' + k + '"><path d="' + curve(pts) + '" style="stroke:' + TL_COLOR[k] + '"/>' + pts.map((p, i) => '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="' + (i === selI ? 4 : 2.6) + '" style="fill:' + TL_COLOR[k] + '"><title>' + esc(rows[i].name + ' · ' + TL_SHORT[k] + ' ' + (p[2] ? p[2].level : '')) + '</title></circle>').join('') + '</g>';
+    });
+    rows.forEach((q, i) => { svg += '<text x="' + xOf(i).toFixed(1) + '" y="' + (H - B + 15) + '" class="tl-gx' + (i === selI ? ' on' : '') + '" text-anchor="middle">' + esc(q.name) + '</text><text x="' + xOf(i).toFixed(1) + '" y="' + (H - B + 28) + '" class="tl-gax" text-anchor="middle">' + esc(M.gzNameK(q.x)) + '</text><rect x="' + (L + cw * i).toFixed(1) + '" y="0" width="' + cw.toFixed(1) + '" height="' + H + '" style="fill:transparent;cursor:pointer" data-pick="' + q.pick + '"><title>' + esc(q.name + ' ' + M.gzNameK(q.x) + ' — 눌러서 변화 보기') + '</title></rect>'; });
+    svg += '</svg>';
+    const legend = '<div class="tl-lg">' + keys.map(k => '<span><i style="background:' + TL_COLOR[k] + '"></i>' + TL_SHORT[k] + '</span>').join('') + '</div>';
+    return '<div class="tl"><div class="ib-k">환경 변화 타임라인 <span class="muted">· 곡선이 높을수록 그 주제가 부각되는 ' + (label === '달' ? '달이에요' : '해예요') + ' · 좋고 나쁨이 아니라 부각되는 정도예요 · ' + (label === '달' ? '달을' : '해를') + ' 누르면 변화 설명</span></div>' + legend + '<div class="tl-gw">' + svg + '</div>' + detail + '</div>';
   }
   // ───────────── 나의 운명 지도 (지역 환경 · 미리보기) ─────────────
   // 현재 거주지·비교 지역은 원국 계산과 무관한 별도 설정이다(브라우저에만 저장). 출생지는 기존 입력(만세력 계산용)을 그대로 쓴다.
@@ -7964,7 +7978,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       (ev.excluded.length ? '<p><b>적용하지 않은 규칙</b></p>' + li(ev.excluded.map(q => q.id + ' — ' + q.why)) : '') +
       '<p class="muted">해석 엔진 ' + esc(r.version) + ' · 문구 v' + r.phraseVersion + ' (검수 완료 ' + r.evidence.phraseReview.published + '/' + r.evidence.phraseReview.total + '건)</p></div></details></div>';
   }
-  const IB_CSS = '.tl{margin:10px 0}.tl-t{width:100%;border-collapse:collapse;font-size:.84rem}.tl-t th{font-weight:600;color:var(--ink-2);padding:4px 2px;text-align:center}.tl-t tr[data-pick]{cursor:pointer}.tl-t tr.sel{background:var(--surface-2)}.tl-t td{padding:6px 2px;border-top:1px solid var(--line)}.tl-n{white-space:nowrap}.tl-c{text-align:center}.tl-hi{color:var(--accent);font-weight:800}.tl-mid{color:var(--ink-2)}.tl-lo{color:var(--ink-3)}.tl-d{margin-top:6px;padding:8px 10px;border-radius:10px;background:var(--surface-2)}.ib{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0;background:var(--surface)}.ib p{margin:4px 0}.ib-k{font-size:.74rem;font-weight:700;letter-spacing:.04em;color:var(--ink-2);margin:12px 0 2px}.ib-k:first-child{margin-top:0}.ib-ul{margin:2px 0 0;padding-left:18px;font-size:.88rem}.ib-ul li{margin:3px 0}.ib-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ib-g{color:var(--good)}.ib-b{color:var(--bad)}@media(max-width:600px){.ib-cols{grid-template-columns:1fr}}';
+  const IB_CSS = '.tl{margin:10px 0}.tl-lg{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0 2px;font-size:.8rem}.tl-lg i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}.tl-gw{overflow-x:auto}.tl-g{width:100%;min-width:520px;height:auto;display:block}.tl-g path{fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}.tl-gref{stroke:var(--line,#ddd);stroke-dasharray:4 4}.tl-gax{font-size:10px;fill:var(--ink-3,#999)}.tl-gx{font-size:11px;fill:var(--ink-2,#555)}.tl-gx.on{font-weight:700;fill:var(--ink,#222)}.tl-gsel{fill:rgba(59,91,219,.07)}.tl-t{width:100%;border-collapse:collapse;font-size:.84rem}.tl-t th{font-weight:600;color:var(--ink-2);padding:4px 2px;text-align:center}.tl-t tr[data-pick]{cursor:pointer}.tl-t tr.sel{background:var(--surface-2)}.tl-t td{padding:6px 2px;border-top:1px solid var(--line)}.tl-n{white-space:nowrap}.tl-c{text-align:center}.tl-hi{color:var(--accent);font-weight:800}.tl-mid{color:var(--ink-2)}.tl-lo{color:var(--ink-3)}.tl-d{margin-top:6px;padding:8px 10px;border-radius:10px;background:var(--surface-2)}.ib{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0;background:var(--surface)}.ib p{margin:4px 0}.ib-k{font-size:.74rem;font-weight:700;letter-spacing:.04em;color:var(--ink-2);margin:12px 0 2px}.ib-k:first-child{margin-top:0}.ib-ul{margin:2px 0 0;padding-left:18px;font-size:.88rem}.ib-ul li{margin:3px 0}.ib-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ib-g{color:var(--good)}.ib-b{color:var(--bad)}@media(max-width:600px){.ib-cols{grid-template-columns:1fr}}';
   { const st = document.createElement('style'); st.textContent = IB_CSS; document.head.appendChild(st); }
   // 건강 측면 참고(health-body.js): 건강 지표를 보는 중일 때 선택한 시기의 오행 쏠림을 전통 오행-장부 대응으로 서술한다. 스위치 healthBody(기본 켜짐).
   function hbBox(x, kind) {
