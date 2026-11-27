@@ -4,7 +4,8 @@
 // 선택: SOLAPI_SMS_FALLBACK=1 이면 알림톡 실패 시 문자(LMS)로 대신 보낸다(문자 요금 발생). 기본은 보내지 않는다.
 // 받는 번호·이름은 로그에 남기지 않는다.
 export const SHARE_DAYS = 7;
-export const solapiReady = env => !!(env && env.SOLAPI_API_KEY && env.SOLAPI_API_SECRET && env.SOLAPI_PFID && env.SOLAPI_TEMPLATE_ID && env.SOLAPI_SENDER);
+export const solapiBaseReady = env => !!(env && env.SOLAPI_API_KEY && env.SOLAPI_API_SECRET && env.SOLAPI_PFID && env.SOLAPI_SENDER);   // 템플릿과 상관없는 공통 설정
+export const solapiReady = env => solapiBaseReady(env) && !!env.SOLAPI_TEMPLATE_ID;   // 만세력 PDF 템플릿까지
 export const solapiMissing = env => ['SOLAPI_API_KEY', 'SOLAPI_API_SECRET', 'SOLAPI_PFID', 'SOLAPI_TEMPLATE_ID', 'SOLAPI_SENDER'].filter(k => !(env && env[k]));
 // 휴대폰 번호: 숫자만 남기고 010·011·016~019 로 시작하는 10~11자리
 export const normPhone = s => { const d = String(s || '').replace(/[^0-9]/g, ''); return /^01[016789][0-9]{7,8}$/.test(d) ? d : null; };
@@ -18,11 +19,11 @@ async function authHeader(env) {
   return `HMAC-SHA256 apiKey=${env.SOLAPI_API_KEY}, date=${date}, salt=${salt}, signature=${sig}`;
 }
 
-// variables: 템플릿의 #{변수} → 값. 반환 { ok, code, message }
-export async function sendAlimtalk(env, to, variables) {
+// variables: 템플릿의 #{변수} → 값. templateId 를 안 주면 만세력 PDF 템플릿. 반환 { ok, code, message }
+export async function sendAlimtalk(env, to, variables, templateId = env.SOLAPI_TEMPLATE_ID) {
   const message = {
     to, from: String(env.SOLAPI_SENDER).replace(/[^0-9]/g, ''),
-    kakaoOptions: { pfId: env.SOLAPI_PFID, templateId: env.SOLAPI_TEMPLATE_ID, variables, disableSms: String(env.SOLAPI_SMS_FALLBACK || '') !== '1' },
+    kakaoOptions: { pfId: env.SOLAPI_PFID, templateId, variables, disableSms: String(env.SOLAPI_SMS_FALLBACK || '') !== '1' },
   };
   try {
     const r = await fetch('https://api.solapi.com/messages/v4/send', {

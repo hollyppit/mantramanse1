@@ -19,13 +19,15 @@
     links: { my: '/report/my/', products: '/report/legal/products.html', terms: '/report/legal/terms.html', privacy: '/report/legal/privacy.html', refund: '/report/legal/refund.html' },
     // 공정거래위원회 사업자정보 공개 페이지(통신판매사업자 정보 확인)
     bizCheck: 'https://www.ftc.go.kr/bizCommPop.do?wrkr_no=7752401924',
+    // 카카오톡 채널 '만트라 포춘'(친구 추가·1:1 채팅). 바뀌면 Cloudflare Secret KAKAO_CHANNEL_URL(마이페이지)도 같이 바꾼다
+    kakaoChannel: 'https://pf.kakao.com/_QxhxgvX',
   };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   function fill(doc) { [].forEach.call((doc || document).querySelectorAll('[data-biz]'), function (el) { var v = B[el.getAttribute('data-biz')]; if (v != null) el.textContent = v; }); }
   function footerHtml() {
     return '<footer class="mt-legal" role="contentinfo"><nav class="mt-legal-links" aria-label="약관과 정책">' +
       '<a href="' + B.links.my + '">내 구매 내역</a><a href="' + B.links.products + '">상품 안내</a><a href="' + B.links.terms + '">이용약관</a><a href="' + B.links.privacy + '"><b>개인정보처리방침</b></a><a href="' + B.links.refund + '">환불정책</a></nav>' +
-      '<p>' + esc(B.name) + ' · 대표 ' + esc(B.ceo) + ' · 사업자등록번호 ' + esc(B.bizNo) + ' <a href="' + B.bizCheck + '" target="_blank" rel="noopener">사업자정보 확인</a> <a class="mt-legal-ask" href="/report/#/me?inq=open">문의하기</a></p>' +
+      '<p>' + esc(B.name) + ' · 대표 ' + esc(B.ceo) + ' · 사업자등록번호 ' + esc(B.bizNo) + ' <a href="' + B.bizCheck + '" target="_blank" rel="noopener">사업자정보 확인</a> <a class="mt-legal-ask" href="/report/#/me?inq=open">문의하기</a> <a class="mt-legal-ask" href="' + B.kakaoChannel + '" target="_blank" rel="noopener">카카오톡 채널</a></p>' +
       '<p>통신판매업 신고 ' + esc(B.mailOrderNo) + ' · ' + esc(B.address) + '</p>' +
       '<p>고객 문의 <a href="tel:' + B.phone.replace(/-/g, '') + '">' + esc(B.phone) + '</a> · <a href="mailto:' + B.email + '">' + esc(B.email) + '</a></p></footer>';   // '참고용 콘텐츠' 안내는 화면마다 이미 있어 푸터에서는 반복하지 않는다
   }

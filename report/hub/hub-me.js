@@ -249,6 +249,7 @@
         (pend ? '<p class="me-note">‘결제 확인 중’ 주문은 결제가 끝나지 않은 것입니다. 실제로 결제했다면 잠시 후 결제 완료로 바뀌고, 그렇지 않으면 자동으로 정리됩니다.</p>' : '')
       : '<p class="me-muted">결제 기록이 없습니다.</p>') +
       '<div class="me-acts"><a class="btn ghost sm" href="/report/my/" data-track="mypage_click" data-p="orders">전체 구매 내역 · 영수증 · 환불 →</a></div></section>';
+    h += '<section class="me-card" id="meNotify" aria-live="polite" hidden></section>';   // 카카오톡 거래 알림(2026-11-27) — 서버 설정이 켜져야 보인다
     h += '<section class="me-card" id="meConsent" aria-live="polite"><h2>혜택·소식 받기 설정</h2><p class="me-muted">불러오는 중입니다…</p></section><div id="meProfile"></div>';
     h += inquiryHtml(email, orders);
     h += deviceHtml(true);
@@ -443,9 +444,38 @@
       });
     });
   }
+  // 카카오톡 알림 받기(구매 완료·문의 답변·이용 기간 만료 안내 — 광고 아님). functions/api/account/notify.js
+  var NK = { paid: '구매 완료', answer: '1:1 문의 답변', expire: '이용 기간 만료 30일 전' };
+  function notifyHtml(d) {
+    var kinds = (d.kinds || []).map(function (k) { return NK[k]; }).filter(Boolean).join(' · ');
+    return '<h2>카카오톡 알림 받기</h2>' +
+      '<p class="me-muted">' + esc(kinds || '구매·문의 안내') + ' 소식을 카카오톡 알림톡으로 받아요. 광고는 보내지 않습니다.</p>' +
+      '<form class="me-form" id="meNotifyForm">' +
+      (d.on ? '<p class="me-muted">지금 <b>' + esc(d.phone) + '</b> 번호로 받고 있어요.</p>' : '') +
+      '<label><span>휴대폰 번호 <small>알림톡을 받을 번호 · 카카오톡을 쓰는 번호</small></span><input name="phone" inputmode="numeric" autocomplete="tel" maxlength="13" placeholder="' + (d.on ? '바꾸실 때만 적어 주세요' : '01012345678') + '"></label>' +
+      '<div class="me-acts"><button class="btn sm" type="submit">' + (d.on ? '번호 바꾸기' : '알림 받기') + '</button>' + (d.on ? '<button class="btn ghost sm" type="button" data-off>알림 끄기</button>' : '') + '</div><p class="me-msg" role="status"></p></form>' +
+      '<p class="me-note">이 번호는 위 안내를 보낼 때만 쓰고, 알림을 끄거나 탈퇴하면 바로 지웁니다. 혜택·소식(광고) 수신과는 따로입니다. <a href="/report/legal/privacy.html" target="_blank" rel="noopener">개인정보처리방침</a></p>';
+  }
+  function paintNotify(sec, token, d) {
+    if (!d || !d.available) { sec.hidden = true; return; }
+    sec.hidden = false; sec.innerHTML = notifyHtml(d);
+    var form = $('#meNotifyForm'), msg = form.querySelector('.me-msg'), btn = form.querySelector('[type=submit]'), off = form.querySelector('[data-off]');
+    var save = function (body, done) {
+      btn.disabled = true; if (off) off.disabled = true; msg.textContent = '저장하는 중입니다…';
+      post('/api/account/notify', token, body).then(function (r) {
+        btn.disabled = false; if (off) off.disabled = false;
+        if (!r._ok) { msg.textContent = r._status === 401 ? '로그인이 만료됐습니다. 다시 로그인해 주세요.' : (r.error || '저장하지 못했습니다.'); if (r.field === 'phone') form.elements.phone.focus(); return; }
+        paintNotify(sec, token, r); H.toast(done, 3000); H.track('notify_' + body.action, {});
+      });
+    };
+    form.addEventListener('submit', function (e) { e.preventDefault(); var ph = form.elements.phone.value.replace(/[^0-9]/g, ''); if (!/^01[016789][0-9]{7,8}$/.test(ph)) { msg.textContent = '휴대폰 번호를 확인해 주세요(010으로 시작하는 번호).'; form.elements.phone.focus(); return; } save({ action: 'set', phone: ph }, '카카오톡 알림을 켰습니다.'); });
+    if (off) off.addEventListener('click', function () { save({ action: 'off' }, '카카오톡 알림을 껐습니다. 번호도 지웠어요.'); });
+  }
   H.MeConsent = {
     mount: function (token, ctx) {
       var sec = $('#meConsent'); if (!sec) return;
+      var nsec = $('#meNotify');
+      if (nsec) post('/api/account/notify', token, { action: 'get' }).then(function (d) { if ((ctx && !H.alive(ctx)) || !d._ok) return; paintNotify(nsec, token, d); });
       post('/api/account/consent', token, { action: 'get' }).then(function (d) {
         if (ctx && !H.alive(ctx)) return;
         if (!d._ok) { sec.innerHTML = '<h2>혜택·소식 받기 설정</h2><p class="me-muted">' + (d._status === 503 ? '지금은 설정을 불러올 수 없습니다.' : '설정을 불러오지 못했습니다. 잠시 후 다시 열어 주세요.') + '</p>'; return; }

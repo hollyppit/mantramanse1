@@ -15,6 +15,7 @@ import { json, isAdmin } from './_lib.js';
 import { kvOf } from './_store.js';
 import { loadEditorial } from './_editorial.js';
 import { mailPurchase, mailRefund, mailAdmin, safeHttps } from './_mail.js';
+import { noticePaid } from './_notice.js';   // 구매 완료 알림톡(번호를 등록한 회원만)
 
 export const TOPIC_WORLD = { self: 'w1', timing: 'w1', health: 'w1', creative: 'w1', remedy: 'w1', wealth: 'w2', career: 'w7', love: 'w3', relationships: 'w3' };
 export const PRODUCTS_KEY = 'commerce:products';
@@ -266,7 +267,7 @@ export async function settlePortone(env, order) {
     order.__mail = Array.isArray(changed) && changed.length ? { ...order, ...paidFields, receipt_url: safeHttps(p.receiptUrl) } : null;
     // 웹훅·복귀가 동시에 와도 '대기' 상태일 때만 바뀐다. 권한은 같은 주문·세계 중복을 막는다
     await grantOrder(env, order, 'payment');
-    if (order.__mail) { await mailPurchase(env, order.__mail); await mailAdmin(env, 'paid', order.__mail); }   // 구매 확인·관리자 알림 메일(실패해도 결제는 완료)
+    if (order.__mail) { await mailPurchase(env, order.__mail); await noticePaid(env, order.__mail); await mailAdmin(env, 'paid', order.__mail); }   // 구매 확인·관리자 알림 메일(실패해도 결제는 완료)
   } catch (e) {
     await mailAdmin(env, 'grant-failed', { ...order, method: methodOf(p.method), is_test: !!(p.channel && p.channel.type === 'TEST') }, { detail: String((e && e.message) || e).slice(0, 120) }).catch(() => { });
     return { ok: false, error: 'grant-failed', orderId: order.order_id };

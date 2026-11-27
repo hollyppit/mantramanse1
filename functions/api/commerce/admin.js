@@ -14,6 +14,7 @@ import { loadProducts, cleanProducts, PRODUCTS_KEY, worldAccess, sbRest, tossCal
 import { naverReady } from '../../_naver-login.js';
 import { summaryAll, salesCsv, kstDay } from '../../_sales.js';
 import { alertReady, mailInquiryAnswer } from '../../_mail.js';
+import { noticeAnswer } from '../../_notice.js';
 import { funnelReport, purgeFunnel } from '../../_funnel.js';
 
 const enc = encodeURIComponent;
@@ -92,8 +93,9 @@ export async function onRequestPost({ request, env }) {
     const at = new Date().toISOString();
     const rows = await sbRest(env, `support_inquiries?id=eq.${id}`, { method: 'PATCH', headers: { prefer: 'return=representation' }, body: JSON.stringify({ answer, status: 'answered', answered_at: at, answered_by: who(request), answer_mailed: false, answer_seen_at: null }) });
     const mailed = b.mail === false ? false : await mailInquiryAnswer(env, { ...q, answer });
+    const kakao = b.mail === false ? false : await noticeAnswer(env, { ...q, answer, answered_at: at });   // 답변 알림톡(번호를 등록한 회원만)
     if (mailed) { try { await sbRest(env, `support_inquiries?id=eq.${id}`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ answer_mailed: true }) }); } catch { } }
-    return json({ ok: true, mailed, inquiry: { ...(rows && rows[0] || q), answer, status: 'answered', answered_at: at, answer_mailed: mailed } });
+    return json({ ok: true, mailed, kakao, inquiry: { ...(rows && rows[0] || q), answer, status: 'answered', answered_at: at, answer_mailed: mailed } });
   }
   if (b && b.action === 'inquiry-status') {
     const id = Number.isInteger(b.id) && b.id > 0 ? b.id : 0, status = ['received', 'answered', 'closed'].includes(b.status) ? b.status : '';
