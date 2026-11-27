@@ -27,7 +27,7 @@ assert.equal(snapshot,JSON.stringify(M.analyzeNatalRoot(ch)));
 assert(sd.roots.details.every(r=>r.reason&&r.hiddenStem&&r.depth));
 const remedy = R.Deep.SECTIONS.deep_remedy(H);
 assert(text(remedy).includes('수은') === false);
-assert(text(remedy).includes('기준별 판단이 다릅니다'));
+assert(text(remedy).includes('보는 기준에 따라 판단이 달라요'));   // 2026-11-27 고객용 해요체(전: '기준별 판단이 다릅니다')
 assert(text(remedy).includes('비중 가장 큼'));
 assert(!text(remedy).includes('줄일 기운'));
 assert(text(remedy).includes('여러 기준을 종합하면'));

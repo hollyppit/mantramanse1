@@ -159,7 +159,7 @@
       risk: join([dItem ? '지금 10년(' + C.M.gzName(du) + ' 대운) 동안 길게 이어지는 신호는 \'' + dItem.title + '\' 쪽이에요. ' + dItem.tip : '', sj ? '전통 민속의 삼재로 보면 올해는 ' + sj.stage + '이에요(' + sj.group + '). 삼재는 참고 정보이며 이 앱의 점수에는 쓰지 않아요.' : '', SAFE]),
       reinforce: items.length ? '장면이 정해져 있으니 그 장소에서만 한 박자 늦추면 돼요. 나머지 생활은 평소처럼 지내도 충분해요.' : '운전·계단·주방처럼 매일 지나는 곳에서 한 번 더 확인하는 습관이면 충분해요.',
       practice: items.length ? '\'' + items[0].title + '\' 장면에서 쓸 나만의 확인 문장 하나를 정해, 이번 주에 세 번 소리 내어 확인해 보세요.' : '이번 주 운전·계단·주방에서 \'한 번 더 확인\'을 습관으로 붙여 보세요.',
-      why: join([C.nowY + '년(' + C.M.gzName(x) + ') 세운이 원국과 만드는 관계로 본 장면: ' + ((a && a.items || []).map(function (it) { return it.title; }).join(' · ') || '뚜렷한 장면 없음'), (a && a.items || []).map(function (it) { return it.title + ': ' + (it.reasons || []).join(' '); }).join(' / '), '장면 7가지(오행 5 + 날카로운 도구 + 갑작스러운 충격)와 장소 대응은 만세력 사고수 참고(accident-hint.js)와 같은 기준이에요.']),
+      why: join([C.nowY + '년(' + C.M.gzName(x) + ') 운이 타고난 사주와 만나는 방식으로 본 장면: ' + ((a && a.items || []).map(function (it) { return it.title; }).join(' · ') || '올해는 뚜렷하게 걸리는 장면이 없어요') + '.', (a && a.items || []).map(function (it) { return it.title + ': ' + (it.reasons || []).join(' '); }).join(' / '), '장면은 일곱 가지(다섯 기운 + 날카로운 도구 + 갑작스러운 충격)로 나눠 봐요.']),
     };
     return chapter('timeline_self_h5', core, { name: C.nm });
   }

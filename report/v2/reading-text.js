@@ -54,6 +54,8 @@
   [/일간 ([갑을병정무기경신임계])·([갑을병정무기경신임계])[은는] 오행으로 ([목화토금수])\(([^)]+)\)에 해당하고,/g,function(m,a,b,e,d){return '태어난 날 글자('+a+'·'+b+')가 '+EL_WORD[e]+' 기운('+d+')이고,';}],
   [/이 사주의 용신 오행은 ([목화토금수])이고\(억부·조후 기준이 같은 오행을 가리킴\),/g,function(m,e){return '내게 가장 필요한 기운(용신)은 '+EL_WORD[e]+' 기운이고,';}],
   [/억부와 조후 기준이 같은 용신 오행[이은] ([목화토금수])(\([^)]+\))?(이고|이에요)/g,function(m,e,d,t){return '내게 가장 필요한 기운(용신)은 '+EL_WORD[e]+' 기운'+(d||'')+t;}],
+  // 2026-11-27 같은 문형의 나머지 꼴('수(…)고,' · '화예요' · '…으로 계산됐고/계산됐어요') — DB 재게시 없이 화면에서 쉬운 말로
+  [/억부와 조후 기준이 같은 용신 오행[이은] ([목화토금수])(\([^)]+\))?(으로 계산됐고|으로 계산됐어요|고|예요)(?![가-힣])/g,function(m,e,d,t){return '내게 가장 필요한 기운(용신)은 '+EL_WORD[e]+' 기운'+(d||'')+(/고$/.test(t)?'이고':'이에요');}],
   [/용신은 원국의 균형을 맞추는 데 가장 필요하다고 계산된 오행인데, 이 사주에서는 ([목화토금수])/g,function(m,e){return '내게 가장 필요한 기운(용신)은 '+EL_WORD[e]+' 기운';}],
   [/이를 누르는 성질의 환경은 ([목화토금수])(\([^)]+\))인데,/g,function(m,e,d){return '이 기운을 누르는 환경은 '+EL_WORD[e]+' 기운'+d+'이고,';}],
   [/(비겁|식상|재성|관성|인성)과 (비겁|식상|재성|관성|인성)가 모두 높게 계산돼서/g,function(m,a,b){return a+'과 '+b+'이 모두 높아서';}],
@@ -190,7 +192,7 @@
   if(hasClash(p))n-=6;
   return Math.round(Math.max(5,Math.min(99,n)));}
  function timingReason(p,topic,gender){var g=TG_GROUP[p.stemTG],m=GROUP_MEANING[topic][g],want=timingWant(topic,gender),out='';
-  if(p.stemTG)out+=p.stemTG+' 대운이라 '+(m||'새로운 기운')+'이 들어오고, ';
+  if(p.stemTG)out+=(m||'새로운 기운')+'('+p.stemTG+')이 들어오는 10년이고, ';   // 2026-11-27 쉬운 말 먼저, 십성 이름은 괄호(용어로 시작하지 않게)
   out+=(COND_TEXT[p.condition]||'원래 사주와의 관계는 보통이에요')+'.';
   if(want&&g===want[0])out+=' '+TOPIC_LABEL[topic]+((TOPIC_LABEL[topic].charCodeAt(TOPIC_LABEL[topic].length-1)-0xAC00)%28?'과':'와')+' 가장 직접 닿는 기운이라 점수를 더했어요.';
   if(hasClash(p))out+=' 원래 사주와 부딪히는 글자가 있어 변동이 섞여요.';
@@ -211,11 +213,13 @@
   else n=50+(sg===want[0]?25:sg===want[1]?12:0)+(bg===want[0]?12:bg===want[1]?6:0)+cond;
   if(hasClash(x))n-=8;return Math.round(Math.max(5,Math.min(99,n)));}
  function luckReason(x,topic,unit){var g=TG_GROUP[x.stemTG],m=(GROUP_MEANING[topic]||{})[g],el=stemEl(x.ganzhi),out='';
-  if(x.stemTG)out+=(x.ganzhi?x.ganzhi+'('+el+') ':'')+x.stemTG+'의 '+(unit==='해'?'해라 ':'달이라 ')+(m||'새로운 기운')+'이 들어와요.';
+  if(x.stemTG)out+=(x.ganzhi?x.ganzhi+'('+el+')'+(unit==='해'?'년은 ':'월은 '):'')+(m||'새로운 기운')+'('+x.stemTG+')이 들어오는 '+(unit==='해'?'해예요.':'달이에요.');
   if(x.condition)out+=' '+(COND_TEXT[x.condition]||'원래 사주와의 관계는 보통이에요')+'.';
   if(hasClash(x))out+=' 부딪히는 글자가 있어 서두르지 않는 게 좋아요.';return out;}
  function bars(items,aria){var dense=items.length>10?' rt-dense':'';return '<div class="rt-flow'+dense+'" role="img" aria-label="'+esc(aria)+'"><div class="rt-bands" aria-hidden="true"><span>50</span></div>'+items.map(function(x){var t=tierOf(x.n),v=Math.max(-50,Math.min(50,x.n-50)),up=v>=0;var ei=elIdx(x.gz||(x.p&&x.p.ganzhi)||x.ganzhi);return '<div class="rt-col t-'+t.k+(up?' is-up':' is-down')+(x.cur?' is-current':'')+(x.past?' is-past':'')+'" style="--v:'+(Math.abs(v)/50).toFixed(3)+(ei>=0?';--t:'+EL_COL[ei]:'')+'" title="'+esc(String(x.title||'').replace(/<[^>]+>/g,''))+' '+x.n+'점 · '+(ei>=0?EL_ORD[ei]+' 기운 · ':'')+t.n+'"><div class="rt-plot"><i class="rt-bar"></i><span class="rt-tag"><b>'+x.n+'</b><em>'+t.n+'</em></span></div><small class="rt-lab">'+x.label+'</small></div>';}).join('')+'</div>';}
- function rankList(items,cls){return items.length?'<ol class="rt-rank'+(cls?' '+cls:'')+'">'+items.map(function(x,i){var t=tierOf(x.n);return '<li class="t-'+t.k+'"><span class="rt-no">'+(i+1)+'위</span><div><strong><i class="rt-dot" style="--e:'+colorOf(x.gz)+'"></i>'+x.title+'</strong><em>'+x.n+'점 <span class="rt-pill">'+t.n+'</span></em><p>'+esc(x.reason)+'</p></div></li>';}).join('')+'</ol>':'';}
+ var COND_SHORT={순풍:'이때도 흐름이 잘 맞아요',보통:'이때도 무난하게 받쳐 줘요',주의:'이때도 조심이 필요한 흐름이 섞여요',부담:'이때도 버거운 흐름이 섞여요'};
+ function dedupeReasons(items){var seen={};return items.map(function(x){var r=String(x.reason||'');Object.keys(COND_TEXT).forEach(function(k){var t=COND_TEXT[k];if(r.indexOf(t)>=0){if(seen[k])r=r.replace(t,COND_SHORT[k]);seen[k]=1;}});if(/부딪히는 글자가 있어/.test(r)){if(seen.clash)r=r.replace(/ ?(?:원래 사주와 )?부딪히는 글자가 있어 (?:변동이 섞여요|서두르지 않는 게 좋아요)./,' 여기도 부딪히는 글자가 있어요.');seen.clash=1;}return r===x.reason?x:Object.assign({},x,{reason:r});});}
+ function rankList(items,cls){items=dedupeReasons(items||[]);return items.length?'<ol class="rt-rank'+(cls?' '+cls:'')+'">'+items.map(function(x,i){var t=tierOf(x.n);return '<li class="t-'+t.k+'"><span class="rt-no">'+(i+1)+'위</span><div><strong><i class="rt-dot" style="--e:'+colorOf(x.gz)+'"></i>'+x.title+'</strong><em>'+x.n+'점 <span class="rt-pill">'+t.n+'</span></em><p>'+esc(x.reason)+'</p></div></li>';}).join('')+'</ol>':'';}
  function gzHtml(gz){return '<b class="rt-dw"><i class="rt-dot" style="--e:'+colorOf(gz)+'"></i>'+esc(gz||'')+'</b>';}
  function kwHtml(x){var k=SEASON_KW[x&&x.season];return k?'<span class="rt-kw">'+k+'</span>':'';}
  function topOf(items,k){return items.filter(function(x){return !x.past&&!x.endingSoon&&!x.late;}).slice().sort(function(a,b){return b.n-a.n||a.ord-b.ord;}).slice(0,k);}

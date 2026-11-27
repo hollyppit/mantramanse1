@@ -146,7 +146,7 @@
         '대표 특기(' + t1.name + ') 근거: ' + t1.basis.map(function (b) { return b.label; }).join(' · ') + '.',
         '특기 5영역: ' + C.r.talents.map(function (t) { return t.name + ' ' + (t.levelK || '근거 부족'); }).join(' · ') + '.',
         '앞선 특기의 결: ' + ts.map(function (t) { var y = typeOf(t); return y ? t.name + ' — ' + y.top.name + '(' + y.top.basis.map(function (b) { return b.label; }).slice(0, 2).join(', ') + ')' : ''; }).filter(Boolean).join(' · ') + '.',
-        top.length ? '직업 강점 활용 분야(엔진 careerProfile): ' + top.map(function (c) { return c.name + ' ' + c.score; }).join(' · ') + '.' : '',
+        top.length ? '직업 강점이 잘 쓰이는 분야(100점에 가까울수록 잘 맞음): ' + top.map(function (c) { return c.name + ' ' + c.score; }).join(' · ') + '.' : '',
         ps.length ? '일하는 방식(양쪽 합 100%): ' + ps.slice(0, 3).map(function (p) { return p.name + ' ' + p.v + '%'; }).join(' · ') + '.' : '',
         '특기는 만세력 특기·적성 탭, 강점 분야는 커리어 장들과 같은 계산이에요. ' + D.NOTE,
       ]),
@@ -183,7 +183,7 @@
         ranked.map(function (x) { var s = D.SIDE[x.sub.id]; return x.sub.name + '(' + x.sub.recK + ') — ' + s.path + ' ' + s.step; }).concat(ranked.length ? [D.SIDE_NOTE + ' 처음 드는 비용·반복 수입 같은 돈의 구조는 재물운 심화 ‘이렇게 벌면 편해요’ 장에서 따로 짚어요.'] : [])),
       practice: join([routine].concat(['short_long', 'in_out'].map(function (k) { var a = C.r.sport.axes.filter(function (x) { return x.id === k; })[0]; return a && a.ok && a.side !== 'bal' ? D.REST_AXIS[k][a.side] : ''; }))),
       why: join([
-        ps.length ? (C.kid ? '생활 방식' : '일하는 방식') + '(엔진 careerProfile, 양쪽 합 100%): ' + ps.map(function (p) { return p.name + ' ' + p.v + '%'; }).join(' · ') + '.' : '',
+        ps.length ? (C.kid ? '생활 방식' : '일하는 방식') + '(마주 보는 두 방식의 합이 100%): ' + ps.map(function (p) { return p.name + ' ' + p.v + '%'; }).join(' · ') + '.' : '',
         '재충전 활동은 기울어진 두 축의 반대쪽 활동 중 이 사주의 세부 분야 점수가 높은 것으로 골랐어요: ' + rc.map(function (x) { return x.sub.name + ' ' + x.sub.recK; }).join(' · ') + '.',
         !C.kid && burden.length ? '부담이 커질 수 있는 환경: ' + burden.map(function (e) { return e.name + ' ' + e.burden; }).join(' · ') + '.' : '',
         D.NOTE,

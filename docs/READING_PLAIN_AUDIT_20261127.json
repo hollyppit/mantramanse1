@@ -1,0 +1,2562 @@
+{
+ "charts": 12,
+ "rendered": 1284,
+ "errors": 0,
+ "total": 15545,
+ "bad": [
+  {
+   "s": "비견·겁재는 나와 같은 힘, 식신·상관은 표현·재능, 편재·정재는 돈·결과, 편관·정관은 책임·규칙, 편인·정인은 배움·도움이에요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(10)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 48
+  },
+  {
+   "s": "戊정재庚정관丙상관",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 16
+  },
+  {
+   "s": "맞는 일주 · 끌리는 일주 · 부딪히는 일주",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "feature",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_28"
+   ],
+   "n": 12
+  },
+  {
+   "s": "辛정재丁겁재戊식신",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 12
+  },
+  {
+   "s": "신약은 내 힘을 빼 가는 식상·재성·관성이 상대적으로 많다는 뜻이에요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_01"
+   ],
+   "n": 10
+  },
+  {
+   "s": "癸편인辛편관己편재",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 8
+  },
+  {
+   "s": "戊정재壬정인庚정관",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 8
+  },
+  {
+   "s": "癸겁재辛정인己정관",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 8
+  },
+  {
+   "s": "戊편인壬식신庚비견",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 4
+  },
+  {
+   "s": "丁식신乙비견己편재",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 4
+  },
+  {
+   "s": "辛편관丁식신戊정재",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 4
+  },
+  {
+   "s": "辛상관丁정인戊비견",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 4
+  },
+  {
+   "s": "戊편관丙편재甲식신",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 4
+  },
+  {
+   "s": "乙정인癸정관戊식신",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 4
+  },
+  {
+   "s": "癸정관辛정재己상관",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 4
+  },
+  {
+   "s": "戊비견壬편재庚식신",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 4
+  },
+  {
+   "s": "戊정관庚정인丙정재",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 4
+  },
+  {
+   "s": "丁편재乙식신己편관",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 4
+  },
+  {
+   "s": "乙식신癸비견戊정관",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 4
+  },
+  {
+   "s": "戊정인庚겁재丙정관",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 4
+  },
+  {
+   "s": "戊정인丙정관甲정재",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 4
+  },
+  {
+   "s": "戊정재丙상관甲겁재",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 4
+  },
+  {
+   "s": "乙비견癸편인戊정재",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 4
+  },
+  {
+   "s": "戊식신丙비견甲편인",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01",
+    "timeline_love_01",
+    "timeline_self_03",
+    "timeline_wealth_01"
+   ],
+   "n": 4
+  },
+  {
+   "s": "상관패인은 상관의 세력이 크지만 인성이 이를 눌러 조절하는 구조라는 뜻이에요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_04"
+   ],
+   "n": 3
+  },
+  {
+   "s": "월간에 정관·편관이 있고, 타고난 사주 전체에서 관성이 많은 편이에요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_05"
+   ],
+   "n": 2
+  },
+  {
+   "s": "용신이 억부와 조후 기준에서 다르게 계산돼서 누르는 환경도 한 가지로 정하지 않았어요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "why",
+   "src": "editorial/rebuild-20261022/self-14.mjs, editorial/rebuild-20261022/health-09-10.mjs",
+   "chapters": [
+    "timeline_self_14"
+   ],
+   "n": 2
+  },
+  {
+   "s": "월간에 식신·상관이 있고, 타고난 사주 전체에서 재성이 많은 편이에요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_05"
+   ],
+   "n": 2
+  },
+  {
+   "s": "월간에 비견·겁재가 있고, 타고난 사주 전체에서 관성이 많은 편이에요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_05"
+   ],
+   "n": 2
+  },
+  {
+   "s": "살인상생은 편관이 인성을 통해 일간으로 이어지는 구조라는 뜻이에요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_04"
+   ],
+   "n": 2
+  },
+  {
+   "s": "월간에 식신·상관이 있고, 타고난 사주 전체에서 관성이 많은 편이에요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_05"
+   ],
+   "n": 1
+  },
+  {
+   "s": "월지에서 드러난 관성으로 격을 이루고(정관격·편관격), 격을 돕는 기운이 있어 격이 잘 짜인(성격) 사주예요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "report/v2/life-narrative-data.js",
+   "chapters": [
+    "timeline_self_03"
+   ],
+   "n": 1
+  },
+  {
+   "s": "월간에 정재·편재가 있고, 타고난 사주 전체에서 비겁이 많은 편이에요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_05"
+   ],
+   "n": 1
+  },
+  {
+   "s": "월간에 정관·편관이 있고, 타고난 사주 전체에서 인성이 많은 편이에요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_05"
+   ],
+   "n": 1
+  },
+  {
+   "s": "월간에 정관·편관이 있고, 타고난 사주 전체에서 재성이 많은 편이에요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_05"
+   ],
+   "n": 1
+  },
+  {
+   "s": "관살혼잡은 정관과 편관이 함께 나타나 규칙과 압박이 섞이는 구조라는 뜻이에요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "why",
+   "src": "editorial/rebuild-20261022/self-04.mjs",
+   "chapters": [
+    "timeline_self_04"
+   ],
+   "n": 1
+  },
+  {
+   "s": "월간에 정인·편인이 있고, 타고난 사주 전체에서 재성이 많은 편이에요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_05"
+   ],
+   "n": 1
+  },
+  {
+   "s": "식신제살은 식신이 편관을 눌러 주는 구조라는 뜻이에요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(3)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_04"
+   ],
+   "n": 1
+  },
+  {
+   "s": "월간에 정재·편재가 있고, 타고난 사주 전체에서 재성이 많은 편이에요.",
+   "flags": [
+    "용어로 시작",
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_05"
+   ],
+   "n": 1
+  },
+  {
+   "s": "木 목 자라나고 뻗어 가는 기운火 화 드러나고 퍼지는 기운土 토 받쳐 주고 다지는 기운金 금 정리되고 완성되는 기운水 수 모이고 깊어지는 기운",
+   "flags": [
+    "추상"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_08",
+    "timeline_career_12",
+    "timeline_career_14",
+    "timeline_love_08",
+    "timeline_love_14",
+    "timeline_self_20",
+    "timeline_self_24",
+    "timeline_wealth_06",
+    "timeline_wealth_10",
+    "timeline_wealth_14"
+   ],
+   "n": 120
+  },
+  {
+   "s": "막대 색 = 그 시기에 두드러지는 기운(길흉 아님) · 가운데 선 = 보통(50점), 위로 길수록 힘이 실리고 아래로 길수록 조심할 때예요 · 숫자 옆 좋음·무난·조심 = 점수 등급(보조)",
+   "flags": [
+    "긴 문장(105자)"
+   ],
+   "part": "chart",
+   "src": "report/v2/reading-text.js",
+   "chapters": [
+    "timeline_career_08",
+    "timeline_career_12",
+    "timeline_career_14",
+    "timeline_love_08",
+    "timeline_love_14",
+    "timeline_self_20",
+    "timeline_self_24",
+    "timeline_wealth_06",
+    "timeline_wealth_10",
+    "timeline_wealth_14"
+   ],
+   "n": 120
+  },
+  {
+   "s": "10년의 계절(대운) 안에 해마다 날씨(세운)가, 그 안에 달마다 기온(월운)이, 그 안에 그날의 바람(일진)이 있어요.",
+   "flags": [
+    "용어 많음(4)"
+   ],
+   "part": "chart",
+   "src": "report/v2/reading-text.js",
+   "chapters": [
+    "timeline_career_08",
+    "timeline_career_12",
+    "timeline_career_14",
+    "timeline_love_08",
+    "timeline_love_14",
+    "timeline_self_20",
+    "timeline_self_24",
+    "timeline_wealth_06",
+    "timeline_wealth_10",
+    "timeline_wealth_14"
+   ],
+   "n": 120
+  },
+  {
+   "s": "엔진 · 표현과 실행",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "chart",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 12
+  },
+  {
+   "s": "엔진 힘은 여리지만 연비와 섬세한 조작이 좋은 차예요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "depth",
+   "src": "report/v2/reading-depth-data-1.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 10
+  },
+  {
+   "s": "검수, 교정, 정밀 작업처럼 작은 차이가 돈이 되는 일에서 특히 빛나요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/everyday-reading.js",
+   "chapters": [
+    "timeline_self_06"
+   ],
+   "n": 10
+  },
+  {
+   "s": "나와 배우자 자리(일지)에 서로 꺼리고 예민해지는 관계(원진·귀문관)가 있어요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "why",
+   "src": "report/v2/reading-text.js",
+   "chapters": [
+    "timeline_career_06",
+    "timeline_love_01",
+    "timeline_love_06",
+    "timeline_love_13",
+    "timeline_love_15"
+   ],
+   "n": 9
+  },
+  {
+   "s": "함께 확인한 것: 나와 배우자 자리(일지)의 신·자 반합→수 기운.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_love_04",
+    "timeline_love_05",
+    "timeline_love_07",
+    "timeline_love_08",
+    "timeline_love_14",
+    "timeline_self_27",
+    "timeline_self_29"
+   ],
+   "n": 7
+  },
+  {
+   "s": "자동차로는 짐이 엔진보다 무거운 구조로 읽어요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "why",
+   "src": "report/v2/life-narrative-data-self3.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 4
+  },
+  {
+   "s": "짐이 엔진보다 무거우면 차는 느려지고 연료는 더 들어요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/life-narrative-data-self3.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 4
+  },
+  {
+   "s": "차체에 비해 엔진이 가벼운 편이라, 짐을 많이 실을수록 속도가 크게 떨어져요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-self.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 4
+  },
+  {
+   "s": "나(일간)의 무·계 합(묶임)→화 기운.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_love_01",
+    "timeline_love_03",
+    "timeline_love_12",
+    "timeline_self_27"
+   ],
+   "n": 4
+  },
+  {
+   "s": "검수, 분석, 법·재무처럼 틀리지 않는 것이 가치가 되는 자리예요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "depth",
+   "src": "report/v2/reading-depth-data-4.js",
+   "chapters": [
+    "timeline_career_01"
+   ],
+   "n": 3
+  },
+  {
+   "s": "아래 글자 속에 숨은 글자(지장간)에 식신·상관이 있고, 타고난 사주 전체에서 식상이 적은 편이에요.",
+   "flags": [
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "report/v2/reading-text.js",
+   "chapters": [
+    "timeline_self_08"
+   ],
+   "n": 3
+  },
+  {
+   "s": "책임의 기운(관성)은 많고 인성은 보통이라 관성이 인성으로 이어지는 흐름(조직→배움)이 한쪽이 앞서고 한쪽이 받치는 형태로 나타나는 것이에요.",
+   "flags": [
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_17"
+   ],
+   "n": 3
+  },
+  {
+   "s": "분석, 검수, 법·재무 같은 분야도 눈여겨보세요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "depth",
+   "src": "report/v2/reading-depth-data-1.js",
+   "chapters": [
+    "timeline_self_26"
+   ],
+   "n": 3
+  },
+  {
+   "s": "월급형이라면 전문 검수나 관리 쪽이 어울리고, 정확함으로 인정받는 자리에서 신뢰가 쌓여요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "depth",
+   "src": "report/v2/reading-depth-data-2.js",
+   "chapters": [
+    "timeline_wealth_04"
+   ],
+   "n": 3
+  },
+  {
+   "s": "나와 배우자 자리(일지)에 표현의 기운(식상)이 있고 원국에도 식상이 넉넉해요.",
+   "flags": [
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_love_04"
+   ],
+   "n": 3
+  },
+  {
+   "s": "균형을 맞출 때 기대면 좋은 기운은 수(지혜·흐름) 쪽이에요.",
+   "flags": [
+    "추상"
+   ],
+   "part": "depth",
+   "src": "report/v2/reading-depth.js",
+   "chapters": [
+    "timeline_career_01"
+   ],
+   "n": 3
+  },
+  {
+   "s": "아래 글자 속에 숨은 글자(지장간)에 정인·편인이 있고, 타고난 사주 전체에서 인성이 보통이에요.",
+   "flags": [
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "report/v2/reading-text.js",
+   "chapters": [
+    "timeline_self_08"
+   ],
+   "n": 3
+  },
+  {
+   "s": "허술한 부분을 알아보는 눈이 있으니 마감 직전 검수 단계에서 믿음직한 사람이 돼요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "editorial/rebuild-20261022/enrich-20261102.mjs",
+   "chapters": [
+    "timeline_self_10"
+   ],
+   "n": 3
+  },
+  {
+   "s": "내 사주에서 확인한 것: 책임의 기운 두 갈래가 섞인 구조 — 바른 책임과 강한 압박이 함께 있음 — 둘 다 윗글자에 드러남 · 나를 돕는 힘 51%(균형).",
+   "flags": [
+    "추상"
+   ],
+   "part": "why",
+   "src": "report/v2/reading-text.js",
+   "chapters": [
+    "timeline_career_04",
+    "timeline_career_13",
+    "timeline_self_25"
+   ],
+   "n": 3
+  },
+  {
+   "s": "책임의 기운 중 정관과 편관이 섞인 관살혼잡 구조인데 나를 돕는 힘은 약한 편이에요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "why",
+   "src": "report/v2/life-narrative-data-career.js, report/v2/life-narrative-data-career2.js",
+   "chapters": [
+    "timeline_career_13"
+   ],
+   "n": 3
+  },
+  {
+   "s": "바른 책임의 기운(정관)과 편관이 함께 있는 관살혼잡 구조이고 내 힘이 넉넉하지 않아요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_25"
+   ],
+   "n": 3
+  },
+  {
+   "s": "아래 글자 속에 숨은 글자(지장간)에 정인·편인이 있고, 타고난 사주 전체에서 인성이 적은 편이에요.",
+   "flags": [
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "report/v2/reading-text.js",
+   "chapters": [
+    "timeline_self_08"
+   ],
+   "n": 3
+  },
+  {
+   "s": "관살과다는 관성이 크다는 뜻이에요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_04"
+   ],
+   "n": 2
+  },
+  {
+   "s": "토(정체·무게의 기운)가 높고 수(유연·휴식·수분의 기운)가 낮음 조합이라 전통에서는 토를 무게와 정체, 수를 흐름과 수분·휴식의 상징으로 읽어요.",
+   "flags": [
+    "추상"
+   ],
+   "part": "why",
+   "src": "editorial/rebuild-20261022/health-01-04.mjs",
+   "chapters": [
+    "timeline_health_01"
+   ],
+   "n": 2
+  },
+  {
+   "s": "재다신약은 재성이 많고 내 힘이 상대적으로 약한 구조라는 뜻이에요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_04"
+   ],
+   "n": 2
+  },
+  {
+   "s": "수익을 따지지 않는 영역이 있으면 마음의 균형이 잡히고 그 영역에서 뜻밖의 쓸모가 생겨나기도 해요.",
+   "flags": [
+    "추상"
+   ],
+   "part": "body",
+   "src": "editorial/rebuild-20261022/enrich-20261102.mjs",
+   "chapters": [
+    "timeline_self_05"
+   ],
+   "n": 2
+  },
+  {
+   "s": "아래 글자 속에 숨은 글자(지장간)에 정관·편관이 있고, 타고난 사주 전체에서 관성이 적은 편이에요.",
+   "flags": [
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "report/v2/reading-text.js",
+   "chapters": [
+    "timeline_self_08"
+   ],
+   "n": 2
+  },
+  {
+   "s": "내 사주에서 확인한 것: 나를 돕는 힘 29%(태약) · 일간의 뿌리(통근) 24점.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_22",
+    "timeline_self_33"
+   ],
+   "n": 2
+  },
+  {
+   "s": "수(차갑고 깊은 기운)가 높고 화(활기·열의 기운)가 낮음 조합이라 전통에서는 수를 한기와 사색, 화를 열과 활기의 상징으로 읽어서, 차갑고 정적인 패턴이에요.",
+   "flags": [
+    "추상"
+   ],
+   "part": "why",
+   "src": "editorial/rebuild-20261022/health-01-04.mjs",
+   "chapters": [
+    "timeline_health_01"
+   ],
+   "n": 2
+  },
+  {
+   "s": "차가운 기운이 계절과 만나 겹치는 구조라서, 추운 환경과 정적인 생활에서 움츠러들기 쉬운 균형이에요.",
+   "flags": [
+    "추상"
+   ],
+   "part": "body",
+   "src": "editorial/rebuild-20261022/health-01-04.mjs",
+   "chapters": [
+    "timeline_health_01"
+   ],
+   "n": 2
+  },
+  {
+   "s": "엔진과 브레이크의 균형이 잡힌 차예요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "depth",
+   "src": "report/v2/reading-depth-data-1.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 2
+  },
+  {
+   "s": "일주 자체보다 대화 방식과 생활 리듬이 맞는지를 우선 보면, 처음엔 안 맞아 보이던 일주와도 편해질 수 있어요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "depth",
+   "src": "report/v2/reading-depth-data-1.js",
+   "chapters": [
+    "timeline_self_28"
+   ],
+   "n": 2
+  },
+  {
+   "s": "프리랜서: 혼자 모든 걸 판단하기보다 검수해 주는 파트너가 있는 프로젝트가 맞아요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_13"
+   ],
+   "n": 2
+  },
+  {
+   "s": "용신이 억부와 조후 기준에서 다르게 계산돼 한 가지로 정하지 않았고, 힘이 약한 쪽이라 컨디션이 낮을 때는 기본 습관을 지키는 방식으로 안내해요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "why",
+   "src": "editorial/rebuild-20261022/health-09-10.mjs",
+   "chapters": [
+    "timeline_health_09"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국의 인연 기운은 아내·연인을 뜻하는 기운(9%), 배우자 자리는 책임을 지는 힘(관성)이에요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_love_14"
+   ],
+   "n": 1
+  },
+  {
+   "s": "용신이 억부와 조후 기준에서 다르게 계산돼 한 가지로 정하지 않았고, 힘이 넉넉하지 않은 쪽이라 힘든 분기에는 가장 기본이 되는 생활만 붙잡는 방식으로 안내해요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "why",
+   "src": "editorial/rebuild-20261022/remedy-05-08.mjs",
+   "chapters": [
+    "timeline_remedy_08"
+   ],
+   "n": 1
+  },
+  {
+   "s": "자동차로 치면 엔진의 힘은 나를 돕는 힘 38%로 힘이 여린 편이에요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-self.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "이 차는 엔진이 쉽게 달아오르는 편이에요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-self.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 나를 뜻하는 글자(일간) 庚(경금) · 내 힘 약한 편(신약, 나를 돕는 힘 38%).",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 식상 11% · 재성 9% · 관성 42%.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_32"
+   ],
+   "n": 1
+  },
+  {
+   "s": "돈을 다루는 힘(재성)이 9%, 내 뜻을 지키는 힘(비겁)이 14%, 표현하는 힘(식상)이 11%예요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_wealth_03"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국에서는 움직이는 돈(편재)이 0%, 그 돈을 감당하는 나를 돕는 힘이 38%예요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-wealth.js",
+   "chapters": [
+    "timeline_wealth_06"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국의 인연 기운은 남편·연인을 뜻하는 기운(11%), 배우자 자리는 표현하는 힘(식상)이에요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_love_14"
+   ],
+   "n": 1
+  },
+  {
+   "s": "자동차로 치면 엔진의 힘은 나를 돕는 힘 33%로 힘이 여린 편이에요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-self.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 나를 뜻하는 글자(일간) 乙(을목) · 내 힘 약한 편(신약, 나를 돕는 힘 33%).",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "지금 대운에 들어온 글자(인·寅)와 집안 자리(축·丑)가 속으로 묶이는 숨은 합(암합)이 있어서예요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_30"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 식상 25% · 재성 31% · 관성 12%.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_32"
+   ],
+   "n": 1
+  },
+  {
+   "s": "돈을 다루는 힘(재성)이 31%, 내 뜻을 지키는 힘(비겁)이 22%, 표현하는 힘(식상)이 25%예요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_wealth_03"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국에서는 움직이는 돈(편재)이 13%, 그 돈을 감당하는 나를 돕는 힘이 33%예요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-wealth.js",
+   "chapters": [
+    "timeline_wealth_06"
+   ],
+   "n": 1
+  },
+  {
+   "s": "지금 대운에 들어온 글자(신·申)와 일터 자리(묘·卯)가 속으로 묶이는 숨은 합(암합)이 있어서예요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국의 인연 기운은 아내·연인을 뜻하는 기운(11%), 배우자 자리는 돈을 다루는 힘(재성)이에요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_love_14"
+   ],
+   "n": 1
+  },
+  {
+   "s": "자동차로 치면 엔진의 힘은 나를 돕는 힘 26%로 힘이 여린 편이에요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-self.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 나를 뜻하는 글자(일간) 戊(무토) · 내 힘 약한 편(신약, 나를 돕는 힘 26%).",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 식상 12% · 재성 11% · 관성 52%.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_32"
+   ],
+   "n": 1
+  },
+  {
+   "s": "돈을 다루는 힘(재성)이 11%, 내 뜻을 지키는 힘(비겁)이 24%, 표현하는 힘(식상)이 12%예요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_wealth_03"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국에서는 움직이는 돈(편재)이 0%, 그 돈을 감당하는 나를 돕는 힘이 26%예요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-wealth.js",
+   "chapters": [
+    "timeline_wealth_06"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국의 인연 기운은 남편·연인을 뜻하는 기운(31%), 배우자 자리는 돈을 다루는 힘(재성)이에요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_love_14"
+   ],
+   "n": 1
+  },
+  {
+   "s": "자동차로 치면 엔진의 힘은 나를 돕는 힘 29%로 힘이 여린 편이에요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-self.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 나를 뜻하는 글자(일간) 乙(을목) · 내 힘 약한 편(신약, 나를 돕는 힘 29%).",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 식상 25% · 재성 15% · 관성 31%.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_32"
+   ],
+   "n": 1
+  },
+  {
+   "s": "돈을 다루는 힘(재성)이 15%, 내 뜻을 지키는 힘(비겁)이 12%, 표현하는 힘(식상)이 25%예요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_wealth_03"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국에서는 움직이는 돈(편재)이 9%, 그 돈을 감당하는 나를 돕는 힘이 29%예요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-wealth.js",
+   "chapters": [
+    "timeline_wealth_06"
+   ],
+   "n": 1
+  },
+  {
+   "s": "지금 대운에 들어온 글자(미·未)와 배우자 자리(인·寅)가 속으로 묶이는 숨은 합(암합)이 있어서예요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원진과 귀문관은 마음이 예민해지는 관계라, 이 10년은 눈치와 신경이 곤두서기 쉬우니 일과 휴식의 경계를 지키세요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "insight",
+   "src": "report/v2/reading-insight-data-4.js",
+   "chapters": [
+    "timeline_career_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "용신이 억부와 조후 기준에서 다르게 계산돼 한 가지로 정하지 않았고, 힘이 충분한 쪽이라 여러 습관을 시험해 보며 맞는 조합을 찾는 방식으로 안내해요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "why",
+   "src": "editorial/rebuild-20261022/health-09-10.mjs",
+   "chapters": [
+    "timeline_health_09"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원진과 귀문관은 마음이 예민해지는 관계라, 이 10년은 상대 마음에 의심과 서운함이 커지기 쉬우니 추측보다 직접 물어보세요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "insight",
+   "src": "report/v2/reading-insight-data-4.js",
+   "chapters": [
+    "timeline_love_01"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국의 인연 기운은 남편·연인을 뜻하는 기운(30%), 배우자 자리는 표현하는 힘(식상)이에요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_love_14"
+   ],
+   "n": 1
+  },
+  {
+   "s": "태어난 날 글자(임·계)가 물 기운(흐름·사색)이고, 내 힘이 넉넉한 편이라 흐름과 사색의 기운이 충분해요.",
+   "flags": [
+    "추상"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_remedy_05"
+   ],
+   "n": 1
+  },
+  {
+   "s": "용신이 억부와 조후 기준에서 다르게 계산돼 한 가지로 정하지 않았고, 힘이 충분한 쪽이라 분기마다 원칙을 하나씩 바꿔 가며 확인하는 방식으로 안내해요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "why",
+   "src": "editorial/rebuild-20261022/remedy-05-08.mjs",
+   "chapters": [
+    "timeline_remedy_08"
+   ],
+   "n": 1
+  },
+  {
+   "s": "출발이 느려 남보다 늦게 움직이는 것 같지만, 엔진이 데워진 뒤에는 조용하고 꾸준하게 먼 길을 가요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/life-narrative-data-self3.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "자동차로 치면 엔진의 힘은 나를 돕는 힘 49%로 어느 한쪽으로 크게 기울지 않은 편이에요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-self.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "남의 속도에 맞춰 급출발하면 엔진에 무리가 가고, 스스로 느린 차라고 오해하게 돼요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/life-narrative-data-self3.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "엔진이 센 차예요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "depth",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 나를 뜻하는 글자(일간) 壬(임수) · 내 힘 고른 편(중화, 나를 돕는 힘 49%).",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "동료의 소식에 자극받아 주말에 포트폴리오를 손보는 추진력은 좋은 성장 엔진이 돼요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "editorial/rebuild-20261022/enrich-20261102.mjs",
+   "chapters": [
+    "timeline_self_16"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서 확인한 것: 통합 판단 조후 우선 · 억부 보조 — 용신 화(火), 희신 목(木) · 타고난 온도: 서늘한 편.",
+   "flags": [
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_22"
+   ],
+   "n": 1
+  },
+  {
+   "s": "나(일간)의 정·임 합(묶임)→목 기운.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_27"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 식상 9% · 재성 12% · 관성 30%.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_32"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원진과 귀문관은 마음이 예민해지는 관계라, 이 10년은 돈 문제에서 불안과 의심이 커지기 쉬우니 숫자와 사실로 확인하는 습관을 들이세요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "insight",
+   "src": "report/v2/reading-insight-data-4.js",
+   "chapters": [
+    "timeline_wealth_01"
+   ],
+   "n": 1
+  },
+  {
+   "s": "돈을 다루는 힘(재성)이 12%, 내 뜻을 지키는 힘(비겁)이 36%, 표현하는 힘(식상)이 9%예요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_wealth_03"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국에서는 움직이는 돈(편재)이 3%, 그 돈을 감당하는 나를 돕는 힘이 49%예요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-wealth.js",
+   "chapters": [
+    "timeline_wealth_06"
+   ],
+   "n": 1
+  },
+  {
+   "s": "배움의 기운(인성)이 30% 이상이고 자격·제도의 기운(관성)이나 인성 격이 받쳐 줘요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "why",
+   "src": "report/v2/life-narrative-data-career.js",
+   "chapters": [
+    "timeline_career_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "책임의 기운 중 정관과 편관이 섞인 관살혼잡 구조인데 나를 돕는 힘이 받쳐 줘요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "why",
+   "src": "report/v2/life-narrative-data-career.js, report/v2/life-narrative-data-career2.js",
+   "chapters": [
+    "timeline_career_04"
+   ],
+   "n": 1
+  },
+  {
+   "s": "일주일에 한 번 서로의 일주일을 이야기하는 시간을 정해 두세요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-love.js",
+   "chapters": [
+    "timeline_love_09"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국의 인연 기운은 아내·연인을 뜻하는 기운(1%), 배우자 자리는 책임을 지는 힘(관성)이에요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_love_14"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내게 가장 필요한 기운(용신)은 물 기운(휴식·유연·정보)이고, 내 힘이 넉넉한 편이라 흐름을 읽는 힘이 충분해요.",
+   "flags": [
+    "추상"
+   ],
+   "part": "why",
+   "src": "report/v2/reading-text.js",
+   "chapters": [
+    "timeline_remedy_08"
+   ],
+   "n": 1
+  },
+  {
+   "s": "자동차로 치면 엔진의 힘은 나를 돕는 힘 51%로 어느 한쪽으로 크게 기울지 않은 편이에요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-self.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 나를 뜻하는 글자(일간) 丙(병화) · 내 힘 고른 편(중화, 나를 돕는 힘 51%).",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "생각·준비를 뜻하는 인성이 많거나 표현·실행(식신)을 누르는 구조이고, 내보내는 기운인 식상은 10% 미만이에요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "why",
+   "src": "report/v2/life-narrative-data.js",
+   "chapters": [
+    "timeline_self_03"
+   ],
+   "n": 1
+  },
+  {
+   "s": "책임의 기운(관성)과 인성이 모두 높아서 관성이 인성으로 이어지는 흐름(조직→배움)으로 풀었어요.",
+   "flags": [
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_17"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 식상 9% · 재성 1% · 관성 39%.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_32"
+   ],
+   "n": 1
+  },
+  {
+   "s": "돈을 다루는 힘(재성)이 1%, 내 뜻을 지키는 힘(비겁)이 20%, 표현하는 힘(식상)이 9%예요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_wealth_03"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국에서는 움직이는 돈(편재)이 0%, 그 돈을 감당하는 나를 돕는 힘이 51%예요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-wealth.js",
+   "chapters": [
+    "timeline_wealth_06"
+   ],
+   "n": 1
+  },
+  {
+   "s": "일의 긴 흐름으로 보면 토(土) 기운을 살려 업무를 체계화하고 운영 관리로 안정적인 수익 구조를 쌓는 방향이 이 사주와 잘 맞아요.",
+   "flags": [
+    "추상"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국의 인연 기운은 남편·연인을 뜻하는 기운(12%), 배우자 자리는 표현하는 힘(식상)이에요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_love_14"
+   ],
+   "n": 1
+  },
+  {
+   "s": "자동차로 치면 엔진의 힘은 나를 돕는 힘 32%로 힘이 여린 편이에요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-self.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 나를 뜻하는 글자(일간) 戊(무토) · 내 힘 약한 편(신약, 나를 돕는 힘 32%).",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "주변은 갑작스러운 결정이라고 느끼지만 나는 오래 계산한 결과예요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "editorial/rebuild-20261022/self-05.mjs",
+   "chapters": [
+    "timeline_self_05"
+   ],
+   "n": 1
+  },
+  {
+   "s": "오래 계산한 결정이라도 정리해 두면 주변에 설명하기도 쉬워요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "editorial/rebuild-20261022/enrich-20261102.mjs",
+   "chapters": [
+    "timeline_self_05"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 식상 28% · 재성 29% · 관성 12%.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_32"
+   ],
+   "n": 1
+  },
+  {
+   "s": "돈을 다루는 힘(재성)이 29%, 내 뜻을 지키는 힘(비겁)이 27%, 표현하는 힘(식상)이 28%예요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_wealth_03"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국에서는 움직이는 돈(편재)이 4%, 그 돈을 감당하는 나를 돕는 힘이 32%예요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-wealth.js",
+   "chapters": [
+    "timeline_wealth_06"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국의 인연 기운은 아내·연인을 뜻하는 기운(25%), 배우자 자리는 내 뜻을 지키는 힘(비겁)이에요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_love_14"
+   ],
+   "n": 1
+  },
+  {
+   "s": "태어난 날 글자(임·계)가 물 기운(흐름·사색)이고, 내 힘이 약한 편(신약)이라 사색의 기운은 있지만 힘이 약해요.",
+   "flags": [
+    "추상"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_remedy_05"
+   ],
+   "n": 1
+  },
+  {
+   "s": "자동차로 치면 엔진의 힘은 나를 돕는 힘 20%로 힘이 여린 편이에요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-self.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 나를 뜻하는 글자(일간) 癸(계수) · 내 힘 약한 편(신약, 나를 돕는 힘 20%).",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "아래 글자 속에 숨은 글자(지장간)에 정재·편재가 있고, 타고난 사주 전체에서 재성이 보통이에요.",
+   "flags": [
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "report/v2/reading-text.js",
+   "chapters": [
+    "timeline_self_08"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 식상 8% · 재성 25% · 관성 47%.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_32"
+   ],
+   "n": 1
+  },
+  {
+   "s": "돈을 다루는 힘(재성)이 25%, 내 뜻을 지키는 힘(비겁)이 18%, 표현하는 힘(식상)이 8%예요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_wealth_03"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국에서는 움직이는 돈(편재)이 22%, 그 돈을 감당하는 나를 돕는 힘이 20%예요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-wealth.js",
+   "chapters": [
+    "timeline_wealth_06"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국의 인연 기운은 남편·연인을 뜻하는 기운(12%), 배우자 자리는 책임을 지는 힘(관성)이에요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_love_14"
+   ],
+   "n": 1
+  },
+  {
+   "s": "자동차로 치면 엔진의 힘은 나를 돕는 힘 40%로 힘이 여린 편이에요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-self.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 나를 뜻하는 글자(일간) 辛(신금) · 내 힘 약한 편(신약, 나를 돕는 힘 40%).",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 식상 18% · 재성 30% · 관성 12%.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_32"
+   ],
+   "n": 1
+  },
+  {
+   "s": "돈을 다루는 힘(재성)이 30%, 내 뜻을 지키는 힘(비겁)이 14%, 표현하는 힘(식상)이 18%예요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_wealth_03"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국에서는 움직이는 돈(편재)이 15%, 그 돈을 감당하는 나를 돕는 힘이 40%예요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-wealth.js",
+   "chapters": [
+    "timeline_wealth_06"
+   ],
+   "n": 1
+  },
+  {
+   "s": "지금 대운에 들어온 글자(묘·卯)와 자녀·앞날 자리(신·申)가 속으로 묶이는 숨은 합(암합)이 있어서예요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_career_01"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국의 인연 기운은 아내·연인을 뜻하는 기운(5%), 배우자 자리는 책임을 지는 힘(관성)이에요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_love_14"
+   ],
+   "n": 1
+  },
+  {
+   "s": "자동차로 치면 엔진의 힘은 나를 돕는 힘 34%로 힘이 여린 편이에요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-self.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 나를 뜻하는 글자(일간) 乙(을목) · 내 힘 약한 편(신약, 나를 돕는 힘 34%).",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 식상 5% · 재성 5% · 관성 56%.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_32"
+   ],
+   "n": 1
+  },
+  {
+   "s": "돈을 다루는 힘(재성)이 5%, 내 뜻을 지키는 힘(비겁)이 32%, 표현하는 힘(식상)이 5%예요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_wealth_03"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국에서는 움직이는 돈(편재)이 0%, 그 돈을 감당하는 나를 돕는 힘이 34%예요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-wealth.js",
+   "chapters": [
+    "timeline_wealth_06"
+   ],
+   "n": 1
+  },
+  {
+   "s": "자동차로 치면 엔진의 힘은 나를 돕는 힘 31%로 힘이 여린 편이에요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-self.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 나를 뜻하는 글자(일간) 乙(을목) · 내 힘 약한 편(신약, 나를 돕는 힘 31%).",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 식상 20% · 재성 46% · 관성 3%.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_32"
+   ],
+   "n": 1
+  },
+  {
+   "s": "돈을 다루는 힘(재성)이 46%, 내 뜻을 지키는 힘(비겁)이 21%, 표현하는 힘(식상)이 20%예요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_wealth_03"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국에서는 움직이는 돈(편재)이 0%, 그 돈을 감당하는 나를 돕는 힘이 31%예요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-wealth.js",
+   "chapters": [
+    "timeline_wealth_06"
+   ],
+   "n": 1
+  },
+  {
+   "s": "표현·실행의 기운(식상)이 지나치게 많아 내 힘이 밖으로 새는 식상과다(설기) 구조예요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "why",
+   "src": "report/v2/life-narrative-data-career.js",
+   "chapters": [
+    "timeline_career_01"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국의 인연 기운은 아내·연인을 뜻하는 기운(30%), 배우자 자리는 배우고 기대는 힘(인성)이에요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_love_14"
+   ],
+   "n": 1
+  },
+  {
+   "s": "자동차로 치면 엔진의 힘은 나를 돕는 힘 22%로 힘이 여린 편이에요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-self.js",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 나를 뜻하는 글자(일간) 丙(병화) · 내 힘 약한 편(신약, 나를 돕는 힘 22%).",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "표현의 기운(식상)과 재성이 모두 높아서 식상이 재성으로 이어지는 흐름(재주→수입)으로 풀었어요.",
+   "flags": [
+    "용어 많음(4)"
+   ],
+   "part": "why",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_17"
+   ],
+   "n": 1
+  },
+  {
+   "s": "재능의 기운(식상)이 30% 이상이고 돈의 기운(재성)이 이어 받는 식상생재 구조예요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "why",
+   "src": "report/v2/life-narrative-data-self.js",
+   "chapters": [
+    "timeline_self_26"
+   ],
+   "n": 1
+  },
+  {
+   "s": "내 사주에서는 식상 39% · 재성 30% · 관성 9%.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "basis",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_self_32"
+   ],
+   "n": 1
+  },
+  {
+   "s": "표현·재주의 식상이 30% 이상이고 결과·돈의 재성이 이어 받는 식상생재 구조예요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "why",
+   "src": "report/v2/life-narrative-data.js",
+   "chapters": [
+    "timeline_wealth_02"
+   ],
+   "n": 1
+  },
+  {
+   "s": "돈을 다루는 힘(재성)이 30%, 내 뜻을 지키는 힘(비겁)이 17%, 표현하는 힘(식상)이 39%예요.",
+   "flags": [
+    "용어 많음(3)"
+   ],
+   "part": "body",
+   "src": "(조합 문장)",
+   "chapters": [
+    "timeline_wealth_03"
+   ],
+   "n": 1
+  },
+  {
+   "s": "원국에서는 움직이는 돈(편재)이 16%, 그 돈을 감당하는 나를 돕는 힘이 22%예요.",
+   "flags": [
+    "용어로 시작"
+   ],
+   "part": "body",
+   "src": "report/v2/premium-depth-data-wealth.js",
+   "chapters": [
+    "timeline_wealth_06"
+   ],
+   "n": 1
+  },
+  {
+   "s": "무료로 해 준 작업, 기분에 계산한 술값, 친구 가게에 홍보해 주겠다며 쓴 비용 같은 것들이 쌓여 있어요.",
+   "flags": [
+    "내부 설명"
+   ],
+   "part": "body",
+   "src": "report/v2/life-narrative-data-wealth2.js",
+   "chapters": [
+    "timeline_wealth_09"
+   ],
+   "n": 1
+  }
+ ],
+ "byPart": {
+  "head": {
+   "n": 1200,
+   "chars": 20256,
+   "flags": {}
+  },
+  "hook": {
+   "n": 2131,
+   "chars": 72777,
+   "flags": {}
+  },
+  "chart": {
+   "n": 5878,
+   "chars": 159384,
+   "flags": {
+    "용어로 시작": 164,
+    "용어 많음": 284,
+    "추상": 120,
+    "긴 문장": 120,
+    "내부 설명": 12
+   }
+  },
+  "body": {
+   "n": 24047,
+   "chars": 910362,
+   "flags": {
+    "용어로 시작": 28,
+    "내부 설명": 42,
+    "용어 많음": 12,
+    "추상": 5
+   }
+  },
+  "why": {
+   "n": 10822,
+   "chars": 401269,
+   "flags": {
+    "용어로 시작": 45,
+    "용어 많음": 83,
+    "추상": 10,
+    "내부 설명": 4
+   }
+  },
+  "plus": {
+   "n": 1190,
+   "chars": 32461,
+   "flags": {}
+  },
+  "feature": {
+   "n": 768,
+   "chars": 11808,
+   "flags": {
+    "용어로 시작": 12,
+    "용어 많음": 12
+   }
+  },
+  "periods": {
+   "n": 7481,
+   "chars": 203174,
+   "flags": {}
+  },
+  "depth": {
+   "n": 7238,
+   "chars": 245560,
+   "flags": {
+    "내부 설명": 22,
+    "추상": 3,
+    "용어로 시작": 2
+   }
+  },
+  "insight": {
+   "n": 2305,
+   "chars": 68842,
+   "flags": {
+    "용어로 시작": 3
+   }
+  },
+  "basis": {
+   "n": 345,
+   "chars": 12445,
+   "flags": {
+    "용어 많음": 24
+   }
+  }
+ },
+ "bySrc": {
+  "(조합 문장)": {
+   "n": 106,
+   "flags": {
+    "용어로 시작": 55,
+    "용어 많음": 80,
+    "추상": 4,
+    "내부 설명": 3
+   }
+  },
+  "editorial/rebuild-20261022/self-14.mjs": {
+   "n": 1,
+   "flags": {
+    "용어로 시작": 1,
+    "용어 많음": 1
+   }
+  },
+  "report/v2/life-narrative-data.js": {
+   "n": 3,
+   "flags": {
+    "용어로 시작": 1,
+    "용어 많음": 3
+   }
+  },
+  "editorial/rebuild-20261022/self-04.mjs": {
+   "n": 1,
+   "flags": {
+    "용어로 시작": 1,
+    "용어 많음": 1
+   }
+  },
+  "report/v2/reading-text.js": {
+   "n": 10,
+   "flags": {
+    "긴 문장": 1,
+    "용어 많음": 7,
+    "추상": 2
+   }
+  },
+  "report/v2/reading-depth-data-1.js": {
+   "n": 4,
+   "flags": {
+    "내부 설명": 3,
+    "용어로 시작": 1
+   }
+  },
+  "report/v2/everyday-reading.js": {
+   "n": 1,
+   "flags": {
+    "내부 설명": 1
+   }
+  },
+  "report/v2/life-narrative-data-self3.js": {
+   "n": 4,
+   "flags": {
+    "내부 설명": 4
+   }
+  },
+  "report/v2/premium-depth-data-self.js": {
+   "n": 14,
+   "flags": {
+    "내부 설명": 14
+   }
+  },
+  "report/v2/reading-depth-data-4.js": {
+   "n": 1,
+   "flags": {
+    "내부 설명": 1
+   }
+  },
+  "report/v2/reading-depth-data-2.js": {
+   "n": 1,
+   "flags": {
+    "내부 설명": 1
+   }
+  },
+  "report/v2/reading-depth.js": {
+   "n": 1,
+   "flags": {
+    "추상": 1
+   }
+  },
+  "editorial/rebuild-20261022/enrich-20261102.mjs": {
+   "n": 4,
+   "flags": {
+    "내부 설명": 3,
+    "추상": 1
+   }
+  },
+  "report/v2/life-narrative-data-career.js": {
+   "n": 4,
+   "flags": {
+    "용어 많음": 4
+   }
+  },
+  "editorial/rebuild-20261022/health-01-04.mjs": {
+   "n": 3,
+   "flags": {
+    "추상": 3
+   }
+  },
+  "editorial/rebuild-20261022/health-09-10.mjs": {
+   "n": 2,
+   "flags": {
+    "용어로 시작": 2
+   }
+  },
+  "editorial/rebuild-20261022/remedy-05-08.mjs": {
+   "n": 2,
+   "flags": {
+    "용어로 시작": 2
+   }
+  },
+  "report/v2/premium-depth-data-wealth.js": {
+   "n": 12,
+   "flags": {
+    "용어로 시작": 12
+   }
+  },
+  "report/v2/reading-insight-data-4.js": {
+   "n": 3,
+   "flags": {
+    "용어로 시작": 3
+   }
+  },
+  "report/v2/premium-depth-data-love.js": {
+   "n": 1,
+   "flags": {
+    "용어로 시작": 1
+   }
+  },
+  "editorial/rebuild-20261022/self-05.mjs": {
+   "n": 1,
+   "flags": {
+    "내부 설명": 1
+   }
+  },
+  "report/v2/life-narrative-data-self.js": {
+   "n": 1,
+   "flags": {
+    "용어 많음": 1
+   }
+  },
+  "report/v2/life-narrative-data-wealth2.js": {
+   "n": 1,
+   "flags": {
+    "내부 설명": 1
+   }
+  }
+ }
+}

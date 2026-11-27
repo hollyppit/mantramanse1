@@ -147,12 +147,12 @@
     out.push(scene(sec('', cap('이 그릇의 장점과 조심할 점') + '<div class="dp-pc"><div class="dp-pro"><h4>장점</h4><ul>' + P.pros.map(li).join('') + '</ul></div><div class="dp-con"><h4>조심할 점</h4><ul>' + P.cons.map(li).join('') + '</ul></div></div><p class="dp-note">그릇을 잘 쓰는 법: ' + esc(P.tip) + '</p>')));
     out.push(scene(sec('', cap('돈을 다루는 나의 성향 · 일간 ' + st + '(' + el + EL_HJ[el] + ')') + '<p class="lead">' + esc('일간 ' + st + (/[무기계]/.test(st) ? '는 ' : '은 ') + SH[0] + '입니다. ' + SH[1]) + '</p>')));
     // 8) 돈 버는 방식 그래프
-    out.push(scene(sec('', cap('나에게 유리한 돈 버는 방식') + '<p class="dp-lead2">같은 돈도 버는 모양이 다릅니다. 사주의 십성·일간 힘·창고·충·재물 인연을 겹쳐 6가지 방식의 <b>어울림</b>을 점수로 옮겼습니다. 수익을 맞히는 점수가 아니라 "내 구조에 편한 방식"의 상대적 순위입니다.</p><div class="dp-bars">' +
+    out.push(scene(sec('', cap('나에게 유리한 돈 버는 방식') + '<p class="dp-lead2">같은 돈도 버는 모양이 달라요. 사주 속 기운의 짜임·내 힘의 세기·돈을 모아 두는 자리(창고)·부딪히는 글자·재물 인연을 겹쳐 6가지 방식이 얼마나 <b>어울리는지</b> 점수로 옮겼어요. 70점 이상은 잘 맞음, 50점 아래는 힘이 덜 실리는 쪽이에요. 수익을 맞히는 점수가 아니라 "내 구조에 편한 방식"의 순서예요.</p><div class="dp-bars">' +
       ms.map(function (m, i) { return bar((i === 0 ? '★ ' : '') + m.name, m.v, { text: m.v + '점 · ' + band(m.v), color: m.v >= 70 ? '#5FBF9A' : m.v >= 50 ? '#D5B97F' : '#FF9A3C' }); }).join('') + '</div>')));
     var top = ms.slice(0, 2), low = ms[ms.length - 1];
     out.push(scene(sec('', cap('이렇게 벌면 편합니다') + '<div class="dp-pc"><div class="dp-pro" style="grid-column:1/-1"><h4>추천 조합</h4><ul>' + top.map(function (m, i) { return '<li><span>' + (i === 0 ? '주력 · ' : '보조 · ') + esc(m.name) + ' <small>(' + esc(m.sub) + ')</small></span><em>' + esc(m.why) + ' ' + esc(m.warn) + '</em></li>'; }).join('') + '</ul></div></div>' +
-      '<div class="dp-pc"><div class="dp-con" style="grid-column:1/-1"><h4>무리하지 말 것</h4><ul><li><span>' + esc(low.name) + ' <small>(' + esc(low.v + '점') + ')</small></span><em>' + esc('내 구조에서는 가장 힘이 덜 실리는 방식입니다. ' + low.warn) + '</em></li></ul></div></div>' +
-      '<p class="dp-note">원국(그릇)은 고정된 계산 구조이고 대운·세운은 시기 조건입니다. 재성이 들어오는 시기는 재물 주제를 검토하는 전통적 단서이며 자산 증가의 예고가 아닙니다. 실제로 돈을 버는 선택은 가격·납기·회수일을, 지키는 선택은 고정비·부채·비상 지출을 따로 기록해 비교하세요. 운의 흐름은 뒤의 계산표에서 확인합니다.</p>')));
+      '<div class="dp-pc"><div class="dp-con" style="grid-column:1/-1"><h4>무리하지 말 것</h4><ul><li><span>' + esc(low.name) + ' <small>(' + esc(low.v + '점') + ')</small></span><em>' + esc('내 구조에서는 가장 힘이 덜 실리는 방식이에요. ' + low.warn) + '</em></li></ul></div></div>' +
+      '<p class="dp-note">타고난 사주(그릇)는 바뀌지 않는 바탕이고, 10년 운·한 해 운은 그때의 조건이에요. 돈 기운(재성)이 들어오는 때는 재물을 점검해 볼 때라는 뜻이지 돈이 는다는 예고는 아니에요. 버는 선택은 가격·납기·회수일(돈 받는 날)을, 지키는 선택은 고정비·부채·비상 지출을 따로 적어 견줘 보세요. 운의 흐름은 뒤의 표에서 볼 수 있어요.</p>')));
     return { title: '재물 그릇 · 돈 버는 방식', sub: BW[0] + ' · ' + top[0].name, scenes: out, vessel: bk, power: pw, flow: fl, route: rt };
   };
   R.DeepWealth = { profile: profile, powerOf: powerOf, flowOf: flowOf, routeOf: routeOf, storage: storage, POWER: POWER, BOWLS: BOWLS, ROUTE: ROUTE, ROLE_TXT: ROLE_TXT, STEM_HABIT: STEM_HABIT, modes: modes, gauges: gauges };

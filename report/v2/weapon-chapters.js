@@ -233,7 +233,7 @@
       // 2판(2026-11-26): 주무기 십성 g × 넉넉한(20% 이상) 직업 십성 k 조합 문장 — 다른 묶음이 없으면 같은 묶음, 그것도 없으면 '모두 적음'
       var rich = [3, 1, 2].filter(function (k) { return k !== g && G[k] >= 20; }).sort(function (a, b) { return G[b] - G[a]; });
       var ck = rich.length ? g + '-' + rich[0] : (G[g] >= 20 && C2.combo[g + '-' + g]) ? g + '-' + g : null;
-      body += '<h4>' + esc('주무기와 직업 십성의 결합') + '</h4><p>' + esc(fill(d.career.mixLine, { g3: G[3], g1: G[1], g2: G[2] }) + ' ' + (ck && C2.combo[ck] ? C2.combo[ck] : C2.comboNone)) + '</p>';
+      body += '<h4>' + esc('주무기와 일에 쓰는 세 가지 힘') + '</h4><p>' + esc(fill(d.career.mixLine, { g3: G[3], g1: G[1], g2: G[2] }) + ' ' + (ck && C2.combo[ck] ? C2.combo[ck] : C2.comboNone)) + '</p>';
     }
     // 기존 직업 분석(엔진 careerProfile)과 맞춰 보기: 일하는 방식 축 · 앞선 직업 분야 · 업무 환경 — 서로 다르면 억지로 맞추지 않고 둘 다 살리는 자리를 제안
     if (P && P.workStyle) {
@@ -327,7 +327,7 @@
     var LGm = root.MantraLuckGrade, lvl = scope === 'wolun' ? 'wolun' : 'seun', dk = { wealth: 'wealth', love: 'love', career: 'career' }[topic], favName = '그 시기 전체 흐름 등급';
     if (dk && scope !== 'daeun' && LGm && LGm.metric && B.M.evaluateDomainLuck) {
       var used = 0; G.rows = G.rows.map(function (r) { if (!r || !r.src) return r; var dd = null; try { dd = B.M.evaluateDomainLuck(B.ch, r.src, lvl); } catch (e) { dd = null; } var o = dd && dd[dk]; if (!o || !Number.isFinite(o.score)) return r; used++; var gg = LGm.metric(dk, o.score), c = {}; for (var k in r) c[k] = r[k]; c.favor = { k: gg.k, n: gg.n }; return c; });
-      if (used) favName = { wealth: '재물 지수 등급', love: '인연 지수 등급', career: '직업 지수 등급' }[dk] + '(이 장 위 시기 그래프와 같은 엔진 지수)';
+      if (used) favName = { wealth: '재물 지수 등급', love: '인연 지수 등급', career: '직업 지수 등급' }[dk] + '(이 장 위 시기 그래프와 같은 점수)';
     }
     var d = DD(), g = d.graph, w = ws[0], strong = WD().el[w.el].strengths.slice(0, 2).join('·');
     var from = scope === 'daeun' || scope === 'seun' ? Math.max(0, G.nowIdx) : 0;   // 요약은 지금부터 앞쪽만(그래프는 평생 전체·세운은 지난 10년까지)
@@ -341,11 +341,15 @@
     if (both.length) lines.push(fill(T.both, { list: lim(both) }));
     if (over.length && !allOver) lines.push(fill(T.over, { list: lim(over) }));
     if (low.length) lines.push(fill(T.low, { list: lim(low) }));
-    var leg = '선 = 주무기 발현도(' + EL_K[w.el] + ' · ' + WD().el[w.el].title + ')' + (use.favor ? ' · 아래 띠 = ' + favName + '(초록 좋음·회색 무난·주황 조심)' : '') + ' · 점 색 = 그 시기 천간의 오행 · 두 값은 합치지 않아요';
-    return sec(fill(g.cap[scope], { t: TOPIC_K[topic] }), esc(fill(T.lead[scope] || T.lead.seun, { s: strong })), svgChart(G, use) + '<p class="dp-mi">' + esc(leg) + '</p><ul class="dp-ul">' + lines.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>', '');
+    var leg = '선 = 주무기 발현도(' + EL_K[w.el] + ' · ' + WD().el[w.el].title + ')' + (use.favor ? ' · 아래 띠 = ' + favName + '(초록 좋음·회색 무난·주황 조심)' : '') + ' · 점 색 = 그 시기에 들어오는 기운의 색 · 선과 띠는 따로 매긴 값이라 더하지 않아요';
+    return sec(fill(g.cap[scope], { t: TOPIC_K[topic] }), esc(fill(T.lead[scope] || T.lead.seun, { s: strong })), svgChart(G, use) + '<p class="dp-mi dp-key">' + esc(leg) + '</p><ul class="dp-ul">' + lines.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>', '');
   }
   var BUILD = { self: selfBlock, wealth: wealthBlock, career: careerBlock, love: loveBlock, remedy: remedyBlock };
 
+  // 2026-11-27 고객용 쉬운 말: 공용 판정 모듈(만세력은 명리 용어 그대로)이 준 문장을 이 블록에서만 풀어 쓴다
+  function plainWp(h) {
+    return h == null ? h : String(h).replace(/십신의 구조·실제 작용/g, '역할(십신)의 짜임과 실제 쓰임').replace(/([子丑寅卯辰巳午未申酉戌亥]{2})충(?=\s|$|[ ,.·—)<])/g, '$1충(두 글자가 부딪힘)');
+  }
   function has(custom) { return /^wp:/.test(String(custom || '')); }
   function render(part, H, id) {
     if (!API.on) return null;
@@ -353,7 +357,7 @@
     var B = base(H); if (!B) return null;
     var html = null; try { html = row.view === 'graph' ? graphBlock(B, row.topic, row.scope, row.use) : BUILD[row.topic](B, row.use); } catch (e) { html = null; }
     if (html && BANNED.test(html.replace(/<[^>]+>/g, ' '))) return null;
-    return html;
+    return plainWp(html);
   }
   // 관리자 미리보기·검사용: 장 ID 없이 주제·설정으로 바로 그린다
   // 관리자 미리보기: 설정 줄 하나(형태·범위 포함)로 그린다

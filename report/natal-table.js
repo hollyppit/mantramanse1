@@ -34,7 +34,7 @@
       row(tip('12신살'), function (p, c) { return '<span class="tq-nt-t">' + esc(c && c.sinsal12 || '—') + '</span>'; }) +
       row(tip('신살'), function (p, c, k) { var names = [], L = ((ch.sinsal && ch.sinsal[k]) || []).map(function (x) { names.push(x.name); return '<i class="tq-nt-ss ' + (x.good ? 'g' : 'b') + '" title="' + esc(x.basis || '') + '">' + esc(x.name) + '</i>'; }); if (c && c.gongmang && names.indexOf('공망') < 0) L.unshift('<i class="tq-nt-ss gm">공망</i>'); return L.join('') || '<span class="tq-nt-s">—</span>'; }) +
       '</div>' + (ch.hourKnown === false ? '<p class="tq-sub">출생 시각을 몰라 시주(時柱) 없이 계산했습니다. 일간·일주는 날짜 기준이라 그대로입니다.</p>' : '') +
-      '<p class="tq-sub">글자 색은 다섯 가지 기운(나무·불·흙·쇠·물)이에요. 아래 줄의 ' + tip('지장간') + '은 글자 속에 숨은 기운, ' + tip('12운성') + '은 그 자리에서 내 힘이 어느 단계인지예요. 초록 표시는 도움이 되는 신호, 붉은 표시는 살펴볼 신호예요(좋고 나쁨을 가르는 표시는 아니에요). 용어를 누르면 뜻이 열려요.</p>';
+      '<p class="tq-sub">글자 색은 다섯 가지 기운(나무·불·흙·쇠·물)이에요. 아래 줄의 ' + tip('지장간') + '은 글자 속에 숨은 기운, ' + tip('12운성') + '은 그 자리에서 내 힘이 어느 단계인지예요. ' + tip('십성') + ' 줄의 이름은 그 글자가 나에게 하는 역할이에요. 비견·겁재는 나와 같은 힘, 식신·상관은 표현·재능, 편재·정재는 돈·결과, 편관·정관은 책임·규칙, 편인·정인은 배움·도움이에요. 초록 표시는 도움이 되는 신호, 붉은 표시는 살펴볼 신호예요(좋고 나쁨을 가르는 표시는 아니에요). 용어를 누르면 뜻이 열려요.</p>';
   }
   var api = { html: html, TERMS: TERMS, EL_COL: EL_COL };
   G.MantraNatal = api;

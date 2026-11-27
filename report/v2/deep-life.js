@@ -36,7 +36,7 @@
   var CAT_HJ = { creative: '創', planning: '策', research: '究', education: '敎', business: '商', sales: '販', management: '營', organization: '統', technical: '技', communication: '話', asset: '財', public: '公' };
   S.deep_jobs = function (H) {
     var M = H.M, cp = M.careerProfile(H.ch), cats = cp.categories, top = cats.slice(0, 5), out = [];
-    out.push(scene(sec('', cap('직업 후보 · 나에게 맞는 일의 방향') + '<p class="lead">' + esc(who(H)) + '의 사주에서 <b>잘 쓰이는 기운</b>과 <b>일하는 방식(성향)</b>을 겹쳐 12가지 직군의 적합도를 계산했습니다. 점수가 높다고 그 일을 해야 하는 건 아니고, "힘이 덜 드는 방향"을 보여 주는 지도입니다.</p>' +
+    out.push(scene(sec('', cap('직업 후보 · 나에게 맞는 일의 방향') + '<p class="lead">' + esc(who(H)) + '의 사주에서 <b>잘 쓰이는 기운</b>과 <b>일하는 방식(성향)</b>을 겹쳐 12가지 직군이 얼마나 잘 맞는지 견줘 봤어요. <b>적합도</b>는 100에 가까울수록 힘이 덜 드는 일, <b>부담도</b>는 높을수록 기운을 많이 쓰는 일이에요. 점수가 높다고 그 일을 해야 하는 건 아니고, "힘이 덜 드는 방향"을 보여 주는 지도예요.</p>' +
       '<div class="dp-bars">' + cats.slice(0, 8).map(function (c, i) { return bar(c.name, c.score, { text: c.score + '점', color: i < 3 ? '#D5B97F' : '' }); }).join('') + '</div>')));
     top.forEach(function (c, i) {
       var ex = (c.examples || []).slice(0, 6), st = plainCareer((c.strengths || [])[0] || ''), ca = plainCareer((c.cautions || [])[0] || '');
@@ -44,8 +44,8 @@
         '<div class="dp-tags">' + ex.map(function (x) { return chip(x); }).join('') + '</div>' + (st ? '<p class="dp-pl">＋ ' + esc(st) + '</p>' : '') + (ca ? '<p class="dp-mi">－ ' + esc(ca) + '</p>' : ''))));
     });
     var ws = cp.workStyle, ax = ['independence', 'stability', 'creation', 'interaction', 'execution', 'horizon'].filter(function (k) { return ws[k]; }).map(function (k) { var a = ws[k]; return '<div class="dp-axis"><span>' + esc(a.left) + '</span><div class="dp-track"><i style="left:' + clamp(a.value, 4, 96) + '%"></i></div><span>' + esc(a.right) + '</span></div>'; }).join('');
-    out.push(scene(sec('', cap('일하는 방식의 성향') + '<p class="dp-lead2">점이 어느 쪽에 가까운지로 "어떤 환경에서 힘이 나는지"를 봅니다.</p>' + ax + (cp.envSummary && cp.envSummary.text ? '<p class="dp-note">' + esc(cp.envSummary.text) + '</p>' : ''))));
-    var avoid = cp.byBurden.slice(0, 3); out.push(scene(sec('', cap('솔직하게, 힘들 수 있는 일') + '<div class="dp-pc"><div class="dp-con" style="grid-column:1/-1"><h4>부담이 큰 직군·환경</h4><ul>' + avoid.map(function (c) { return '<li><span>' + esc(c.name) + ' (부담 ' + c.burden + ')</span><em>' + esc((c.cautions || [])[0] || '기운의 소모가 큰 편입니다') + '</em></li>'; }).join('') + (cp.burdenEnvs || []).slice(0, 2).map(function (e) { return '<li><span>' + esc(e.name) + '</span><em>' + esc((e.why || [])[0] || e.desc) + '</em></li>'; }).join('') + '</ul></div></div>')));
+    out.push(scene(sec('', cap('일하는 방식의 성향') + '<p class="dp-lead2">점이 어느 쪽에 가까운지로 "어떤 환경에서 힘이 나는지"를 봐요. 가운데에 가까우면 양쪽 다 무난한 편이에요.</p>' + ax + (cp.envSummary && cp.envSummary.text ? '<p class="dp-note">' + esc(cp.envSummary.text) + '</p>' : ''))));
+    var avoid = cp.byBurden.slice(0, 3); out.push(scene(sec('', cap('솔직하게, 힘들 수 있는 일') + '<div class="dp-pc"><div class="dp-con" style="grid-column:1/-1"><h4>부담이 큰 직군·환경</h4><ul>' + avoid.map(function (c) { return '<li><span>' + esc(c.name) + ' (부담 ' + c.burden + ')</span><em>' + esc((c.cautions || [])[0] || '기운의 소모가 큰 편이에요') + '</em></li>'; }).join('') + (cp.burdenEnvs || []).slice(0, 2).map(function (e) { return '<li><span>' + esc(e.name) + '</span><em>' + esc((e.why || [])[0] || e.desc) + '</em></li>'; }).join('') + '</ul></div></div>')));
     return { title: '직업 후보 지도', sub: '나에게 맞는 일의 방향 · 부담이 큰 일', scenes: out };
   };
 
@@ -206,7 +206,7 @@
       return '<div class="fd-col' + (k[0] === 'day' ? ' is-day' : '') + (p ? '' : ' is-none') + '"><p>' + k[1] + '</p>' + cell(h.charAt(0), k[0] === 'day' ? '일간(나)' : p && p.stemTG) + cell(h.charAt(1), p && p.branchTG) + '<em>' + esc(p ? (ts[k[0]] || '') : '시각 미상') + '</em></div>';
     }).join('');
     var hid = (d.hidden || []).map(function (x) { return x.stem + '(' + x.tg + ')'; }).join(' · '), stars = (sd.specialStars || []).filter(function (x) { return x.pillar === 'day'; }).map(function (x) { return x.name; });
-    var dm = sd.dayMaster || {}, facts = [['일간', dm.stem ? dm.stem + '(' + dm.hanja + ') · ' + dm.el + '(' + EL_HJ[dm.el] + ')' : ''], ['일지', d.ko ? d.ko.charAt(1) + ' · ' + (d.branchTG || '') : ''], ['지장간', hid], ['12운성', ts.day || ''], ['신살', [ss.day].concat(stars).filter(function (x, i, a) { return x && a.indexOf(x) === i; }).join(' · ')]].filter(function (x) { return x[1]; });
+    var dm = sd.dayMaster || {}, facts = [['나를 뜻하는 글자(일간)', dm.stem ? dm.stem + '(' + dm.hanja + ') · ' + dm.el + '(' + EL_HJ[dm.el] + ')' : ''], ['내가 앉은 자리(일지)', d.ko ? d.ko.charAt(1) + ' · ' + (d.branchTG || '') : ''], ['그 안에 숨은 기운(지장간)', hid], ['그 자리의 힘 단계(12운성)', ts.day || ''], ['붙은 별(신살)', [ss.day].concat(stars).filter(function (x, i, a) { return x && a.indexOf(x) === i; }).join(' · ')]].filter(function (x) { return x[1]; });
     return '<div class="fd-card"><p class="fd-k">나의 일주 · DAY PILLAR</p><h3 class="fd-ilju"><b>' + esc(hz) + '</b><span>' + esc((d.ko || '') + '일주') + '</span></h3><p class="fd-sub">' + esc([info.animal, info.naeum].filter(Boolean).join(' · ')) + '</p>' +
       '<div class="fd-grid">' + cols + '</div><dl class="fd-facts">' + facts.map(function (x) { return '<div><dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd></div>'; }).join('') + '</dl>' + (line ? '<p class="fd-line">' + esc(line) + '</p>' : '') + '</div>';
   }
