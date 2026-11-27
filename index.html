@@ -7186,7 +7186,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const y = ch.yong;
     const order = ['용신', '희신', '한신', '구신', '기신'];
     const elOf = r => +Object.keys(y.roles).find(e => y.roles[e] === r);
-    return `${renderYongEasy()}${spYongCard()}${unifiedCard(ch)}
+    return `${renderYongEasy()}${unifiedCard(ch)}
     <section class="card">
       <div class="card-h"><h2>${term('용신')} · 희신 · 기신</h2>${seg('school', [['auto', '자동']].concat(Object.entries(M.SCHOOLS).map(([k, l]) => [k, l.split(' ')[0]])), ch.schoolAuto ? 'auto' : ch.school)}</div>
       ${ch.schoolAuto ? `<p class="small muted" style="margin:-4px 0 10px">자동 — 통합 판단 결과입니다: <b>${esc(ch.unified ? ch.unified.headline : '')}</b>. 근거는 위 '통합 판단'에 있습니다.</p>` : ''}
@@ -8680,7 +8680,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${chartLegend()}
       <div class="legend sj-leg" style="margin:4px 0 2px"><span><i class="sw sj-sw"></i><b style="color:var(--samjae)">빗금 띠·들/눌/날 = 삼재 3년</b> · 띠 기준 전통 참고 보조 지표(막대 색·점수와 별개)</span><span><i class="sw" style="background:none;border:1px solid var(--ink-3);border-radius:4px"></i>테두리 = 그 10년의 대운(색은 대운의 대표 오행)</span></div>
       ${elLegendBar()}<div class="chart" data-chart="life"></div>
-      ${wpBlock('luck', { curY, wolY: Y, part: 'seun' })}
+      ${wpBlock('luck', Object.assign({ curY, wolY: Y, part: 'seun' }, sel.kind === 'daeun' && ch.daeun.list[sel.i] ? { seunFrom: ch.daeun.list[sel.i].startYear, seunYears: 10, seunDaeun: sel.i, seunTitle: `${ch.daeun.list[sel.i].startAge}세 대운 ${M.gzName(ch.daeun.list[sel.i])} 안의 세운 (${ch.daeun.list[sel.i].startYear}~${ch.daeun.list[sel.i].startYear + 9}년)` } : { seunFrom: curY - 10, seunYears: 20 }))}
       ${samjaeBox(sel.kind === 'seun' ? sel.Y : curY)}
       ${yearSummary(curY)}
       ${lcSeunHTML(sel.kind === 'seun' ? sel.Y : curY)}
@@ -10194,6 +10194,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${warn.length ? `<ul class="pos-ul small">${warn.map(w => `<li class="sp-b">${esc(w)}</li>`).join('')}</ul>` : (isMove && mv ? '<p class="small sp-g">입력하신 방향은 올해 삼살·태세·세파·오황에 걸리지 않습니다.</p>' : '')}${bld}
       <p class="note">위 내용은 날짜 점수에 더해지지 않는 참고 정보입니다. 추천 날짜는 사주와의 맞음 기준 그대로이며, 풍수상 조심할 점이 있으면 날짜·방향 중 하나를 조정하는 식으로 활용하세요. 계약·등기·안전 점검은 현장과 전문가 확인이 우선입니다.</p></section>`;
   }
+  // 2026-11-27 사용자 요청: 용신 탭 '용신 방향과 건물 풍수는 다릅니다' 카드 제거(집 정보를 입력한 사람에게도 안 보임). 함수는 남겨 두고 부르지 않는다
   function spYongCard() {
     if (!spOn()) return '';
     const F = window.MantraFengshui, FD = window.MantraFengshuiData, ch = S.ch, y = ch.yong, P = FD.PALACE;
