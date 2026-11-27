@@ -86,13 +86,15 @@
     LS.forEach(function (l) { s += arc(l, true); }); LB.forEach(function (l) { s += arc(l, false); });
     return s + '</svg>';
   }
-  function pairHTML(M, A, B) {
+  var wrapOpen = function (id, note, opt) { return opt && opt.dark ? '<div class="nc-card nc-dark lc-card" id="' + id + '"><div class="card-h nc-hd"><h3>명식 나란히 보기</h3><span class="note">' + note + '</span></div>' : '<section class="card nc-card" id="' + id + '"><div class="card-h"><h2>명식 나란히 보기</h2><span class="note">' + note + '</span></div>'; };
+  var wrapClose = function (opt) { return opt && opt.dark ? '</div>' : '</section>'; };
+  function pairHTML(M, A, B, opt) {
     if (!A || !B || !A.ch || !B.ch) return '';
     var R = relsBetween(M, A.ch, B.ch);
     var cA = elCount(M, A.ch), cB = elCount(M, B.ch), mx = Math.max.apply(null, cA.concat(cB, [1]));
     var bar = function (nm, n) {
       var tot = n.reduce(function (x, y) { return x + y; }, 0) || 1;
-      return '<div class="nc-el-r"><b>' + esc(nm) + '</b><span class="nc-el-b">' + n.map(function (v, e) { return v ? '<i class="e-' + EV[e] + '" style="width:' + (v / tot * 100).toFixed(1) + '%">' + M.EL[e] + v + '</i>' : ''; }).join('') + '</span></div>';
+      return '<div class="nc-el-r"><b>' + esc(nm) + '</b><span class="nc-el-b">' + n.map(function (v, e) { return v ? '<i style="background:var(--' + EV[e] + ');color:var(--' + EV[e] + '-on);width:' + (v / tot * 100).toFixed(1) + '%">' + M.EL[e] + v + '</i>' : ''; }).join('') + '</span></div>';
     };
     var dA = A.ch.pillars.day.s, dB = B.ch.pillars.day.s;
     var dayTxt = function (s) { return M.STEM[s] + M.EL[M.stemEl(s)]; };
@@ -101,19 +103,18 @@
     var others = R.filter(function (r) { return r.tone === 'other'; });
     var relLi = function (r) { return '<li><span class="nc-dot nc-' + r.tone + 'b"></span>' + esc(A.name) + ' ' + r.a.map(function (k) { return posTxt(k, r.kind); }).join('·') + ' ↔ ' + esc(B.name) + ' ' + r.b.map(function (k) { return posTxt(k, r.kind); }).join('·') + ' · <b>' + esc(r.name) + '</b> <span class="muted">(' + esc(r.type) + ')</span></li>'; };
     var seenO = {}, oTxt = others.filter(function (r) { var k = r.name; if (seenO[k]) return false; seenO[k] = 1; return true; }).map(function (r) { return esc(r.name); });
-    return '<section class="card nc-card" id="ncPairCard">'
-      + '<div class="card-h"><h2>명식 나란히 보기</h2><span class="note">각자 일간 기준 십성 · 선은 두 사람 사이 작용</span></div>'
+    return wrapOpen('ncPairCard', '각자 일간 기준 십성 · 선은 두 사람 사이 작용', opt)
       + '<div class="nc-scroll">' + pairSvg(M, A, B, R) + '</div>'
       + '<div class="nc-keys small muted"><span><i class="nc-k nc-goodb"></i>합(천간합·육합·삼합·반합·방합)</span><span><i class="nc-k nc-badb"></i>충·천간충</span><span><i class="nc-k nc-badb nc-kd"></i>형·원진</span><span>일주는 굵은 테두리</span></div>'
       + (shown.length ? '<ul class="nc-rels small">' + shown.map(relLi).join('') + '</ul>' : '<p class="small muted">두 원국 사이에 합·충·형·원진으로 이어지는 글자가 없습니다.</p>')
       + (oTxt.length ? '<p class="small muted">그 밖의 작용(선 없음): ' + oTxt.join(', ') + '</p>' : '')
       + '<h3 class="cp-h3">오행 글자 수</h3><div class="nc-el">' + bar(A.name, cA) + bar(B.name, cB) + '</div>'
       + '<h3 class="cp-h3">상대 일간 기준 십성</h3><ul class="pr-list nc-tgl">' + tgLine(A.name, dA, B.name, dB) + tgLine(B.name, dB, A.name, dA) + '</ul>'
-      + '</section>';
+      + wrapClose(opt);
   }
 
   // ───────── 3~6명 ─────────
-  var G = { focus: -1, mem: null, M: null };
+  var G = { focus: -1, mem: null, M: null, opt: null };
   function groupMarks(M, mem, i) {
     var mk = {}, list = [];
     var add = function (p, k, kind, tone) { var key = p + '.' + k + '.' + (kind === 'stem' ? 's' : 'b'); mk[key] = mk[key] === tone || !mk[key] ? tone : 'both'; };
@@ -127,14 +128,14 @@
     });
     return { mk: mk, list: list };
   }
-  function groupHTML(M, mem) {
+  function groupHTML(M, mem, opt) {
     if (!mem || mem.length < 2) return '';
-    G.M = M; G.mem = mem; if (!(G.focus >= -1 && G.focus < mem.length)) G.focus = -1;
+    G.M = M; G.mem = mem; G.opt = opt || null; if (!(G.focus >= -1 && G.focus < mem.length)) G.focus = -1;
     var F = G.focus >= 0 ? groupMarks(M, mem, G.focus) : { mk: {}, list: [] };
     var cell = function (i, c) {
       if (c.none) return '<td class="nc-gc nc-gnone">시 모름</td>';
       var m = function (part) { var t = F.mk[i + '.' + c.k + '.' + part]; return t ? ' nc-hl-' + t : ''; };
-      return '<td class="nc-gc' + (c.k === 'day' ? ' nc-gday' : '') + '"><span class="nc-gg e-' + EV[c.se] + m('s') + '" title="' + esc(c.stg) + '">' + esc(c.sc) + '</span><span class="nc-gg e-' + EV[c.be] + m('b') + '" title="' + esc(c.btg) + '">' + esc(c.bc) + '</span></td>';
+      return '<td class="nc-gc' + (c.k === 'day' ? ' nc-gday' : '') + '"><span class="nc-gg' + m('s') + '" style="background:var(--' + EV[c.se] + ');color:var(--' + EV[c.se] + '-on)" title="' + esc(c.stg) + '">' + esc(c.sc) + '</span><span class="nc-gg' + m('b') + '" style="background:var(--' + EV[c.be] + ');color:var(--' + EV[c.be] + '-on)" title="' + esc(c.btg) + '">' + esc(c.bc) + '</span></td>';
     };
     var rows = mem.map(function (p, i) {
       return '<tr class="' + (G.focus === i ? 'on' : '') + '"><th scope="row"><button type="button" class="nc-nb" data-ncfocus="' + i + '" aria-pressed="' + (G.focus === i) + '">' + esc(p.name) + '</button></th>' + cells(M, p.ch).map(function (c) { return cell(i, c); }).join('') + '</tr>';
@@ -152,13 +153,12 @@
       }).join('') + '</div>'
         : '<p class="small muted">' + nm(G.focus) + '와(과) 다른 사람들 사이에 합·충·형·원진으로 이어지는 글자가 없습니다.</p>';
     }
-    return '<section class="card nc-card" id="ncGroupCard">'
-      + '<div class="card-h"><h2>명식 나란히 보기</h2><span class="note">' + mem.length + '명 · 일주 굵게</span></div>'
+    return wrapOpen('ncGroupCard', mem.length + '명 · 일주 굵게', opt)
       + '<p class="small muted nc-hint">이름을 누르면 그 사람과 다른 사람들 사이의 합(파랑)·충·형·원진(빨강) 글자에 표시가 켜집니다. 한 번 더 누르면 끕니다. 글자에 손을 올리면 그 사람 일간 기준 십성이 보입니다.</p>'
       + '<div class="nc-tw"><table class="nc-gt"><thead><tr><th scope="col">이름</th>' + POS.map(function (k) { return '<th scope="col">' + POS_L[k] + '주</th>'; }).join('') + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
-      + listH + '</section>';
+      + listH + wrapClose(opt);
   }
-  function refreshGroup() { if (typeof document === 'undefined' || !G.mem) return; var el = document.getElementById('ncGroupCard'); if (el) el.outerHTML = groupHTML(G.M, G.mem); }
+  function refreshGroup() { if (typeof document === 'undefined' || !G.mem) return; var el = document.getElementById('ncGroupCard'); if (el) el.outerHTML = groupHTML(G.M, G.mem, G.opt); }
 
   if (typeof document !== 'undefined') {
     document.addEventListener('click', function (ev) {
@@ -179,6 +179,8 @@
       + '.nc-gg{display:inline-block;min-width:1.7em;margin:1px;padding:3px 2px;border-radius:7px;background:var(--c);color:var(--on);font-family:var(--f-display);font-size:1.15rem;font-weight:800;line-height:1.2}.nc-gday .nc-gg{font-weight:900}'
       + '.nc-hl-good{box-shadow:0 0 0 3px var(--accent)}.nc-hl-bad{box-shadow:0 0 0 3px var(--bad)}.nc-hl-both{box-shadow:0 0 0 3px var(--bad),0 0 0 6px var(--accent)}'
       + '.nc-by{display:grid;gap:6px;margin-top:6px}.nc-det{border:1px solid var(--line);border-radius:10px;padding:6px 10px;background:var(--surface)}.nc-det summary{cursor:pointer}.nc-det .nc-rels{margin-top:6px}'
+      + '.nc-dark{--surface:#0D1120;--surface-2:rgba(255,255,255,.07);--ink-2:#BDB8AB;--ink-3:#8A8678;--line:rgba(205,178,122,.22);--accent:#7FA2FF;--bad:#FF8A6E;--wood-on:#fff;--fire-on:#fff;--earth-on:#1d1606;--metal-on:#141821;--water-on:#fff;--f-display:var(--f-serif,serif)}'
+      + '.nc-dark .nc-hd{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 10px;margin-bottom:6px}.nc-dark .nc-hd h3{margin:0}.nc-dark .note,.nc-dark .muted{color:var(--ink-3)}.nc-dark .small{font-size:.84rem}.nc-dark .cp-h3{margin:14px 0 6px;font-size:.95rem}.nc-dark .pr-list{margin:6px 0;padding-left:1.1em}.nc-dark .nc-c{stroke:rgba(255,255,255,.08)}.nc-dark .nc-c.nc-day{stroke:var(--gold,#D5B97F)}.nc-dark .nc-gc.nc-gday{box-shadow:inset 0 0 0 2px var(--gold,#D5B97F)}.nc-dark .nc-gt tbody th{background:var(--surface)}.nc-dark .nc-nb{background:rgba(255,255,255,.04)}.nc-dark .nc-det{background:rgba(255,255,255,.03)}'
       + '.nc-tgl li{line-height:1.7}.nc-hint{margin:0 0 4px}';
     (document.head || document.documentElement).appendChild(st);
   }

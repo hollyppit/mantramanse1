@@ -131,16 +131,45 @@
     if (n < 3 || n > 6) { GS.err = '3~6명을 골라 주세요. 지금 ' + n + '명이에요.'; paint(); return; }
     GS.err = ''; GS.busy = true; paint(); viewScript();
     var people = ppl.map(function (x) { return { name: x.name || (x.year + '년생'), role: GS.roles[keyOf(x)] || '', year: x.year, month: x.month, day: x.day, hour: x.hour, minute: x.minute, hourUnknown: !!x.hourUnknown, calendar: x.calendar, leap: !!x.leap, gender: x.gender, lon: x.lon, tz: x.tz }; });
+    var sent = (GS.me ? [{ me: true, name: S.name || '나' }] : []).concat(ppl.map(function (x, k) { return Object.assign({}, x, { name: people[k].name }); }));
     post({ a: 'group', includeMe: GS.me, people: people }).then(function (d) {
       GS.busy = false;
       if (d && d.quota && S.status) S.status.quota = d.quota;
-      if (d && d.ok) { GS.res = d.result; GS.editing = false; GS.more = false; track('love_compat_group_view'); }
+      if (d && d.ok) { GS.res = d.result; GS.inp = sent; GS.editing = false; GS.more = false; track('love_compat_group_view'); }
       else if (d && (d.status === 401 || d.status === 402)) { S.locked = d.locked && d.locked.reason || 'purchase'; }
       else GS.err = (d && (ERR[d.error] || d.message)) || '여러 명 궁합을 보지 못했어요. 잠시 후 다시 시도해 주세요.';
       paint(); if (!GS.editing) scrollTop();
     }).catch(function () { GS.busy = false; GS.err = '연결이 불안정해요. 잠시 후 다시 시도해 주세요.'; paint(); });
   }
   var viewP = null;
+  // 명식 나란히 보기(2026-11-28, /compat-natal.js — 만세력 궁합 탭과 같은 카드, 어두운 화면용 dark): 결과 맨 위. 원국은 서버 chartOf 와 같게 이 기기 엔진으로 계산(합충 판정은 엔진 relationsAmong 그대로)
+  var NC_SRC = '/compat-natal.js?v=20261128-lc', ncP = null;
+  function ncScript() {
+    if (root.MantraNatalCompare || !root.document) return Promise.resolve();
+    return ncP || (ncP = new Promise(function (ok) { var s = root.document.createElement('script'); s.src = NC_SRC; s.onload = function () { ok(); paint(); }; s.onerror = function () { ncP = null; ok(); }; root.document.head.appendChild(s); }));
+  }
+  var NC_KEYS = ['timeMode', 'jasi', 'sinsalBase', 'model', 'school', 'combinationMode', 'climatePalaceMode'];
+  function ncChart(b) {
+    var M = root.Manse; if (!M || !b) return null;
+    var o = { year: +b.year, month: +b.month, day: +b.day, hour: b.hourUnknown || b.hour == null ? null : +b.hour, minute: +b.minute || 0, calendar: b.calendar, leap: !!b.leap, gender: b.gender, lon: b.lon, tz: b.tz };
+    NC_KEYS.forEach(function (k) { if (S.me && S.me[k] !== undefined) o[k] = S.me[k]; });
+    try { return M.compute(o); } catch (e) { return null; }
+  }
+  function ncPair() {
+    if (!S.res || !S.resInp || !S.me) return '';
+    if (!root.MantraNatalCompare) { ncScript(); return ''; }
+    var Rr = S.res.views[S.rel] || S.res.views.lover, A = ncChart(S.me), B = ncChart(S.resInp);
+    if (!A || !B) return '';
+    try { return root.MantraNatalCompare.pairHTML(root.Manse, { name: Rr.names.a, ch: A }, { name: Rr.names.b, ch: B }, { dark: true }); } catch (e) { return ''; }
+  }
+  function ncGroup() {
+    if (!GS.res || !GS.inp) return '';
+    if (!root.MantraNatalCompare) { ncScript(); return ''; }
+    var V = GS.res.views[GS.rel] || GS.res.views.lover, P = (V && V.people) || [], mem = GS.inp.map(function (x) { return { name: x.name, ch: x.me ? ncChart(S.me) : ncChart(x) }; });
+    if (mem.length !== P.length || mem.some(function (m) { return !m.ch; })) return '';
+    P.forEach(function (p, i) { if (p && p.name) mem[i].name = p.name; });   // 이름은 서버 결과와 같게
+    try { return root.MantraNatalCompare.groupHTML(root.Manse, mem, { dark: true }); } catch (e) { return ''; }
+  }
   function viewScript() {
     if (R.LoveGroupView || !root.document) return Promise.resolve();
     return viewP || (viewP = new Promise(function (ok) { var s = root.document.createElement('script'); s.src = VIEW_SRC; s.onload = function () { styleGroup(); ok(); paint(); }; s.onerror = function () { viewP = null; ok(); }; root.document.head.appendChild(s); }));
@@ -166,7 +195,7 @@
   function groupHtml() {
     if (GS.res && !GS.editing) {
       if (!R.LoveGroupView) { viewScript(); return '<p class="lc-muted">결과 화면을 불러오는 중…</p>'; }
-      try { return R.LoveGroupView.html(GS.res, GS.rel, { quota: quotaLine(), moreArrows: GS.more }); } catch (e) { return '<p class="lc-err">결과를 그리지 못했어요. 다시 시도해 주세요.</p>'; }
+      try { return ncGroup() + R.LoveGroupView.html(GS.res, GS.rel, { quota: quotaLine(), moreArrows: GS.more }); } catch (e) { return '<p class="lc-err">결과를 그리지 못했어요. 다시 시도해 주세요.</p>'; }
     }
     return groupPickHtml();
   }
@@ -333,7 +362,7 @@
     if (S.locked) return lockHtml();
     if (groupOn() && S.mode === 'group' && !GS.adding) return modeSeg() + groupHtml();
     if (GS.adding) return '<div class="lc-intro"><p><b>여러 명 궁합에 넣을 사람</b>을 입력해 주세요. 저장만 하고 횟수는 쓰지 않아요.</p></div>' + formHtml();
-    if (S.res && !S.editing) return modeSeg() + resultHtml();
+    if (S.res && !S.editing) return modeSeg() + ncPair() + resultHtml();
     return modeSeg() + '<div class="lc-intro"><p>상대의 생년월일을 넣으면 만세력 궁합과 같은 기준으로 <b>점수·한눈에 정리·서로에게 주는 것·간지 관계·숨은 인연(암합)</b>까지 바로 보여 드려요. 인연운 심화를 보유한 동안 상대를 바꿔 가며 볼 수 있어요.</p>' + quotaLine() + '</div>' + formHtml() + (S.res ? '<p><button type="button" class="btn lc-btn" data-lc="back">지난 결과 다시 보기</button></p>' : '');
   }
   function paint() {
