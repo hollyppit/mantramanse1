@@ -5455,7 +5455,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const ovTag = k => `<span class="ovb ov-${k}">${OVL[k][0]}</span>`;
   const ovBtn = (k, e) => `<button type="button" class="term ovb ov-${k}" data-term="${OVL[k][2]}"${volAttr(e)}>${OVL[k][0]}</button>`;
   const ovTags = (e, btn) => ['volatility', 'defense'].filter(k => e.overlays[k].active).map(k => btn ? ovBtn(k, e) : ovTag(k)).join('');
-  const modeLegend = () => `${sigLegend('보조 표시 · ' + flowRule().replace('색 = ', '').replace('이 시기가 나에게 얼마나 유리한가', '점수 등급'))}<div class="legend"><span>막대 높이 = 흐름 적합도 · 막대 아래 글자 = 그 운의 ${term('십성', '십신')}(천간 기준 · 누르면 지지 십신도)</span><span>${ovTag('volatility')}${ovTag('defense')} ${term('변화 신호')}·${term('부담 신호')} = 막대 테두리와 아래 글자(변·부)</span>${showGhost() ? `<span><i class="sw ghost"></i>흐린 막대·선 = ${term(schoolName(altSchool()))}만 따로 본 값</span>` : ''}</div>`;
+  const modeLegend = () => `${sigLegend('보조 표시 · 등급 = 인생 흐름 점수(65점 이상 좋음 · 45점 미만 조심) · 막대 높이·숫자 = 흐름 적합도')}<div class="legend"><span>막대 높이 = 흐름 적합도 · 막대 아래 글자 = 그 운의 ${term('십성', '십신')}(천간 기준 · 누르면 지지 십신도)</span><span>${ovTag('volatility')}${ovTag('defense')} ${term('변화 신호')}·${term('부담 신호')} = 막대 테두리와 아래 글자(변·부)</span>${showGhost() ? `<span><i class="sw ghost"></i>흐린 막대·선 = ${term(schoolName(altSchool()))}만 따로 본 값</span>` : ''}</div>`;
   // 시진 4단계 실행 등급. 목적마다 맞는 기운(십성 묶음 번호: 0 비겁 1 식상 2 재성 3 관성 4 인성)
   const PURPOSE = { gen: ['일반', null], deal: ['계약', [3, 4]], money: ['돈', [2, 1]], create: ['창작', [1, 4]] };
   const GRADE = { '실행': ['◎', 'g-go'], '활용': ['○', 'g-use'], '주의': ['△', 'g-warn'], '회피': ['×', 'g-avoid'] };
@@ -7451,10 +7451,13 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const sigMetric = (key, v) => SIG[LG.metric(key, v).i];
   function domCol(key, v) { return sigMetric(key, v).c; }
   // 막대 하나·타일 하나의 신호등(현재 선택한 지표 기준)
-  const tileSig = x => { if (isDomain()) { try { return sigMetric(S.metric, domOf(x, x.ev.level)[S.metric].score); } catch (e) { } } return sigFlow(x.ev && x.ev.level === 'seun' && x.combined != null ? x.combined : luckV(x)); };
+  // 2026-11-28 대운·세운·월운 등급(좋음·무난·조심) = 인생 흐름 점수 등급(유료 상세풀이·주무기 그래프 바람과 같은 계산, 65↑ 좋음·45↑ 무난). 막대 높이·숫자는 엔진 흐름 점수 그대로, 일진은 엔진 등급
+  const lifeCache = new WeakMap();   // 사주(S.ch)마다 따로
+  const lifeSig = x => { const lv = x && x.ev && x.ev.level, P = window.ReportV2 && window.ReportV2.PeakReading; if (!P || !P.lifeOf || !S.ch || !/^(daeun|seun|wolun)$/.test(lv || '')) return null; const key = lv + ':' + (x.startMs != null ? x.startMs : x.year) + ':' + M.gzName(x); let C = lifeCache.get(S.ch); if (!C) { C = new Map(); lifeCache.set(S.ch, C); } let n = C.get(key); if (n === undefined) { try { n = P.lifeOf(M, S.ch, x, lv === 'daeun' ? 'daeun' : 'luck'); } catch (e) { n = null; } C.set(key, n); } if (!Number.isFinite(n)) return null; const k = n >= 65 ? 'good' : n >= 45 ? 'ok' : 'care'; return SIG.find(q => q.k === k) || null; };
+  const tileSig = x => { if (isDomain()) { try { return sigMetric(S.metric, domOf(x, x.ev.level)[S.metric].score); } catch (e) { } } return lifeSig(x) || sigFlow(x.ev && x.ev.level === 'seun' && x.combined != null ? x.combined : luckV(x)); };
   // 분포 끝(흐름 +30 이상·−35 이하, 지표 상위·하위 10%)인지 — 등급 이름은 3단계 그대로, 점수 글씨만 굵게
   // 흐름 등급(지표와 상관없이 전체 흐름 기준) — 엔진의 4단계 상태 글자(순풍·보통·주의·부담) 대신 화면에 쓰는 3단계 이름
-  const flowGrade = x => sigFlow(x.ev && x.ev.level === 'seun' && x.combined != null ? x.combined : luckV(x));
+  const flowGrade = x => lifeSig(x) || sigFlow(x.ev && x.ev.level === 'seun' && x.combined != null ? x.combined : luckV(x));
   const gradeChip = g => `<span class="sgchip" style="${sgVars(g)}">${g.n}</span>`;
   // 운세 흐름 그래프 오행 색(2026-11-25): 막대 색 = 그 시기에 두드러지는 오행(luck-element-theme.js). 길흉이 아니며, 좋음·무난·조심은 점수 옆·상세에 보조로만
   const LT = () => window.MantraLuckTheme, EL_VAR = ['wood', 'fire', 'earth', 'metal', 'water'];
@@ -8531,8 +8534,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const dk = isDomain() ? S.metric : null;   // 지표를 골랐으면 그 지표 점수·등급으로(2026-11-25)
     if (dk) ys.forEach(q => { try { q._dv = domOf(q, 'seun')[dk].score; } catch (e) { q._dv = null; } });
     const dg = q => q._dv == null ? null : sigMetric(dk, q._dv), rk = q => dk === 'accident' ? -q._dv : q._dv;
-    const best = dk ? ys.filter(q => dg(q) && dg(q).k === 'good').sort((a, b) => rk(b) - rk(a)).slice(0, 3) : [...ys].sort((a, b) => b.combined - a.combined).filter(q => q.combined >= CC.tailwind).slice(0, 3);
-    const worst = dk ? ys.filter(q => dg(q) && dg(q).k === 'care').sort((a, b) => rk(a) - rk(b)).slice(0, 3) : [...ys].sort((a, b) => a.combined - b.combined).filter(q => q.combined <= CC.caution).slice(0, 3);
+    const best = dk ? ys.filter(q => dg(q) && dg(q).k === 'good').sort((a, b) => rk(b) - rk(a)).slice(0, 3) : [...ys].sort((a, b) => b.combined - a.combined).filter(q => flowGrade(q).k === 'good').slice(0, 3);   // 2026-11-28 등급은 인생 흐름 점수(칸 등급과 같게), 순서는 엔진 흐름 점수
+    const worst = dk ? ys.filter(q => dg(q) && dg(q).k === 'care').sort((a, b) => rk(a) - rk(b)).slice(0, 3) : [...ys].sort((a, b) => a.combined - b.combined).filter(q => flowGrade(q).k === 'care').slice(0, 3);
     const btn = q => dk ? `<button type="button" class="sgchip" style="${sgVars(dg(q))};border:0;cursor:pointer" data-pick="seun:${q.year}">${q.year} ${M.gzName(q)} ${dg(q).n} ${q._dv}</button>` : `<button type="button" class="chip ${q.combined >= 0 ? 'good' : 'bad'}" data-pick="seun:${q.year}" style="border:0;cursor:pointer">${q.year} ${M.gzName(q)} ${signed(q.combined)}</button>`;
     const strip = lcOn() ? lcStrip(ys, curY) : `<div class="lts">${ys.map(q => luckTile(q, `${q.year} · ${q.age}세`, 'seun:' + q.year, S.sel && S.sel.kind === 'seun' && S.sel.Y === q.year, q.year === curY)).join('')}</div>`;
     return `<div><h3 style="margin-bottom:8px">앞으로 10년${dk ? ` <span class="small muted">· ${esc(DOM_INFO[dk].full)} 기준</span>` : ''}</h3>${strip}</div>
