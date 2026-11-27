@@ -513,7 +513,10 @@
       var mon = G.wolun ? '<h4 class="tq-h4">' + st.y + '년 월별 흐름 (절기 기준)</h4>' + barChart(ms, { label: st.y + '년 월별 흐름', cls: 'wolun', attr: function (it) { return 'data-m="' + it.month + '"'; }, sel: function (it) { return st.m === it.month; }, now: function (it) { return !!it.isNow; }, name: function (it) { return st.y + '년 ' + it.month + '월 ' + it.ganzhi + ' 월운'; }, top: function (it) { return it.month + '월'; }, sub: function (it) { return it.ganzhi; } }) : '';
       var cm = st.m != null ? ms.filter(function (x) { return x.month === st.m; })[0] : null, monthCard = cm ? detail(cm, '월운 ' + cm.ganzhi + ' · ' + st.y + '년 ' + cm.month + '월 (' + cm.term + ' 이후)', 'wolun') : '';
       var dy = dOf(st.y);
-      return (TG ? metricBar(true) + tenHtml() : '') + unitWrap('seun', yr + seun + (LV && LV.quick ? '' : pairHtml()), { d: dy }) +
+      // 만트라 개운 5계(2026-11-28, /gaewoon.js): 고른 해의 세운으로 '그해 특히 붙잡을 원칙' 한 줄
+      var GW = root.MantraGaewoon, gwl = GW && GW.yearLine ? GW.yearLine(M, ch, st.y) : null;
+      var gwH = gwl ? '<div class="tq-gw" style="margin:10px 0;padding:10px 12px;border-radius:12px;background:rgba(213,185,127,.13);line-height:1.65"><p style="margin:0 0 4px;font-weight:700">' + st.y + '년의 개운 원칙 · ' + gwl.no + '. ' + esc(gwl.title) + '</p><p style="margin:0">' + esc(gwl.line) + '</p></div>' : '';
+      return (TG ? metricBar(true) + tenHtml() : '') + unitWrap('seun', yr + seun + gwH + (LV && LV.quick ? '' : pairHtml()), { d: dy }) +
         (mon ? unitWrap('wolun', mon + monthCard + '<p class="tq-sub">월운은 절기를 기준으로 하며, 1월 막대는 소한 이후입니다. 일별 흐름과 택일은 일진 캘린더에서 볼 수 있습니다.</p>', { d: dy }) : '<p class="tq-sub">일별 흐름과 택일은 일진 캘린더에서 볼 수 있습니다.</p>');
     }
 
