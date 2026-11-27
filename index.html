@@ -1266,6 +1266,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="luck-element-theme.js"></script>
 <script src="compat-group.js"></script>
 <script src="compat-flow.js"></script>
+<script src="compat-natal.js"></script>
 <script src="luck-alerts.js"></script>
 <script src="signal-colors.js"></script>
 <script src="glossary-cases.js"></script>
@@ -11895,7 +11896,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <h3 class="cp-h3">함께 움직이기 좋은 달</h3><ul class="pr-list">${MO.lines.good.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
       <h3 class="cp-h3">서로 예민해지기 쉬운 달</h3><ul class="pr-list">${MO.lines.care.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
     </section>` : '';
-    return `${grModeSeg()}
+    return `${grModeSeg()}${ncGroup()}
     <section class="card pr-hero gr-hero">
       <div class="gr-chips">${chips}</div>
       <div class="pr-ring" style="--p:${R.avg}"><div><b class="num">${R.avg}</b><span>평균</span></div></div>
@@ -11922,8 +11923,13 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (!PR.inp) PR.inp = prDefault();
     if (grOn() && PR.mode === 'group' && !GR.adding) return GR.res ? grResult() : `${grModeSeg()}${grPicker()}`;
     if (PR.editing || !PR.res) return `${grModeSeg()}<div class="cp-title"><h2>${GR.adding ? '무리에 추가할 사람' : '나와 상대의 궁합'}</h2><p class="note">${GR.adding ? '입력한 사람은 최근 본 사람에 저장되고, 여러 명 궁합에 바로 추가됩니다.' : '두 사람의 사주를 직접 비교해 점수와 등급, 이유를 알려 드립니다.'}</p></div>${prForm()}`;
-    return grModeSeg() + prResult() + pfCard();
+    return grModeSeg() + ncPair() + prResult() + pfCard();
   }
+  // ───────────── 명식 나란히 보기(2026-11-28, compat-natal.js) — 궁합 결과 맨 위, 스위치 natalCompare ─────────────
+  //  합·충 판정은 엔진 relationsAmong 그대로(궁합 점수와 별개 표시). 2인은 네 기둥 좌우 + 글자끼리 선, 여러 명은 한 줄 압축 표
+  const ncOn = () => !!(window.MantraNatalCompare && (!window.MANTRA_FLAGS || window.MANTRA_FLAGS.natalCompare !== false));
+  function ncPair() { if (!ncOn() || !S.ch || !PR.ch || !PR.res) return ''; try { const nm = PR.res.names || {}; return MantraNatalCompare.pairHTML(M, { name: nm.a || prMyName(), ch: S.ch }, { name: nm.b || prName(), ch: PR.ch }); } catch (e) { return ''; } }
+  function ncGroup() { if (!ncOn() || !GR.mem || GR.mem.length < 2) return ''; try { return MantraNatalCompare.groupHTML(M, GR.mem.map(m => ({ name: m.name, ch: m.ch }))); } catch (e) { return ''; } }
   // ───────────── 두 사람 운 흐름 겹쳐 보기(2026-11-26, compat-flow.js) ─────────────
   // 스위치 MANTRA_FLAGS.pairFlow(기본 꺼짐, 관리자 /api/luck-flags pairFlow). 두 사람 각자의 세운 흐름 점수(엔진 combined) 그대로 두 곡선으로 그린다.
   // 궁합 점수·엔진 계산은 건드리지 않는다. 해석은 두 값의 관계(둘 다 좋음·엇갈림·교차)만.
