@@ -300,8 +300,9 @@
   function graphRows(B, scope) {
     var tl = B.tl, M = B.M, ch = B.ch; if (!tl) return null;
     if (scope === 'daeun') return { rows: tl.daeun, labs: tl.daeun.map(function (r) { return r.startAge + '세'; }), when: tl.daeun.map(function (r) { return r.startAge + '세 대운(' + r.startYear + '~)'; }), nowIdx: curIdx(tl.daeun, B.now) };
-    if (scope === 'seun') { var src = M.seunRange(ch, B.nowY, B.nowY + 9) || []; tl.seun.forEach(function (r, i) { if (r) r.src = src[i]; }); }
-    if (scope === 'seun') return { rows: tl.seun, labs: tl.seun.map(function (r) { return "'" + String(r.year).slice(2); }), when: tl.seun.map(function (r) { return r.year + '년'; }), nowIdx: tl.seun.findIndex(function (r) { return r.year === B.nowY; }) };
+    // 2026-11-27 세운 그래프는 지난 10년 + 앞으로 10년(20년). 시기 줄·요약 문장은 지금부터 앞쪽만(그래프 블록 from)
+    if (scope === 'seun') { if (!B.tl20) { try { B.tl20 = W().timeline(M, ch, { fromY: B.nowY - 10, years: 20, wolY: B.nowY }); if (B.tl20) B.tl20.seun.forEach(prim); } catch (e) { B.tl20 = null; } } var T20 = B.tl20 || tl, y0 = B.tl20 ? B.nowY - 10 : B.nowY, src = M.seunRange(ch, y0, y0 + T20.seun.length - 1) || []; T20.seun.forEach(function (r, i) { if (r) r.src = src[i]; });
+      return { rows: T20.seun, labs: T20.seun.map(function (r) { return "'" + String(r.year).slice(2); }), when: T20.seun.map(function (r) { return r.year + '년'; }), nowIdx: T20.seun.findIndex(function (r) { return r.year === B.nowY; }) }; }
     var all = [B.nowY, B.nowY + 1].reduce(function (a, y) { return a.concat((M.wolun(ch, y) || []).map(function (x) { var r = prim(W().luck(M, ch, x, 'wolun')); if (r) { var k = new Date(x.startMs + 9 * 3600e3); r.src = x; r.startMs = x.startMs; r.month = k.getUTCMonth() + 1; r.y = k.getUTCFullYear(); } return r; })); }, []);
     var ci = Math.max(0, curIdx(all, B.now)), rows = all.slice(ci, ci + 12);
     return { rows: rows, labs: rows.map(function (r) { return r.month + '월'; }), when: rows.map(function (r) { return r.y + '년 ' + r.month + '월'; }), nowIdx: 0 };
@@ -329,7 +330,7 @@
       if (used) favName = { wealth: '재물 지수 등급', love: '인연 지수 등급', career: '직업 지수 등급' }[dk] + '(이 장 위 시기 그래프와 같은 엔진 지수)';
     }
     var d = DD(), g = d.graph, w = ws[0], strong = WD().el[w.el].strengths.slice(0, 2).join('·');
-    var from = scope === 'daeun' ? Math.max(0, G.nowIdx) : 0;   // 요약은 지금부터 앞쪽만(그래프는 평생 전체)
+    var from = scope === 'daeun' || scope === 'seun' ? Math.max(0, G.nowIdx) : 0;   // 요약은 지금부터 앞쪽만(그래프는 평생 전체·세운은 지난 10년까지)
     var pick = function (f) { return G.rows.map(function (r, i) { return i >= from && f(r) ? G.when[i] : null; }).filter(Boolean); };
     var isOn = function (r) { return r && r.best && /strong|on|shaky/.test(r.best.level); };
     var onL = pick(isOn), both = use.favor ? pick(function (r) { return isOn(r) && r.favor && r.favor.k === 'good'; }) : [], over = use.favor ? pick(function (r) { return isOn(r) && r.favor && r.favor.k === 'care'; }) : [], low = pick(function (r) { return r && r.best && /hit|trim/.test(r.best.level); });
