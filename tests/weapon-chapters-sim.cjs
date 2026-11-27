@@ -117,6 +117,10 @@ T('11 바람·칼날·결과', () => {
     const paid = R.PeakReading.build(sd, '', { M, ch, now }).readingVisualData, T0 = R.ReadingText; R.ReadingText = undefined;
     let manse; try { manse = R.PeakReading.build(R.SajuData.build(ch, { now }), '', { blades: W.daeunBlades(M, ch) }).readingVisualData; } finally { R.ReadingText = T0; }
     assert.deepEqual([manse.peakRule, manse.peakOrder, manse.peakPicks, manse.peakDetail], [paid.peakRule, paid.peakOrder, paid.peakPicks, paid.peakDetail], '만세력 전성기 = 유료 전성기 장');
+    // 만세력 대운·세운·월운 주무기 그래프 바람 = 유료 화면 인생 흐름 점수(엔진 기둥에서 바로 계산해도 같은 값)
+    sd.daewoon.forEach(p => { const x = ch.daeun.list.find(q => q.startYear === p.startYear); assert.equal(R.PeakReading.lifeOf(M, ch, x, 'daeun'), R.ReadingText.timingScore(p, 'life'), '대운 바람'); });
+    const sr = M.seunRange(ch, sd.nowYear, sd.nowYear + 9); sd.annualLuck.forEach((y, i) => assert.equal(R.PeakReading.lifeOf(M, ch, sr[i], 'luck'), R.ReadingText.luckScore(y, 'life'), '세운 바람'));
+    const wl = M.wolun(ch, sd.nowYear).concat(M.wolun(ch, sd.nowYear + 1)); sd.monthlyLuck.forEach(mm => { const x = wl.find(q => { const k = new Date(q.startMs + 9 * 3600e3); return k.getUTCFullYear() === mm.year && k.getUTCMonth() + 1 === mm.month; }); assert.equal(R.PeakReading.lifeOf(M, ch, x, 'luck'), R.ReadingText.luckScore(mm, 'life'), '월운 바람'); });
   });
 });
 T('10 질문별 끄기·데이터 항목 끄기', () => {

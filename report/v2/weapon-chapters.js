@@ -348,6 +348,10 @@
       var used = 0; G.rows = G.rows.map(function (r) { if (!r || !r.src) return r; var dd = null; try { dd = B.M.evaluateDomainLuck(B.ch, r.src, lvl); } catch (e) { dd = null; } var o = dd && dd[dk]; if (!o || !Number.isFinite(o.score)) return r; used++; var gg = LGm.metric(dk, o.score), c = {}; for (var k in r) c[k] = r[k]; c.favor = { k: gg.k, n: gg.n }; return c; });
       if (used) favName = { wealth: '재물 지수 등급', love: '인연 지수 등급', career: '직업 지수 등급' }[dk] + '(이 장 위 시기 그래프와 같은 점수)';
     }
+    // 2026-11-28 종합: 띠 = 인생 흐름 점수 등급(이 장 위 그래프·만세력 주무기 그래프와 같은 계산, 65↑ 좋음·45↑ 무난)
+    var LF = R.PeakReading && R.PeakReading.lifeOf;
+    if (!dk && LF) { var usedL = 0; G.rows = G.rows.map(function (r) { if (!r) return r; var x = r.src || (scope === 'daeun' ? (B.ch.daeun.list || []).filter(function (q) { return q.startYear === r.startYear; })[0] : null), n = null; try { n = x ? LF(B.M, B.ch, x, scope === 'daeun' ? 'daeun' : 'luck') : null; } catch (e) { n = null; } if (!Number.isFinite(n)) return r; usedL++; var k = n >= 65 ? 'good' : n >= 45 ? 'ok' : 'care', c2 = {}; for (var kk in r) c2[kk] = r[kk]; c2.favor = { k: k, n: { good: '좋음', ok: '무난', care: '조심' }[k], v: n }; return c2; });
+      if (usedL) favName = '인생 흐름 점수 등급(이 장 위 그래프와 같은 점수)'; }
     var d = DD(), g = d.graph, w = ws[0], strong = WD().el[w.el].strengths.slice(0, 2).join('·');
     var from = scope === 'daeun' || scope === 'seun' ? Math.max(0, G.nowIdx) : 0;   // 요약은 지금부터 앞쪽만(그래프는 평생 전체·세운은 지난 10년까지)
     var pick = function (f) { return G.rows.map(function (r, i) { return i >= from && f(r) ? G.when[i] : null; }).filter(Boolean); };
