@@ -67,7 +67,7 @@ const noSelf = F.add({ chapters: [mk('w1', 'wealth')] }, {}, '', M, ch0); ok(noS
 const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 for (const [file, pat, msg] of [
   ['report/v2/index.html', /reading-peak\.js[^"]*"><\/script><script src="\/gyeok-structure\.js[^"]*"><\/script><script src="flow-chapters\.js/, '타임라인 화면에 격국·흐름 장 스크립트가 없음'],
-  ['report/v2/viewer.js', /R\.PeakReading\.add\(S\.rep,S\.sd,S\.name\);\r?\n[^\n]*\n\s*if\(!PREVIEW&&R\.FlowChapters\)\{try\{if\(await R\.FlowChapters\.readyWithin\(2500\)\)S\.rep=R\.FlowChapters\.add\(S\.rep,S\.sd,S\.name,window\.Manse,S\.ch\)/, '타임라인에 장을 넣는 코드가 없음'],
+  ['report/v2/viewer.js', /R\.PeakReading\.add\(S\.rep,S\.sd,S\.name(?:,\{[^}]*\})?\);\r?\n[^\n]*\n\s*if\(!PREVIEW&&R\.FlowChapters\)\{try\{if\(await R\.FlowChapters\.readyWithin\(2500\)\)S\.rep=R\.FlowChapters\.add\(S\.rep,S\.sd,S\.name,window\.Manse,S\.ch\)/, '타임라인에 장을 넣는 코드가 없음'],
   ['functions/api/luck-flags.js', /NAMES = [^\n]*'flowChapters'/, '공개 스위치 이름에 flowChapters 가 없음'],
   ['report/admin/v2-luckenv.js', /flags: \{ flowChapters: v \}/, '관리자 스위치 버튼이 없음'],
   ['report/v2/seal-topics.js', /_\(flow\|gyeok\)\$\/\.test\(chapter\)/, '봉인 목차 설명에 새 장 범위가 없음']]) ok(pat.test(read(file)), msg);

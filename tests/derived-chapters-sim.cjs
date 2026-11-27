@@ -32,7 +32,7 @@ for (const [file, pat, msg] of [
   ['report/admin/v2-chapter-audit.js', /r\.derived \? ' <small/, '감사 성적표에 엔진 장 표시가 없음'],
   ['report/admin/v2-chapter-audit.js', /계약 ' \+ rows\.filter\(function \(r\) \{ return !r\.derived; \}\)/, '감사 성적표 요약에 계약·엔진 장 수가 없음'],
   ['report/admin/v2-timeline.js', /R\.FlowChapters\.add\(doc,sd,'',M,ch\)[\s\S]*R\.HealthChapters\.add\(doc,sd,'',M,ch\)/, '타임라인 구성에 흐름·건강 장이 없음'],
-  ['report/admin/v2-timeline.js', /R\.PeakReading\.add\(doc,sd,''\)/, '타임라인 구성에 전성기 장이 없음'],
+  ['report/admin/v2-timeline.js', /R\.PeakReading\.add\(doc,sd,''(?:,\{[^}]*\})?\)/, '타임라인 구성에 전성기 장이 없음'],
   ['tools/timeline-chapter-audit.cjs', /const ORDER = DC\.insert\(/, '감사 도구가 엔진 장을 함께 재지 않음'],
   ['tools/timeline-chapter-audit-report.cjs', /엔진 조립 장 \$\{rows\.filter\(r => r\.derived\)\.length\}장/, '감사 보고서에 엔진 장 수가 없음']]) ok(pat.test(read(file)), msg);
 const audit = JSON.parse(read('report/admin/data/timeline-chapter-audit.json'));

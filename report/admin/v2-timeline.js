@@ -47,7 +47,7 @@
         var catalog=null;if(R.Editorial){try{catalog=await C.api('/api/reading-editorial');}catch(e){}if(token!==state.generation)return;doc=R.Editorial.prepare(doc,catalog,sd);}
         // 사용자 화면(viewer.js)과 같이 오행 흐름·격국 장(flow-chapters.js)을 끼운다. 스위치가 꺼져 있어도 위치를 보여 주고 상태를 표시한다
         // 전성기 장(reading-peak.js)도 사용자 화면처럼 흐름·격국 장보다 먼저, '전체 인생 흐름' 바로 뒤에 끼운다(순서·노출은 다른 장처럼 바꿀 수 있음)
-        if(R.PeakReading){try{doc=R.PeakReading.add(doc,sd,'');}catch(e){}}
+        if(R.PeakReading){try{if(R.WeaponChapters&&R.WeaponChapters.readyWithin)await R.WeaponChapters.readyWithin(2500);doc=R.PeakReading.add(doc,sd,'',{M:M,ch:ch,now:Date.now()});}catch(e){}}   // 2026-11-28 사용자 화면처럼 주무기 칼날을 전성기 순위에 반영
         state.flowOn=null;if(R.FlowChapters){try{state.flowOn=await R.FlowChapters.ready();doc=R.FlowChapters.add(doc,sd,'',M,ch);}catch(e){}}state.healthOn=null;if(R.HealthChapters){try{state.healthOn=await R.HealthChapters.ready();doc=R.HealthChapters.add(doc,sd,'',M,ch);}catch(e){}}state.aptOn=null;if(R.AptChapters){try{state.aptOn=await R.AptChapters.ready();doc=R.AptChapters.add(doc,sd,'',M,ch);}catch(e){}}try{await loveCompatScript();if(R.LoveCompat)doc=R.LoveCompat.add(doc,sd,'',M,ch);}catch(e){}if(token!==state.generation)return;
         state.sd=sd; state.past=null; state.chapters=doc.chapters; draw(box);
       });

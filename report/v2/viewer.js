@@ -633,7 +633,9 @@
     if(!PREVIEW && R.RealityContext)R.RealityContext.mount(S.realityContext,function(context){
       var c=S.rep && S.rep.chapters[S.idx];sessionStorage.setItem('mt_v2_input',JSON.stringify({inp:S.ch.input,name:S.name,interest:S.interest || '',guide:S.guide,resumeChapter:c && c.id,realityContext:context}));location.reload();
     });
-    if(!PREVIEW&&R.PeakReading)S.rep=R.PeakReading.add(S.rep,S.sd,S.name);
+    // 2026-11-28 전성기 순위에 주무기 칼날 반영 — 주무기 모듈(스위치 weaponChapters)을 먼저 기다린다(아래 줄과 같은 준비, 두 번째는 바로 끝남)
+    if(!PREVIEW&&R.WeaponChapters){try{await R.WeaponChapters.readyWithin(2500);}catch(e){elog('caught','weapon.chapters');}}
+    if(!PREVIEW&&R.PeakReading)S.rep=R.PeakReading.add(S.rep,S.sd,S.name,{M:window.Manse,ch:S.ch,now:Date.now()});
     // 오행 흐름·격국 상세 풀이 장(flow-chapters.js, 스위치 flowChapters): 종합풀이 기질 장 뒤 2장, 재물·커리어·인연 첫 장 뒤 1장씩
     if(!PREVIEW&&R.FlowChapters){try{if(await R.FlowChapters.readyWithin(2500))S.rep=R.FlowChapters.add(S.rep,S.sd,S.name,window.Manse,S.ch);}catch(e){elog('caught','flow.chapters');}}
     // 건강·사고수 상세 장 6개(health-chapters.js, 스위치 healthChapters): 종합풀이 '건강 및 사고수' 장 바로 뒤

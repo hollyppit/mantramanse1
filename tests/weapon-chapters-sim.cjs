@@ -94,11 +94,23 @@ T('11 바람·칼날·결과', () => {
       if (!has) return; stat.axes.shown[id] = (stat.axes.shown[id] || 0) + 1;
       assert.ok(!/undefined|NaN|\[object|null/.test(s), id + ' 빈 값'); assert.ok(!/반드시|무조건|보장|성공 확률/.test(s), id + ' 금지어');
       const seg = s.slice(s.indexOf('바람과 칼날로 다시 본')), names = (seg.match(/→ (전성기|발휘기|돌파기|순항기|정비기)/g) || []).map(x => x.slice(2)); assert.ok(names.length >= 1, id + ' 갈래 이름'); names.forEach(n => { assert.ok(NAMES.includes(n)); stat.axes.kinds[n] = (stat.axes.kinds[n] || 0) + 1; });
-      if (id === 'timeline_self_peak') { const pk = R.PeakReading.build(sd, ''); assert.equal(names.length, pk.readingVisualData.peakPicks.length, '전성기 고른 대운 수 = 갈래 수'); (seg.match(/인생 흐름 (\d+)점 (좋음|무난|조심)/g) || []).forEach(x => { const m = x.match(/(\d+)점 (\S+)/); assert.equal(R.ReadingText.tierOf(+m[1]).n, m[2], '바람 = 전성기 점수 등급'); }); }
+      if (id === 'timeline_self_peak') { const pk = R.PeakReading.build(sd, '', { M, ch, now }); assert.equal(names.length, pk.readingVisualData.peakPicks.length, '전성기 고른 대운 수 = 갈래 수'); (seg.match(/인생 흐름 (\d+)점 (좋음|무난|조심)/g) || []).forEach(x => { const m = x.match(/(\d+)점 (\S+)/); assert.equal(R.ReadingText.tierOf(+m[1]).n, m[2], '바람 = 전성기 점수 등급'); }); }
       else { const kind = rows[id].topic === 'self' ? 'career' : rows[id].topic, top = FEAT.rank(M, ch, now, kind, rows[id].scope === 'month' ? 'month' : 'year').slice(0, 3); top.forEach(x => assert.ok(seg.includes(x.v + '점'), id + ' 순위 점수 그대로 ' + x.v)); }
     });
   });
   AXES_IDS.forEach(id => assert.ok(stat.axes.shown[id] > 0, id + ' 한 번도 안 붙음'));
+  // 전성기 순위 칼날 반영(2026-11-28): 갈래 순서(전성기 → 발휘기 → 순항기 → 나머지)가 지켜지고, 1위 = 그래프 아래 순위 1위, 스위치 끔이면 예전(바람 점수만)과 같음
+  const QO = { '전성기': 0, '발휘기': 1, '순항기': 2, '돌파기': 3, '정비기': 4 }; stat.peakRank = { blade: 0, topChanged: 0 };
+  dev.slice(0, 80).forEach(inp => {
+    const ch = M.compute(inp), sd = R.SajuData.build(ch, { now }), b = R.PeakReading.build(sd, '', { M, ch, now }), vd = b.readingVisualData; if (vd.peakRule !== 'blade' || !vd.peakPicks.length) return; stat.peakRank.blade++;
+    const sel = (b.readingCore.why.split(/\n/).find(l => l.startsWith('선정: ')) || '').slice(4).split(/ · (?=[갑을병정무기경신임계][자축인묘진사오미신유술해] )/);
+    const ks = sel.map(s => (s.match(/(전성기|발휘기|순항기|돌파기|정비기)$/) || [])[1]).filter(Boolean).map(k => QO[k]);
+    for (let i = 1; i < ks.length; i++) assert.ok(ks[i] >= ks[i - 1], '갈래 순서 ' + sel.join(' / '));
+    assert.equal(vd.peakOrder[0], vd.peakSelected, '1위 = 가장 강한 때'); assert.deepEqual(vd.peakOrder.slice().sort(), vd.peakPicks.slice().sort(), '순위 목록 = 고른 시기');
+    const o = R.PeakReading.build(sd, ''); if (o.readingVisualData.peakSelected !== vd.peakSelected) stat.peakRank.topChanged++;
+    WC.on = false; const off = R.PeakReading.build(sd, '', { M, ch, now }); WC.on = true; assert.equal(off.readingVisualData.peakRule, 'wind', '스위치 끔이면 바람만'); assert.deepEqual(off.readingVisualData.peakPicks, o.readingVisualData.peakPicks, '스위치 끔 = 예전 순위');
+  });
+  assert.ok(stat.peakRank.blade > 40, '칼날 반영 표본');
 });
 T('10 질문별 끄기·데이터 항목 끄기', () => {
   const inp = dev.find(x => { const A = W.analyze(M, M.compute(x)); return A.weapons.length === 2 && A.status === 'dual'; }), ch = M.compute(inp), sd = () => R.SajuData.build(ch, { now });

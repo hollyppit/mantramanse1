@@ -94,6 +94,12 @@
     return { A: A, tl: tl, now: now, nowY: nowY, sure: sure, M: H.M, ch: H.ch, who: H.name || (H.sd && H.sd.name) || '' };
   }
   function prim(r) { if (r && r.acts && r.acts[0]) { r.best = r.acts[0]; if (W().readPair) r.read = W().readPair(r.best, r.favor); } return r; }
+  // 전성기 순위용(2026-11-28): 대운 시작 연도 → 1순위 주무기 칼날. 스위치가 꺼졌거나 주무기 미확정이면 null(전성기 장은 바람 점수만으로 고른다)
+  function daeunBlades(M, ch, now) {
+    if (!API.on || !M || !ch) return null; var B = base({ M: M, ch: ch, now: now }); if (!B || !B.sure || !B.tl) return null;
+    var out = {}; B.tl.daeun.forEach(function (r) { if (r && r.best && Number.isFinite(r.startYear)) out[r.startYear] = { level: r.best.level, levelK: r.best.levelK, sharp: /strong|on|shaky/.test(r.best.level), power: { strong: 3, on: 2, shaky: 1 }[r.best.level] || 0 }; });
+    return Object.keys(out).length ? out : null;
+  }
   // ── 바람·칼날·결과(2026-11-27) — 운 흐름 = 바람, 주무기 발현도 = 칼날, 활용 유리도 = 결과. 세 값은 따로 두고 갈래 이름만 붙인다(점수 합산 없음) ──
   function bladeOf(a) { return !a ? null : /strong|on|shaky/.test(a.level) ? 'sharp' : a.level === 'sup' ? 'mid' : a.level === 'quiet' ? 'dull' : 'blocked'; }
   function axesOf(a, windK) {
@@ -365,7 +371,7 @@
   function axesRows(B, H, topic, scope) {
     var T = R.ReadingText, LGm = root.MantraLuckGrade, out = [];
     if (scope === 'peak') {
-      var PR = R.PeakReading, sd = H.sd || {}; if (!PR || !T || !T.timingScore || !B.tl) return null; var pk = null; try { pk = PR.build(sd, B.who); } catch (e) { pk = null; }
+      var PR = R.PeakReading, sd = H.sd || {}; if (!PR || !T || !T.timingScore || !B.tl) return null; var pk = null; try { pk = PR.build(sd, B.who, { M: B.M, ch: B.ch, now: B.now }); } catch (e) { pk = null; }
       var ys = pk && pk.readingVisualData && pk.readingVisualData.peakPicks || []; if (!ys.length) return null;
       var one = function (p) { var r = B.tl.daeun.filter(function (q) { return q && q.startYear === p.startYear; })[0]; if (!r || !r.best) return null; var n = T.timingScore(p, 'life'), t = T.tierOf(n);
         return ({ label: p.startYear + '~' + p.endYear + '년(' + Math.floor(p.startAge) + '~' + (Math.floor(p.startAge) + 10) + '세)', gz: (p.ganzhi || r.gz) + ' 대운', wind: t.k, windN: '인생 흐름 ' + n + '점 ' + t.n, a: r.best, short: p.startYear + '~' + p.endYear + '년', t: p.startYear }); };
@@ -453,7 +459,7 @@
   if (R.ReadingFeature) inject();
 
   var API = { VERSION: VERSION, on: false, TOPICS: TOPICS, TOPIC_K: TOPIC_K, USE_KEYS: USE_KEYS, USE_K: USE_K, DEFAULT_ROWS: DEFAULT_ROWS, BLOCKED: BLOCKED, BANNED: BANNED,
-    has: has, render: render, axesOf: axesOf, bladeOf: bladeOf, AX_SCOPES: AX_SCOPES, AX_K: AX_K, preview: preview, previewRow: previewRow, SCOPES: SCOPES, setConfig: setConfig, rows: rowsOf, inject: inject, sanitize: sanitize, ready: ready, readyWithin: readyWithin, localFlag: localFlag };
+    has: has, render: render, axesOf: axesOf, daeunBlades: daeunBlades, bladeOf: bladeOf, AX_SCOPES: AX_SCOPES, AX_K: AX_K, preview: preview, previewRow: previewRow, SCOPES: SCOPES, setConfig: setConfig, rows: rowsOf, inject: inject, sanitize: sanitize, ready: ready, readyWithin: readyWithin, localFlag: localFlag };
   R.WeaponChapters = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
 })(typeof window !== 'undefined' ? window : globalThis);
