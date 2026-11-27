@@ -5,7 +5,7 @@
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const root = path.join(__dirname, '..');
 const ctx = { console }; ctx.window = ctx; ctx.self = ctx; vm.createContext(ctx);
-for (const f of ['engine.js', 'compat-natal.js']) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
+for (const f of ['engine.js', 'compat-pair.js', 'compat-natal.js']) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
 const M = ctx.Manse, NC = ctx.MantraNatalCompare;
 const N = +process.argv[2] || 300;
 const fails = [], ok = (c, m) => { if (!c) fails.push(m); };
@@ -53,6 +53,9 @@ for (let k = 0; k < 80; k++) {
   ok(JSON.stringify(Object.keys(G.mk).sort()) === JSON.stringify([...exp].sort()), `표시 글자 #${k}`);
   ok((h.match(/nc-hl-/g) || []).length === exp.size && !BADTXT.test(h), `표시 수 #${k}`);
 }
+// ⑥ 작용 설명 문구 = 만세력 궁합 결과(compat-pair.js REL_TXT) 문구와 같음, 모든 종류에 설명
+{ const T = ctx.PairCompat.REL_TXT; Object.keys(T).forEach(k => ok(NC.NOTE[k] && NC.NOTE[k][0] === T[k][1] && NC.NOTE[k][1] === T[k][2], `설명 문구 다름: ${k}`)); ok(Object.keys(NC.NOTE).length === Object.keys(T).length, '설명 종류 수');
+  const h = NC.pairHTML(M, { name: '나', ch: charts[0] }, { name: '가람', ch: charts[1] }), R = NC.relsBetween(M, charts[0], charts[1]); ok((h.match(/class="nc-note"/g) || []).length === R.length, '작용마다 설명 한 줄'); }
 NC.state.focus = -1;
 console.log(`쌍 ${N}개 · 쌍당 작용 ${(st.rel / N).toFixed(1)}개 (합 ${st.good} · 충형원진 ${st.bad} · 그 밖 ${st.other}) · 일주끼리 작용 ${st.dayDay} · 순서 바꾸면 삼합·반합 묶음이 달라지는 쌍 ${st.asym}(엔진 그대로)`);
 if (fails.length) { console.log('실패 ' + fails.length + '건'); console.log(fails.slice(0, 15).join('\n')); process.exit(1); }

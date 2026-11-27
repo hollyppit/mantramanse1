@@ -15,6 +15,25 @@
   var EV = ['wood', 'fire', 'earth', 'metal', 'water'];
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var toneOf = function (type) { return GOOD[type] ? 'good' : BAD[type] ? 'bad' : 'other'; };
+  // 작용별 한 줄 설명(2026-11-28 사용자 요청 "충이든 합이든 형이든 그 밑에 간단한 설명문구"): 만세력 궁합 결과와 같은 문구 —
+  //   compat-pair.js REL_TXT[type] 의 [1] 이름·[2] 설명을 그대로 옮긴 것(타임라인 화면은 compat-pair.js 를 불러오지 않는다). tests/compat-natal-sim.cjs 가 같은지 검사
+  var NOTE = {
+    '충': ['정면으로 부딪치는 관계', '서로를 가장 강하게 자극합니다. 끌림도 크지만 한번 틀어지면 크게 싸웁니다.'],
+    '형': ['서로 눌러서 불편해지는 관계', '가까워질수록 서로를 압박하고 지적하게 됩니다. 사소한 문제가 돈·법·건강 같은 현실 문제로 번지기 쉽습니다.'],
+    '파': ['자꾸 어긋나는 관계', '큰 갈등보다 약속·계획이 틀어지는 식으로 나타납니다.'],
+    '해': ['서운함이 쌓이는 관계', '말하지 않은 서운함이 쌓여 서서히 멀어지기 쉽습니다.'],
+    '원진': ['미운 정이 드는 관계', '끌리는데 이유 없이 거슬립니다. 애증이 반복되는 사이입니다.'],
+    '귀문관': ['예민하게 얽히는 관계', '서로의 감정을 깊이 읽어 집착·의심으로 번지기 쉽지만, 정신적으로는 깊이 통합니다.'],
+    '육합': ['서로 끌어당기는 짝', '자연스럽게 마음이 가고 호흡이 잘 맞습니다.'],
+    '삼합': ['한 방향으로 힘이 모이는 관계', '같은 목표를 향하면 시너지가 큽니다.'],
+    '반합': ['손발이 맞는 관계', '같은 방향으로 움직이는 힘이 있습니다.'],
+    '방합': ['같은 결로 묶이는 관계', '비슷한 기질이라 말이 잘 통합니다. 한쪽으로 쏠리는 점만 주의하세요.'],
+    '천간합': ['마음이 통하는 합', '생각과 뜻이 끌려 의기투합하기 쉽습니다.'],
+    '천간충': ['생각이 맞서는 관계', '의견과 방침이 부딪쳐 말다툼이 잦습니다.']
+  };
+  var noteHtml = function (type) { var n = NOTE[type]; return n ? '<span class="nc-note"><b>' + esc(n[0]) + '</b> — ' + esc(n[1]) + '</span>' : ''; };
+  // 작용 한 줄: 누구의 어느 글자 ↔ 누구의 어느 글자 · 이름(종류) + 아래 설명
+  var relItem = function (an, bn, r) { return '<li><span class="nc-dot nc-' + r.tone + 'b"></span>' + an + ' ' + r.a.map(function (k) { return posTxt(k, r.kind); }).join('·') + ' ↔ ' + bn + ' ' + r.b.map(function (k) { return posTxt(k, r.kind); }).join('·') + ' · <b>' + esc(r.name) + '</b> <span class="muted">(' + esc(r.type) + ')</span>' + noteHtml(r.type) + '</li>'; };
 
   // 두 원국 사이 작용(엔진 relationsAmong 그대로). 한쪽 안에서만 생기는 작용은 뺀다. 일간·일지끼리 짝도 넣는다(궁합 점수와 별개 표시).
   function relsBetween(M, X, Y) {
@@ -101,13 +120,12 @@
     var tgLine = function (who, whoS, other, otherS) { return '<li><b>' + esc(other) + '</b> 일간 <b>' + dayTxt(otherS) + '</b> 기준 → <b>' + esc(who) + '</b>(일간 ' + dayTxt(whoS) + ')는 <b>' + M.tenGod(otherS, whoS) + '</b></li>'; };
     var shown = R.filter(function (r) { return r.tone !== 'other'; });
     var others = R.filter(function (r) { return r.tone === 'other'; });
-    var relLi = function (r) { return '<li><span class="nc-dot nc-' + r.tone + 'b"></span>' + esc(A.name) + ' ' + r.a.map(function (k) { return posTxt(k, r.kind); }).join('·') + ' ↔ ' + esc(B.name) + ' ' + r.b.map(function (k) { return posTxt(k, r.kind); }).join('·') + ' · <b>' + esc(r.name) + '</b> <span class="muted">(' + esc(r.type) + ')</span></li>'; };
-    var seenO = {}, oTxt = others.filter(function (r) { var k = r.name; if (seenO[k]) return false; seenO[k] = 1; return true; }).map(function (r) { return esc(r.name); });
+    var relLi = function (r) { return relItem(esc(A.name), esc(B.name), r); };
     return wrapOpen('ncPairCard', '각자 일간 기준 십성 · 선은 두 사람 사이 작용', opt)
       + '<div class="nc-scroll">' + pairSvg(M, A, B, R) + '</div>'
       + '<div class="nc-keys small muted"><span><i class="nc-k nc-goodb"></i>합(천간합·육합·삼합·반합·방합)</span><span><i class="nc-k nc-badb"></i>충·천간충</span><span><i class="nc-k nc-badb nc-kd"></i>형·원진</span><span>일주는 굵은 테두리</span></div>'
       + (shown.length ? '<ul class="nc-rels small">' + shown.map(relLi).join('') + '</ul>' : '<p class="small muted">두 원국 사이에 합·충·형·원진으로 이어지는 글자가 없습니다.</p>')
-      + (oTxt.length ? '<p class="small muted">그 밖의 작용(선 없음): ' + oTxt.join(', ') + '</p>' : '')
+      + (others.length ? '<p class="small muted nc-oth">그 밖의 작용(그림에 선 없음)</p><ul class="nc-rels small">' + others.map(relLi).join('') + '</ul>' : '')
       + '<h3 class="cp-h3">오행 글자 수</h3><div class="nc-el">' + bar(A.name, cA) + bar(B.name, cB) + '</div>'
       + '<h3 class="cp-h3">상대 일간 기준 십성</h3><ul class="pr-list nc-tgl">' + tgLine(A.name, dA, B.name, dB) + tgLine(B.name, dB, A.name, dA) + '</ul>'
       + wrapClose(opt);
@@ -145,7 +163,7 @@
     if (G.focus >= 0) {
       // 사람별로 묶어 접는 상자(합 n · 충·형·원진 n)
       var by = {}; F.list.forEach(function (x) { (by[x.j] = by[x.j] || []).push(x.r); });
-      var li = function (j, r) { return '<li><span class="nc-dot nc-' + r.tone + 'b"></span>' + nm(G.focus) + ' ' + r.a.map(function (k) { return posTxt(k, r.kind); }).join('·') + ' ↔ ' + nm(j) + ' ' + r.b.map(function (k) { return posTxt(k, r.kind); }).join('·') + ' · <b>' + esc(r.name) + '</b> <span class="muted">(' + esc(r.type) + ')</span></li>'; };
+      var li = function (j, r) { return relItem(nm(G.focus), nm(j), r); };
       listH = F.list.length ? '<div class="nc-by">' + mem.map(function (o, j) {
         var rs = by[j]; if (!rs) return '';
         var g = rs.filter(function (r) { return r.tone === 'good'; }).length, b = rs.length - g;
@@ -171,13 +189,14 @@
       + '.nc-c{stroke:rgba(0,0,0,.06)}.nc-c.nc-day{stroke:var(--ink);stroke-width:2.4}.nc-none{fill:var(--surface-2)}'
       + '.nc-l{fill:none;stroke-width:2.2}.nc-good{stroke:var(--accent)}.nc-bad{stroke:var(--bad)}.nc-dash{stroke-dasharray:5 4}.nc-lt{font-size:10.5px;font-weight:800;paint-order:stroke;stroke:var(--surface);stroke-width:4px}.nc-goodt{fill:var(--accent)}.nc-badt{fill:var(--bad)}'
       + '.nc-keys{display:flex;flex-wrap:wrap;gap:4px 14px;margin:6px 0}.nc-k{display:inline-block;width:20px;height:0;border-top:3px solid;vertical-align:middle;margin-right:5px}.nc-goodb{border-color:var(--accent);background:var(--accent)}.nc-badb{border-color:var(--bad);background:var(--bad)}.nc-k.nc-goodb,.nc-k.nc-badb{background:none}.nc-kd{border-top-style:dashed}'
-      + '.nc-rels{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:3px}.nc-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}'
+      + '.nc-rels{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:7px}.nc-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}'
       + '.nc-el{display:grid;gap:6px;margin:4px 0}.nc-el-r{display:grid;grid-template-columns:72px 1fr;gap:8px;align-items:center}.nc-el-r b{font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.nc-el-b{display:flex;height:22px;border-radius:7px;overflow:hidden;background:var(--surface-2)}.nc-el-b i{font-style:normal;font-size:.74rem;font-weight:800;display:flex;align-items:center;justify-content:center;background:var(--c);color:var(--on);min-width:24px}'
       + '.nc-tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:6px 0}.nc-gt{border-collapse:separate;border-spacing:4px;min-width:340px;width:100%}.nc-gt th{font-size:.78rem;color:var(--ink-3);font-weight:600}.nc-gt tbody th{position:sticky;left:0;z-index:1;background:var(--surface);text-align:left}'
       + '.nc-nb{border:1px solid var(--line);border-radius:999px;background:var(--surface);padding:4px 10px;font-weight:700;cursor:pointer;white-space:nowrap;max-width:7.5em;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}.nc-gt tr.on .nc-nb{border-color:var(--ink-2);background:var(--surface-2)}'
       + '.nc-gc{text-align:center;white-space:nowrap;padding:2px;border-radius:10px}.nc-gc.nc-gday{box-shadow:inset 0 0 0 2px var(--ink)}.nc-gnone{color:var(--ink-3);font-size:.76rem;background:var(--surface-2)}'
       + '.nc-gg{display:inline-block;min-width:1.7em;margin:1px;padding:3px 2px;border-radius:7px;background:var(--c);color:var(--on);font-family:var(--f-display);font-size:1.15rem;font-weight:800;line-height:1.2}.nc-gday .nc-gg{font-weight:900}'
       + '.nc-hl-good{box-shadow:0 0 0 3px var(--accent)}.nc-hl-bad{box-shadow:0 0 0 3px var(--bad)}.nc-hl-both{box-shadow:0 0 0 3px var(--bad),0 0 0 6px var(--accent)}'
+      + '.nc-rels li{line-height:1.5}.nc-note{display:block;margin:1px 0 0 14px;color:var(--ink-2);font-size:.92em;line-height:1.5}.nc-note b{font-weight:700}.nc-oth{margin:10px 0 0}.nc-otherb{background:var(--ink-3)}'
       + '.nc-by{display:grid;gap:6px;margin-top:6px}.nc-det{border:1px solid var(--line);border-radius:10px;padding:6px 10px;background:var(--surface)}.nc-det summary{cursor:pointer}.nc-det .nc-rels{margin-top:6px}'
       + '.nc-dark{--surface:#0D1120;--surface-2:rgba(255,255,255,.07);--ink-2:#BDB8AB;--ink-3:#8A8678;--line:rgba(205,178,122,.22);--accent:#7FA2FF;--bad:#FF8A6E;--wood-on:#fff;--fire-on:#fff;--earth-on:#1d1606;--metal-on:#141821;--water-on:#fff;--f-display:var(--f-serif,serif)}'
       + '.nc-dark .nc-hd{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 10px;margin-bottom:6px}.nc-dark .nc-hd h3{margin:0}.nc-dark .note,.nc-dark .muted{color:var(--ink-3)}.nc-dark .small{font-size:.84rem}.nc-dark .cp-h3{margin:14px 0 6px;font-size:.95rem}.nc-dark .pr-list{margin:6px 0;padding-left:1.1em}.nc-dark .nc-c{stroke:rgba(255,255,255,.08)}.nc-dark .nc-c.nc-day{stroke:var(--gold,#D5B97F)}.nc-dark .nc-gc.nc-gday{box-shadow:inset 0 0 0 2px var(--gold,#D5B97F)}.nc-dark .nc-gt tbody th{background:var(--surface)}.nc-dark .nc-nb{background:rgba(255,255,255,.04)}.nc-dark .nc-det{background:rgba(255,255,255,.03)}'
@@ -185,7 +204,7 @@
     (document.head || document.documentElement).appendChild(st);
   }
 
-  var api = { VERSION: VERSION, POS: POS, relsBetween: relsBetween, cells: cells, elCount: elCount, toneOf: toneOf, groupMarks: groupMarks, pairHTML: pairHTML, groupHTML: groupHTML, state: G };
+  var api = { VERSION: VERSION, POS: POS, NOTE: NOTE, relsBetween: relsBetween, cells: cells, elCount: elCount, toneOf: toneOf, groupMarks: groupMarks, pairHTML: pairHTML, groupHTML: groupHTML, state: G };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.MantraNatalCompare = api;
 })(typeof window !== 'undefined' ? window : globalThis);
