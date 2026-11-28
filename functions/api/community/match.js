@@ -12,9 +12,11 @@ import { featureGate } from '../../_features.js';
 import { json, sbRest, supabaseReady, viewer, profileOf, activeSanction, blockedIds, avatarOf, posterMap, badText, overLimit, readBody, ilganLabel } from '../../_plaza.js';
 import { readConsents, requiredOk } from '../../_consent.js';
 import { kstDay } from '../../_daily.js';
-import { PURPOSES, REGIONS, INTERESTS, LIKE_PER_DAY, verificationOf, handleOf, resolveHandle, compat, life, pickToday, ageOf, ageBand, candidatePool } from '../../_match.js';
+import { PURPOSES, REGIONS, INTERESTS, LIKE_PER_DAY, PICKS, verificationOf, handleOf, resolveHandle, compat, life, pickToday, ageOf, ageBand, candidatePool } from '../../_match.js';
 
 const enc = encodeURIComponent;
+// 2026-11-28 보안 점검: 넘기기는 하루 오늘의 인연·받은 인연을 넉넉히 처리할 만큼, 인연 프로필 저장은 하루 5번(저장할 때마다 오늘의 인연을 새로 뽑으므로)
+export const PASS_PER_DAY = PICKS * 4, MATCH_PROFILE_SAVES_PER_DAY = 5;
 const pick = (a, allowed, max) => [...new Set((Array.isArray(a) ? a : []).filter(x => allowed.includes(x)))].slice(0, max);
 const mpOf = async (env, uid) => { const r = await sbRest(env, `cm_match_profiles?user_id=eq.${enc(uid)}&select=*`); return Array.isArray(r) ? r[0] || null : null; };
 const DEF = { active: false, purposes: [], intro: '', region: null, interests: [], want_gender: [], want_age_min: 19, want_age_max: 99, want_region: 'any' };
@@ -118,6 +120,7 @@ export async function onRequestPost({ request, env }) {
     const wantGender = pick(b.wantGender, ['M', 'F'], 2);
     if (b.active === true && purposes.includes('love') && !wantGender.length) return json({ error: '연애 목적이면 만나고 싶은 성별을 골라 주세요' }, 400);
     let lo = Math.max(19, Math.min(99, +b.wantAgeMin || 19)), hi = Math.max(19, Math.min(99, +b.wantAgeMax || 99)); if (lo > hi) [lo, hi] = [hi, lo];
+    if (b.active === true && await overLimit(env, "mprof:" + w.me.id, MATCH_PROFILE_SAVES_PER_DAY)) return json({ error: "인연 프로필은 하루 " + MATCH_PROFILE_SAVES_PER_DAY + "번까지 바꿀 수 있어요" }, 429);
     const row = { user_id: w.me.id, active: b.active === true, purposes, intro: intro || null, region, interests: pick(b.interests, Object.keys(INTERESTS), 6), want_gender: wantGender, want_age_min: lo, want_age_max: hi, want_region: b.wantRegion === 'same' ? 'same' : 'any', updated_at: new Date().toISOString() };
     await sbRest(env, 'cm_match_profiles?on_conflict=user_id', { method: 'POST', headers: { prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify(row) });
     if (row.active) await sbRest(env, `cm_daily_picks?user_id=eq.${enc(w.me.id)}&day=eq.${kstDay()}`, { method: 'DELETE', headers: { prefer: 'return=minimal' } });   // 조건을 바꾸면 오늘의 인연을 다시 고른다
@@ -144,12 +147,16 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: true });
   }
   if (b.action === 'pass') {
+    // 2026-11-28 보안 점검: 넘기기·프로필 저장을 무제한 되풀이해 '오늘의 인연'을 계속 새로 뽑아 매칭 회원 전체를 모으던 것 막기
+    if (await overLimit(env, 'mpass:' + w.me.id, PASS_PER_DAY)) return json({ error: '오늘은 더 넘길 수 없어요. 내일 다시 만나요' }, 429);
     if ((recv || []).some(x => x.from_id === other)) await sbRest(env, `cm_likes?from_id=eq.${enc(other)}&to_id=eq.${enc(w.me.id)}`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ status: 'passed', updated_at: now }) });
     if (!mine) await sbRest(env, 'cm_likes', { method: 'POST', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ from_id: w.me.id, to_id: other, status: 'passed' }) });
     return json({ ok: true });
   }
   if (b.action === 'like') {
     if (mine && (mine.status === 'pending' || mine.status === 'matched')) return json({ ok: true, matched: mine.status === 'matched' });
+    // 2026-11-28 보안 점검: 상대가 넘긴(passed)·내가 거둔(withdrawn) 인연을 다시 보내 상대 받은 인연함에 계속 나타나던 것 막기
+    if (mine && (mine.status === 'passed' || mine.status === 'withdrawn')) return json({ error: '이미 정리된 인연이라 다시 이을 수 없어요' }, 409);
     const note = String(b.note || '').replace(/\s+/g, ' ').trim().slice(0, 100) || null;
     if (note) { const bad = badText(note); if (bad) return json({ error: bad }, 400); }
     if (await overLimit(env, 'like:' + w.me.id, LIKE_PER_DAY)) return json({ error: '인연 잇기는 하루 ' + LIKE_PER_DAY + '번까지 할 수 있어요' }, 429);

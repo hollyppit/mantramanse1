@@ -144,6 +144,18 @@ const ENV = { ADMIN_PASSWORD: 'adm-pw', COMMUNITY_SECRET: 'secret-0123456789', S
   const cardC = (await call(match, 'GET', 'tok-a', '?view=today')).d.cards.find(c => c.name === '꽃길');
   x = await call(match, 'POST', 'tok-a', '', { action: 'pass', handle: cardC.handle }); ok(x.s === 200 && T.cm_likes.some(l => l.from_id === U('a') && l.to_id === U('c') && l.status === 'passed'), '넘기기(조용히 기록)');
   x = await call(match, 'GET', 'tok-c', '?view=inbox'); ok(x.d.received.length === 0, '넘긴 것은 상대에게 알리지 않음');
+  // 2026-11-28 보안 점검: 정리된(넘긴·거둔) 인연은 다시 잇기로 되살려 상대 받은 인연함에 반복해 나타나게 할 수 없다
+  x = await call(match, 'POST', 'tok-a', '', { action: 'like', handle: cardC.handle }); ok(x.s === 409 && T.cm_likes.some(l => l.from_id === U('a') && l.to_id === U('c') && l.status === 'passed'), '넘긴 인연은 다시 잇기 불가(409)');
+  { const row = T.cm_likes.find(l => l.from_id === U('a') && l.to_id === U('c')); row.status = 'withdrawn';
+    x = await call(match, 'POST', 'tok-a', '', { action: 'like', handle: cardC.handle }); ok(x.s === 409 && row.status === 'withdrawn', '거둔 인연도 다시 잇기 불가(409)'); row.status = 'passed'; }
+  // 넘기기·프로필 켜기 반복으로 오늘의 인연을 계속 다시 뽑지 못하게 하루 한도
+  { const M = await imp('functions/api/community/match.js'); ok(M.PASS_PER_DAY === 20 && M.MATCH_PROFILE_SAVES_PER_DAY === 5, '넘기기 하루 20번·인연 프로필 켜기 하루 5번');
+    const saved = [...kv.entries()]; let last;
+    for (let i = 0; i < 6; i++) last = await call(match, 'POST', 'tok-e', '', { action: 'profile', active: true, purposes: ['chat'], region: '서울' });
+    ok(last.s === 429, '인연 프로필 켜기 6번째는 429');
+    x = await call(match, 'POST', 'tok-e', '', { action: 'profile', active: false, purposes: ['chat'], region: '서울' }); ok(x.s === 200, '끄기는 한도와 상관없이 언제나 가능');
+    await call(match, 'POST', 'tok-e', '', { action: 'profile', active: true, purposes: ['chat'], region: '서울' });
+    kv.clear(); saved.forEach(([k, v]) => kv.set(k, v)); await call(match, 'POST', 'tok-e', '', { action: 'profile', active: true, purposes: ['chat'], region: '서울' }); }
 
   // 7) 대화
   x = await call(chat, 'GET', 'tok-c', '?room=' + room); ok(x.s === 404, '방 사람이 아니면 대화 못 봄');

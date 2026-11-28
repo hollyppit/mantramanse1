@@ -22,7 +22,7 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
     if (u === 'https://sb.test/auth/v1/admin/users/g-user') return res({ id: 'g-user', email: 'me@gmail.com' });
     if (u === 'https://sb.test/auth/v1/admin/generate_link') return res({ id: 'u1', hashed_token: body.email === 'me@gmail.com' ? 'hash-g' : 'hash-abc', action_link: 'x' });
     if (u === 'https://sb.test/auth/v1/verify') return body && body.token_hash === 'hash-abc' ? res({ access_token: 'sb-at', refresh_token: 'sb-rt', user: { id: 'u1' } }) : body && body.token_hash === 'hash-g' ? res({ access_token: 'g-at', refresh_token: 'g-rt', user: { id: 'g-user' } }) : res({ msg: 'bad' }, 400);
-    if (u === 'https://sb.test/auth/v1/user') return res({ id: 'u1', email: 'naver-x@users.mantrafortune.com', user_metadata: { provider: 'naver', email: 'buyer@naver.com' }, app_metadata: { provider: 'email' } });
+    if (u === 'https://sb.test/auth/v1/user') return res({ id: 'u1', email: 'naver-' + '0123456789abcdef'.repeat(2) + '@users.mantrafortune.com', user_metadata: { provider: 'naver', email: 'buyer@naver.com' }, app_metadata: { provider: 'email' } /* 2026-11-28: 운영과 같게 — Supabase 가 app_metadata.provider 를 email 로 덮으므로 네이버 판정은 내부 주소(32자리) */ });
     throw new Error('unexpected fetch ' + u);
   };
   const B = 'https://mantrafortune.com';

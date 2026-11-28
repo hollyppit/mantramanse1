@@ -9,6 +9,7 @@ import { audit } from '../../_community.js';
 import { need, actorOf } from '../../_staff.js';
 import { readConsents, DOCS } from '../../_consent.js';
 import { ageBand } from '../../_match.js';
+import { isNaverUser } from '../../_commerce.js';
 
 const enc = encodeURIComponent;
 export const maskEmail = e => { const m = /^([^@]+)@(.+)$/.exec(String(e || '')); if (!m) return null; const u = m[1]; return (u.length <= 2 ? u[0] + '*' : u.slice(0, 2) + '*'.repeat(Math.min(6, u.length - 2))) + '@' + m[2]; };
@@ -18,7 +19,7 @@ async function emailOf(env, id) {
   try {
     const r = await fetch(String(env.SUPABASE_URL).replace(/\/+$/, '') + '/auth/v1/admin/users/' + enc(id), { headers: { apikey: env.SUPABASE_SERVICE_KEY, authorization: 'Bearer ' + env.SUPABASE_SERVICE_KEY }, signal: AbortSignal.timeout(8000) });
     if (!r.ok) return null; const u = await r.json(), m = u.user_metadata || {};
-    return { email: m.provider === 'naver' ? m.email || null : u.email || null, joined: u.created_at || null };
+    return { email: isNaverUser(u) ? m.email || null : u.email || null, joined: u.created_at || null };   // 2026-11-28: 네이버 판정은 회원이 못 고치는 값으로
   } catch { return null; }
 }
 

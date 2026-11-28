@@ -6,7 +6,7 @@
 //   3) 서버가 B 의 로그인·주문·구매 권한·저장한 사주를 A 로 옮기고 B 를 지운 뒤, A 의 세션을 돌려준다
 // 자동 연결: 구글·카카오가 같은 '인증된 이메일'이면 Supabase 가 처음부터 한 회원으로 만든다(기본 동작). 네이버 이메일은 인증 보장이 없어
 //           자동으로 합치지 않고 안내(같은 이메일의 회원이 있어요 → 그 방법으로 로그인해 합치기)만 한다.
-import { sbRest, supabaseReady } from './_commerce.js';
+import { sbRest, supabaseReady, isNaverUser } from './_commerce.js';
 import { kvOf } from './_store.js';
 import { sessionForEmail } from './_naver-login.js';
 import { identitiesOf } from './_account.js';
@@ -27,7 +27,7 @@ export async function loginsOf(env, user) {
   const out = new Set();
   for (const i of await identitiesOf(env, user.id)) if (i.provider === 'kakao' || i.provider === 'google') out.add(i.provider);
   try { if (((await sbRest(env, `member_google_links?select=google_sub&user_id=eq.${enc(user.id)}&limit=1`)) || []).length) out.add('google'); } catch { }   // 서버 구글 로그인 회원
-  if (NAVER_EMAIL.test(user.email || '') || (user.user_metadata && user.user_metadata.provider === 'naver')) out.add('naver');
+  if (isNaverUser(user)) out.add('naver');   // 2026-11-28: user_metadata 는 회원이 고칠 수 있어 판정에 쓰지 않는다
   else {
     try { if (((await sbRest(env, `member_naver_links?select=naver_key&user_id=eq.${enc(user.id)}&limit=1`)) || []).length) out.add('naver'); } catch { }
   }
@@ -37,7 +37,7 @@ export async function hasPurchases(env, userId) {
   try { return ((await sbRest(env, `commerce_entitlements?select=world&user_id=eq.${enc(userId)}&revoked_at=is.null&limit=1`)) || []).length > 0; } catch { return false; }
 }
 // 화면 표시용 이메일: 네이버 회원은 내부 주소 대신 네이버 이메일
-export const displayEmail = u => (u && u.user_metadata && u.user_metadata.provider === 'naver' ? u.user_metadata.email : u && u.email) || '';
+export const displayEmail = u => (isNaverUser(u) ? u.user_metadata && u.user_metadata.email : u && u.email) || '';   // 2026-11-28: 네이버 판정은 isNaverUser
 
 // 안내: 구매 내역이 없는 회원에게 '같은 이메일의 다른 회원(구매 있음)'을 알려 준다. 합치기는 본인이 그 방법으로 로그인해야 된다
 export async function suggestionFor(env, user) {

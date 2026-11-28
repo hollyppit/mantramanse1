@@ -34,10 +34,23 @@ async function who(request, env) {
   return { me, p };
 }
 
+// 2026-11-28 보안 점검: content-length 없이(chunked) 큰 본문을 보내면 arrayBuffer() 가 전부 메모리에 올렸다 → 스트림을 max+1 바이트까지만 읽고 끊는다(넘으면 null)
+export async function readCapped(request, max) {
+  if (!request.body) return new Uint8Array(0);
+  const reader = request.body.getReader(), parts = []; let n = 0;
+  for (;;) {
+    const { done, value } = await reader.read(); if (done) break;
+    n += value.byteLength; if (n > max) { try { await reader.cancel(); } catch { } return null; }
+    parts.push(value);
+  }
+  const out = new Uint8Array(n); let o = 0; for (const p of parts) { out.set(p, o); o += p.byteLength; }
+  return out;
+}
+
 export async function onRequestPost({ request, env }) {
   const w = await who(request, env); if (w.res) return w.res;
   const len = +(request.headers.get('content-length') || 0); if (len > MAX) return json({ error: '사진이 너무 큽니다(300KB 이하)' }, 413);
-  const buf = new Uint8Array(await request.arrayBuffer());
+  const buf = await readCapped(request, MAX); if (!buf) return json({ error: '사진이 너무 큽니다(300KB 이하)' }, 413);
   if (!buf.length || buf.length > MAX) return json({ error: '사진이 너무 크거나 비어 있습니다' }, 413);
   const t = sniff(buf); if (!t) return json({ error: 'JPG·PNG·WebP 사진만 올릴 수 있습니다' }, 415);
   if (await overLimit(env, 'avatar:' + w.me.id, 10)) return json({ error: '사진은 하루 10번까지 바꿀 수 있습니다' }, 429);

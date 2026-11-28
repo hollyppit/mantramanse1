@@ -123,6 +123,15 @@ export async function authThrottle(request, env) {
 }
 
 // 미들웨어에서 부른다: 커뮤니티 경로가 아니면 null(통과), 막아야 하면 Response.
+// 로그인 토큰(JWT)의 sub(회원 id). 형식이 틀리면 ''. 서명 확인은 각 API 의 memberOf 몫
+export function tokenSub(request) {
+  const t = (request.headers.get('x-member-token') || '').trim(), p = t.split('.');
+  if (p.length !== 3) return '';
+  try { const j = JSON.parse(atob(p[1].replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((p[1].length + 3) % 4))); return typeof j.sub === 'string' ? j.sub : ''; } catch { return ''; }
+}
+// 관리자 쿠키(who=admin)는 어떤 토큰과도 쓸 수 있다(테스트 회원 a·b 로 들어가는 관리자). 토큰 없는 요청(로그인 전 둘러보기)은 쿠키만으로 통과.
+export const cookieMatchesMember = (c, request) => c.who === 'admin' || !(request.headers.get('x-member-token') || '').trim() || tokenSub(request) === c.who;
+
 export async function communityGate(request, env, now = Date.now()) {
   const url = new URL(request.url), p = url.pathname.replace(/\/{2,}/g, '/');
   const page = isCommunityPath(p), api = isCommunityApi(p);
@@ -136,7 +145,9 @@ export async function communityGate(request, env, now = Date.now()) {
   // 운영자 열쇠(7단계, functions/_staff.js): 유효하면 API 잠금만 통과(각 API 가 역할별 권한을 다시 확인한다). 페이지(/community/)는 열지 않는다
   if (api && looksStaff(request) && await staffOf(request, env)) return null;
   const c = await readCookie(request, env, now);
-  if (c && roleAllowed(c.role, stage)) return null;
+  // 2026-11-28 보안 점검: 초대받은 회원의 입장 쿠키를 넘겨받아 다른 회원 토큰으로 잠긴 단계 API 를 쓰지 못하게, 쿠키 주인과 요청 회원이 같아야 통과.
+  //   토큰의 sub 는 여기서 서명을 확인하지 않지만, 각 API 가 memberOf 로 토큰을 Supabase 에 검증하므로 sub 를 위조한 토큰은 거기서 걸린다.
+  if (c && roleAllowed(c.role, stage) && (!api || cookieMatchesMember(c, request))) return null;
   if (api) return new Response(JSON.stringify({ error: 'community-closed', stage }), { status: 403, headers: { ...HDR, 'content-type': 'application/json; charset=utf-8' } });
   return closedPage();
 }

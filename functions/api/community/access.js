@@ -5,13 +5,13 @@
 // 모든 변경은 감사 로그(admin_audit_log)에 남는다. 권한이 바뀌어도 이미 받은 입장 쿠키는 최대 12시간 유효하다
 //   — 바로 막아야 하면 공개 단계를 낮추거나(베타 회원 쿠키 즉시 무효) 서버 열쇠(COMMUNITY_SECRET)를 바꾼다.
 import { json, isAdmin, audit, reviewerOf } from '../../_community.js';
-import { sbRest, supabaseReady } from '../../_commerce.js';
+import { sbRest, supabaseReady, isNaverUser } from '../../_commerce.js';   // 2026-11-28: 네이버 판정은 회원이 못 고치는 값으로
 import { maskEmail } from './alert.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const base = env => String(env.SUPABASE_URL).replace(/\/+$/, '');
 async function emailOf(env, id) {
-  try { const r = await fetch(base(env) + '/auth/v1/admin/users/' + id, { headers: { apikey: env.SUPABASE_SERVICE_KEY, authorization: 'Bearer ' + env.SUPABASE_SERVICE_KEY }, signal: AbortSignal.timeout(6000) }); if (!r.ok) return ''; const u = await r.json(); return (u.user_metadata && u.user_metadata.provider === 'naver' ? u.user_metadata.email : u.email) || ''; } catch { return ''; }
+  try { const r = await fetch(base(env) + '/auth/v1/admin/users/' + id, { headers: { apikey: env.SUPABASE_SERVICE_KEY, authorization: 'Bearer ' + env.SUPABASE_SERVICE_KEY }, signal: AbortSignal.timeout(6000) }); if (!r.ok) return ''; const u = await r.json(); return (isNaverUser(u) ? u.user_metadata && u.user_metadata.email : u.email) || ''; } catch { return ''; }
 }
 function guard(request, env) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);

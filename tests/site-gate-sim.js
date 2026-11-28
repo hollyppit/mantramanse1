@@ -77,6 +77,18 @@ import(url.pathToFileURL(path.join(__dirname, '..', 'functions/_middleware.js'))
 
   // http(로컬)에서는 Secure 없이 쿠키
   r = await run('http://localhost:8788/__gate', ENV, form('open-sesame')); ok(!/Secure/.test(r.headers.get('set-cookie') || '') && r.status === 303, '로컬 http 쿠키');
+
+  // 2026-11-28 보안 점검: 입장 비밀번호 대입 막기(같은 IP 1시간 10번 틀리면 맞는 비밀번호도 429, 다른 IP 는 영향 없음)
+  const store = new Map(), KV = { get: async k => store.get(k) ?? null, put: async (k, v) => { store.set(k, v); } };
+  const KENV = { SITE_GATE_PASSWORD: 'open-sesame', GLOSSARY_KV: KV };
+  const fromIp = (ip, pw) => { const f = form(pw); f.headers = { ...f.headers, 'cf-connecting-ip': ip }; return f; };
+  for (let i = 0; i < 10; i++) { r = await run(B + '/__gate', KENV, fromIp('203.0.113.9', 'guess' + i)); ok(r.status === 401, '틀린 비밀번호 ' + (i + 1) + '번째는 401'); }
+  r = await run(B + '/__gate', KENV, fromIp('203.0.113.9', 'open-sesame'));
+  ok(r.status === 429 && !r.headers.get('set-cookie') && (await r.text()).includes('너무 많이 틀렸습니다'), '10번 틀린 IP 는 맞는 비밀번호도 429');
+  r = await run(B + '/__gate', KENV, fromIp('198.51.100.7', 'open-sesame')); ok(r.status === 303, '다른 IP 는 그대로 로그인');
+  for (let i = 0; i < 10; i++) await run(B + '/__gate', KENV, fromIp('2001:db8:1:2:aaaa::' + i, 'x' + i));
+  r = await run(B + '/__gate', KENV, fromIp('2001:db8:1:2:ffff::1', 'open-sesame')); ok(r.status === 429, 'IPv6 는 /64 묶음으로 셈(주소 바꿔 가며 대입 차단)');
+  const before = store.size; r = await run(B + '/__gate', KENV, fromIp('192.0.2.1', '')); ok(r.status === 401 && store.size === before, '빈 비밀번호는 세지 않음');
 }).catch(e => ok(false, '실행 오류: ' + e.message)).then(() => {
   if (fails.length) { console.log('실패 ' + fails.length + '건\n' + fails.map(f => ' ✗ ' + f).join('\n')); process.exit(1); }
   console.log('사이트 잠금 검증 통과');

@@ -2,7 +2,23 @@
 // Cloudflare Pages 환경변수 SITE_GATE_PASSWORD 가 있으면 잠기고, 없거나 비어 있으면 아무 일도 하지 않는다(= 오픈).
 // 오픈할 때는 그 환경변수만 지우면 된다. 코드 변경·재배포 필요 없음(다음 요청부터 바로 적용).
 import { gatewayOpen } from './_gateway.js';
+import { rateAdd } from './_rate.js';
 const COOKIE = 'mantra_gate';
+// 2026-11-28 보안 점검: 입장 비밀번호 대입 막기. 같은 IP(IPv6 는 /64)에서 1시간에 GATE_FAIL_MAX 번 틀리면 그 시간 동안 맞는 비밀번호도 429.
+//   이 쿠키로 PDF 메일·알림톡 발송(/api/mail-pdf·/api/kakao-pdf, 요금 발생)이 열리므로 관리자 비밀번호와 같은 방식으로 센다(DB 원자 계산 → 안 되면 KV).
+export const GATE_FAIL_MAX = 10;
+async function gateFailKey(request) {
+  let ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'local';
+  if (ip.includes(':')) ip = ip.split(':').slice(0, 4).join(':') + '::/64';
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('gate-fail:' + ip));
+  return 'gate:fail:' + [...new Uint8Array(buf)].slice(0, 12).map(b => b.toString(16).padStart(2, '0')).join('') + ':' + new Date().toISOString().slice(0, 13);
+}
+async function gateFailCount(env, k) { if (!env.GLOSSARY_KV) return 0; try { return +(await env.GLOSSARY_KV.get(k)) || 0; } catch { return 0; } }
+async function gateFailAdd(env, k, n) {
+  if (!env.GLOSSARY_KV) return;
+  const db = await rateAdd(env, k, 1, 3700);
+  try { await env.GLOSSARY_KV.put(k, String(db != null ? Math.max(db, n + 1) : n + 1), { expirationTtl: 3700 }); } catch { }
+}
 const MAX_AGE = 60 * 60 * 24 * 30;
 const LOGIN_PATH = '/__gate';
 
@@ -67,10 +83,13 @@ export async function siteGate(request, env) {
   if (url.pathname === LOGIN_PATH && request.method === 'POST') {
     let f; try { f = await request.formData(); } catch (e) { f = null; }
     const given = f ? String(f.get('pw') || '') : '', next = safeNext(f ? f.get('next') : '/');
+    const fk = await gateFailKey(request), fails = await gateFailCount(env, fk);
+    if (fails >= GATE_FAIL_MAX) return new Response(page(next, true).replace('비밀번호가 맞지 않습니다', '비밀번호를 너무 많이 틀렸습니다. 1시간 뒤에 다시 시도해 주세요'), { status: 429, headers: { ...HDR, 'content-type': 'text/html; charset=utf-8', 'retry-after': '3600' } });
     if (given && same(await tokenFor(given), token)) {
       const secure = url.protocol === 'https:' ? '; Secure' : '';
       return new Response(null, { status: 303, headers: { ...HDR, location: next, 'set-cookie': `${COOKIE}=${token}; Path=/; Max-Age=${MAX_AGE}; HttpOnly; SameSite=Lax${secure}` } });
     }
+    if (given) await gateFailAdd(env, fk, fails);
     return new Response(page(next, true), { status: 401, headers: { ...HDR, 'content-type': 'text/html; charset=utf-8' } });
   }
 

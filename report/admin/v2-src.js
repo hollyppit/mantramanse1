@@ -108,7 +108,8 @@
   }
   function pdfPages(file, say) {
     return Promise.all([pdfLib(), file.arrayBuffer()]).then(function (a) {
-      return a[0].getDocument({ data: new Uint8Array(a[1]) }).promise.then(function (pdf) {
+      // 2026-11-28 보안: pdf.js 3.11 은 글꼴을 이용한 임의 스크립트 실행(CVE-2024-4367)이 있다 → 공식 완화책 isEvalSupported:false(관리자 비밀번호가 이 화면 sessionStorage 에 있다)
+      return a[0].getDocument({ data: new Uint8Array(a[1]), isEvalSupported: false }).promise.then(function (pdf) {
         var out = [], n = pdf.numPages, chain = Promise.resolve();
         for (var p = 1; p <= n; p++) (function (p) { chain = chain.then(function () { say('쪽 추출 ' + p + ' / ' + n); return pdf.getPage(p).then(function (pg) { return pg.getTextContent(); }).then(function (tc) { var line = '', lastY = null, lines = []; tc.items.forEach(function (it) { var y = it.transform ? Math.round(it.transform[5]) : 0; if (lastY !== null && Math.abs(y - lastY) > 3) { lines.push(line); line = ''; } line += it.str + (it.hasEOL ? '\n' : ''); lastY = y; }); lines.push(line); out.push({ page: p, text: lines.join('\n') }); }); }); })(p);
         return chain.then(function () { if (!out.some(function (x) { return x.text.trim().length > 20; })) throw new Error('이 PDF 에서 글자를 뽑지 못했습니다(스캔 이미지 PDF 는 지원하지 않습니다). 글자가 들어 있는 PDF 나 MD/TXT 를 올려 주세요'); return out; });

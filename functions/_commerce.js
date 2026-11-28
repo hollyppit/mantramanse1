@@ -54,6 +54,10 @@ export async function sbRest(env, path, init = {}) {
   if (!r.ok) throw new Error('supabase-' + r.status + ':' + txt.slice(0, 160));
   return txt ? JSON.parse(txt) : null;
 }
+// 네이버로 가입한 회원인가: 서버(관리자 API)만 정할 수 있는 app_metadata.provider 또는 서버가 만든 내부 주소로만 본다.
+// user_metadata.provider 는 회원이 스스로 'naver' 로 바꾸고 email 에 남의 주소를 넣을 수 있어 믿지 않는다(2026-11-28 보안 점검).
+export const NAVER_INTERNAL_EMAIL = /^naver-([0-9a-f]{32})@users\.mantrafortune\.com$/;
+export const isNaverUser = u => !!u && ((u.app_metadata && u.app_metadata.provider === 'naver') || NAVER_INTERNAL_EMAIL.test(String(u.email || '')));
 // 회원 토큰 확인: Supabase 가 발급한 로그인 토큰을 Supabase 에 물어 사용자 id 를 받는다(서명 검증을 직접 하지 않는다).
 export async function memberOf(request, env) {
   const tok = (request.headers.get('x-member-token') || '').trim();
@@ -63,7 +67,9 @@ export async function memberOf(request, env) {
     if (!r.ok) return null;
     const u = await r.json();
     if (!u || typeof u.id !== 'string') return null;
-    const um = u.user_metadata || {}, naver = um.provider === 'naver';   // 네이버 회원은 내부용 주소 대신 네이버가 준 이메일을 보여 준다(functions/_naver-login.js)
+    // 네이버 회원은 내부용 주소 대신 네이버가 준 이메일을 보여 준다(functions/_naver-login.js).
+    // 2026-11-28 보안: user_metadata 는 회원이 스스로 고칠 수 있다(PUT /auth/v1/user) → 네이버 여부는 isNaverUser(서버만 쓰는 app_metadata·내부 주소)로만 판정
+    const um = u.user_metadata || {}, naver = isNaverUser(u);
     return { id: u.id, email: (naver ? um.email || um.name || '네이버 회원' : u.email) || '', provider: naver ? 'naver' : (u.app_metadata && u.app_metadata.provider) || '' };
   } catch { return null; }
 }
